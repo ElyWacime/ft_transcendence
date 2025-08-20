@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  backend:
+    build: ./backend
+    container_name: ft_backend
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/data-base:/app/data-base
+    ports:
+      - "3000:3000"
+    networks:
+      - ft_network
+    command: npm run dev
+  nginx:
+    image: nginx:stable-alpine
+    container_name: ft_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/usr/nginx/conf.d
+      - ./nginx/certs:/usr/nginx/certs
+    depends_on:
+      - backend
+    networks:
+      - ft_network
+  
+networks:
+  ft_network:
+    driver: bridge 
+
