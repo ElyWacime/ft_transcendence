@@ -51,8 +51,8 @@ export const PongCanvas = ({
     ball: {
       x: 400,
       y: 300,
-      dx: 5,
-      dy: 3,
+      dx: 2,
+      dy: 1,
       radius: 8
     },
     paddle1: {
@@ -80,8 +80,8 @@ export const PongCanvas = ({
       ball: {
         x: 400,
         y: 300,
-        dx: Math.random() > 0.5 ? 5 : -5,
-        dy: (Math.random() - 0.5) * 6,
+        dx: Math.random() > 0.5 ? 2 : -2,
+        dy: (Math.random() - 0.5) * 3,
         radius: 8
       },
       paddle1: { ...prev.paddle1, y: 250 },
@@ -97,8 +97,8 @@ export const PongCanvas = ({
       ball: {
         x: 400,
         y: 300,
-        dx: Math.random() > 0.5 ? 5 : -5,
-        dy: (Math.random() - 0.5) * 6,
+        dx: Math.random() > 0.5 ? 2 : -2,
+        dy: (Math.random() - 0.5) * 3,
         radius: 8
       }
     }));
