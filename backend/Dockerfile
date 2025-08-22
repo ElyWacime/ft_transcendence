@@ -4,7 +4,8 @@ WORKDIR /usr/src/app
 
 COPY package*.json tsconfig*.json ./
 
-RUN npm install
+RUN npm install -y
+RUN npm install --save-dev @types/better-sqlite3
 
 COPY . .
 

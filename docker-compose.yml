@@ -19,8 +19,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf.d:/usr/nginx/conf.d
-      - ./nginx/certs:/usr/nginx/certs
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
     depends_on:
       - backend
     networks:
