@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createUser } from "./user.controller";
+import { login } from "./user.controller";
 
 export async function userRoutes(app: FastifyInstance) {
   app.get("/", (req: FastifyRequest, reply: FastifyReply) => {
@@ -56,10 +57,7 @@ export async function userRoutes(app: FastifyInstance) {
         },
       },
     },
-    async (req, reply) => {
-      // temporary stub until you add real login logic
-      return reply.code(201).send({ accessToken: "fake-token" });
-    },
+    login,
   );
 
   app.delete("/logout", () => {});

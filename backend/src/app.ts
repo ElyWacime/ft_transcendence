@@ -1,5 +1,7 @@
 import Fastify from "fastify";
 import { userRoutes } from "./modules/user/user.route";
+import fjwt, { FastifyJWT } from "@fastify/jwt";
+import fCookie from "@fastify/cookie";
 
 const app = Fastify({ logger: true });
 async function main() {
@@ -23,4 +25,18 @@ listeners.forEach((signal) => {
 });
 
 app.register(userRoutes, { prefix: "/api/users" });
+
+// jwt
+app.register(fjwt, { secret: "supersecretcode-CHANGE_THIS-USE_ENV_FILE" });
+app.addHook("preHandler", (req, res, next) => {
+  // here we are
+  req.jwt = app.jwt;
+  return next();
+});
+// cookies
+app.register(fCookie, {
+  secret: "some-secret-key",
+  hook: "preHandler",
+});
+
 main();
