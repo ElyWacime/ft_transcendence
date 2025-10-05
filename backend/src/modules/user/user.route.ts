@@ -56,7 +56,10 @@ export async function userRoutes(app: FastifyInstance) {
         },
       },
     },
-    () => {},
+    async (req, reply) => {
+      // temporary stub until you add real login logic
+      return reply.code(201).send({ accessToken: "fake-token" });
+    },
   );
 
   app.delete("/logout", () => {});
