@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { api, userApi } from "@/lib/api"; // assumes you have an api wrapper like in your Game page
 import { Trophy } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,11 +18,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await userApi.login(email, password); // POST to your backend
+      const res = await userApi.login(email, password);
       if (res.accessToken) {
-        localStorage.setItem("token", res.accessToken);
+        login(res.accessToken, email);
+
         toast.success("Welcome back!");
-        navigate("/game"); // redirect to game or dashboard
+        navigate("/tournament");
       } else {
         toast.error(res.message || "Login failed");
       }

@@ -8,13 +8,23 @@ import { Chat } from "@/components/Chat";
 import { Trophy, Play, Users } from "lucide-react";
 import { Tournament as TournamentType, Match, api } from "@/lib/api";
 import { toast } from "sonner";
+// import { useAuth } from "@/context/AuthContext";
 
 const Tournament = () => {
   const navigate = useNavigate();
+  // const { isLoggedIn } = useAuth();
+ 
   const [tournament, setTournament] = useState<TournamentType | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<{ id: string; alias: string } | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  // useEffect(() => {
+  //   if (!isLoggedIn) {
+  //     navigate("/login");
+  //     return;
+  //   }
+  // }, [isLoggedIn, navigate]);
+  //
   useEffect(() => {
     // Load existing tournament if any
     const loadTournament = async () => {

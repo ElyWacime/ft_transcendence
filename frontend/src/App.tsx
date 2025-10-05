@@ -11,7 +11,8 @@ import Game from "./pages/Game";
 import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import { AuthProvider } from "@/context/AuthContext"; // 👈 add this
+import { AuthProvider } from "@/context/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +27,14 @@ const App = () => (
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/tournament" element={<Tournament />} />
+              <Route
+                path="/tournament"
+                element={
+                  <ProtectedRoute>
+                    <Tournament />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/game" element={<Game />} />
               <Route path="/result" element={<Result />} />
               <Route path="/login" element={<Login />} />
