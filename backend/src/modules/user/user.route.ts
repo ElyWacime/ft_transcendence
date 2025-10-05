@@ -1,11 +1,17 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createUser } from "./user.controller";
-import { login } from "./user.controller";
+import { login, logout } from "./user.controller";
 
 export async function userRoutes(app: FastifyInstance) {
-  app.get("/", (req: FastifyRequest, reply: FastifyReply) => {
-    reply.send({ message: "/ route hit" });
-  });
+  app.get(
+    "/",
+    {
+      preHandler: [app.authenticate],
+    },
+    (req: FastifyRequest, reply: FastifyReply) => {
+      reply.send({ message: "/ route hit" });
+    },
+  );
 
   app.post(
     "/register",
@@ -60,7 +66,7 @@ export async function userRoutes(app: FastifyInstance) {
     login,
   );
 
-  app.delete("/logout", () => {});
+  app.delete("/logout", { preHandler: [app.authenticate] }, logout);
 
   app.log.info("user routes registered");
 }
