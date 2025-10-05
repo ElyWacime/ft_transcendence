@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import { userRoutes } from "./modules/user/user.route";
 import fjwt, { FastifyJWT } from "@fastify/jwt";
 import fCookie from "@fastify/cookie";
+import cors from "@fastify/cors";
 
 const app = Fastify({ logger: true });
 async function main() {
@@ -10,6 +11,15 @@ async function main() {
     host: "0.0.0.0",
   });
 }
+
+app.register(cors, {
+  origin: [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://10.30.238.84:8080",
+  ],
+  credentials: true,
+});
 
 app.get("/healthcheck", (req, res) => {
   res.send({ message: "Success" });

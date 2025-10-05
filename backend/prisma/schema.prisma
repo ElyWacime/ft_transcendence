@@ -18,5 +18,5 @@ model User {
   email String @unique
   name String?
   password String
-  logedIn Boolean @default(false)
+  loggedIn Boolean @default(false)
 }

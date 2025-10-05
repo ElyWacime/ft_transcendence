@@ -55,6 +55,11 @@ export async function login(
       message: "Invalid email or password",
     });
   }
+  await prisma.user.update({
+    where: { email },
+    data: { loggedIn: true },
+  });
+
   const payload = {
     id: user.id,
     email: user.email,
@@ -80,7 +85,15 @@ export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
   return reply.code(200).send(users);
 }
 
-export async function logout(req: FastifyRequest, reply: FastifyReply) {
+export async function logout(
+  req: FastifyRequest<{ Body: { email: string } }>,
+  reply: FastifyReply,
+) {
+  const { email } = req.body;
+  await prisma.user.update({
+    where: { email },
+    data: { loggedIn: false },
+  });
   reply.clearCookie("access_token");
   return reply.send({ message: "Logout successful" });
 }

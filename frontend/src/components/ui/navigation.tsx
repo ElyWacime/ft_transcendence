@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Trophy, Gamepad2, MessageSquare } from "lucide-react";
+import { Home, Trophy, Gamepad2, MessageSquare, LogIn} from "lucide-react";
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
   { path: "/tournament", label: "Tournament", icon: Trophy },
   { path: "/game", label: "Game", icon: Gamepad2 },
+  {path: "/login", label: "Login", icon: LogIn},
 ];
 
 export const Navigation = () => {
