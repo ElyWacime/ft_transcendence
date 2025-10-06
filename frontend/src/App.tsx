@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/game" element={<Game />} />
               <Route path="/result" element={<Result />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
