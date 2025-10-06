@@ -13,7 +13,7 @@ export interface Match {
   winner?: Player;
   score1: number;
   score2: number;
-  status: 'pending' | 'playing' | 'completed';
+  status: "pending" | "playing" | "completed";
   round: number;
 }
 
@@ -23,7 +23,7 @@ export interface Tournament {
   players: Player[];
   matches: Match[];
   currentMatch?: Match;
-  status: 'setup' | 'active' | 'completed';
+  status: "setup" | "active" | "completed";
   winner?: Player;
 }
 
@@ -33,10 +33,10 @@ export interface ChatMessage {
   playerAlias: string;
   message: string;
   timestamp: Date;
-  type: 'message' | 'system';
+  type: "message" | "system";
 }
 
-// Mock API functions (replace with real API calls later)
+// ---------------- MOCK TOURNAMENT API ---------------- //
 class TournamentAPI {
   private mockTournament: Tournament | null = null;
   private mockMessages: ChatMessage[] = [];
@@ -47,33 +47,32 @@ class TournamentAPI {
       name,
       players: [],
       matches: [],
-      status: 'setup'
+      status: "setup",
     };
     return this.mockTournament;
   }
 
   async addPlayer(alias: string): Promise<Player> {
-    if (!this.mockTournament) throw new Error('No tournament active');
-    
+    if (!this.mockTournament) throw new Error("No tournament active");
+
     const player: Player = {
       id: Date.now().toString(),
       alias,
       score: 0,
       wins: 0,
-      losses: 0
+      losses: 0,
     };
-    
+
     this.mockTournament.players.push(player);
     return player;
   }
 
   async startTournament(): Promise<Tournament> {
-    if (!this.mockTournament) throw new Error('No tournament active');
-    
-    // Generate bracket matches
+    if (!this.mockTournament) throw new Error("No tournament active");
+
     const players = [...this.mockTournament.players];
     const matches: Match[] = [];
-    
+
     for (let i = 0; i < players.length; i += 2) {
       if (players[i + 1]) {
         matches.push({
@@ -82,31 +81,34 @@ class TournamentAPI {
           player2: players[i + 1],
           score1: 0,
           score2: 0,
-          status: 'pending',
-          round: 1
+          status: "pending",
+          round: 1,
         });
       }
     }
-    
+
     this.mockTournament.matches = matches;
-    this.mockTournament.status = 'active';
+    this.mockTournament.status = "active";
     this.mockTournament.currentMatch = matches[0];
-    
+
     return this.mockTournament;
   }
 
-  async updateMatchResult(matchId: string, score1: number, score2: number): Promise<Match> {
-    if (!this.mockTournament) throw new Error('No tournament active');
-    
-    const match = this.mockTournament.matches.find(m => m.id === matchId);
-    if (!match) throw new Error('Match not found');
-    
+  async updateMatchResult(
+    matchId: string,
+    score1: number,
+    score2: number,
+  ): Promise<Match> {
+    if (!this.mockTournament) throw new Error("No tournament active");
+
+    const match = this.mockTournament.matches.find((m) => m.id === matchId);
+    if (!match) throw new Error("Match not found");
+
     match.score1 = score1;
     match.score2 = score2;
     match.winner = score1 > score2 ? match.player1 : match.player2;
-    match.status = 'completed';
-    
-    // Update player stats
+    match.status = "completed";
+
     match.player1.score += score1;
     match.player2.score += score2;
     if (match.winner === match.player1) {
@@ -116,7 +118,7 @@ class TournamentAPI {
       match.player2.wins++;
       match.player1.losses++;
     }
-    
+
     return match;
   }
 
@@ -124,16 +126,20 @@ class TournamentAPI {
     return this.mockTournament;
   }
 
-  async sendMessage(playerId: string, playerAlias: string, message: string): Promise<ChatMessage> {
+  async sendMessage(
+    playerId: string,
+    playerAlias: string,
+    message: string,
+  ): Promise<ChatMessage> {
     const chatMessage: ChatMessage = {
       id: Date.now().toString(),
       playerId,
       playerAlias,
       message,
       timestamp: new Date(),
-      type: 'message'
+      type: "message",
     };
-    
+
     this.mockMessages.push(chatMessage);
     return chatMessage;
   }
@@ -145,16 +151,66 @@ class TournamentAPI {
   async sendSystemMessage(message: string): Promise<ChatMessage> {
     const systemMessage: ChatMessage = {
       id: Date.now().toString(),
-      playerId: 'system',
-      playerAlias: 'System',
+      playerId: "system",
+      playerAlias: "System",
       message,
       timestamp: new Date(),
-      type: 'system'
+      type: "system",
     };
-    
+
     this.mockMessages.push(systemMessage);
     return systemMessage;
   }
 }
 
 export const api = new TournamentAPI();
+
+// ---------------- USER AUTH API ---------------- //
+class UserAPI {
+  private baseUrl = "http://localhost/api/users";
+
+  async register(email: string, password: string, name: string) {
+    const res = await fetch(`${this.baseUrl}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, name }),
+    });
+
+    return await res.json();
+  }
+
+  async login(email: string, password: string) {
+    const res = await fetch(`${this.baseUrl}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    return await res.json();
+  }
+
+  async logout(email: string) {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${this.baseUrl}/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    return await res.json();
+  }
+
+  async me() {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${this.baseUrl}/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return await res.json();
+  }
+}
+
+export const userApi = new UserAPI();
