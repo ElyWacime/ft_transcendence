@@ -57,10 +57,12 @@ app.get("/healthcheck", async () => ({ message: "Success" }));
 
 // --- Routes ---
 //  No prefix here — NGINX handles `/api/users/`
-app.register(userRoutes);
 
 // --- OAuth routes ---
-app.register(oauthRoutes);
+app.register(oauthRoutes, { prefix: "/auth" });
+
+// --- User routes ---
+app.register(userRoutes);
 
 // --- Graceful shutdown ---
 for (const signal of ["SIGINT", "SIGTERM"]) {
