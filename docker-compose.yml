@@ -20,6 +20,8 @@ services:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
+    env_file:
+      - ./services/.env
     ports:
       - "8000:8000"
     volumes:

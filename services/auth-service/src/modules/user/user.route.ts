@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { createUser, login, logout } from "./user.controller";
+import { FastifyInstance } from "fastify";
 
 export async function userRoutes(app: FastifyInstance) {
   app.get("/", { preHandler: [app.authenticate] }, async () => {
@@ -11,7 +12,7 @@ export async function userRoutes(app: FastifyInstance) {
     schema: {
       body: {
         type: "object",
-        required: ["email", "password", "name"], // ✅ must be an array
+        required: ["email", "password", "name"],
         properties: {
           email: { type: "string", format: "email" },
           password: { type: "string", minLength: 6 },
@@ -37,7 +38,7 @@ export async function userRoutes(app: FastifyInstance) {
     schema: {
       body: {
         type: "object",
-        required: ["email", "password"], // ✅ also array
+        required: ["email", "password"],
         properties: {
           email: { type: "string", format: "email" },
           password: { type: "string", minLength: 6 },
