@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import fetch from "node-fetch";
 import jwt from "jsonwebtoken";
+import prisma from "../../utils/prisma";
 
 export async function oauthRoutes(app: FastifyInstance) {
   // Redirect user to GitHub OAuth
@@ -9,14 +10,13 @@ export async function oauthRoutes(app: FastifyInstance) {
     reply.redirect(redirectUrl);
   });
 
-  // Handle trailing slash
+  // Optional trailing slash route
   app.get("/github/", async (_req, reply) => {
     const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email`;
     reply.redirect(redirectUrl);
   });
 
   // GitHub redirects here with ?code=
-
   app.get("/github/callback", async (req, reply) => {
     const code = (req.query as any).code;
 
@@ -45,19 +45,52 @@ export async function oauthRoutes(app: FastifyInstance) {
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
 
-    // Fetch user info
+    // Fetch user info from GitHub
     const userRes = await fetch("https://api.github.com/user", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const user = await userRes.json();
 
+    // Fetch user’s email (GitHub may not include it in /user)
+    let email = user.email;
+    if (!email) {
+      const emailsRes = await fetch("https://api.github.com/user/emails", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const emails = await emailsRes.json();
+      const primary = emails.find((e: any) => e.primary && e.verified);
+      email = primary?.email || emails[0]?.email || "";
+    }
+
+    if (!email) {
+      return reply
+        .status(400)
+        .send({ error: "Email not found in GitHub account" });
+    }
+
+    // Upsert user in Prisma
+    const dbUser = await prisma.user.upsert({
+      where: { email },
+      update: {
+        loggedIn: true,
+        name: user.name || user.login,
+      },
+      create: {
+        email,
+        name: user.name || user.login,
+        password: "", // No password for OAuth users
+        loggedIn: true,
+      },
+    });
+
     // Generate JWT
     const jwtToken = jwt.sign(
-      { id: user.id, username: user.login },
-      "supersecretcode-CHANGE_THIS-USE_ENV_FILE",
+      { id: dbUser.id, username: dbUser.name },
+      process.env.JWT_SECRET || "supersecretcode-CHANGE_THIS",
       { expiresIn: "1h" },
     );
 
+    // Redirect to frontend with token
     reply.redirect(`http://localhost/login?token=${jwtToken}`);
   });
 }

@@ -15,6 +15,7 @@ app.register(cors, {
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "http://frontend:8080",
+    "http://0.0.0.0",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
