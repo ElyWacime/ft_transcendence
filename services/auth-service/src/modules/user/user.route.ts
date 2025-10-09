@@ -56,5 +56,18 @@ export async function userRoutes(app: FastifyInstance) {
     handler: login,
   });
 
-  app.delete("/logout", { preHandler: [app.authenticate] }, logout);
+  app.post("/logout", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["email"],
+        properties: {
+          email: { type: "string", format: "email" },
+        },
+      },
+    },
+    handler: logout,
+  });
+
+  //app.post("/logout", { preHandler: [app.authenticate] }, logout);
 }

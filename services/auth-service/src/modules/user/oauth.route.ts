@@ -91,6 +91,11 @@ export async function oauthRoutes(app: FastifyInstance) {
     );
 
     // Redirect to frontend with token
-    reply.redirect(`http://localhost/login?token=${jwtToken}`);
+    const redirectUrl = new URL("http://localhost/login");
+    redirectUrl.searchParams.set("token", jwtToken);
+    redirectUrl.searchParams.set("email", email);
+    reply.redirect(redirectUrl.toString());
+
+    //reply.redirect(`http://localhost/login?token=${jwtToken}`);
   });
 }

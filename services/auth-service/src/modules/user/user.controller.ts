@@ -87,6 +87,9 @@ export async function logout(
   reply: FastifyReply,
 ) {
   const { email } = req.body;
+  console.log("\n\n\n\n\n\n\n\n\n");
+  console.log("Logout body received:", req.body);
+  console.log("\n\n\n\n\n\n\n\n\n");
   await prisma.user.update({
     where: { email },
     data: { loggedIn: false },
