@@ -15,39 +15,32 @@ datasource db {
 }
 
 model User {
-  id String @id @default(cuid())
-  email String @unique
-  name String?
-  password String
-  loggedIn Boolean @default(false)
-  // isOnline   Boolean          @default(false)
-  // avatar     String?          @default("https://www.gravatar.com/avatar/")
-  //
-  // friends    User[]           @relation("UserFriends")
-  // friendOf   User[]           @relation("UserFriends")
-  //
-  // sentRequests     FriendRequest[] @relation("SentRequests")
-  // receivedRequests FriendRequest[] @relation("ReceivedRequests")
+  id               String          @id @default(cuid())
+  email            String          @unique
+  name             String?
+  password         String
+  loggedIn         Boolean         @default(false)
+  isOnline         Boolean         @default(false)
+  avatar           String?         @default("https://www.gravatar.com/avatar/")
+  sentRequests     FriendRequest[] @relation("SentRequests")
+  receivedRequests FriendRequest[] @relation("ReceivedRequests")
 }
 
-// model FriendRequest {
-//   id          String   @id @default(cuid())
-//
-//   sender      User     @relation("SentRequests", fields: [senderId], references: [id])
-//   senderId    String
-//
-//   receiver    User     @relation("ReceivedRequests", fields: [receiverId], references: [id])
-//   receiverId  String
-//
-//   status      FriendRequestStatus @default(PENDING)
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-//
-//   @@unique([senderId, receiverId]) // prevent duplicate requests
-// }
-//
-// enum FriendRequestStatus {
-//   PENDING
-//   ACCEPTED
-//   REJECTED
-// }
+model FriendRequest {
+  id         String              @id @default(cuid())
+  sender     User                @relation("SentRequests", fields: [senderId], references: [id])
+  senderId   String
+  receiver   User                @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  receiverId String
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@unique([senderId, receiverId]) // prevent duplicate requests
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
