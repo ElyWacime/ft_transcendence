@@ -28,22 +28,22 @@ enum MatchResult {
 }
 
 model User {
-  id                     String                   @id @default(cuid())
-  email                  String                   @unique
-  name                   String?
-  password               String
-  loggedIn               Boolean                  @default(false)
-  isOnline               Boolean                  @default(false)
-  avatar                 String?                  @default("https://www.gravatar.com/avatar/")
-  sentRequests           FriendRequest[]          @relation("SentRequests")
-  receivedRequests       FriendRequest[]          @relation("ReceivedRequests")
-  Pvp1                   PvP_Offline[]            @relation("As_p1")
-  Pvp2                   PvP_Offline[]            @relation("As_p2")
-  Participate_Tournament Participate_Tournament[] @relation("part")
-  Win_Tournament         Participate_Tournament[] @relation("win")
-  PvP_Tournament_as2     PvP_Tournament[]         @relation("as2")
-  PvP_Tournament_as1     PvP_Tournament[]         @relation("as1")
-  PvP_Tournament         PvP_Tournament[]         @relation("wint")
+  id                       String                   @id @default(cuid())
+  email                    String                   @unique
+  name                     String?
+  password                 String
+  loggedIn                 Boolean                  @default(false)
+  isOnline                 Boolean                  @default(false)
+  avatar                   String?                  @default("https://www.gravatar.com/avatar/")
+  sentRequests             FriendRequest[]          @relation("SentRequests")
+  receivedRequests         FriendRequest[]          @relation("ReceivedRequests")
+  Pvp1                     PvP_Offline[]            @relation("PvP_O1")
+  Pvp2                     PvP_Offline[]            @relation("PvP_O2")
+  Participate_Tournament   Participate_Tournament[] @relation("Participate")
+  Win_Tournament           Participate_Tournament[] @relation("Win")
+  PvP_Tournament_PvP_T_as2 PvP_Tournament[]         @relation("PvP_T_as2")
+  PvP_Tournament_PvP_T_as1 PvP_Tournament[]         @relation("PvP_T_as1")
+  PvP_Tournament           PvP_Tournament[]         @relation("Winner_ID_T")
 }
 
 model FriendRequest {
@@ -56,14 +56,14 @@ model FriendRequest {
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt
 
-  @@unique([senderId, receiverId]) // prevent duplicate requests
+  @@unique([senderId, receiverId])
 }
 
 model PvP_Offline {
   id        String      @id @default(cuid())
-  P1        User        @relation("As_p1", fields: [P1_Id], references: [id])
+  P1        User        @relation("PvP_O1", fields: [P1_Id], references: [id])
   P1_Id     String
-  P2        User        @relation("As_p2", fields: [P2_Id], references: [id])
+  P2        User        @relation("PvP_O2", fields: [P2_Id], references: [id])
   P2_Id     String
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
@@ -74,35 +74,36 @@ model Tournament {
   id                     String                   @id @default(cuid())
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
+  count_player           Int                      @default(0)
   result                 MatchResult              @default(PENDING)
-  Participate_Tournament Participate_Tournament[] @relation("play")
+  Participate_Tournament Participate_Tournament[] @relation("Played")
   PvP_Tournament         PvP_Tournament[]         @relation("in_tor")
 }
 
 model Participate_Tournament {
   id        String      @id @default(cuid())
-  P         User        @relation("part", fields: [P_Id], references: [id])
+  P         User        @relation("Participate", fields: [P_Id], references: [id])
   P_Id      String
-  T         Tournament  @relation("play", fields: [T_Id], references: [id])
+  T         Tournament  @relation("Played", fields: [T_Id], references: [id])
   T_Id      String
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   result    MatchResult @default(PENDING)
-  Winner    User        @relation("win", fields: [Winner_Id], references: [id])
+  Winner    User        @relation("Win", fields: [Winner_Id], references: [id])
   Winner_Id String
 }
 
 model PvP_Tournament {
   id        String      @id @default(cuid())
-  P1        User        @relation("as1", fields: [P1_Id], references: [id])
+  P1        User        @relation("PvP_T_as1", fields: [P1_Id], references: [id])
   P1_Id     String
-  P2        User        @relation("as2", fields: [P2_Id], references: [id])
+  P2        User        @relation("PvP_T_as2", fields: [P2_Id], references: [id])
   P2_Id     String
   T         Tournament  @relation("in_tor", fields: [T_Id], references: [id])
   T_Id      String
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   result    MatchResult @default(PENDING)
-  Winner    User        @relation("wint", fields: [Winner_Id], references: [id])
+  Winner    User        @relation("Winner_ID_T", fields: [Winner_Id], references: [id])
   Winner_Id String
 }
