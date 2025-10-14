@@ -41,7 +41,7 @@ model User {
   Matchw                 Match[]                  @relation("As_Winner")
   Match2                 Match[]                  @relation("As_P2")
   Match1                 Match[]                  @relation("As_P1")
-  Win_Tournament         Participate_Tournament[] @relation("Win")
+  Win_Tournament         Tournament[]             @relation("Win")
   Participate_Tournament Participate_Tournament[] @relation("Participate")
 }
 
@@ -60,23 +60,24 @@ model FriendRequest {
 
 model Tournament {
   id                     String                   @id @default(cuid())
+  Label                  String //Tournament Name
   CreatedAt              DateTime                 @default(now())
   UpdatedAt              DateTime                 @updatedAt
   count_player           Int                      @default(0)
   result                 Result                   @default(PENDING)
+  Winner_Id              String
   Match                  Match[]                  @relation("In_Tournament")
   Participate_Tournament Participate_Tournament[] @relation("Played")
+  Winner                 User                     @relation("Win", fields: [Winner_Id], references: [id])
 }
 
 model Participate_Tournament {
   id        String     @id @default(cuid())
   P_Id      String
   T_Id      String
-  Winner_Id String
   CreatedAt DateTime   @default(now())
   UpdatedAt DateTime   @updatedAt
   result    Result     @default(PENDING)
-  Winner    User       @relation("Win", fields: [Winner_Id], references: [id])
   T         Tournament @relation("Played", fields: [T_Id], references: [id])
   P         User       @relation("Participate", fields: [P_Id], references: [id])
 }
@@ -91,13 +92,13 @@ model Match {
   Player1_y     Float
   Player2_x     Float
   Player2_y     Float
+  score_player1 Int
+  score_player2 Int
   CreatedAt     DateTime    @default(now())
   UpdatedAt     DateTime    @updatedAt
   result        Result      @default(PENDING)
   Winner_Id     String
-  tournamentId  String?
-  score_player1 Int
-  score_player2 Int
+  tournamentId  String? //  Null in case OFFline not null in case in tournament
   match_start   DateTime    @default(now())
   chrono        Int         @default(60) // 60s in a match 
   Tournament    Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])

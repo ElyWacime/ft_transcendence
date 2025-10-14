@@ -1,1 +1,1 @@
-export const PongCanvas = (<div></div>);
+export const PongCanvas = (<div>wdwwdww</div>);

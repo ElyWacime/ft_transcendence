@@ -14,7 +14,21 @@ import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Register from "./pages/Register";
+// import { PrismaClient } from "/home/lhwask02/Desktop/trance/services/auth-service/generated/prisma"
+// import { PrismaClient } from "../../services/auth-service/generated/prisma"
+// const cl = new PrismaClient();
+// const users = await cl.user.create({
+//   data:
+//   {
+//     email: "test1@aaa.com",
+//     name: "aaa",
+//     password: "aaa",
+//     loggedIn: false,
+//     isOnline: false,
+//   }
+// });
 
+// console.log(users);
 const queryClient = new QueryClient();
 // idfn
 
