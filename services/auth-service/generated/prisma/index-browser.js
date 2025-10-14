@@ -123,6 +123,7 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   password: 'password',
   loggedIn: 'loggedIn',
+  Auto_Match: 'Auto_Match',
   isOnline: 'isOnline',
   avatar: 'avatar'
 };

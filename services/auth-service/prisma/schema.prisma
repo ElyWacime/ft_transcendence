@@ -1,9 +1,12 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  // provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+  // provider = "prisma-erd-generator"
+  // output   = "./ERD/diagram.svg" // ✅ file name with extension
+  // format   = "svg"
+  provider = "prisma-erd-generator"
+  output   = "./ERD/diagram.md" // Mermaid Markdown file
+  format   = "mermaid"
 }
 
 datasource db {
@@ -17,7 +20,7 @@ enum FriendRequestStatus {
   REJECTED
 }
 
-enum MatchResult {
+enum Result {
   PENDING
   WIN
   LOSE
@@ -27,29 +30,30 @@ enum MatchResult {
 model User {
   id                     String                   @id @default(cuid())
   email                  String                   @unique
-  name                   String?                  @unique
+  name                   String                   @unique
   password               String
   loggedIn               Boolean                  @default(false)
+  Auto_Match             Boolean                  @default(false)
   isOnline               Boolean                  @default(false)
   avatar                 String?                  @default("https://www.gravatar.com/avatar/")
-  sentRequests           FriendRequest[]          @relation("SentRequests")
   receivedRequests       FriendRequest[]          @relation("ReceivedRequests")
-  Participate_Tournament Participate_Tournament[] @relation("Participate")
-  Win_Tournament         Participate_Tournament[] @relation("Win")
-  Match1                 Match[]                  @relation("As_P1")
-  Match2                 Match[]                  @relation("As_P2")
+  sentRequests           FriendRequest[]          @relation("SentRequests")
   Matchw                 Match[]                  @relation("As_Winner")
+  Match2                 Match[]                  @relation("As_P2")
+  Match1                 Match[]                  @relation("As_P1")
+  Win_Tournament         Participate_Tournament[] @relation("Win")
+  Participate_Tournament Participate_Tournament[] @relation("Participate")
 }
 
 model FriendRequest {
   id         String              @id @default(cuid())
-  sender     User                @relation("SentRequests", fields: [senderId], references: [id])
   senderId   String
-  receiver   User                @relation("ReceivedRequests", fields: [receiverId], references: [id])
   receiverId String
   status     FriendRequestStatus @default(PENDING)
   CreatedAt  DateTime            @default(now())
   UpdatedAt  DateTime            @updatedAt
+  receiver   User                @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  sender     User                @relation("SentRequests", fields: [senderId], references: [id])
 
   @@unique([senderId, receiverId])
 }
@@ -59,37 +63,37 @@ model Tournament {
   CreatedAt              DateTime                 @default(now())
   UpdatedAt              DateTime                 @updatedAt
   count_player           Int                      @default(0)
-  result                 MatchResult              @default(PENDING)
-  Participate_Tournament Participate_Tournament[] @relation("Played")
+  result                 Result                   @default(PENDING)
   Match                  Match[]                  @relation("In_Tournament")
+  Participate_Tournament Participate_Tournament[] @relation("Played")
 }
 
 model Participate_Tournament {
-  id        String      @id @default(cuid())
-  P         User        @relation("Participate", fields: [P_Id], references: [id])
+  id        String     @id @default(cuid())
   P_Id      String
-  T         Tournament  @relation("Played", fields: [T_Id], references: [id])
   T_Id      String
-  CreatedAt DateTime    @default(now())
-  UpdatedAt DateTime    @updatedAt
-  result    MatchResult @default(PENDING)
-  Winner    User        @relation("Win", fields: [Winner_Id], references: [id])
+  CreatedAt DateTime   @default(now())
+  UpdatedAt DateTime   @updatedAt
+  result    Result     @default(PENDING)
   Winner_Id String
+  Winner    User       @relation("Win", fields: [Winner_Id], references: [id])
+  T         Tournament @relation("Played", fields: [T_Id], references: [id])
+  P         User       @relation("Participate", fields: [P_Id], references: [id])
 }
 
 model Match {
   id           String      @id @default(cuid())
-  P1           User        @relation("As_P1", fields: [P1_Id], references: [id])
   P1_Id        String
-  P2           User        @relation("As_P2", fields: [P2_Id], references: [id])
   P2_Id        String
   Ball_x       Float
   Ball_y       Float
   CreatedAt    DateTime    @default(now())
   UpdatedAt    DateTime    @updatedAt
-  result       MatchResult @default(PENDING)
-  Winner       User        @relation("As_Winner", fields: [Winner_Id], references: [id])
+  result       Result      @default(PENDING)
   Winner_Id    String
-  Tournament   Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])
   tournamentId String?
+  Tournament   Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])
+  Winner       User        @relation("As_Winner", fields: [Winner_Id], references: [id])
+  P2           User        @relation("As_P2", fields: [P2_Id], references: [id])
+  P1           User        @relation("As_P1", fields: [P1_Id], references: [id])
 }

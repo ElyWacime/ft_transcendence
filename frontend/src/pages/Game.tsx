@@ -2,7 +2,9 @@
 import { PrismaClient } from "../../../../trance/services/auth-service/generated/prisma"
 
 const Game = () => {
-  const cl = new PrismaClient();
+  // const cl = new PrismaClient();
+
+  console.log("../../../../trance/services/auth-service/generated/prisma")
   return null;
 };
 

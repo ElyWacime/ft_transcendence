@@ -1256,23 +1256,23 @@ export namespace Prisma {
    */
 
   export type UserCountOutputType = {
-    sentRequests: number
     receivedRequests: number
-    Participate_Tournament: number
-    Win_Tournament: number
-    Match1: number
-    Match2: number
+    sentRequests: number
     Matchw: number
+    Match2: number
+    Match1: number
+    Win_Tournament: number
+    Participate_Tournament: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sentRequests?: boolean | UserCountOutputTypeCountSentRequestsArgs
     receivedRequests?: boolean | UserCountOutputTypeCountReceivedRequestsArgs
-    Participate_Tournament?: boolean | UserCountOutputTypeCountParticipate_TournamentArgs
-    Win_Tournament?: boolean | UserCountOutputTypeCountWin_TournamentArgs
-    Match1?: boolean | UserCountOutputTypeCountMatch1Args
-    Match2?: boolean | UserCountOutputTypeCountMatch2Args
+    sentRequests?: boolean | UserCountOutputTypeCountSentRequestsArgs
     Matchw?: boolean | UserCountOutputTypeCountMatchwArgs
+    Match2?: boolean | UserCountOutputTypeCountMatch2Args
+    Match1?: boolean | UserCountOutputTypeCountMatch1Args
+    Win_Tournament?: boolean | UserCountOutputTypeCountWin_TournamentArgs
+    Participate_Tournament?: boolean | UserCountOutputTypeCountParticipate_TournamentArgs
   }
 
   // Custom InputTypes
@@ -1289,13 +1289,6 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountSentRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: FriendRequestWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
   export type UserCountOutputTypeCountReceivedRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FriendRequestWhereInput
   }
@@ -1303,21 +1296,14 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountParticipate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Participate_TournamentWhereInput
+  export type UserCountOutputTypeCountSentRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FriendRequestWhereInput
   }
 
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountWin_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Participate_TournamentWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountMatch1Args<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountMatchwArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: MatchWhereInput
   }
 
@@ -1331,8 +1317,22 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountMatchwArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountMatch1Args<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: MatchWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountWin_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: Participate_TournamentWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountParticipate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: Participate_TournamentWhereInput
   }
 
 
@@ -1341,13 +1341,13 @@ export namespace Prisma {
    */
 
   export type TournamentCountOutputType = {
-    Participate_Tournament: number
     Match: number
+    Participate_Tournament: number
   }
 
   export type TournamentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    Participate_Tournament?: boolean | TournamentCountOutputTypeCountParticipate_TournamentArgs
     Match?: boolean | TournamentCountOutputTypeCountMatchArgs
+    Participate_Tournament?: boolean | TournamentCountOutputTypeCountParticipate_TournamentArgs
   }
 
   // Custom InputTypes
@@ -1364,15 +1364,15 @@ export namespace Prisma {
   /**
    * TournamentCountOutputType without action
    */
-  export type TournamentCountOutputTypeCountParticipate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Participate_TournamentWhereInput
+  export type TournamentCountOutputTypeCountMatchArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MatchWhereInput
   }
 
   /**
    * TournamentCountOutputType without action
    */
-  export type TournamentCountOutputTypeCountMatchArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: MatchWhereInput
+  export type TournamentCountOutputTypeCountParticipate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: Participate_TournamentWhereInput
   }
 
 
@@ -1396,6 +1396,7 @@ export namespace Prisma {
     name: string | null
     password: string | null
     loggedIn: boolean | null
+    Auto_Match: boolean | null
     isOnline: boolean | null
     avatar: string | null
   }
@@ -1406,6 +1407,7 @@ export namespace Prisma {
     name: string | null
     password: string | null
     loggedIn: boolean | null
+    Auto_Match: boolean | null
     isOnline: boolean | null
     avatar: string | null
   }
@@ -1416,6 +1418,7 @@ export namespace Prisma {
     name: number
     password: number
     loggedIn: number
+    Auto_Match: number
     isOnline: number
     avatar: number
     _all: number
@@ -1428,6 +1431,7 @@ export namespace Prisma {
     name?: true
     password?: true
     loggedIn?: true
+    Auto_Match?: true
     isOnline?: true
     avatar?: true
   }
@@ -1438,6 +1442,7 @@ export namespace Prisma {
     name?: true
     password?: true
     loggedIn?: true
+    Auto_Match?: true
     isOnline?: true
     avatar?: true
   }
@@ -1448,6 +1453,7 @@ export namespace Prisma {
     name?: true
     password?: true
     loggedIn?: true
+    Auto_Match?: true
     isOnline?: true
     avatar?: true
     _all?: true
@@ -1531,6 +1537,7 @@ export namespace Prisma {
     name: string | null
     password: string
     loggedIn: boolean
+    Auto_Match: boolean
     isOnline: boolean
     avatar: string | null
     _count: UserCountAggregateOutputType | null
@@ -1558,15 +1565,16 @@ export namespace Prisma {
     name?: boolean
     password?: boolean
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: boolean
-    sentRequests?: boolean | User$sentRequestsArgs<ExtArgs>
     receivedRequests?: boolean | User$receivedRequestsArgs<ExtArgs>
-    Participate_Tournament?: boolean | User$Participate_TournamentArgs<ExtArgs>
-    Win_Tournament?: boolean | User$Win_TournamentArgs<ExtArgs>
-    Match1?: boolean | User$Match1Args<ExtArgs>
-    Match2?: boolean | User$Match2Args<ExtArgs>
+    sentRequests?: boolean | User$sentRequestsArgs<ExtArgs>
     Matchw?: boolean | User$MatchwArgs<ExtArgs>
+    Match2?: boolean | User$Match2Args<ExtArgs>
+    Match1?: boolean | User$Match1Args<ExtArgs>
+    Win_Tournament?: boolean | User$Win_TournamentArgs<ExtArgs>
+    Participate_Tournament?: boolean | User$Participate_TournamentArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1576,6 +1584,7 @@ export namespace Prisma {
     name?: boolean
     password?: boolean
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1586,6 +1595,7 @@ export namespace Prisma {
     name?: boolean
     password?: boolean
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1596,19 +1606,20 @@ export namespace Prisma {
     name?: boolean
     password?: boolean
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "password" | "loggedIn" | "isOnline" | "avatar", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "password" | "loggedIn" | "Auto_Match" | "isOnline" | "avatar", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sentRequests?: boolean | User$sentRequestsArgs<ExtArgs>
     receivedRequests?: boolean | User$receivedRequestsArgs<ExtArgs>
-    Participate_Tournament?: boolean | User$Participate_TournamentArgs<ExtArgs>
-    Win_Tournament?: boolean | User$Win_TournamentArgs<ExtArgs>
-    Match1?: boolean | User$Match1Args<ExtArgs>
-    Match2?: boolean | User$Match2Args<ExtArgs>
+    sentRequests?: boolean | User$sentRequestsArgs<ExtArgs>
     Matchw?: boolean | User$MatchwArgs<ExtArgs>
+    Match2?: boolean | User$Match2Args<ExtArgs>
+    Match1?: boolean | User$Match1Args<ExtArgs>
+    Win_Tournament?: boolean | User$Win_TournamentArgs<ExtArgs>
+    Participate_Tournament?: boolean | User$Participate_TournamentArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1617,13 +1628,13 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
-      sentRequests: Prisma.$FriendRequestPayload<ExtArgs>[]
       receivedRequests: Prisma.$FriendRequestPayload<ExtArgs>[]
-      Participate_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
-      Win_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
-      Match1: Prisma.$MatchPayload<ExtArgs>[]
-      Match2: Prisma.$MatchPayload<ExtArgs>[]
+      sentRequests: Prisma.$FriendRequestPayload<ExtArgs>[]
       Matchw: Prisma.$MatchPayload<ExtArgs>[]
+      Match2: Prisma.$MatchPayload<ExtArgs>[]
+      Match1: Prisma.$MatchPayload<ExtArgs>[]
+      Win_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
+      Participate_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1631,6 +1642,7 @@ export namespace Prisma {
       name: string | null
       password: string
       loggedIn: boolean
+      Auto_Match: boolean
       isOnline: boolean
       avatar: string | null
     }, ExtArgs["result"]["user"]>
@@ -2027,13 +2039,13 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    sentRequests<T extends User$sentRequestsArgs<ExtArgs> = {}>(args?: Subset<T, User$sentRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FriendRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     receivedRequests<T extends User$receivedRequestsArgs<ExtArgs> = {}>(args?: Subset<T, User$receivedRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FriendRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    Participate_Tournament<T extends User$Participate_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, User$Participate_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    Win_Tournament<T extends User$Win_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, User$Win_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    Match1<T extends User$Match1Args<ExtArgs> = {}>(args?: Subset<T, User$Match1Args<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    Match2<T extends User$Match2Args<ExtArgs> = {}>(args?: Subset<T, User$Match2Args<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sentRequests<T extends User$sentRequestsArgs<ExtArgs> = {}>(args?: Subset<T, User$sentRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FriendRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     Matchw<T extends User$MatchwArgs<ExtArgs> = {}>(args?: Subset<T, User$MatchwArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    Match2<T extends User$Match2Args<ExtArgs> = {}>(args?: Subset<T, User$Match2Args<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    Match1<T extends User$Match1Args<ExtArgs> = {}>(args?: Subset<T, User$Match1Args<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    Win_Tournament<T extends User$Win_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, User$Win_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    Participate_Tournament<T extends User$Participate_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, User$Participate_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2068,6 +2080,7 @@ export namespace Prisma {
     readonly name: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly loggedIn: FieldRef<"User", 'Boolean'>
+    readonly Auto_Match: FieldRef<"User", 'Boolean'>
     readonly isOnline: FieldRef<"User", 'Boolean'>
     readonly avatar: FieldRef<"User", 'String'>
   }
@@ -2456,30 +2469,6 @@ export namespace Prisma {
   }
 
   /**
-   * User.sentRequests
-   */
-  export type User$sentRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the FriendRequest
-     */
-    select?: FriendRequestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the FriendRequest
-     */
-    omit?: FriendRequestOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FriendRequestInclude<ExtArgs> | null
-    where?: FriendRequestWhereInput
-    orderBy?: FriendRequestOrderByWithRelationInput | FriendRequestOrderByWithRelationInput[]
-    cursor?: FriendRequestWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: FriendRequestScalarFieldEnum | FriendRequestScalarFieldEnum[]
-  }
-
-  /**
    * User.receivedRequests
    */
   export type User$receivedRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2504,57 +2493,33 @@ export namespace Prisma {
   }
 
   /**
-   * User.Participate_Tournament
+   * User.sentRequests
    */
-  export type User$Participate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$sentRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Participate_Tournament
+     * Select specific fields to fetch from the FriendRequest
      */
-    select?: Participate_TournamentSelect<ExtArgs> | null
+    select?: FriendRequestSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Participate_Tournament
+     * Omit specific fields from the FriendRequest
      */
-    omit?: Participate_TournamentOmit<ExtArgs> | null
+    omit?: FriendRequestOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Participate_TournamentInclude<ExtArgs> | null
-    where?: Participate_TournamentWhereInput
-    orderBy?: Participate_TournamentOrderByWithRelationInput | Participate_TournamentOrderByWithRelationInput[]
-    cursor?: Participate_TournamentWhereUniqueInput
+    include?: FriendRequestInclude<ExtArgs> | null
+    where?: FriendRequestWhereInput
+    orderBy?: FriendRequestOrderByWithRelationInput | FriendRequestOrderByWithRelationInput[]
+    cursor?: FriendRequestWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: Participate_TournamentScalarFieldEnum | Participate_TournamentScalarFieldEnum[]
+    distinct?: FriendRequestScalarFieldEnum | FriendRequestScalarFieldEnum[]
   }
 
   /**
-   * User.Win_Tournament
+   * User.Matchw
    */
-  export type User$Win_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Participate_Tournament
-     */
-    select?: Participate_TournamentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Participate_Tournament
-     */
-    omit?: Participate_TournamentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: Participate_TournamentInclude<ExtArgs> | null
-    where?: Participate_TournamentWhereInput
-    orderBy?: Participate_TournamentOrderByWithRelationInput | Participate_TournamentOrderByWithRelationInput[]
-    cursor?: Participate_TournamentWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: Participate_TournamentScalarFieldEnum | Participate_TournamentScalarFieldEnum[]
-  }
-
-  /**
-   * User.Match1
-   */
-  export type User$Match1Args<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$MatchwArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Match
      */
@@ -2600,9 +2565,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.Matchw
+   * User.Match1
    */
-  export type User$MatchwArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$Match1Args<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Match
      */
@@ -2621,6 +2586,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: MatchScalarFieldEnum | MatchScalarFieldEnum[]
+  }
+
+  /**
+   * User.Win_Tournament
+   */
+  export type User$Win_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Participate_Tournament
+     */
+    select?: Participate_TournamentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Participate_Tournament
+     */
+    omit?: Participate_TournamentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Participate_TournamentInclude<ExtArgs> | null
+    where?: Participate_TournamentWhereInput
+    orderBy?: Participate_TournamentOrderByWithRelationInput | Participate_TournamentOrderByWithRelationInput[]
+    cursor?: Participate_TournamentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Participate_TournamentScalarFieldEnum | Participate_TournamentScalarFieldEnum[]
+  }
+
+  /**
+   * User.Participate_Tournament
+   */
+  export type User$Participate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Participate_Tournament
+     */
+    select?: Participate_TournamentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Participate_Tournament
+     */
+    omit?: Participate_TournamentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Participate_TournamentInclude<ExtArgs> | null
+    where?: Participate_TournamentWhereInput
+    orderBy?: Participate_TournamentOrderByWithRelationInput | Participate_TournamentOrderByWithRelationInput[]
+    cursor?: Participate_TournamentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Participate_TournamentScalarFieldEnum | Participate_TournamentScalarFieldEnum[]
   }
 
   /**
@@ -2814,8 +2827,8 @@ export namespace Prisma {
     status?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
-    sender?: boolean | UserDefaultArgs<ExtArgs>
     receiver?: boolean | UserDefaultArgs<ExtArgs>
+    sender?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["friendRequest"]>
 
   export type FriendRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2825,8 +2838,8 @@ export namespace Prisma {
     status?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
-    sender?: boolean | UserDefaultArgs<ExtArgs>
     receiver?: boolean | UserDefaultArgs<ExtArgs>
+    sender?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["friendRequest"]>
 
   export type FriendRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2836,8 +2849,8 @@ export namespace Prisma {
     status?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
-    sender?: boolean | UserDefaultArgs<ExtArgs>
     receiver?: boolean | UserDefaultArgs<ExtArgs>
+    sender?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["friendRequest"]>
 
   export type FriendRequestSelectScalar = {
@@ -2851,23 +2864,23 @@ export namespace Prisma {
 
   export type FriendRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "senderId" | "receiverId" | "status" | "CreatedAt" | "UpdatedAt", ExtArgs["result"]["friendRequest"]>
   export type FriendRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sender?: boolean | UserDefaultArgs<ExtArgs>
     receiver?: boolean | UserDefaultArgs<ExtArgs>
+    sender?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type FriendRequestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sender?: boolean | UserDefaultArgs<ExtArgs>
     receiver?: boolean | UserDefaultArgs<ExtArgs>
+    sender?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type FriendRequestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sender?: boolean | UserDefaultArgs<ExtArgs>
     receiver?: boolean | UserDefaultArgs<ExtArgs>
+    sender?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $FriendRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FriendRequest"
     objects: {
-      sender: Prisma.$UserPayload<ExtArgs>
       receiver: Prisma.$UserPayload<ExtArgs>
+      sender: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3270,8 +3283,8 @@ export namespace Prisma {
    */
   export interface Prisma__FriendRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    sender<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     receiver<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    sender<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3917,8 +3930,8 @@ export namespace Prisma {
     UpdatedAt?: boolean
     count_player?: boolean
     result?: boolean
-    Participate_Tournament?: boolean | Tournament$Participate_TournamentArgs<ExtArgs>
     Match?: boolean | Tournament$MatchArgs<ExtArgs>
+    Participate_Tournament?: boolean | Tournament$Participate_TournamentArgs<ExtArgs>
     _count?: boolean | TournamentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tournament"]>
 
@@ -3948,8 +3961,8 @@ export namespace Prisma {
 
   export type TournamentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CreatedAt" | "UpdatedAt" | "count_player" | "result", ExtArgs["result"]["tournament"]>
   export type TournamentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    Participate_Tournament?: boolean | Tournament$Participate_TournamentArgs<ExtArgs>
     Match?: boolean | Tournament$MatchArgs<ExtArgs>
+    Participate_Tournament?: boolean | Tournament$Participate_TournamentArgs<ExtArgs>
     _count?: boolean | TournamentCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TournamentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3958,8 +3971,8 @@ export namespace Prisma {
   export type $TournamentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Tournament"
     objects: {
-      Participate_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
       Match: Prisma.$MatchPayload<ExtArgs>[]
+      Participate_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4361,8 +4374,8 @@ export namespace Prisma {
    */
   export interface Prisma__TournamentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    Participate_Tournament<T extends Tournament$Participate_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, Tournament$Participate_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     Match<T extends Tournament$MatchArgs<ExtArgs> = {}>(args?: Subset<T, Tournament$MatchArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    Participate_Tournament<T extends Tournament$Participate_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, Tournament$Participate_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4783,30 +4796,6 @@ export namespace Prisma {
   }
 
   /**
-   * Tournament.Participate_Tournament
-   */
-  export type Tournament$Participate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Participate_Tournament
-     */
-    select?: Participate_TournamentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Participate_Tournament
-     */
-    omit?: Participate_TournamentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: Participate_TournamentInclude<ExtArgs> | null
-    where?: Participate_TournamentWhereInput
-    orderBy?: Participate_TournamentOrderByWithRelationInput | Participate_TournamentOrderByWithRelationInput[]
-    cursor?: Participate_TournamentWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: Participate_TournamentScalarFieldEnum | Participate_TournamentScalarFieldEnum[]
-  }
-
-  /**
    * Tournament.Match
    */
   export type Tournament$MatchArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4828,6 +4817,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: MatchScalarFieldEnum | MatchScalarFieldEnum[]
+  }
+
+  /**
+   * Tournament.Participate_Tournament
+   */
+  export type Tournament$Participate_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Participate_Tournament
+     */
+    select?: Participate_TournamentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Participate_Tournament
+     */
+    omit?: Participate_TournamentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Participate_TournamentInclude<ExtArgs> | null
+    where?: Participate_TournamentWhereInput
+    orderBy?: Participate_TournamentOrderByWithRelationInput | Participate_TournamentOrderByWithRelationInput[]
+    cursor?: Participate_TournamentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Participate_TournamentScalarFieldEnum | Participate_TournamentScalarFieldEnum[]
   }
 
   /**
@@ -5029,9 +5042,9 @@ export namespace Prisma {
     UpdatedAt?: boolean
     result?: boolean
     Winner_Id?: boolean
-    P?: boolean | UserDefaultArgs<ExtArgs>
-    T?: boolean | TournamentDefaultArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
+    T?: boolean | TournamentDefaultArgs<ExtArgs>
+    P?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participate_Tournament"]>
 
   export type Participate_TournamentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5042,9 +5055,9 @@ export namespace Prisma {
     UpdatedAt?: boolean
     result?: boolean
     Winner_Id?: boolean
-    P?: boolean | UserDefaultArgs<ExtArgs>
-    T?: boolean | TournamentDefaultArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
+    T?: boolean | TournamentDefaultArgs<ExtArgs>
+    P?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participate_Tournament"]>
 
   export type Participate_TournamentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5055,9 +5068,9 @@ export namespace Prisma {
     UpdatedAt?: boolean
     result?: boolean
     Winner_Id?: boolean
-    P?: boolean | UserDefaultArgs<ExtArgs>
-    T?: boolean | TournamentDefaultArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
+    T?: boolean | TournamentDefaultArgs<ExtArgs>
+    P?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participate_Tournament"]>
 
   export type Participate_TournamentSelectScalar = {
@@ -5072,27 +5085,27 @@ export namespace Prisma {
 
   export type Participate_TournamentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "P_Id" | "T_Id" | "CreatedAt" | "UpdatedAt" | "result" | "Winner_Id", ExtArgs["result"]["participate_Tournament"]>
   export type Participate_TournamentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    P?: boolean | UserDefaultArgs<ExtArgs>
-    T?: boolean | TournamentDefaultArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
+    T?: boolean | TournamentDefaultArgs<ExtArgs>
+    P?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type Participate_TournamentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    P?: boolean | UserDefaultArgs<ExtArgs>
-    T?: boolean | TournamentDefaultArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
+    T?: boolean | TournamentDefaultArgs<ExtArgs>
+    P?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type Participate_TournamentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    P?: boolean | UserDefaultArgs<ExtArgs>
-    T?: boolean | TournamentDefaultArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
+    T?: boolean | TournamentDefaultArgs<ExtArgs>
+    P?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $Participate_TournamentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Participate_Tournament"
     objects: {
-      P: Prisma.$UserPayload<ExtArgs>
-      T: Prisma.$TournamentPayload<ExtArgs>
       Winner: Prisma.$UserPayload<ExtArgs>
+      T: Prisma.$TournamentPayload<ExtArgs>
+      P: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5496,9 +5509,9 @@ export namespace Prisma {
    */
   export interface Prisma__Participate_TournamentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    P<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    T<T extends TournamentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TournamentDefaultArgs<ExtArgs>>): Prisma__TournamentClient<$Result.GetResult<Prisma.$TournamentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     Winner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    T<T extends TournamentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TournamentDefaultArgs<ExtArgs>>): Prisma__TournamentClient<$Result.GetResult<Prisma.$TournamentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    P<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6189,10 +6202,10 @@ export namespace Prisma {
     result?: boolean
     Winner_Id?: boolean
     tournamentId?: boolean
-    P1?: boolean | UserDefaultArgs<ExtArgs>
-    P2?: boolean | UserDefaultArgs<ExtArgs>
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+    P2?: boolean | UserDefaultArgs<ExtArgs>
+    P1?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["match"]>
 
   export type MatchSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6206,10 +6219,10 @@ export namespace Prisma {
     result?: boolean
     Winner_Id?: boolean
     tournamentId?: boolean
-    P1?: boolean | UserDefaultArgs<ExtArgs>
-    P2?: boolean | UserDefaultArgs<ExtArgs>
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+    P2?: boolean | UserDefaultArgs<ExtArgs>
+    P1?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["match"]>
 
   export type MatchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6223,10 +6236,10 @@ export namespace Prisma {
     result?: boolean
     Winner_Id?: boolean
     tournamentId?: boolean
-    P1?: boolean | UserDefaultArgs<ExtArgs>
-    P2?: boolean | UserDefaultArgs<ExtArgs>
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+    P2?: boolean | UserDefaultArgs<ExtArgs>
+    P1?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["match"]>
 
   export type MatchSelectScalar = {
@@ -6244,31 +6257,31 @@ export namespace Prisma {
 
   export type MatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "P1_Id" | "P2_Id" | "Ball_x" | "Ball_y" | "CreatedAt" | "UpdatedAt" | "result" | "Winner_Id" | "tournamentId", ExtArgs["result"]["match"]>
   export type MatchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    P1?: boolean | UserDefaultArgs<ExtArgs>
-    P2?: boolean | UserDefaultArgs<ExtArgs>
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+    P2?: boolean | UserDefaultArgs<ExtArgs>
+    P1?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type MatchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    P1?: boolean | UserDefaultArgs<ExtArgs>
-    P2?: boolean | UserDefaultArgs<ExtArgs>
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+    P2?: boolean | UserDefaultArgs<ExtArgs>
+    P1?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type MatchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    P1?: boolean | UserDefaultArgs<ExtArgs>
-    P2?: boolean | UserDefaultArgs<ExtArgs>
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+    P2?: boolean | UserDefaultArgs<ExtArgs>
+    P1?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $MatchPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Match"
     objects: {
-      P1: Prisma.$UserPayload<ExtArgs>
-      P2: Prisma.$UserPayload<ExtArgs>
-      Winner: Prisma.$UserPayload<ExtArgs>
       Tournament: Prisma.$TournamentPayload<ExtArgs> | null
+      Winner: Prisma.$UserPayload<ExtArgs>
+      P2: Prisma.$UserPayload<ExtArgs>
+      P1: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6675,10 +6688,10 @@ export namespace Prisma {
    */
   export interface Prisma__MatchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    P1<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    P2<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    Winner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     Tournament<T extends Match$TournamentArgs<ExtArgs> = {}>(args?: Subset<T, Match$TournamentArgs<ExtArgs>>): Prisma__TournamentClient<$Result.GetResult<Prisma.$TournamentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    Winner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    P2<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    P1<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7166,6 +7179,7 @@ export namespace Prisma {
     name: 'name',
     password: 'password',
     loggedIn: 'loggedIn',
+    Auto_Match: 'Auto_Match',
     isOnline: 'isOnline',
     avatar: 'avatar'
   };
@@ -7307,15 +7321,16 @@ export namespace Prisma {
     name?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
     loggedIn?: BoolFilter<"User"> | boolean
+    Auto_Match?: BoolFilter<"User"> | boolean
     isOnline?: BoolFilter<"User"> | boolean
     avatar?: StringNullableFilter<"User"> | string | null
-    sentRequests?: FriendRequestListRelationFilter
     receivedRequests?: FriendRequestListRelationFilter
-    Participate_Tournament?: Participate_TournamentListRelationFilter
-    Win_Tournament?: Participate_TournamentListRelationFilter
-    Match1?: MatchListRelationFilter
-    Match2?: MatchListRelationFilter
+    sentRequests?: FriendRequestListRelationFilter
     Matchw?: MatchListRelationFilter
+    Match2?: MatchListRelationFilter
+    Match1?: MatchListRelationFilter
+    Win_Tournament?: Participate_TournamentListRelationFilter
+    Participate_Tournament?: Participate_TournamentListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -7324,15 +7339,16 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     password?: SortOrder
     loggedIn?: SortOrder
+    Auto_Match?: SortOrder
     isOnline?: SortOrder
     avatar?: SortOrderInput | SortOrder
-    sentRequests?: FriendRequestOrderByRelationAggregateInput
     receivedRequests?: FriendRequestOrderByRelationAggregateInput
-    Participate_Tournament?: Participate_TournamentOrderByRelationAggregateInput
-    Win_Tournament?: Participate_TournamentOrderByRelationAggregateInput
-    Match1?: MatchOrderByRelationAggregateInput
-    Match2?: MatchOrderByRelationAggregateInput
+    sentRequests?: FriendRequestOrderByRelationAggregateInput
     Matchw?: MatchOrderByRelationAggregateInput
+    Match2?: MatchOrderByRelationAggregateInput
+    Match1?: MatchOrderByRelationAggregateInput
+    Win_Tournament?: Participate_TournamentOrderByRelationAggregateInput
+    Participate_Tournament?: Participate_TournamentOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -7344,15 +7360,16 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     password?: StringFilter<"User"> | string
     loggedIn?: BoolFilter<"User"> | boolean
+    Auto_Match?: BoolFilter<"User"> | boolean
     isOnline?: BoolFilter<"User"> | boolean
     avatar?: StringNullableFilter<"User"> | string | null
-    sentRequests?: FriendRequestListRelationFilter
     receivedRequests?: FriendRequestListRelationFilter
-    Participate_Tournament?: Participate_TournamentListRelationFilter
-    Win_Tournament?: Participate_TournamentListRelationFilter
-    Match1?: MatchListRelationFilter
-    Match2?: MatchListRelationFilter
+    sentRequests?: FriendRequestListRelationFilter
     Matchw?: MatchListRelationFilter
+    Match2?: MatchListRelationFilter
+    Match1?: MatchListRelationFilter
+    Win_Tournament?: Participate_TournamentListRelationFilter
+    Participate_Tournament?: Participate_TournamentListRelationFilter
   }, "id" | "email" | "name">
 
   export type UserOrderByWithAggregationInput = {
@@ -7361,6 +7378,7 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     password?: SortOrder
     loggedIn?: SortOrder
+    Auto_Match?: SortOrder
     isOnline?: SortOrder
     avatar?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -7377,6 +7395,7 @@ export namespace Prisma {
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringWithAggregatesFilter<"User"> | string
     loggedIn?: BoolWithAggregatesFilter<"User"> | boolean
+    Auto_Match?: BoolWithAggregatesFilter<"User"> | boolean
     isOnline?: BoolWithAggregatesFilter<"User"> | boolean
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
@@ -7391,8 +7410,8 @@ export namespace Prisma {
     status?: EnumFriendRequestStatusFilter<"FriendRequest"> | $Enums.FriendRequestStatus
     CreatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
     UpdatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
-    sender?: XOR<UserScalarRelationFilter, UserWhereInput>
     receiver?: XOR<UserScalarRelationFilter, UserWhereInput>
+    sender?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type FriendRequestOrderByWithRelationInput = {
@@ -7402,8 +7421,8 @@ export namespace Prisma {
     status?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
-    sender?: UserOrderByWithRelationInput
     receiver?: UserOrderByWithRelationInput
+    sender?: UserOrderByWithRelationInput
   }
 
   export type FriendRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -7417,8 +7436,8 @@ export namespace Prisma {
     status?: EnumFriendRequestStatusFilter<"FriendRequest"> | $Enums.FriendRequestStatus
     CreatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
     UpdatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
-    sender?: XOR<UserScalarRelationFilter, UserWhereInput>
     receiver?: XOR<UserScalarRelationFilter, UserWhereInput>
+    sender?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "senderId_receiverId">
 
   export type FriendRequestOrderByWithAggregationInput = {
@@ -7454,8 +7473,8 @@ export namespace Prisma {
     UpdatedAt?: DateTimeFilter<"Tournament"> | Date | string
     count_player?: IntFilter<"Tournament"> | number
     result?: EnumMatchResultFilter<"Tournament"> | $Enums.MatchResult
-    Participate_Tournament?: Participate_TournamentListRelationFilter
     Match?: MatchListRelationFilter
+    Participate_Tournament?: Participate_TournamentListRelationFilter
   }
 
   export type TournamentOrderByWithRelationInput = {
@@ -7464,8 +7483,8 @@ export namespace Prisma {
     UpdatedAt?: SortOrder
     count_player?: SortOrder
     result?: SortOrder
-    Participate_Tournament?: Participate_TournamentOrderByRelationAggregateInput
     Match?: MatchOrderByRelationAggregateInput
+    Participate_Tournament?: Participate_TournamentOrderByRelationAggregateInput
   }
 
   export type TournamentWhereUniqueInput = Prisma.AtLeast<{
@@ -7477,8 +7496,8 @@ export namespace Prisma {
     UpdatedAt?: DateTimeFilter<"Tournament"> | Date | string
     count_player?: IntFilter<"Tournament"> | number
     result?: EnumMatchResultFilter<"Tournament"> | $Enums.MatchResult
-    Participate_Tournament?: Participate_TournamentListRelationFilter
     Match?: MatchListRelationFilter
+    Participate_Tournament?: Participate_TournamentListRelationFilter
   }, "id">
 
   export type TournamentOrderByWithAggregationInput = {
@@ -7516,9 +7535,9 @@ export namespace Prisma {
     UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
     result?: EnumMatchResultFilter<"Participate_Tournament"> | $Enums.MatchResult
     Winner_Id?: StringFilter<"Participate_Tournament"> | string
-    P?: XOR<UserScalarRelationFilter, UserWhereInput>
-    T?: XOR<TournamentScalarRelationFilter, TournamentWhereInput>
     Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
+    T?: XOR<TournamentScalarRelationFilter, TournamentWhereInput>
+    P?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type Participate_TournamentOrderByWithRelationInput = {
@@ -7529,9 +7548,9 @@ export namespace Prisma {
     UpdatedAt?: SortOrder
     result?: SortOrder
     Winner_Id?: SortOrder
-    P?: UserOrderByWithRelationInput
-    T?: TournamentOrderByWithRelationInput
     Winner?: UserOrderByWithRelationInput
+    T?: TournamentOrderByWithRelationInput
+    P?: UserOrderByWithRelationInput
   }
 
   export type Participate_TournamentWhereUniqueInput = Prisma.AtLeast<{
@@ -7545,9 +7564,9 @@ export namespace Prisma {
     UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
     result?: EnumMatchResultFilter<"Participate_Tournament"> | $Enums.MatchResult
     Winner_Id?: StringFilter<"Participate_Tournament"> | string
-    P?: XOR<UserScalarRelationFilter, UserWhereInput>
-    T?: XOR<TournamentScalarRelationFilter, TournamentWhereInput>
     Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
+    T?: XOR<TournamentScalarRelationFilter, TournamentWhereInput>
+    P?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
 
   export type Participate_TournamentOrderByWithAggregationInput = {
@@ -7590,10 +7609,10 @@ export namespace Prisma {
     result?: EnumMatchResultFilter<"Match"> | $Enums.MatchResult
     Winner_Id?: StringFilter<"Match"> | string
     tournamentId?: StringNullableFilter<"Match"> | string | null
-    P1?: XOR<UserScalarRelationFilter, UserWhereInput>
-    P2?: XOR<UserScalarRelationFilter, UserWhereInput>
-    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
     Tournament?: XOR<TournamentNullableScalarRelationFilter, TournamentWhereInput> | null
+    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
+    P2?: XOR<UserScalarRelationFilter, UserWhereInput>
+    P1?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type MatchOrderByWithRelationInput = {
@@ -7607,10 +7626,10 @@ export namespace Prisma {
     result?: SortOrder
     Winner_Id?: SortOrder
     tournamentId?: SortOrderInput | SortOrder
-    P1?: UserOrderByWithRelationInput
-    P2?: UserOrderByWithRelationInput
-    Winner?: UserOrderByWithRelationInput
     Tournament?: TournamentOrderByWithRelationInput
+    Winner?: UserOrderByWithRelationInput
+    P2?: UserOrderByWithRelationInput
+    P1?: UserOrderByWithRelationInput
   }
 
   export type MatchWhereUniqueInput = Prisma.AtLeast<{
@@ -7627,10 +7646,10 @@ export namespace Prisma {
     result?: EnumMatchResultFilter<"Match"> | $Enums.MatchResult
     Winner_Id?: StringFilter<"Match"> | string
     tournamentId?: StringNullableFilter<"Match"> | string | null
-    P1?: XOR<UserScalarRelationFilter, UserWhereInput>
-    P2?: XOR<UserScalarRelationFilter, UserWhereInput>
-    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
     Tournament?: XOR<TournamentNullableScalarRelationFilter, TournamentWhereInput> | null
+    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
+    P2?: XOR<UserScalarRelationFilter, UserWhereInput>
+    P1?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
 
   export type MatchOrderByWithAggregationInput = {
@@ -7673,15 +7692,16 @@ export namespace Prisma {
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Match2?: MatchCreateNestedManyWithoutP2Input
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -7690,15 +7710,16 @@ export namespace Prisma {
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
   export type UserUpdateInput = {
@@ -7707,15 +7728,16 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUpdateManyWithoutP1NestedInput
-    Match2?: MatchUpdateManyWithoutP2NestedInput
+    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUpdateManyWithoutP2NestedInput
+    Match1?: MatchUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -7724,15 +7746,16 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -7741,6 +7764,7 @@ export namespace Prisma {
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
   }
@@ -7751,6 +7775,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -7761,6 +7786,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -7770,8 +7796,8 @@ export namespace Prisma {
     status?: $Enums.FriendRequestStatus
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    sender: UserCreateNestedOneWithoutSentRequestsInput
     receiver: UserCreateNestedOneWithoutReceivedRequestsInput
+    sender: UserCreateNestedOneWithoutSentRequestsInput
   }
 
   export type FriendRequestUncheckedCreateInput = {
@@ -7788,8 +7814,8 @@ export namespace Prisma {
     status?: EnumFriendRequestStatusFieldUpdateOperationsInput | $Enums.FriendRequestStatus
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    sender?: UserUpdateOneRequiredWithoutSentRequestsNestedInput
     receiver?: UserUpdateOneRequiredWithoutReceivedRequestsNestedInput
+    sender?: UserUpdateOneRequiredWithoutSentRequestsNestedInput
   }
 
   export type FriendRequestUncheckedUpdateInput = {
@@ -7832,8 +7858,8 @@ export namespace Prisma {
     UpdatedAt?: Date | string
     count_player?: number
     result?: $Enums.MatchResult
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutTInput
     Match?: MatchCreateNestedManyWithoutTournamentInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutTInput
   }
 
   export type TournamentUncheckedCreateInput = {
@@ -7842,8 +7868,8 @@ export namespace Prisma {
     UpdatedAt?: Date | string
     count_player?: number
     result?: $Enums.MatchResult
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutTInput
     Match?: MatchUncheckedCreateNestedManyWithoutTournamentInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutTInput
   }
 
   export type TournamentUpdateInput = {
@@ -7852,8 +7878,8 @@ export namespace Prisma {
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
     result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutTNestedInput
     Match?: MatchUpdateManyWithoutTournamentNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutTNestedInput
   }
 
   export type TournamentUncheckedUpdateInput = {
@@ -7862,8 +7888,8 @@ export namespace Prisma {
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
     result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutTNestedInput
     Match?: MatchUncheckedUpdateManyWithoutTournamentNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutTNestedInput
   }
 
   export type TournamentCreateManyInput = {
@@ -7895,9 +7921,9 @@ export namespace Prisma {
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     result?: $Enums.MatchResult
-    P: UserCreateNestedOneWithoutParticipate_TournamentInput
-    T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
     Winner: UserCreateNestedOneWithoutWin_TournamentInput
+    T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
+    P: UserCreateNestedOneWithoutParticipate_TournamentInput
   }
 
   export type Participate_TournamentUncheckedCreateInput = {
@@ -7915,9 +7941,9 @@ export namespace Prisma {
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
-    T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
     Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
+    T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
+    P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
   }
 
   export type Participate_TournamentUncheckedUpdateInput = {
@@ -7964,10 +7990,10 @@ export namespace Prisma {
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     result?: $Enums.MatchResult
-    P1: UserCreateNestedOneWithoutMatch1Input
-    P2: UserCreateNestedOneWithoutMatch2Input
-    Winner: UserCreateNestedOneWithoutMatchwInput
     Tournament?: TournamentCreateNestedOneWithoutMatchInput
+    Winner: UserCreateNestedOneWithoutMatchwInput
+    P2: UserCreateNestedOneWithoutMatch2Input
+    P1: UserCreateNestedOneWithoutMatch1Input
   }
 
   export type MatchUncheckedCreateInput = {
@@ -7990,10 +8016,10 @@ export namespace Prisma {
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
-    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
-    Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
     Tournament?: TournamentUpdateOneWithoutMatchNestedInput
+    Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
+    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
+    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
   }
 
   export type MatchUncheckedUpdateInput = {
@@ -8083,16 +8109,16 @@ export namespace Prisma {
     none?: FriendRequestWhereInput
   }
 
-  export type Participate_TournamentListRelationFilter = {
-    every?: Participate_TournamentWhereInput
-    some?: Participate_TournamentWhereInput
-    none?: Participate_TournamentWhereInput
-  }
-
   export type MatchListRelationFilter = {
     every?: MatchWhereInput
     some?: MatchWhereInput
     none?: MatchWhereInput
+  }
+
+  export type Participate_TournamentListRelationFilter = {
+    every?: Participate_TournamentWhereInput
+    some?: Participate_TournamentWhereInput
+    none?: Participate_TournamentWhereInput
   }
 
   export type SortOrderInput = {
@@ -8104,11 +8130,11 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type Participate_TournamentOrderByRelationAggregateInput = {
+  export type MatchOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type MatchOrderByRelationAggregateInput = {
+  export type Participate_TournamentOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -8118,6 +8144,7 @@ export namespace Prisma {
     name?: SortOrder
     password?: SortOrder
     loggedIn?: SortOrder
+    Auto_Match?: SortOrder
     isOnline?: SortOrder
     avatar?: SortOrder
   }
@@ -8128,6 +8155,7 @@ export namespace Prisma {
     name?: SortOrder
     password?: SortOrder
     loggedIn?: SortOrder
+    Auto_Match?: SortOrder
     isOnline?: SortOrder
     avatar?: SortOrder
   }
@@ -8138,6 +8166,7 @@ export namespace Prisma {
     name?: SortOrder
     password?: SortOrder
     loggedIn?: SortOrder
+    Auto_Match?: SortOrder
     isOnline?: SortOrder
     avatar?: SortOrder
   }
@@ -8455,13 +8484,6 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type FriendRequestCreateNestedManyWithoutSenderInput = {
-    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
-    createMany?: FriendRequestCreateManySenderInputEnvelope
-    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-  }
-
   export type FriendRequestCreateNestedManyWithoutReceiverInput = {
     create?: XOR<FriendRequestCreateWithoutReceiverInput, FriendRequestUncheckedCreateWithoutReceiverInput> | FriendRequestCreateWithoutReceiverInput[] | FriendRequestUncheckedCreateWithoutReceiverInput[]
     connectOrCreate?: FriendRequestCreateOrConnectWithoutReceiverInput | FriendRequestCreateOrConnectWithoutReceiverInput[]
@@ -8469,24 +8491,17 @@ export namespace Prisma {
     connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
   }
 
-  export type Participate_TournamentCreateNestedManyWithoutPInput = {
-    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
-    createMany?: Participate_TournamentCreateManyPInputEnvelope
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  export type FriendRequestCreateNestedManyWithoutSenderInput = {
+    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
+    createMany?: FriendRequestCreateManySenderInputEnvelope
+    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
   }
 
-  export type Participate_TournamentCreateNestedManyWithoutWinnerInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-  }
-
-  export type MatchCreateNestedManyWithoutP1Input = {
-    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
-    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
-    createMany?: MatchCreateManyP1InputEnvelope
+  export type MatchCreateNestedManyWithoutWinnerInput = {
+    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
+    createMany?: MatchCreateManyWinnerInputEnvelope
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
@@ -8497,18 +8512,25 @@ export namespace Prisma {
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
-  export type MatchCreateNestedManyWithoutWinnerInput = {
-    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
-    createMany?: MatchCreateManyWinnerInputEnvelope
+  export type MatchCreateNestedManyWithoutP1Input = {
+    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
+    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
+    createMany?: MatchCreateManyP1InputEnvelope
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
-  export type FriendRequestUncheckedCreateNestedManyWithoutSenderInput = {
-    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
-    createMany?: FriendRequestCreateManySenderInputEnvelope
-    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+  export type Participate_TournamentCreateNestedManyWithoutWinnerInput = {
+    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
+    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  }
+
+  export type Participate_TournamentCreateNestedManyWithoutPInput = {
+    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
+    createMany?: Participate_TournamentCreateManyPInputEnvelope
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
   }
 
   export type FriendRequestUncheckedCreateNestedManyWithoutReceiverInput = {
@@ -8518,24 +8540,17 @@ export namespace Prisma {
     connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
   }
 
-  export type Participate_TournamentUncheckedCreateNestedManyWithoutPInput = {
-    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
-    createMany?: Participate_TournamentCreateManyPInputEnvelope
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  export type FriendRequestUncheckedCreateNestedManyWithoutSenderInput = {
+    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
+    createMany?: FriendRequestCreateManySenderInputEnvelope
+    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
   }
 
-  export type Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-  }
-
-  export type MatchUncheckedCreateNestedManyWithoutP1Input = {
-    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
-    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
-    createMany?: MatchCreateManyP1InputEnvelope
+  export type MatchUncheckedCreateNestedManyWithoutWinnerInput = {
+    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
+    createMany?: MatchCreateManyWinnerInputEnvelope
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
@@ -8546,11 +8561,25 @@ export namespace Prisma {
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
-  export type MatchUncheckedCreateNestedManyWithoutWinnerInput = {
-    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
-    createMany?: MatchCreateManyWinnerInputEnvelope
+  export type MatchUncheckedCreateNestedManyWithoutP1Input = {
+    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
+    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
+    createMany?: MatchCreateManyP1InputEnvelope
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
+  }
+
+  export type Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput = {
+    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
+    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  }
+
+  export type Participate_TournamentUncheckedCreateNestedManyWithoutPInput = {
+    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
+    createMany?: Participate_TournamentCreateManyPInputEnvelope
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -8563,20 +8592,6 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
-  }
-
-  export type FriendRequestUpdateManyWithoutSenderNestedInput = {
-    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
-    upsert?: FriendRequestUpsertWithWhereUniqueWithoutSenderInput | FriendRequestUpsertWithWhereUniqueWithoutSenderInput[]
-    createMany?: FriendRequestCreateManySenderInputEnvelope
-    set?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    disconnect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    delete?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    update?: FriendRequestUpdateWithWhereUniqueWithoutSenderInput | FriendRequestUpdateWithWhereUniqueWithoutSenderInput[]
-    updateMany?: FriendRequestUpdateManyWithWhereWithoutSenderInput | FriendRequestUpdateManyWithWhereWithoutSenderInput[]
-    deleteMany?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
   }
 
   export type FriendRequestUpdateManyWithoutReceiverNestedInput = {
@@ -8593,45 +8608,31 @@ export namespace Prisma {
     deleteMany?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
   }
 
-  export type Participate_TournamentUpdateManyWithoutPNestedInput = {
-    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
-    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutPInput | Participate_TournamentUpsertWithWhereUniqueWithoutPInput[]
-    createMany?: Participate_TournamentCreateManyPInputEnvelope
-    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    update?: Participate_TournamentUpdateWithWhereUniqueWithoutPInput | Participate_TournamentUpdateWithWhereUniqueWithoutPInput[]
-    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutPInput | Participate_TournamentUpdateManyWithWhereWithoutPInput[]
-    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+  export type FriendRequestUpdateManyWithoutSenderNestedInput = {
+    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
+    upsert?: FriendRequestUpsertWithWhereUniqueWithoutSenderInput | FriendRequestUpsertWithWhereUniqueWithoutSenderInput[]
+    createMany?: FriendRequestCreateManySenderInputEnvelope
+    set?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    disconnect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    delete?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    update?: FriendRequestUpdateWithWhereUniqueWithoutSenderInput | FriendRequestUpdateWithWhereUniqueWithoutSenderInput[]
+    updateMany?: FriendRequestUpdateManyWithWhereWithoutSenderInput | FriendRequestUpdateManyWithWhereWithoutSenderInput[]
+    deleteMany?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
   }
 
-  export type Participate_TournamentUpdateManyWithoutWinnerNestedInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    update?: Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
-    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutWinnerInput | Participate_TournamentUpdateManyWithWhereWithoutWinnerInput[]
-    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
-  }
-
-  export type MatchUpdateManyWithoutP1NestedInput = {
-    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
-    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
-    upsert?: MatchUpsertWithWhereUniqueWithoutP1Input | MatchUpsertWithWhereUniqueWithoutP1Input[]
-    createMany?: MatchCreateManyP1InputEnvelope
+  export type MatchUpdateManyWithoutWinnerNestedInput = {
+    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
+    upsert?: MatchUpsertWithWhereUniqueWithoutWinnerInput | MatchUpsertWithWhereUniqueWithoutWinnerInput[]
+    createMany?: MatchCreateManyWinnerInputEnvelope
     set?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     disconnect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     delete?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
-    update?: MatchUpdateWithWhereUniqueWithoutP1Input | MatchUpdateWithWhereUniqueWithoutP1Input[]
-    updateMany?: MatchUpdateManyWithWhereWithoutP1Input | MatchUpdateManyWithWhereWithoutP1Input[]
+    update?: MatchUpdateWithWhereUniqueWithoutWinnerInput | MatchUpdateWithWhereUniqueWithoutWinnerInput[]
+    updateMany?: MatchUpdateManyWithWhereWithoutWinnerInput | MatchUpdateManyWithWhereWithoutWinnerInput[]
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
@@ -8649,32 +8650,46 @@ export namespace Prisma {
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type MatchUpdateManyWithoutWinnerNestedInput = {
-    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
-    upsert?: MatchUpsertWithWhereUniqueWithoutWinnerInput | MatchUpsertWithWhereUniqueWithoutWinnerInput[]
-    createMany?: MatchCreateManyWinnerInputEnvelope
+  export type MatchUpdateManyWithoutP1NestedInput = {
+    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
+    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
+    upsert?: MatchUpsertWithWhereUniqueWithoutP1Input | MatchUpsertWithWhereUniqueWithoutP1Input[]
+    createMany?: MatchCreateManyP1InputEnvelope
     set?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     disconnect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     delete?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
-    update?: MatchUpdateWithWhereUniqueWithoutWinnerInput | MatchUpdateWithWhereUniqueWithoutWinnerInput[]
-    updateMany?: MatchUpdateManyWithWhereWithoutWinnerInput | MatchUpdateManyWithWhereWithoutWinnerInput[]
+    update?: MatchUpdateWithWhereUniqueWithoutP1Input | MatchUpdateWithWhereUniqueWithoutP1Input[]
+    updateMany?: MatchUpdateManyWithWhereWithoutP1Input | MatchUpdateManyWithWhereWithoutP1Input[]
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type FriendRequestUncheckedUpdateManyWithoutSenderNestedInput = {
-    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
-    upsert?: FriendRequestUpsertWithWhereUniqueWithoutSenderInput | FriendRequestUpsertWithWhereUniqueWithoutSenderInput[]
-    createMany?: FriendRequestCreateManySenderInputEnvelope
-    set?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    disconnect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    delete?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
-    update?: FriendRequestUpdateWithWhereUniqueWithoutSenderInput | FriendRequestUpdateWithWhereUniqueWithoutSenderInput[]
-    updateMany?: FriendRequestUpdateManyWithWhereWithoutSenderInput | FriendRequestUpdateManyWithWhereWithoutSenderInput[]
-    deleteMany?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
+  export type Participate_TournamentUpdateManyWithoutWinnerNestedInput = {
+    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
+    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
+    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
+    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    update?: Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
+    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutWinnerInput | Participate_TournamentUpdateManyWithWhereWithoutWinnerInput[]
+    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+  }
+
+  export type Participate_TournamentUpdateManyWithoutPNestedInput = {
+    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
+    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutPInput | Participate_TournamentUpsertWithWhereUniqueWithoutPInput[]
+    createMany?: Participate_TournamentCreateManyPInputEnvelope
+    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    update?: Participate_TournamentUpdateWithWhereUniqueWithoutPInput | Participate_TournamentUpdateWithWhereUniqueWithoutPInput[]
+    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutPInput | Participate_TournamentUpdateManyWithWhereWithoutPInput[]
+    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
   }
 
   export type FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput = {
@@ -8691,45 +8706,31 @@ export namespace Prisma {
     deleteMany?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
   }
 
-  export type Participate_TournamentUncheckedUpdateManyWithoutPNestedInput = {
-    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
-    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutPInput | Participate_TournamentUpsertWithWhereUniqueWithoutPInput[]
-    createMany?: Participate_TournamentCreateManyPInputEnvelope
-    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    update?: Participate_TournamentUpdateWithWhereUniqueWithoutPInput | Participate_TournamentUpdateWithWhereUniqueWithoutPInput[]
-    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutPInput | Participate_TournamentUpdateManyWithWhereWithoutPInput[]
-    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+  export type FriendRequestUncheckedUpdateManyWithoutSenderNestedInput = {
+    create?: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput> | FriendRequestCreateWithoutSenderInput[] | FriendRequestUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: FriendRequestCreateOrConnectWithoutSenderInput | FriendRequestCreateOrConnectWithoutSenderInput[]
+    upsert?: FriendRequestUpsertWithWhereUniqueWithoutSenderInput | FriendRequestUpsertWithWhereUniqueWithoutSenderInput[]
+    createMany?: FriendRequestCreateManySenderInputEnvelope
+    set?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    disconnect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    delete?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    connect?: FriendRequestWhereUniqueInput | FriendRequestWhereUniqueInput[]
+    update?: FriendRequestUpdateWithWhereUniqueWithoutSenderInput | FriendRequestUpdateWithWhereUniqueWithoutSenderInput[]
+    updateMany?: FriendRequestUpdateManyWithWhereWithoutSenderInput | FriendRequestUpdateManyWithWhereWithoutSenderInput[]
+    deleteMany?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
   }
 
-  export type Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    update?: Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
-    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutWinnerInput | Participate_TournamentUpdateManyWithWhereWithoutWinnerInput[]
-    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
-  }
-
-  export type MatchUncheckedUpdateManyWithoutP1NestedInput = {
-    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
-    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
-    upsert?: MatchUpsertWithWhereUniqueWithoutP1Input | MatchUpsertWithWhereUniqueWithoutP1Input[]
-    createMany?: MatchCreateManyP1InputEnvelope
+  export type MatchUncheckedUpdateManyWithoutWinnerNestedInput = {
+    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
+    upsert?: MatchUpsertWithWhereUniqueWithoutWinnerInput | MatchUpsertWithWhereUniqueWithoutWinnerInput[]
+    createMany?: MatchCreateManyWinnerInputEnvelope
     set?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     disconnect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     delete?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
-    update?: MatchUpdateWithWhereUniqueWithoutP1Input | MatchUpdateWithWhereUniqueWithoutP1Input[]
-    updateMany?: MatchUpdateManyWithWhereWithoutP1Input | MatchUpdateManyWithWhereWithoutP1Input[]
+    update?: MatchUpdateWithWhereUniqueWithoutWinnerInput | MatchUpdateWithWhereUniqueWithoutWinnerInput[]
+    updateMany?: MatchUpdateManyWithWhereWithoutWinnerInput | MatchUpdateManyWithWhereWithoutWinnerInput[]
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
@@ -8747,29 +8748,57 @@ export namespace Prisma {
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type MatchUncheckedUpdateManyWithoutWinnerNestedInput = {
-    create?: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput> | MatchCreateWithoutWinnerInput[] | MatchUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: MatchCreateOrConnectWithoutWinnerInput | MatchCreateOrConnectWithoutWinnerInput[]
-    upsert?: MatchUpsertWithWhereUniqueWithoutWinnerInput | MatchUpsertWithWhereUniqueWithoutWinnerInput[]
-    createMany?: MatchCreateManyWinnerInputEnvelope
+  export type MatchUncheckedUpdateManyWithoutP1NestedInput = {
+    create?: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input> | MatchCreateWithoutP1Input[] | MatchUncheckedCreateWithoutP1Input[]
+    connectOrCreate?: MatchCreateOrConnectWithoutP1Input | MatchCreateOrConnectWithoutP1Input[]
+    upsert?: MatchUpsertWithWhereUniqueWithoutP1Input | MatchUpsertWithWhereUniqueWithoutP1Input[]
+    createMany?: MatchCreateManyP1InputEnvelope
     set?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     disconnect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     delete?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
-    update?: MatchUpdateWithWhereUniqueWithoutWinnerInput | MatchUpdateWithWhereUniqueWithoutWinnerInput[]
-    updateMany?: MatchUpdateManyWithWhereWithoutWinnerInput | MatchUpdateManyWithWhereWithoutWinnerInput[]
+    update?: MatchUpdateWithWhereUniqueWithoutP1Input | MatchUpdateWithWhereUniqueWithoutP1Input[]
+    updateMany?: MatchUpdateManyWithWhereWithoutP1Input | MatchUpdateManyWithWhereWithoutP1Input[]
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type UserCreateNestedOneWithoutSentRequestsInput = {
-    create?: XOR<UserCreateWithoutSentRequestsInput, UserUncheckedCreateWithoutSentRequestsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutSentRequestsInput
-    connect?: UserWhereUniqueInput
+  export type Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput = {
+    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
+    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
+    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
+    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    update?: Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
+    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutWinnerInput | Participate_TournamentUpdateManyWithWhereWithoutWinnerInput[]
+    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+  }
+
+  export type Participate_TournamentUncheckedUpdateManyWithoutPNestedInput = {
+    create?: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput> | Participate_TournamentCreateWithoutPInput[] | Participate_TournamentUncheckedCreateWithoutPInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutPInput | Participate_TournamentCreateOrConnectWithoutPInput[]
+    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutPInput | Participate_TournamentUpsertWithWhereUniqueWithoutPInput[]
+    createMany?: Participate_TournamentCreateManyPInputEnvelope
+    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    update?: Participate_TournamentUpdateWithWhereUniqueWithoutPInput | Participate_TournamentUpdateWithWhereUniqueWithoutPInput[]
+    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutPInput | Participate_TournamentUpdateManyWithWhereWithoutPInput[]
+    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutReceivedRequestsInput = {
     create?: XOR<UserCreateWithoutReceivedRequestsInput, UserUncheckedCreateWithoutReceivedRequestsInput>
     connectOrCreate?: UserCreateOrConnectWithoutReceivedRequestsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutSentRequestsInput = {
+    create?: XOR<UserCreateWithoutSentRequestsInput, UserUncheckedCreateWithoutSentRequestsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSentRequestsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -8781,14 +8810,6 @@ export namespace Prisma {
     set?: Date | string
   }
 
-  export type UserUpdateOneRequiredWithoutSentRequestsNestedInput = {
-    create?: XOR<UserCreateWithoutSentRequestsInput, UserUncheckedCreateWithoutSentRequestsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutSentRequestsInput
-    upsert?: UserUpsertWithoutSentRequestsInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSentRequestsInput, UserUpdateWithoutSentRequestsInput>, UserUncheckedUpdateWithoutSentRequestsInput>
-  }
-
   export type UserUpdateOneRequiredWithoutReceivedRequestsNestedInput = {
     create?: XOR<UserCreateWithoutReceivedRequestsInput, UserUncheckedCreateWithoutReceivedRequestsInput>
     connectOrCreate?: UserCreateOrConnectWithoutReceivedRequestsInput
@@ -8797,11 +8818,12 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutReceivedRequestsInput, UserUpdateWithoutReceivedRequestsInput>, UserUncheckedUpdateWithoutReceivedRequestsInput>
   }
 
-  export type Participate_TournamentCreateNestedManyWithoutTInput = {
-    create?: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput> | Participate_TournamentCreateWithoutTInput[] | Participate_TournamentUncheckedCreateWithoutTInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutTInput | Participate_TournamentCreateOrConnectWithoutTInput[]
-    createMany?: Participate_TournamentCreateManyTInputEnvelope
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  export type UserUpdateOneRequiredWithoutSentRequestsNestedInput = {
+    create?: XOR<UserCreateWithoutSentRequestsInput, UserUncheckedCreateWithoutSentRequestsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSentRequestsInput
+    upsert?: UserUpsertWithoutSentRequestsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSentRequestsInput, UserUpdateWithoutSentRequestsInput>, UserUncheckedUpdateWithoutSentRequestsInput>
   }
 
   export type MatchCreateNestedManyWithoutTournamentInput = {
@@ -8811,7 +8833,7 @@ export namespace Prisma {
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
-  export type Participate_TournamentUncheckedCreateNestedManyWithoutTInput = {
+  export type Participate_TournamentCreateNestedManyWithoutTInput = {
     create?: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput> | Participate_TournamentCreateWithoutTInput[] | Participate_TournamentUncheckedCreateWithoutTInput[]
     connectOrCreate?: Participate_TournamentCreateOrConnectWithoutTInput | Participate_TournamentCreateOrConnectWithoutTInput[]
     createMany?: Participate_TournamentCreateManyTInputEnvelope
@@ -8825,6 +8847,13 @@ export namespace Prisma {
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
+  export type Participate_TournamentUncheckedCreateNestedManyWithoutTInput = {
+    create?: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput> | Participate_TournamentCreateWithoutTInput[] | Participate_TournamentUncheckedCreateWithoutTInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutTInput | Participate_TournamentCreateOrConnectWithoutTInput[]
+    createMany?: Participate_TournamentCreateManyTInputEnvelope
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -8835,20 +8864,6 @@ export namespace Prisma {
 
   export type EnumMatchResultFieldUpdateOperationsInput = {
     set?: $Enums.MatchResult
-  }
-
-  export type Participate_TournamentUpdateManyWithoutTNestedInput = {
-    create?: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput> | Participate_TournamentCreateWithoutTInput[] | Participate_TournamentUncheckedCreateWithoutTInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutTInput | Participate_TournamentCreateOrConnectWithoutTInput[]
-    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutTInput | Participate_TournamentUpsertWithWhereUniqueWithoutTInput[]
-    createMany?: Participate_TournamentCreateManyTInputEnvelope
-    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    update?: Participate_TournamentUpdateWithWhereUniqueWithoutTInput | Participate_TournamentUpdateWithWhereUniqueWithoutTInput[]
-    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutTInput | Participate_TournamentUpdateManyWithWhereWithoutTInput[]
-    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
   }
 
   export type MatchUpdateManyWithoutTournamentNestedInput = {
@@ -8865,7 +8880,7 @@ export namespace Prisma {
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type Participate_TournamentUncheckedUpdateManyWithoutTNestedInput = {
+  export type Participate_TournamentUpdateManyWithoutTNestedInput = {
     create?: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput> | Participate_TournamentCreateWithoutTInput[] | Participate_TournamentUncheckedCreateWithoutTInput[]
     connectOrCreate?: Participate_TournamentCreateOrConnectWithoutTInput | Participate_TournamentCreateOrConnectWithoutTInput[]
     upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutTInput | Participate_TournamentUpsertWithWhereUniqueWithoutTInput[]
@@ -8893,9 +8908,23 @@ export namespace Prisma {
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type UserCreateNestedOneWithoutParticipate_TournamentInput = {
-    create?: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutParticipate_TournamentInput
+  export type Participate_TournamentUncheckedUpdateManyWithoutTNestedInput = {
+    create?: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput> | Participate_TournamentCreateWithoutTInput[] | Participate_TournamentUncheckedCreateWithoutTInput[]
+    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutTInput | Participate_TournamentCreateOrConnectWithoutTInput[]
+    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutTInput | Participate_TournamentUpsertWithWhereUniqueWithoutTInput[]
+    createMany?: Participate_TournamentCreateManyTInputEnvelope
+    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+    update?: Participate_TournamentUpdateWithWhereUniqueWithoutTInput | Participate_TournamentUpdateWithWhereUniqueWithoutTInput[]
+    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutTInput | Participate_TournamentUpdateManyWithWhereWithoutTInput[]
+    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutWin_TournamentInput = {
+    create?: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
+    connectOrCreate?: UserCreateOrConnectWithoutWin_TournamentInput
     connect?: UserWhereUniqueInput
   }
 
@@ -8905,26 +8934,10 @@ export namespace Prisma {
     connect?: TournamentWhereUniqueInput
   }
 
-  export type UserCreateNestedOneWithoutWin_TournamentInput = {
-    create?: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutWin_TournamentInput
-    connect?: UserWhereUniqueInput
-  }
-
-  export type UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput = {
+  export type UserCreateNestedOneWithoutParticipate_TournamentInput = {
     create?: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
     connectOrCreate?: UserCreateOrConnectWithoutParticipate_TournamentInput
-    upsert?: UserUpsertWithoutParticipate_TournamentInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutParticipate_TournamentInput, UserUpdateWithoutParticipate_TournamentInput>, UserUncheckedUpdateWithoutParticipate_TournamentInput>
-  }
-
-  export type TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput = {
-    create?: XOR<TournamentCreateWithoutParticipate_TournamentInput, TournamentUncheckedCreateWithoutParticipate_TournamentInput>
-    connectOrCreate?: TournamentCreateOrConnectWithoutParticipate_TournamentInput
-    upsert?: TournamentUpsertWithoutParticipate_TournamentInput
-    connect?: TournamentWhereUniqueInput
-    update?: XOR<XOR<TournamentUpdateToOneWithWhereWithoutParticipate_TournamentInput, TournamentUpdateWithoutParticipate_TournamentInput>, TournamentUncheckedUpdateWithoutParticipate_TournamentInput>
   }
 
   export type UserUpdateOneRequiredWithoutWin_TournamentNestedInput = {
@@ -8935,9 +8948,31 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutWin_TournamentInput, UserUpdateWithoutWin_TournamentInput>, UserUncheckedUpdateWithoutWin_TournamentInput>
   }
 
-  export type UserCreateNestedOneWithoutMatch1Input = {
-    create?: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
-    connectOrCreate?: UserCreateOrConnectWithoutMatch1Input
+  export type TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput = {
+    create?: XOR<TournamentCreateWithoutParticipate_TournamentInput, TournamentUncheckedCreateWithoutParticipate_TournamentInput>
+    connectOrCreate?: TournamentCreateOrConnectWithoutParticipate_TournamentInput
+    upsert?: TournamentUpsertWithoutParticipate_TournamentInput
+    connect?: TournamentWhereUniqueInput
+    update?: XOR<XOR<TournamentUpdateToOneWithWhereWithoutParticipate_TournamentInput, TournamentUpdateWithoutParticipate_TournamentInput>, TournamentUncheckedUpdateWithoutParticipate_TournamentInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput = {
+    create?: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
+    connectOrCreate?: UserCreateOrConnectWithoutParticipate_TournamentInput
+    upsert?: UserUpsertWithoutParticipate_TournamentInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutParticipate_TournamentInput, UserUpdateWithoutParticipate_TournamentInput>, UserUncheckedUpdateWithoutParticipate_TournamentInput>
+  }
+
+  export type TournamentCreateNestedOneWithoutMatchInput = {
+    create?: XOR<TournamentCreateWithoutMatchInput, TournamentUncheckedCreateWithoutMatchInput>
+    connectOrCreate?: TournamentCreateOrConnectWithoutMatchInput
+    connect?: TournamentWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutMatchwInput = {
+    create?: XOR<UserCreateWithoutMatchwInput, UserUncheckedCreateWithoutMatchwInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMatchwInput
     connect?: UserWhereUniqueInput
   }
 
@@ -8947,16 +8982,10 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type UserCreateNestedOneWithoutMatchwInput = {
-    create?: XOR<UserCreateWithoutMatchwInput, UserUncheckedCreateWithoutMatchwInput>
-    connectOrCreate?: UserCreateOrConnectWithoutMatchwInput
+  export type UserCreateNestedOneWithoutMatch1Input = {
+    create?: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
+    connectOrCreate?: UserCreateOrConnectWithoutMatch1Input
     connect?: UserWhereUniqueInput
-  }
-
-  export type TournamentCreateNestedOneWithoutMatchInput = {
-    create?: XOR<TournamentCreateWithoutMatchInput, TournamentUncheckedCreateWithoutMatchInput>
-    connectOrCreate?: TournamentCreateOrConnectWithoutMatchInput
-    connect?: TournamentWhereUniqueInput
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -8967,20 +8996,14 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type UserUpdateOneRequiredWithoutMatch1NestedInput = {
-    create?: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
-    connectOrCreate?: UserCreateOrConnectWithoutMatch1Input
-    upsert?: UserUpsertWithoutMatch1Input
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMatch1Input, UserUpdateWithoutMatch1Input>, UserUncheckedUpdateWithoutMatch1Input>
-  }
-
-  export type UserUpdateOneRequiredWithoutMatch2NestedInput = {
-    create?: XOR<UserCreateWithoutMatch2Input, UserUncheckedCreateWithoutMatch2Input>
-    connectOrCreate?: UserCreateOrConnectWithoutMatch2Input
-    upsert?: UserUpsertWithoutMatch2Input
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMatch2Input, UserUpdateWithoutMatch2Input>, UserUncheckedUpdateWithoutMatch2Input>
+  export type TournamentUpdateOneWithoutMatchNestedInput = {
+    create?: XOR<TournamentCreateWithoutMatchInput, TournamentUncheckedCreateWithoutMatchInput>
+    connectOrCreate?: TournamentCreateOrConnectWithoutMatchInput
+    upsert?: TournamentUpsertWithoutMatchInput
+    disconnect?: TournamentWhereInput | boolean
+    delete?: TournamentWhereInput | boolean
+    connect?: TournamentWhereUniqueInput
+    update?: XOR<XOR<TournamentUpdateToOneWithWhereWithoutMatchInput, TournamentUpdateWithoutMatchInput>, TournamentUncheckedUpdateWithoutMatchInput>
   }
 
   export type UserUpdateOneRequiredWithoutMatchwNestedInput = {
@@ -8991,14 +9014,20 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMatchwInput, UserUpdateWithoutMatchwInput>, UserUncheckedUpdateWithoutMatchwInput>
   }
 
-  export type TournamentUpdateOneWithoutMatchNestedInput = {
-    create?: XOR<TournamentCreateWithoutMatchInput, TournamentUncheckedCreateWithoutMatchInput>
-    connectOrCreate?: TournamentCreateOrConnectWithoutMatchInput
-    upsert?: TournamentUpsertWithoutMatchInput
-    disconnect?: TournamentWhereInput | boolean
-    delete?: TournamentWhereInput | boolean
-    connect?: TournamentWhereUniqueInput
-    update?: XOR<XOR<TournamentUpdateToOneWithWhereWithoutMatchInput, TournamentUpdateWithoutMatchInput>, TournamentUncheckedUpdateWithoutMatchInput>
+  export type UserUpdateOneRequiredWithoutMatch2NestedInput = {
+    create?: XOR<UserCreateWithoutMatch2Input, UserUncheckedCreateWithoutMatch2Input>
+    connectOrCreate?: UserCreateOrConnectWithoutMatch2Input
+    upsert?: UserUpsertWithoutMatch2Input
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMatch2Input, UserUpdateWithoutMatch2Input>, UserUncheckedUpdateWithoutMatch2Input>
+  }
+
+  export type UserUpdateOneRequiredWithoutMatch1NestedInput = {
+    create?: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
+    connectOrCreate?: UserCreateOrConnectWithoutMatch1Input
+    upsert?: UserUpsertWithoutMatch1Input
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMatch1Input, UserUpdateWithoutMatch1Input>, UserUncheckedUpdateWithoutMatch1Input>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -9200,31 +9229,6 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
-  export type FriendRequestCreateWithoutSenderInput = {
-    id?: string
-    status?: $Enums.FriendRequestStatus
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    receiver: UserCreateNestedOneWithoutReceivedRequestsInput
-  }
-
-  export type FriendRequestUncheckedCreateWithoutSenderInput = {
-    id?: string
-    receiverId: string
-    status?: $Enums.FriendRequestStatus
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-  }
-
-  export type FriendRequestCreateOrConnectWithoutSenderInput = {
-    where: FriendRequestWhereUniqueInput
-    create: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput>
-  }
-
-  export type FriendRequestCreateManySenderInputEnvelope = {
-    data: FriendRequestCreateManySenderInput | FriendRequestCreateManySenderInput[]
-  }
-
   export type FriendRequestCreateWithoutReceiverInput = {
     id?: string
     status?: $Enums.FriendRequestStatus
@@ -9250,124 +9254,29 @@ export namespace Prisma {
     data: FriendRequestCreateManyReceiverInput | FriendRequestCreateManyReceiverInput[]
   }
 
-  export type Participate_TournamentCreateWithoutPInput = {
+  export type FriendRequestCreateWithoutSenderInput = {
     id?: string
+    status?: $Enums.FriendRequestStatus
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
-    Winner: UserCreateNestedOneWithoutWin_TournamentInput
+    receiver: UserCreateNestedOneWithoutReceivedRequestsInput
   }
 
-  export type Participate_TournamentUncheckedCreateWithoutPInput = {
+  export type FriendRequestUncheckedCreateWithoutSenderInput = {
     id?: string
-    T_Id: string
+    receiverId: string
+    status?: $Enums.FriendRequestStatus
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
-  export type Participate_TournamentCreateOrConnectWithoutPInput = {
-    where: Participate_TournamentWhereUniqueInput
-    create: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput>
+  export type FriendRequestCreateOrConnectWithoutSenderInput = {
+    where: FriendRequestWhereUniqueInput
+    create: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput>
   }
 
-  export type Participate_TournamentCreateManyPInputEnvelope = {
-    data: Participate_TournamentCreateManyPInput | Participate_TournamentCreateManyPInput[]
-  }
-
-  export type Participate_TournamentCreateWithoutWinnerInput = {
-    id?: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    P: UserCreateNestedOneWithoutParticipate_TournamentInput
-    T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
-  }
-
-  export type Participate_TournamentUncheckedCreateWithoutWinnerInput = {
-    id?: string
-    P_Id: string
-    T_Id: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-  }
-
-  export type Participate_TournamentCreateOrConnectWithoutWinnerInput = {
-    where: Participate_TournamentWhereUniqueInput
-    create: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput>
-  }
-
-  export type Participate_TournamentCreateManyWinnerInputEnvelope = {
-    data: Participate_TournamentCreateManyWinnerInput | Participate_TournamentCreateManyWinnerInput[]
-  }
-
-  export type MatchCreateWithoutP1Input = {
-    id?: string
-    Ball_x: number
-    Ball_y: number
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    P2: UserCreateNestedOneWithoutMatch2Input
-    Winner: UserCreateNestedOneWithoutMatchwInput
-    Tournament?: TournamentCreateNestedOneWithoutMatchInput
-  }
-
-  export type MatchUncheckedCreateWithoutP1Input = {
-    id?: string
-    P2_Id: string
-    Ball_x: number
-    Ball_y: number
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
-    tournamentId?: string | null
-  }
-
-  export type MatchCreateOrConnectWithoutP1Input = {
-    where: MatchWhereUniqueInput
-    create: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input>
-  }
-
-  export type MatchCreateManyP1InputEnvelope = {
-    data: MatchCreateManyP1Input | MatchCreateManyP1Input[]
-  }
-
-  export type MatchCreateWithoutP2Input = {
-    id?: string
-    Ball_x: number
-    Ball_y: number
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    P1: UserCreateNestedOneWithoutMatch1Input
-    Winner: UserCreateNestedOneWithoutMatchwInput
-    Tournament?: TournamentCreateNestedOneWithoutMatchInput
-  }
-
-  export type MatchUncheckedCreateWithoutP2Input = {
-    id?: string
-    P1_Id: string
-    Ball_x: number
-    Ball_y: number
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
-    tournamentId?: string | null
-  }
-
-  export type MatchCreateOrConnectWithoutP2Input = {
-    where: MatchWhereUniqueInput
-    create: XOR<MatchCreateWithoutP2Input, MatchUncheckedCreateWithoutP2Input>
-  }
-
-  export type MatchCreateManyP2InputEnvelope = {
-    data: MatchCreateManyP2Input | MatchCreateManyP2Input[]
+  export type FriendRequestCreateManySenderInputEnvelope = {
+    data: FriendRequestCreateManySenderInput | FriendRequestCreateManySenderInput[]
   }
 
   export type MatchCreateWithoutWinnerInput = {
@@ -9377,9 +9286,9 @@ export namespace Prisma {
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     result?: $Enums.MatchResult
-    P1: UserCreateNestedOneWithoutMatch1Input
-    P2: UserCreateNestedOneWithoutMatch2Input
     Tournament?: TournamentCreateNestedOneWithoutMatchInput
+    P2: UserCreateNestedOneWithoutMatch2Input
+    P1: UserCreateNestedOneWithoutMatch1Input
   }
 
   export type MatchUncheckedCreateWithoutWinnerInput = {
@@ -9403,32 +9312,124 @@ export namespace Prisma {
     data: MatchCreateManyWinnerInput | MatchCreateManyWinnerInput[]
   }
 
-  export type FriendRequestUpsertWithWhereUniqueWithoutSenderInput = {
-    where: FriendRequestWhereUniqueInput
-    update: XOR<FriendRequestUpdateWithoutSenderInput, FriendRequestUncheckedUpdateWithoutSenderInput>
-    create: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput>
+  export type MatchCreateWithoutP2Input = {
+    id?: string
+    Ball_x: number
+    Ball_y: number
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Tournament?: TournamentCreateNestedOneWithoutMatchInput
+    Winner: UserCreateNestedOneWithoutMatchwInput
+    P1: UserCreateNestedOneWithoutMatch1Input
   }
 
-  export type FriendRequestUpdateWithWhereUniqueWithoutSenderInput = {
-    where: FriendRequestWhereUniqueInput
-    data: XOR<FriendRequestUpdateWithoutSenderInput, FriendRequestUncheckedUpdateWithoutSenderInput>
+  export type MatchUncheckedCreateWithoutP2Input = {
+    id?: string
+    P1_Id: string
+    Ball_x: number
+    Ball_y: number
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner_Id: string
+    tournamentId?: string | null
   }
 
-  export type FriendRequestUpdateManyWithWhereWithoutSenderInput = {
-    where: FriendRequestScalarWhereInput
-    data: XOR<FriendRequestUpdateManyMutationInput, FriendRequestUncheckedUpdateManyWithoutSenderInput>
+  export type MatchCreateOrConnectWithoutP2Input = {
+    where: MatchWhereUniqueInput
+    create: XOR<MatchCreateWithoutP2Input, MatchUncheckedCreateWithoutP2Input>
   }
 
-  export type FriendRequestScalarWhereInput = {
-    AND?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
-    OR?: FriendRequestScalarWhereInput[]
-    NOT?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
-    id?: StringFilter<"FriendRequest"> | string
-    senderId?: StringFilter<"FriendRequest"> | string
-    receiverId?: StringFilter<"FriendRequest"> | string
-    status?: EnumFriendRequestStatusFilter<"FriendRequest"> | $Enums.FriendRequestStatus
-    CreatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
-    UpdatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
+  export type MatchCreateManyP2InputEnvelope = {
+    data: MatchCreateManyP2Input | MatchCreateManyP2Input[]
+  }
+
+  export type MatchCreateWithoutP1Input = {
+    id?: string
+    Ball_x: number
+    Ball_y: number
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Tournament?: TournamentCreateNestedOneWithoutMatchInput
+    Winner: UserCreateNestedOneWithoutMatchwInput
+    P2: UserCreateNestedOneWithoutMatch2Input
+  }
+
+  export type MatchUncheckedCreateWithoutP1Input = {
+    id?: string
+    P2_Id: string
+    Ball_x: number
+    Ball_y: number
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner_Id: string
+    tournamentId?: string | null
+  }
+
+  export type MatchCreateOrConnectWithoutP1Input = {
+    where: MatchWhereUniqueInput
+    create: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input>
+  }
+
+  export type MatchCreateManyP1InputEnvelope = {
+    data: MatchCreateManyP1Input | MatchCreateManyP1Input[]
+  }
+
+  export type Participate_TournamentCreateWithoutWinnerInput = {
+    id?: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
+    P: UserCreateNestedOneWithoutParticipate_TournamentInput
+  }
+
+  export type Participate_TournamentUncheckedCreateWithoutWinnerInput = {
+    id?: string
+    P_Id: string
+    T_Id: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+  }
+
+  export type Participate_TournamentCreateOrConnectWithoutWinnerInput = {
+    where: Participate_TournamentWhereUniqueInput
+    create: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput>
+  }
+
+  export type Participate_TournamentCreateManyWinnerInputEnvelope = {
+    data: Participate_TournamentCreateManyWinnerInput | Participate_TournamentCreateManyWinnerInput[]
+  }
+
+  export type Participate_TournamentCreateWithoutPInput = {
+    id?: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner: UserCreateNestedOneWithoutWin_TournamentInput
+    T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
+  }
+
+  export type Participate_TournamentUncheckedCreateWithoutPInput = {
+    id?: string
+    T_Id: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner_Id: string
+  }
+
+  export type Participate_TournamentCreateOrConnectWithoutPInput = {
+    where: Participate_TournamentWhereUniqueInput
+    create: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput>
+  }
+
+  export type Participate_TournamentCreateManyPInputEnvelope = {
+    data: Participate_TournamentCreateManyPInput | Participate_TournamentCreateManyPInput[]
   }
 
   export type FriendRequestUpsertWithWhereUniqueWithoutReceiverInput = {
@@ -9447,65 +9448,48 @@ export namespace Prisma {
     data: XOR<FriendRequestUpdateManyMutationInput, FriendRequestUncheckedUpdateManyWithoutReceiverInput>
   }
 
-  export type Participate_TournamentUpsertWithWhereUniqueWithoutPInput = {
-    where: Participate_TournamentWhereUniqueInput
-    update: XOR<Participate_TournamentUpdateWithoutPInput, Participate_TournamentUncheckedUpdateWithoutPInput>
-    create: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput>
+  export type FriendRequestScalarWhereInput = {
+    AND?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
+    OR?: FriendRequestScalarWhereInput[]
+    NOT?: FriendRequestScalarWhereInput | FriendRequestScalarWhereInput[]
+    id?: StringFilter<"FriendRequest"> | string
+    senderId?: StringFilter<"FriendRequest"> | string
+    receiverId?: StringFilter<"FriendRequest"> | string
+    status?: EnumFriendRequestStatusFilter<"FriendRequest"> | $Enums.FriendRequestStatus
+    CreatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
+    UpdatedAt?: DateTimeFilter<"FriendRequest"> | Date | string
   }
 
-  export type Participate_TournamentUpdateWithWhereUniqueWithoutPInput = {
-    where: Participate_TournamentWhereUniqueInput
-    data: XOR<Participate_TournamentUpdateWithoutPInput, Participate_TournamentUncheckedUpdateWithoutPInput>
+  export type FriendRequestUpsertWithWhereUniqueWithoutSenderInput = {
+    where: FriendRequestWhereUniqueInput
+    update: XOR<FriendRequestUpdateWithoutSenderInput, FriendRequestUncheckedUpdateWithoutSenderInput>
+    create: XOR<FriendRequestCreateWithoutSenderInput, FriendRequestUncheckedCreateWithoutSenderInput>
   }
 
-  export type Participate_TournamentUpdateManyWithWhereWithoutPInput = {
-    where: Participate_TournamentScalarWhereInput
-    data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutPInput>
+  export type FriendRequestUpdateWithWhereUniqueWithoutSenderInput = {
+    where: FriendRequestWhereUniqueInput
+    data: XOR<FriendRequestUpdateWithoutSenderInput, FriendRequestUncheckedUpdateWithoutSenderInput>
   }
 
-  export type Participate_TournamentScalarWhereInput = {
-    AND?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
-    OR?: Participate_TournamentScalarWhereInput[]
-    NOT?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
-    id?: StringFilter<"Participate_Tournament"> | string
-    P_Id?: StringFilter<"Participate_Tournament"> | string
-    T_Id?: StringFilter<"Participate_Tournament"> | string
-    CreatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
-    UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
-    result?: EnumMatchResultFilter<"Participate_Tournament"> | $Enums.MatchResult
-    Winner_Id?: StringFilter<"Participate_Tournament"> | string
+  export type FriendRequestUpdateManyWithWhereWithoutSenderInput = {
+    where: FriendRequestScalarWhereInput
+    data: XOR<FriendRequestUpdateManyMutationInput, FriendRequestUncheckedUpdateManyWithoutSenderInput>
   }
 
-  export type Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput = {
-    where: Participate_TournamentWhereUniqueInput
-    update: XOR<Participate_TournamentUpdateWithoutWinnerInput, Participate_TournamentUncheckedUpdateWithoutWinnerInput>
-    create: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput>
-  }
-
-  export type Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput = {
-    where: Participate_TournamentWhereUniqueInput
-    data: XOR<Participate_TournamentUpdateWithoutWinnerInput, Participate_TournamentUncheckedUpdateWithoutWinnerInput>
-  }
-
-  export type Participate_TournamentUpdateManyWithWhereWithoutWinnerInput = {
-    where: Participate_TournamentScalarWhereInput
-    data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutWinnerInput>
-  }
-
-  export type MatchUpsertWithWhereUniqueWithoutP1Input = {
+  export type MatchUpsertWithWhereUniqueWithoutWinnerInput = {
     where: MatchWhereUniqueInput
-    update: XOR<MatchUpdateWithoutP1Input, MatchUncheckedUpdateWithoutP1Input>
-    create: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input>
+    update: XOR<MatchUpdateWithoutWinnerInput, MatchUncheckedUpdateWithoutWinnerInput>
+    create: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput>
   }
 
-  export type MatchUpdateWithWhereUniqueWithoutP1Input = {
+  export type MatchUpdateWithWhereUniqueWithoutWinnerInput = {
     where: MatchWhereUniqueInput
-    data: XOR<MatchUpdateWithoutP1Input, MatchUncheckedUpdateWithoutP1Input>
+    data: XOR<MatchUpdateWithoutWinnerInput, MatchUncheckedUpdateWithoutWinnerInput>
   }
 
-  export type MatchUpdateManyWithWhereWithoutP1Input = {
+  export type MatchUpdateManyWithWhereWithoutWinnerInput = {
     where: MatchScalarWhereInput
-    data: XOR<MatchUpdateManyMutationInput, MatchUncheckedUpdateManyWithoutP1Input>
+    data: XOR<MatchUpdateManyMutationInput, MatchUncheckedUpdateManyWithoutWinnerInput>
   }
 
   export type MatchScalarWhereInput = {
@@ -9540,57 +9524,65 @@ export namespace Prisma {
     data: XOR<MatchUpdateManyMutationInput, MatchUncheckedUpdateManyWithoutP2Input>
   }
 
-  export type MatchUpsertWithWhereUniqueWithoutWinnerInput = {
+  export type MatchUpsertWithWhereUniqueWithoutP1Input = {
     where: MatchWhereUniqueInput
-    update: XOR<MatchUpdateWithoutWinnerInput, MatchUncheckedUpdateWithoutWinnerInput>
-    create: XOR<MatchCreateWithoutWinnerInput, MatchUncheckedCreateWithoutWinnerInput>
+    update: XOR<MatchUpdateWithoutP1Input, MatchUncheckedUpdateWithoutP1Input>
+    create: XOR<MatchCreateWithoutP1Input, MatchUncheckedCreateWithoutP1Input>
   }
 
-  export type MatchUpdateWithWhereUniqueWithoutWinnerInput = {
+  export type MatchUpdateWithWhereUniqueWithoutP1Input = {
     where: MatchWhereUniqueInput
-    data: XOR<MatchUpdateWithoutWinnerInput, MatchUncheckedUpdateWithoutWinnerInput>
+    data: XOR<MatchUpdateWithoutP1Input, MatchUncheckedUpdateWithoutP1Input>
   }
 
-  export type MatchUpdateManyWithWhereWithoutWinnerInput = {
+  export type MatchUpdateManyWithWhereWithoutP1Input = {
     where: MatchScalarWhereInput
-    data: XOR<MatchUpdateManyMutationInput, MatchUncheckedUpdateManyWithoutWinnerInput>
+    data: XOR<MatchUpdateManyMutationInput, MatchUncheckedUpdateManyWithoutP1Input>
   }
 
-  export type UserCreateWithoutSentRequestsInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Match2?: MatchCreateNestedManyWithoutP2Input
-    Matchw?: MatchCreateNestedManyWithoutWinnerInput
+  export type Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput = {
+    where: Participate_TournamentWhereUniqueInput
+    update: XOR<Participate_TournamentUpdateWithoutWinnerInput, Participate_TournamentUncheckedUpdateWithoutWinnerInput>
+    create: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput>
   }
 
-  export type UserUncheckedCreateWithoutSentRequestsInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
-    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+  export type Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput = {
+    where: Participate_TournamentWhereUniqueInput
+    data: XOR<Participate_TournamentUpdateWithoutWinnerInput, Participate_TournamentUncheckedUpdateWithoutWinnerInput>
   }
 
-  export type UserCreateOrConnectWithoutSentRequestsInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutSentRequestsInput, UserUncheckedCreateWithoutSentRequestsInput>
+  export type Participate_TournamentUpdateManyWithWhereWithoutWinnerInput = {
+    where: Participate_TournamentScalarWhereInput
+    data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutWinnerInput>
+  }
+
+  export type Participate_TournamentScalarWhereInput = {
+    AND?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+    OR?: Participate_TournamentScalarWhereInput[]
+    NOT?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+    id?: StringFilter<"Participate_Tournament"> | string
+    P_Id?: StringFilter<"Participate_Tournament"> | string
+    T_Id?: StringFilter<"Participate_Tournament"> | string
+    CreatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
+    UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
+    result?: EnumMatchResultFilter<"Participate_Tournament"> | $Enums.MatchResult
+    Winner_Id?: StringFilter<"Participate_Tournament"> | string
+  }
+
+  export type Participate_TournamentUpsertWithWhereUniqueWithoutPInput = {
+    where: Participate_TournamentWhereUniqueInput
+    update: XOR<Participate_TournamentUpdateWithoutPInput, Participate_TournamentUncheckedUpdateWithoutPInput>
+    create: XOR<Participate_TournamentCreateWithoutPInput, Participate_TournamentUncheckedCreateWithoutPInput>
+  }
+
+  export type Participate_TournamentUpdateWithWhereUniqueWithoutPInput = {
+    where: Participate_TournamentWhereUniqueInput
+    data: XOR<Participate_TournamentUpdateWithoutPInput, Participate_TournamentUncheckedUpdateWithoutPInput>
+  }
+
+  export type Participate_TournamentUpdateManyWithWhereWithoutPInput = {
+    where: Participate_TournamentScalarWhereInput
+    data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutPInput>
   }
 
   export type UserCreateWithoutReceivedRequestsInput = {
@@ -9599,14 +9591,15 @@ export namespace Prisma {
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
     sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Match2?: MatchCreateNestedManyWithoutP2Input
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateWithoutReceivedRequestsInput = {
@@ -9615,14 +9608,15 @@ export namespace Prisma {
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
     sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
   export type UserCreateOrConnectWithoutReceivedRequestsInput = {
@@ -9630,47 +9624,43 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutReceivedRequestsInput, UserUncheckedCreateWithoutReceivedRequestsInput>
   }
 
-  export type UserUpsertWithoutSentRequestsInput = {
-    update: XOR<UserUpdateWithoutSentRequestsInput, UserUncheckedUpdateWithoutSentRequestsInput>
+  export type UserCreateWithoutSentRequestsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
+    Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
+  }
+
+  export type UserUncheckedCreateWithoutSentRequestsInput = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
+    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
+  }
+
+  export type UserCreateOrConnectWithoutSentRequestsInput = {
+    where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutSentRequestsInput, UserUncheckedCreateWithoutSentRequestsInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutSentRequestsInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutSentRequestsInput, UserUncheckedUpdateWithoutSentRequestsInput>
-  }
-
-  export type UserUpdateWithoutSentRequestsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUpdateManyWithoutP1NestedInput
-    Match2?: MatchUpdateManyWithoutP2NestedInput
-    Matchw?: MatchUpdateManyWithoutWinnerNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutSentRequestsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
-    Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
   }
 
   export type UserUpsertWithoutReceivedRequestsInput = {
@@ -9690,14 +9680,15 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUpdateManyWithoutP1NestedInput
-    Match2?: MatchUpdateManyWithoutP2NestedInput
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUpdateManyWithoutP2NestedInput
+    Match1?: MatchUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
@@ -9706,41 +9697,60 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
-  export type Participate_TournamentCreateWithoutTInput = {
-    id?: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    P: UserCreateNestedOneWithoutParticipate_TournamentInput
-    Winner: UserCreateNestedOneWithoutWin_TournamentInput
+  export type UserUpsertWithoutSentRequestsInput = {
+    update: XOR<UserUpdateWithoutSentRequestsInput, UserUncheckedUpdateWithoutSentRequestsInput>
+    create: XOR<UserCreateWithoutSentRequestsInput, UserUncheckedCreateWithoutSentRequestsInput>
+    where?: UserWhereInput
   }
 
-  export type Participate_TournamentUncheckedCreateWithoutTInput = {
-    id?: string
-    P_Id: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
+  export type UserUpdateToOneWithWhereWithoutSentRequestsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutSentRequestsInput, UserUncheckedUpdateWithoutSentRequestsInput>
   }
 
-  export type Participate_TournamentCreateOrConnectWithoutTInput = {
-    where: Participate_TournamentWhereUniqueInput
-    create: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput>
+  export type UserUpdateWithoutSentRequestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
+    Matchw?: MatchUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUpdateManyWithoutP2NestedInput
+    Match1?: MatchUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
-  export type Participate_TournamentCreateManyTInputEnvelope = {
-    data: Participate_TournamentCreateManyTInput | Participate_TournamentCreateManyTInput[]
+  export type UserUncheckedUpdateWithoutSentRequestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
+    Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
   export type MatchCreateWithoutTournamentInput = {
@@ -9750,9 +9760,9 @@ export namespace Prisma {
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     result?: $Enums.MatchResult
-    P1: UserCreateNestedOneWithoutMatch1Input
-    P2: UserCreateNestedOneWithoutMatch2Input
     Winner: UserCreateNestedOneWithoutMatchwInput
+    P2: UserCreateNestedOneWithoutMatch2Input
+    P1: UserCreateNestedOneWithoutMatch1Input
   }
 
   export type MatchUncheckedCreateWithoutTournamentInput = {
@@ -9776,20 +9786,31 @@ export namespace Prisma {
     data: MatchCreateManyTournamentInput | MatchCreateManyTournamentInput[]
   }
 
-  export type Participate_TournamentUpsertWithWhereUniqueWithoutTInput = {
+  export type Participate_TournamentCreateWithoutTInput = {
+    id?: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner: UserCreateNestedOneWithoutWin_TournamentInput
+    P: UserCreateNestedOneWithoutParticipate_TournamentInput
+  }
+
+  export type Participate_TournamentUncheckedCreateWithoutTInput = {
+    id?: string
+    P_Id: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner_Id: string
+  }
+
+  export type Participate_TournamentCreateOrConnectWithoutTInput = {
     where: Participate_TournamentWhereUniqueInput
-    update: XOR<Participate_TournamentUpdateWithoutTInput, Participate_TournamentUncheckedUpdateWithoutTInput>
     create: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput>
   }
 
-  export type Participate_TournamentUpdateWithWhereUniqueWithoutTInput = {
-    where: Participate_TournamentWhereUniqueInput
-    data: XOR<Participate_TournamentUpdateWithoutTInput, Participate_TournamentUncheckedUpdateWithoutTInput>
-  }
-
-  export type Participate_TournamentUpdateManyWithWhereWithoutTInput = {
-    where: Participate_TournamentScalarWhereInput
-    data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutTInput>
+  export type Participate_TournamentCreateManyTInputEnvelope = {
+    data: Participate_TournamentCreateManyTInput | Participate_TournamentCreateManyTInput[]
   }
 
   export type MatchUpsertWithWhereUniqueWithoutTournamentInput = {
@@ -9808,41 +9829,59 @@ export namespace Prisma {
     data: XOR<MatchUpdateManyMutationInput, MatchUncheckedUpdateManyWithoutTournamentInput>
   }
 
-  export type UserCreateWithoutParticipate_TournamentInput = {
+  export type Participate_TournamentUpsertWithWhereUniqueWithoutTInput = {
+    where: Participate_TournamentWhereUniqueInput
+    update: XOR<Participate_TournamentUpdateWithoutTInput, Participate_TournamentUncheckedUpdateWithoutTInput>
+    create: XOR<Participate_TournamentCreateWithoutTInput, Participate_TournamentUncheckedCreateWithoutTInput>
+  }
+
+  export type Participate_TournamentUpdateWithWhereUniqueWithoutTInput = {
+    where: Participate_TournamentWhereUniqueInput
+    data: XOR<Participate_TournamentUpdateWithoutTInput, Participate_TournamentUncheckedUpdateWithoutTInput>
+  }
+
+  export type Participate_TournamentUpdateManyWithWhereWithoutTInput = {
+    where: Participate_TournamentScalarWhereInput
+    data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutTInput>
+  }
+
+  export type UserCreateWithoutWin_TournamentInput = {
     id?: string
     email: string
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Match2?: MatchCreateNestedManyWithoutP2Input
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
-  export type UserUncheckedCreateWithoutParticipate_TournamentInput = {
+  export type UserUncheckedCreateWithoutWin_TournamentInput = {
     id?: string
     email: string
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
-  export type UserCreateOrConnectWithoutParticipate_TournamentInput = {
+  export type UserCreateOrConnectWithoutWin_TournamentInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
+    create: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
   }
 
   export type TournamentCreateWithoutParticipate_TournamentInput = {
@@ -9868,84 +9907,88 @@ export namespace Prisma {
     create: XOR<TournamentCreateWithoutParticipate_TournamentInput, TournamentUncheckedCreateWithoutParticipate_TournamentInput>
   }
 
-  export type UserCreateWithoutWin_TournamentInput = {
+  export type UserCreateWithoutParticipate_TournamentInput = {
     id?: string
     email: string
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Match2?: MatchCreateNestedManyWithoutP2Input
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
   }
 
-  export type UserUncheckedCreateWithoutWin_TournamentInput = {
+  export type UserUncheckedCreateWithoutParticipate_TournamentInput = {
     id?: string
     email: string
     name?: string | null
     password: string
     loggedIn?: boolean
+    Auto_Match?: boolean
     isOnline?: boolean
     avatar?: string | null
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
   }
 
-  export type UserCreateOrConnectWithoutWin_TournamentInput = {
+  export type UserCreateOrConnectWithoutParticipate_TournamentInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
-  }
-
-  export type UserUpsertWithoutParticipate_TournamentInput = {
-    update: XOR<UserUpdateWithoutParticipate_TournamentInput, UserUncheckedUpdateWithoutParticipate_TournamentInput>
     create: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
+  }
+
+  export type UserUpsertWithoutWin_TournamentInput = {
+    update: XOR<UserUpdateWithoutWin_TournamentInput, UserUncheckedUpdateWithoutWin_TournamentInput>
+    create: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutParticipate_TournamentInput = {
+  export type UserUpdateToOneWithWhereWithoutWin_TournamentInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutParticipate_TournamentInput, UserUncheckedUpdateWithoutParticipate_TournamentInput>
+    data: XOR<UserUpdateWithoutWin_TournamentInput, UserUncheckedUpdateWithoutWin_TournamentInput>
   }
 
-  export type UserUpdateWithoutParticipate_TournamentInput = {
+  export type UserUpdateWithoutWin_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUpdateManyWithoutP1NestedInput
-    Match2?: MatchUpdateManyWithoutP2NestedInput
+    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUpdateManyWithoutP2NestedInput
+    Match1?: MatchUpdateManyWithoutP1NestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutParticipate_TournamentInput = {
+  export type UserUncheckedUpdateWithoutWin_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
   export type TournamentUpsertWithoutParticipate_TournamentInput = {
@@ -9977,158 +10020,49 @@ export namespace Prisma {
     Match?: MatchUncheckedUpdateManyWithoutTournamentNestedInput
   }
 
-  export type UserUpsertWithoutWin_TournamentInput = {
-    update: XOR<UserUpdateWithoutWin_TournamentInput, UserUncheckedUpdateWithoutWin_TournamentInput>
-    create: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
+  export type UserUpsertWithoutParticipate_TournamentInput = {
+    update: XOR<UserUpdateWithoutParticipate_TournamentInput, UserUncheckedUpdateWithoutParticipate_TournamentInput>
+    create: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutWin_TournamentInput = {
+  export type UserUpdateToOneWithWhereWithoutParticipate_TournamentInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutWin_TournamentInput, UserUncheckedUpdateWithoutWin_TournamentInput>
+    data: XOR<UserUpdateWithoutParticipate_TournamentInput, UserUncheckedUpdateWithoutParticipate_TournamentInput>
   }
 
-  export type UserUpdateWithoutWin_TournamentInput = {
+  export type UserUpdateWithoutParticipate_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
-    Match1?: MatchUpdateManyWithoutP1NestedInput
-    Match2?: MatchUpdateManyWithoutP2NestedInput
+    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUpdateManyWithoutP2NestedInput
+    Match1?: MatchUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutWin_TournamentInput = {
+  export type UserUncheckedUpdateWithoutParticipate_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
-    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
-  }
-
-  export type UserCreateWithoutMatch1Input = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
-    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-    Match2?: MatchCreateNestedManyWithoutP2Input
-    Matchw?: MatchCreateNestedManyWithoutWinnerInput
-  }
-
-  export type UserUncheckedCreateWithoutMatch1Input = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
-    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
-    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
-  }
-
-  export type UserCreateOrConnectWithoutMatch1Input = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
-  }
-
-  export type UserCreateWithoutMatch2Input = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
-    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Matchw?: MatchCreateNestedManyWithoutWinnerInput
-  }
-
-  export type UserUncheckedCreateWithoutMatch2Input = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
-    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
-  }
-
-  export type UserCreateOrConnectWithoutMatch2Input = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutMatch2Input, UserUncheckedCreateWithoutMatch2Input>
-  }
-
-  export type UserCreateWithoutMatchwInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
-    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Match2?: MatchCreateNestedManyWithoutP2Input
-  }
-
-  export type UserUncheckedCreateWithoutMatchwInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
-    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
-  }
-
-  export type UserCreateOrConnectWithoutMatchwInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutMatchwInput, UserUncheckedCreateWithoutMatchwInput>
+    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
   }
 
   export type TournamentCreateWithoutMatchInput = {
@@ -10154,133 +10088,121 @@ export namespace Prisma {
     create: XOR<TournamentCreateWithoutMatchInput, TournamentUncheckedCreateWithoutMatchInput>
   }
 
-  export type UserUpsertWithoutMatch1Input = {
-    update: XOR<UserUpdateWithoutMatch1Input, UserUncheckedUpdateWithoutMatch1Input>
-    create: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
-    where?: UserWhereInput
+  export type UserCreateWithoutMatchwInput = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutMatch1Input = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutMatch1Input, UserUncheckedUpdateWithoutMatch1Input>
+  export type UserUncheckedCreateWithoutMatchwInput = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
-  export type UserUpdateWithoutMatch1Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
-    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
-    Match2?: MatchUpdateManyWithoutP2NestedInput
-    Matchw?: MatchUpdateManyWithoutWinnerNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutMatch1Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
-    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
-    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
-    Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
-  }
-
-  export type UserUpsertWithoutMatch2Input = {
-    update: XOR<UserUpdateWithoutMatch2Input, UserUncheckedUpdateWithoutMatch2Input>
-    create: XOR<UserCreateWithoutMatch2Input, UserUncheckedCreateWithoutMatch2Input>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutMatch2Input = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutMatch2Input, UserUncheckedUpdateWithoutMatch2Input>
-  }
-
-  export type UserUpdateWithoutMatch2Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
-    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUpdateManyWithoutP1NestedInput
-    Matchw?: MatchUpdateManyWithoutWinnerNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutMatch2Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
-    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
-  }
-
-  export type UserUpsertWithoutMatchwInput = {
-    update: XOR<UserUpdateWithoutMatchwInput, UserUncheckedUpdateWithoutMatchwInput>
+  export type UserCreateOrConnectWithoutMatchwInput = {
+    where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutMatchwInput, UserUncheckedCreateWithoutMatchwInput>
-    where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutMatchwInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutMatchwInput, UserUncheckedUpdateWithoutMatchwInput>
+  export type UserCreateWithoutMatch2Input = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
+    Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
-  export type UserUpdateWithoutMatchwInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
-    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUpdateManyWithoutP1NestedInput
-    Match2?: MatchUpdateManyWithoutP2NestedInput
+  export type UserUncheckedCreateWithoutMatch2Input = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
+    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
-  export type UserUncheckedUpdateWithoutMatchwInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    loggedIn?: BoolFieldUpdateOperationsInput | boolean
-    isOnline?: BoolFieldUpdateOperationsInput | boolean
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
-    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
-    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
-    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+  export type UserCreateOrConnectWithoutMatch2Input = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutMatch2Input, UserUncheckedCreateWithoutMatch2Input>
+  }
+
+  export type UserCreateWithoutMatch1Input = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
+    Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
+  }
+
+  export type UserUncheckedCreateWithoutMatch1Input = {
+    id?: string
+    email: string
+    name?: string | null
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
+    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
+  }
+
+  export type UserCreateOrConnectWithoutMatch1Input = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
   }
 
   export type TournamentUpsertWithoutMatchInput = {
@@ -10312,12 +10234,139 @@ export namespace Prisma {
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutTNestedInput
   }
 
-  export type FriendRequestCreateManySenderInput = {
-    id?: string
-    receiverId: string
-    status?: $Enums.FriendRequestStatus
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
+  export type UserUpsertWithoutMatchwInput = {
+    update: XOR<UserUpdateWithoutMatchwInput, UserUncheckedUpdateWithoutMatchwInput>
+    create: XOR<UserCreateWithoutMatchwInput, UserUncheckedCreateWithoutMatchwInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutMatchwInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutMatchwInput, UserUncheckedUpdateWithoutMatchwInput>
+  }
+
+  export type UserUpdateWithoutMatchwInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
+    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
+    Match2?: MatchUpdateManyWithoutP2NestedInput
+    Match1?: MatchUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutMatchwInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
+    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
+    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
+  }
+
+  export type UserUpsertWithoutMatch2Input = {
+    update: XOR<UserUpdateWithoutMatch2Input, UserUncheckedUpdateWithoutMatch2Input>
+    create: XOR<UserCreateWithoutMatch2Input, UserUncheckedCreateWithoutMatch2Input>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutMatch2Input = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutMatch2Input, UserUncheckedUpdateWithoutMatch2Input>
+  }
+
+  export type UserUpdateWithoutMatch2Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
+    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
+    Matchw?: MatchUpdateManyWithoutWinnerNestedInput
+    Match1?: MatchUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutMatch2Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
+    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
+    Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
+    Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
+    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
+  }
+
+  export type UserUpsertWithoutMatch1Input = {
+    update: XOR<UserUpdateWithoutMatch1Input, UserUncheckedUpdateWithoutMatch1Input>
+    create: XOR<UserCreateWithoutMatch1Input, UserUncheckedCreateWithoutMatch1Input>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutMatch1Input = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutMatch1Input, UserUncheckedUpdateWithoutMatch1Input>
+  }
+
+  export type UserUpdateWithoutMatch1Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUpdateManyWithoutReceiverNestedInput
+    sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
+    Matchw?: MatchUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUpdateManyWithoutP2NestedInput
+    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutMatch1Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    loggedIn?: BoolFieldUpdateOperationsInput | boolean
+    Auto_Match?: BoolFieldUpdateOperationsInput | boolean
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedRequests?: FriendRequestUncheckedUpdateManyWithoutReceiverNestedInput
+    sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
+    Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
+    Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
+    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
   export type FriendRequestCreateManyReceiverInput = {
@@ -10328,33 +10377,23 @@ export namespace Prisma {
     UpdatedAt?: Date | string
   }
 
-  export type Participate_TournamentCreateManyPInput = {
+  export type FriendRequestCreateManySenderInput = {
     id?: string
-    T_Id: string
+    receiverId: string
+    status?: $Enums.FriendRequestStatus
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
-  export type Participate_TournamentCreateManyWinnerInput = {
+  export type MatchCreateManyWinnerInput = {
     id?: string
-    P_Id: string
-    T_Id: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-  }
-
-  export type MatchCreateManyP1Input = {
-    id?: string
+    P1_Id: string
     P2_Id: string
     Ball_x: number
     Ball_y: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     result?: $Enums.MatchResult
-    Winner_Id: string
     tournamentId?: string | null
   }
 
@@ -10370,40 +10409,34 @@ export namespace Prisma {
     tournamentId?: string | null
   }
 
-  export type MatchCreateManyWinnerInput = {
+  export type MatchCreateManyP1Input = {
     id?: string
-    P1_Id: string
     P2_Id: string
     Ball_x: number
     Ball_y: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     result?: $Enums.MatchResult
+    Winner_Id: string
     tournamentId?: string | null
   }
 
-  export type FriendRequestUpdateWithoutSenderInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: EnumFriendRequestStatusFieldUpdateOperationsInput | $Enums.FriendRequestStatus
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    receiver?: UserUpdateOneRequiredWithoutReceivedRequestsNestedInput
+  export type Participate_TournamentCreateManyWinnerInput = {
+    id?: string
+    P_Id: string
+    T_Id: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
   }
 
-  export type FriendRequestUncheckedUpdateWithoutSenderInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    receiverId?: StringFieldUpdateOperationsInput | string
-    status?: EnumFriendRequestStatusFieldUpdateOperationsInput | $Enums.FriendRequestStatus
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type FriendRequestUncheckedUpdateManyWithoutSenderInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    receiverId?: StringFieldUpdateOperationsInput | string
-    status?: EnumFriendRequestStatusFieldUpdateOperationsInput | $Enums.FriendRequestStatus
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type Participate_TournamentCreateManyPInput = {
+    id?: string
+    T_Id: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner_Id: string
   }
 
   export type FriendRequestUpdateWithoutReceiverInput = {
@@ -10430,130 +10463,28 @@ export namespace Prisma {
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type Participate_TournamentUpdateWithoutPInput = {
+  export type FriendRequestUpdateWithoutSenderInput = {
     id?: StringFieldUpdateOperationsInput | string
+    status?: EnumFriendRequestStatusFieldUpdateOperationsInput | $Enums.FriendRequestStatus
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
-    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
+    receiver?: UserUpdateOneRequiredWithoutReceivedRequestsNestedInput
   }
 
-  export type Participate_TournamentUncheckedUpdateWithoutPInput = {
+  export type FriendRequestUncheckedUpdateWithoutSenderInput = {
     id?: StringFieldUpdateOperationsInput | string
-    T_Id?: StringFieldUpdateOperationsInput | string
+    receiverId?: StringFieldUpdateOperationsInput | string
+    status?: EnumFriendRequestStatusFieldUpdateOperationsInput | $Enums.FriendRequestStatus
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
-  export type Participate_TournamentUncheckedUpdateManyWithoutPInput = {
+  export type FriendRequestUncheckedUpdateManyWithoutSenderInput = {
     id?: StringFieldUpdateOperationsInput | string
-    T_Id?: StringFieldUpdateOperationsInput | string
+    receiverId?: StringFieldUpdateOperationsInput | string
+    status?: EnumFriendRequestStatusFieldUpdateOperationsInput | $Enums.FriendRequestStatus
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type Participate_TournamentUpdateWithoutWinnerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
-    T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
-  }
-
-  export type Participate_TournamentUncheckedUpdateWithoutWinnerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    P_Id?: StringFieldUpdateOperationsInput | string
-    T_Id?: StringFieldUpdateOperationsInput | string
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-  }
-
-  export type Participate_TournamentUncheckedUpdateManyWithoutWinnerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    P_Id?: StringFieldUpdateOperationsInput | string
-    T_Id?: StringFieldUpdateOperationsInput | string
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-  }
-
-  export type MatchUpdateWithoutP1Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    Ball_x?: FloatFieldUpdateOperationsInput | number
-    Ball_y?: FloatFieldUpdateOperationsInput | number
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
-    Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
-    Tournament?: TournamentUpdateOneWithoutMatchNestedInput
-  }
-
-  export type MatchUncheckedUpdateWithoutP1Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    P2_Id?: StringFieldUpdateOperationsInput | string
-    Ball_x?: FloatFieldUpdateOperationsInput | number
-    Ball_y?: FloatFieldUpdateOperationsInput | number
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
-    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type MatchUncheckedUpdateManyWithoutP1Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    P2_Id?: StringFieldUpdateOperationsInput | string
-    Ball_x?: FloatFieldUpdateOperationsInput | number
-    Ball_y?: FloatFieldUpdateOperationsInput | number
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
-    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type MatchUpdateWithoutP2Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    Ball_x?: FloatFieldUpdateOperationsInput | number
-    Ball_y?: FloatFieldUpdateOperationsInput | number
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
-    Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
-    Tournament?: TournamentUpdateOneWithoutMatchNestedInput
-  }
-
-  export type MatchUncheckedUpdateWithoutP2Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    P1_Id?: StringFieldUpdateOperationsInput | string
-    Ball_x?: FloatFieldUpdateOperationsInput | number
-    Ball_y?: FloatFieldUpdateOperationsInput | number
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
-    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type MatchUncheckedUpdateManyWithoutP2Input = {
-    id?: StringFieldUpdateOperationsInput | string
-    P1_Id?: StringFieldUpdateOperationsInput | string
-    Ball_x?: FloatFieldUpdateOperationsInput | number
-    Ball_y?: FloatFieldUpdateOperationsInput | number
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
-    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type MatchUpdateWithoutWinnerInput = {
@@ -10563,9 +10494,9 @@ export namespace Prisma {
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
-    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
     Tournament?: TournamentUpdateOneWithoutMatchNestedInput
+    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
+    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
   }
 
   export type MatchUncheckedUpdateWithoutWinnerInput = {
@@ -10592,13 +10523,130 @@ export namespace Prisma {
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type Participate_TournamentCreateManyTInput = {
-    id?: string
-    P_Id: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
+  export type MatchUpdateWithoutP2Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    Ball_x?: FloatFieldUpdateOperationsInput | number
+    Ball_y?: FloatFieldUpdateOperationsInput | number
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Tournament?: TournamentUpdateOneWithoutMatchNestedInput
+    Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
+    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
+  }
+
+  export type MatchUncheckedUpdateWithoutP2Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    P1_Id?: StringFieldUpdateOperationsInput | string
+    Ball_x?: FloatFieldUpdateOperationsInput | number
+    Ball_y?: FloatFieldUpdateOperationsInput | number
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
+    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MatchUncheckedUpdateManyWithoutP2Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    P1_Id?: StringFieldUpdateOperationsInput | string
+    Ball_x?: FloatFieldUpdateOperationsInput | number
+    Ball_y?: FloatFieldUpdateOperationsInput | number
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
+    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MatchUpdateWithoutP1Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    Ball_x?: FloatFieldUpdateOperationsInput | number
+    Ball_y?: FloatFieldUpdateOperationsInput | number
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Tournament?: TournamentUpdateOneWithoutMatchNestedInput
+    Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
+    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
+  }
+
+  export type MatchUncheckedUpdateWithoutP1Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    P2_Id?: StringFieldUpdateOperationsInput | string
+    Ball_x?: FloatFieldUpdateOperationsInput | number
+    Ball_y?: FloatFieldUpdateOperationsInput | number
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
+    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MatchUncheckedUpdateManyWithoutP1Input = {
+    id?: StringFieldUpdateOperationsInput | string
+    P2_Id?: StringFieldUpdateOperationsInput | string
+    Ball_x?: FloatFieldUpdateOperationsInput | number
+    Ball_y?: FloatFieldUpdateOperationsInput | number
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
+    tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type Participate_TournamentUpdateWithoutWinnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
+    P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
+  }
+
+  export type Participate_TournamentUncheckedUpdateWithoutWinnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    P_Id?: StringFieldUpdateOperationsInput | string
+    T_Id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+  }
+
+  export type Participate_TournamentUncheckedUpdateManyWithoutWinnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    P_Id?: StringFieldUpdateOperationsInput | string
+    T_Id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+  }
+
+  export type Participate_TournamentUpdateWithoutPInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
+    T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
+  }
+
+  export type Participate_TournamentUncheckedUpdateWithoutPInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    T_Id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type Participate_TournamentUncheckedUpdateManyWithoutPInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    T_Id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
   export type MatchCreateManyTournamentInput = {
@@ -10613,31 +10661,13 @@ export namespace Prisma {
     Winner_Id: string
   }
 
-  export type Participate_TournamentUpdateWithoutTInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
-    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
-  }
-
-  export type Participate_TournamentUncheckedUpdateWithoutTInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    P_Id?: StringFieldUpdateOperationsInput | string
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type Participate_TournamentUncheckedUpdateManyWithoutTInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    P_Id?: StringFieldUpdateOperationsInput | string
-    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
+  export type Participate_TournamentCreateManyTInput = {
+    id?: string
+    P_Id: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    result?: $Enums.MatchResult
+    Winner_Id: string
   }
 
   export type MatchUpdateWithoutTournamentInput = {
@@ -10647,9 +10677,9 @@ export namespace Prisma {
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
-    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
     Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
+    P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
+    P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
   }
 
   export type MatchUncheckedUpdateWithoutTournamentInput = {
@@ -10670,6 +10700,33 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type Participate_TournamentUpdateWithoutTInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
+    P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
+  }
+
+  export type Participate_TournamentUncheckedUpdateWithoutTInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    P_Id?: StringFieldUpdateOperationsInput | string
+    CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    Winner_Id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type Participate_TournamentUncheckedUpdateManyWithoutTInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    P_Id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
