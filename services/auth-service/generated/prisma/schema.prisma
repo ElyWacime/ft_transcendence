@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum MatchResult {
+  PENDING
+  WIN
+  LOSE
+  DRAW
+}
+
+model User {
+  id                     String                   @id @default(cuid())
+  email                  String                   @unique
+  name                   String?                  @unique
+  password               String
+  loggedIn               Boolean                  @default(false)
+  isOnline               Boolean                  @default(false)
+  avatar                 String?                  @default("https://www.gravatar.com/avatar/")
+  sentRequests           FriendRequest[]          @relation("SentRequests")
+  receivedRequests       FriendRequest[]          @relation("ReceivedRequests")
+  Participate_Tournament Participate_Tournament[] @relation("Participate")
+  Win_Tournament         Participate_Tournament[] @relation("Win")
+  Match1                 Match[]                  @relation("As_P1")
+  Match2                 Match[]                  @relation("As_P2")
+  Matchw                 Match[]                  @relation("As_Winner")
+}
+
+model FriendRequest {
+  id         String              @id @default(cuid())
+  sender     User                @relation("SentRequests", fields: [senderId], references: [id])
+  senderId   String
+  receiver   User                @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  receiverId String
+  status     FriendRequestStatus @default(PENDING)
+  CreatedAt  DateTime            @default(now())
+  UpdatedAt  DateTime            @updatedAt
+
+  @@unique([senderId, receiverId])
+}
+
+model Tournament {
+  id                     String                   @id @default(cuid())
+  CreatedAt              DateTime                 @default(now())
+  UpdatedAt              DateTime                 @updatedAt
+  count_player           Int                      @default(0)
+  result                 MatchResult              @default(PENDING)
+  Participate_Tournament Participate_Tournament[] @relation("Played")
+  Match                  Match[]                  @relation("In_Tournament")
+}
+
+model Participate_Tournament {
+  id        String      @id @default(cuid())
+  P         User        @relation("Participate", fields: [P_Id], references: [id])
+  P_Id      String
+  T         Tournament  @relation("Played", fields: [T_Id], references: [id])
+  T_Id      String
+  CreatedAt DateTime    @default(now())
+  UpdatedAt DateTime    @updatedAt
+  result    MatchResult @default(PENDING)
+  Winner    User        @relation("Win", fields: [Winner_Id], references: [id])
+  Winner_Id String
+}
+
+model Match {
+  id           String      @id @default(cuid())
+  P1           User        @relation("As_P1", fields: [P1_Id], references: [id])
+  P1_Id        String
+  P2           User        @relation("As_P2", fields: [P2_Id], references: [id])
+  P2_Id        String
+  Ball_x       Float
+  Ball_y       Float
+  CreatedAt    DateTime    @default(now())
+  UpdatedAt    DateTime    @updatedAt
+  result       MatchResult @default(PENDING)
+  Winner       User        @relation("As_Winner", fields: [Winner_Id], references: [id])
+  Winner_Id    String
+  Tournament   Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])
+  tournamentId String?
+}
