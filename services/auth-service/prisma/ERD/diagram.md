@@ -57,6 +57,10 @@ DRAW DRAW
     String id "🗝️"
     Float Ball_x 
     Float Ball_y 
+    Float Player1_x 
+    Float Player1_y 
+    Float Player2_x 
+    Float Player2_y 
     DateTime CreatedAt 
     DateTime UpdatedAt 
     Result result 

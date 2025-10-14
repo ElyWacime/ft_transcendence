@@ -16,6 +16,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
+// idfn
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

@@ -87,6 +87,10 @@ model Match {
   P2_Id         String
   Ball_x        Float
   Ball_y        Float
+  Player1_x     Float
+  Player1_y     Float
+  Player2_x     Float
+  Player2_y     Float
   CreatedAt     DateTime    @default(now())
   UpdatedAt     DateTime    @updatedAt
   result        Result      @default(PENDING)
