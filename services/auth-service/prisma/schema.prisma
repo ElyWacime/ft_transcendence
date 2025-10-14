@@ -1,12 +1,9 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -28,22 +25,20 @@ enum MatchResult {
 }
 
 model User {
-  id                       String                   @id @default(cuid())
-  email                    String                   @unique
-  name                     String?
-  password                 String
-  loggedIn                 Boolean                  @default(false)
-  isOnline                 Boolean                  @default(false)
-  avatar                   String?                  @default("https://www.gravatar.com/avatar/")
-  sentRequests             FriendRequest[]          @relation("SentRequests")
-  receivedRequests         FriendRequest[]          @relation("ReceivedRequests")
-  Pvp1                     PvP_Offline[]            @relation("PvP_O1")
-  Pvp2                     PvP_Offline[]            @relation("PvP_O2")
-  Participate_Tournament   Participate_Tournament[] @relation("Participate")
-  Win_Tournament           Participate_Tournament[] @relation("Win")
-  PvP_Tournament_PvP_T_as2 PvP_Tournament[]         @relation("PvP_T_as2")
-  PvP_Tournament_PvP_T_as1 PvP_Tournament[]         @relation("PvP_T_as1")
-  PvP_Tournament           PvP_Tournament[]         @relation("Winner_ID_T")
+  id                     String                   @id @default(cuid())
+  email                  String                   @unique
+  name                   String?                  @unique
+  password               String
+  loggedIn               Boolean                  @default(false)
+  isOnline               Boolean                  @default(false)
+  avatar                 String?                  @default("https://www.gravatar.com/avatar/")
+  sentRequests           FriendRequest[]          @relation("SentRequests")
+  receivedRequests       FriendRequest[]          @relation("ReceivedRequests")
+  Participate_Tournament Participate_Tournament[] @relation("Participate")
+  Win_Tournament         Participate_Tournament[] @relation("Win")
+  Match1                 Match[]                  @relation("As_P1")
+  Match2                 Match[]                  @relation("As_P2")
+  Matchw                 Match[]                  @relation("As_Winner")
 }
 
 model FriendRequest {
@@ -53,31 +48,20 @@ model FriendRequest {
   receiver   User                @relation("ReceivedRequests", fields: [receiverId], references: [id])
   receiverId String
   status     FriendRequestStatus @default(PENDING)
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
+  CreatedAt  DateTime            @default(now())
+  UpdatedAt  DateTime            @updatedAt
 
   @@unique([senderId, receiverId])
 }
 
-model PvP_Offline {
-  id        String      @id @default(cuid())
-  P1        User        @relation("PvP_O1", fields: [P1_Id], references: [id])
-  P1_Id     String
-  P2        User        @relation("PvP_O2", fields: [P2_Id], references: [id])
-  P2_Id     String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  result    MatchResult @default(PENDING)
-}
-
 model Tournament {
   id                     String                   @id @default(cuid())
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
+  CreatedAt              DateTime                 @default(now())
+  UpdatedAt              DateTime                 @updatedAt
   count_player           Int                      @default(0)
   result                 MatchResult              @default(PENDING)
   Participate_Tournament Participate_Tournament[] @relation("Played")
-  PvP_Tournament         PvP_Tournament[]         @relation("in_tor")
+  Match                  Match[]                  @relation("In_Tournament")
 }
 
 model Participate_Tournament {
@@ -86,24 +70,26 @@ model Participate_Tournament {
   P_Id      String
   T         Tournament  @relation("Played", fields: [T_Id], references: [id])
   T_Id      String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  CreatedAt DateTime    @default(now())
+  UpdatedAt DateTime    @updatedAt
   result    MatchResult @default(PENDING)
   Winner    User        @relation("Win", fields: [Winner_Id], references: [id])
   Winner_Id String
 }
 
-model PvP_Tournament {
-  id        String      @id @default(cuid())
-  P1        User        @relation("PvP_T_as1", fields: [P1_Id], references: [id])
-  P1_Id     String
-  P2        User        @relation("PvP_T_as2", fields: [P2_Id], references: [id])
-  P2_Id     String
-  T         Tournament  @relation("in_tor", fields: [T_Id], references: [id])
-  T_Id      String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  result    MatchResult @default(PENDING)
-  Winner    User        @relation("Winner_ID_T", fields: [Winner_Id], references: [id])
-  Winner_Id String
+model Match {
+  id           String      @id @default(cuid())
+  P1           User        @relation("As_P1", fields: [P1_Id], references: [id])
+  P1_Id        String
+  P2           User        @relation("As_P2", fields: [P2_Id], references: [id])
+  P2_Id        String
+  Ball_x       Float
+  Ball_y       Float
+  CreatedAt    DateTime    @default(now())
+  UpdatedAt    DateTime    @updatedAt
+  result       MatchResult @default(PENDING)
+  Winner       User        @relation("As_Winner", fields: [Winner_Id], references: [id])
+  Winner_Id    String
+  Tournament   Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])
+  tournamentId String?
 }
