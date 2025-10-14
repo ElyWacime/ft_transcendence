@@ -60,6 +60,10 @@ DRAW DRAW
     DateTime CreatedAt 
     DateTime UpdatedAt 
     Result result 
+    Int score_player1 
+    Int score_player2 
+    DateTime match_start 
+    Int chrono 
     }
   
     "User" o{--}o "FriendRequest" : ""

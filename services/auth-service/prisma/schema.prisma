@@ -72,28 +72,32 @@ model Participate_Tournament {
   id        String     @id @default(cuid())
   P_Id      String
   T_Id      String
+  Winner_Id String
   CreatedAt DateTime   @default(now())
   UpdatedAt DateTime   @updatedAt
   result    Result     @default(PENDING)
-  Winner_Id String
   Winner    User       @relation("Win", fields: [Winner_Id], references: [id])
   T         Tournament @relation("Played", fields: [T_Id], references: [id])
   P         User       @relation("Participate", fields: [P_Id], references: [id])
 }
 
 model Match {
-  id           String      @id @default(cuid())
-  P1_Id        String
-  P2_Id        String
-  Ball_x       Float
-  Ball_y       Float
-  CreatedAt    DateTime    @default(now())
-  UpdatedAt    DateTime    @updatedAt
-  result       Result      @default(PENDING)
-  Winner_Id    String
-  tournamentId String?
-  Tournament   Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])
-  Winner       User        @relation("As_Winner", fields: [Winner_Id], references: [id])
-  P2           User        @relation("As_P2", fields: [P2_Id], references: [id])
-  P1           User        @relation("As_P1", fields: [P1_Id], references: [id])
+  id            String      @id @default(cuid())
+  P1_Id         String
+  P2_Id         String
+  Ball_x        Float
+  Ball_y        Float
+  CreatedAt     DateTime    @default(now())
+  UpdatedAt     DateTime    @updatedAt
+  result        Result      @default(PENDING)
+  Winner_Id     String
+  tournamentId  String?
+  score_player1 Int
+  score_player2 Int
+  match_start   DateTime    @default(now())
+  chrono        Int         @default(60) // 60s in a match 
+  Tournament    Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])
+  Winner        User        @relation("As_Winner", fields: [Winner_Id], references: [id])
+  P2            User        @relation("As_P2", fields: [P2_Id], references: [id])
+  P1            User        @relation("As_P1", fields: [P1_Id], references: [id])
 }
