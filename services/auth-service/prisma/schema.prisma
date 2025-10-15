@@ -77,7 +77,6 @@ model Participate_Tournament {
   T_Id      String
   CreatedAt DateTime   @default(now())
   UpdatedAt DateTime   @updatedAt
-  result    Result     @default(PENDING)
   T         Tournament @relation("Played", fields: [T_Id], references: [id])
   P         User       @relation("Participate", fields: [P_Id], references: [id])
 }

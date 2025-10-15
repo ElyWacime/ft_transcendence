@@ -38,6 +38,7 @@ DRAW DRAW
 
   "Tournament" {
     String id "🗝️"
+    String Label 
     DateTime CreatedAt 
     DateTime UpdatedAt 
     Int count_player 
@@ -49,7 +50,6 @@ DRAW DRAW
     String id "🗝️"
     DateTime CreatedAt 
     DateTime UpdatedAt 
-    Result result 
     }
   
 
@@ -61,11 +61,11 @@ DRAW DRAW
     Float Player1_y 
     Float Player2_x 
     Float Player2_y 
+    Int score_player1 
+    Int score_player2 
     DateTime CreatedAt 
     DateTime UpdatedAt 
     Result result 
-    Int score_player1 
-    Int score_player2 
     DateTime match_start 
     Int chrono 
     }
@@ -75,7 +75,7 @@ DRAW DRAW
     "User" o{--}o "Match" : ""
     "User" o{--}o "Match" : ""
     "User" o{--}o "Match" : ""
-    "User" o{--}o "Participate_Tournament" : ""
+    "User" o{--}o "Tournament" : ""
     "User" o{--}o "Participate_Tournament" : ""
     "FriendRequest" o|--|| "FriendRequestStatus" : "enum:status"
     "FriendRequest" o|--|| "User" : "receiver"
@@ -83,8 +83,7 @@ DRAW DRAW
     "Tournament" o|--|| "Result" : "enum:result"
     "Tournament" o{--}o "Match" : ""
     "Tournament" o{--}o "Participate_Tournament" : ""
-    "Participate_Tournament" o|--|| "Result" : "enum:result"
-    "Participate_Tournament" o|--|| "User" : "Winner"
+    "Tournament" o|--|| "User" : "Winner"
     "Participate_Tournament" o|--|| "Tournament" : "T"
     "Participate_Tournament" o|--|| "User" : "P"
     "Match" o|--|| "Result" : "enum:result"
