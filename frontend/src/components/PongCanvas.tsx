@@ -51,8 +51,8 @@ export const PongCanvas = ({
     ball: {
       x: 400,
       y: 300,
-      dx: 2,
-      dy: 1,
+      dx: 1.5,
+      dy: 0,
       radius: 8
     },
     paddle1: {
@@ -74,17 +74,24 @@ export const PongCanvas = ({
     gameStatus: 'waiting'
   });
   // helper to create a fresh ball object (keeps logic in one place)
-  const createBall = useCallback(() => ({
-    x: 400,
-    y: 300,
-    dx: Math.random() > 0.5 ? 2 : -2,
-    dy: (Math.random() - 0.5) * 3,
-    radius: 8
-  }), []);
+  const createBall = useCallback(() => {
+    // small random angle so ball isn't perfectly horizontal
+    const angle = (Math.random() - 0.5) * (Math.PI / 6); // +/- 30 degrees
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    return {
+      x: 400,
+      y: 300,
+      dx: dir * BALL_SPEED * Math.cos(angle),
+      dy: BALL_SPEED * Math.sin(angle),
+      radius: 8
+    };
+  }, []);
 
   // Physics tuning constants
   const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
-  const MAX_DY = 8; // clamp for vertical velocity
+  const MAX_DY = 6; // clamp for vertical velocity
+  const BALL_SPEED = 0.9; // constant total speed (pixels per frame)
+  const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
 
   const resetGame = useCallback(() => {
     setGameState(prev => ({
@@ -113,7 +120,7 @@ export const PongCanvas = ({
       if (!canvas) return prev;
 
       // Move paddles based on keys
-      const paddleSpeed = 4;
+      const paddleSpeed = 2;
       if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) {
         newState.paddle1.y -= paddleSpeed;
       }
@@ -132,8 +139,30 @@ export const PongCanvas = ({
       newState.ball.y += newState.ball.dy;
 
       // Ball collision with top/bottom walls
-      if (newState.ball.y <= newState.ball.radius || newState.ball.y >= canvas.height - newState.ball.radius) {
-        newState.ball.dy = -newState.ball.dy;
+      if (newState.ball.y <= newState.ball.radius) {
+        // Hit top: force vertical component to go down (positive)
+        newState.ball.dy = Math.abs(newState.ball.dy) || 0.5;
+        // reduce vertical component to widen outgoing angle
+        newState.ball.dy *= WALL_BOUNCE_DY_REDUCTION;
+        // clamp vertical speed for safety
+        newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
+        // recompute horizontal component so total speed remains BALL_SPEED
+        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const dyAbs = Math.abs(newState.ball.dy);
+        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
+        newState.ball.dx = signX * dxMag;
+      } else if (newState.ball.y >= canvas.height - newState.ball.radius) {
+        // Hit bottom: force vertical component to go up (negative)
+        newState.ball.dy = -Math.abs(newState.ball.dy) || -0.5;
+        // reduce vertical component to widen outgoing angle
+        newState.ball.dy *= WALL_BOUNCE_DY_REDUCTION;
+        // clamp vertical speed for safety
+        newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
+        // recompute horizontal component so total speed remains BALL_SPEED
+        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const dyAbs = Math.abs(newState.ball.dy);
+        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
+        newState.ball.dx = signX * dxMag;
       }
 
       // Ball collision with paddles
@@ -154,10 +183,9 @@ export const PongCanvas = ({
         ball.dy += (ball.y - (p1.y + p1.height / 2)) * SPIN_FACTOR;
         // Clamp vertical speed
         ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
-        // Preserve overall speed magnitude (optional: keeps gameplay consistent)
+        // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
         const speed = Math.hypot(ball.dx, ball.dy) || 1;
-        const desired = Math.max(3, Math.min(12, speed));
-        const scale = desired / speed;
+        const scale = BALL_SPEED / speed;
         ball.dx *= scale;
         ball.dy *= scale;
       }
@@ -175,10 +203,9 @@ export const PongCanvas = ({
         ball.dy += (ball.y - (p2.y + p2.height / 2)) * SPIN_FACTOR;
         // Clamp vertical speed
         ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
-        // Preserve overall speed magnitude
+        // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
         const speed = Math.hypot(ball.dx, ball.dy) || 1;
-        const desired = Math.max(3, Math.min(12, speed));
-        const scale = desired / speed;
+        const scale = BALL_SPEED / speed;
         ball.dx *= scale;
         ball.dy *= scale;
       }
