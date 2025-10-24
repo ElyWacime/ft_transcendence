@@ -64,7 +64,9 @@ services:
       - auth-service
       # - tournament-service
     ports:
-      - "80:80"
+      # Changed host port to 8081 to avoid conflict with services already
+      # binding to host port 80 (e.g., local apache2). Access via http://localhost:8081
+      - "8081:80"
     volumes:
       - ./services/gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
