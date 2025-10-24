@@ -165,29 +165,41 @@ export const PongCanvas = ({
         newState.ball.dx = signX * dxMag;
       }
 
-      // Ball collision with paddles
-      const ball = newState.ball;
-      const p1 = newState.paddle1;
-      const p2 = newState.paddle2;
+  // Ball collision with paddles
+  const ball = newState.ball;
+  // store incoming velocity before collision adjustments
+  const incomingDx = ball.dx;
+  const incomingDy = ball.dy;
+  const p1 = newState.paddle1;
+  const p2 = newState.paddle2;
 
       // Left paddle collision
       if (ball.x - ball.radius <= p1.x + p1.width &&
           ball.y >= p1.y &&
           ball.y <= p1.y + p1.height &&
           ball.dx < 0) {
-        // Reverse horizontal direction
-        ball.dx = -ball.dx;
         // Nudge ball outside the paddle to avoid repeat collisions
         ball.x = p1.x + p1.width + ball.radius;
-        // Apply spin based on impact point relative to paddle center
-        ball.dy += (ball.y - (p1.y + p1.height / 2)) * SPIN_FACTOR;
-        // Clamp vertical speed
-        ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
-        // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
-        const speed = Math.hypot(ball.dx, ball.dy) || 1;
-        const scale = BALL_SPEED / speed;
-        ball.dx *= scale;
-        ball.dy *= scale;
+        // detect whether paddle moved this frame (using prev)
+        const p1Moved = prev.paddle1.y !== p1.y;
+        if (!p1Moved) {
+          // Paddle didn't move: preserve incoming angle (keep dy) and flip horizontal direction
+          const dy = incomingDy;
+          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+          ball.dx = Math.abs(dxMag); // go right
+          ball.dy = dy;
+        } else {
+          // Paddle moved: apply spin based on impact point relative to paddle center
+          ball.dx = -ball.dx; // reverse horizontal direction
+          ball.dy += (ball.y - (p1.y + p1.height / 2)) * SPIN_FACTOR;
+          // Clamp vertical speed
+          ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
+          // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
+          const speed = Math.hypot(ball.dx, ball.dy) || 1;
+          const scale = BALL_SPEED / speed;
+          ball.dx *= scale;
+          ball.dy *= scale;
+        }
       }
 
       // Right paddle collision
@@ -195,19 +207,28 @@ export const PongCanvas = ({
           ball.y >= p2.y &&
           ball.y <= p2.y + p2.height &&
           ball.dx > 0) {
-        // Reverse horizontal direction
-        ball.dx = -ball.dx;
         // Nudge ball outside the paddle to avoid repeat collisions
         ball.x = p2.x - ball.radius;
-        // Apply spin based on impact point relative to paddle center
-        ball.dy += (ball.y - (p2.y + p2.height / 2)) * SPIN_FACTOR;
-        // Clamp vertical speed
-        ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
-        // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
-        const speed = Math.hypot(ball.dx, ball.dy) || 1;
-        const scale = BALL_SPEED / speed;
-        ball.dx *= scale;
-        ball.dy *= scale;
+        // detect whether paddle moved this frame
+        const p2Moved = prev.paddle2.y !== p2.y;
+        if (!p2Moved) {
+          // Paddle didn't move: preserve incoming angle (keep dy) and flip horizontal direction
+          const dy = incomingDy;
+          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+          ball.dx = -Math.abs(dxMag); // go left
+          ball.dy = dy;
+        } else {
+          // Paddle moved: apply spin based on impact point relative to paddle center
+          ball.dx = -ball.dx; // reverse horizontal direction
+          ball.dy += (ball.y - (p2.y + p2.height / 2)) * SPIN_FACTOR;
+          // Clamp vertical speed
+          ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
+          // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
+          const speed = Math.hypot(ball.dx, ball.dy) || 1;
+          const scale = BALL_SPEED / speed;
+          ball.dx *= scale;
+          ball.dy *= scale;
+        }
       }
 
       // Scoring
