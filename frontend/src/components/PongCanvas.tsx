@@ -52,7 +52,7 @@ export const PongCanvas = ({
       x: 400,
       y: 300,
       dx: 1.5,
-      dy: 0,
+      dy: 0.5,
       radius: 8
     },
     paddle1: {
@@ -76,7 +76,8 @@ export const PongCanvas = ({
   // helper to create a fresh ball object (keeps logic in one place)
   const createBall = useCallback(() => {
     // small random angle so ball isn't perfectly horizontal
-    const angle = (Math.random() - 0.5) * (Math.PI / 6); // +/- 30 degrees
+    const angle =  (Math.PI / 6); // +/- 30 degrees
+    // const angle = (Math.random() - 0.5) * (Math.PI / 6); // +/- 30 degrees
     const dir = Math.random() > 0.5 ? 1 : -1;
     return {
       x: 400,
@@ -196,7 +197,8 @@ export const PongCanvas = ({
           ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
           // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
           const speed = Math.hypot(ball.dx, ball.dy) || 1;
-          const scale = BALL_SPEED / speed;
+          const scale = 1;
+          // const scale = BALL_SPEED / speed;
           ball.dx *= scale;
           ball.dy *= scale;
         }
