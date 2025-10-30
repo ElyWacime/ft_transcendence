@@ -1,1 +1,0 @@
-import PrismaClient from '/home/skamroun/Downloads/ft_transcendence/services/auth-service/generated/prisma'
