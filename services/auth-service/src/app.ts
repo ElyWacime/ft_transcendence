@@ -74,15 +74,49 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
   });
 }
 
+import prisma from './utils/prisma';
+
 // --- Start server ---
 async function main() {
   try {
     await app.listen({ port: 8000, host: "0.0.0.0" });
-    app.log.info("✅ Auth service running on port 8000");
+    app.log.info("✅ Auth service running on port 8000 ------->>>>>>");
+    await initusers();
+    app.log.info("✅ Users initialized>");
   } catch (err) {
     app.log.error(err);
     process.exit(1);
   }
 }
 
-main();
+// main();
+main()
+    .catch(e => { console.log(e.message); })
+    .finally(async () => { await prisma.$disconnect(); })
+
+
+
+
+// use `prisma` in your application to read and write data in your DB
+
+async function initusers() {
+    await prisma.user.deleteMany();
+    const user1 = await prisma.user.create({
+        data: {
+            email: "user1@aaa.com",
+            name: "user1",
+            password: "1"
+            }
+    });
+    const user2 = await prisma.user.create({
+        data: {
+            email: "user2@aaa.com",
+            name: "user2",
+            password: "2"
+            }
+    });
+}
+
+
+// cmd
+// docker compose up -d --no-deps --build auth-service && docker compose logs --follow --no-color auth-service

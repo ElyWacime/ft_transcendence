@@ -139,10 +139,12 @@ exports.Prisma.FriendRequestScalarFieldEnum = {
 
 exports.Prisma.TournamentScalarFieldEnum = {
   id: 'id',
+  Label: 'Label',
   CreatedAt: 'CreatedAt',
   UpdatedAt: 'UpdatedAt',
   count_player: 'count_player',
-  result: 'result'
+  result: 'result',
+  Winner_Id: 'Winner_Id'
 };
 
 exports.Prisma.Participate_TournamentScalarFieldEnum = {
@@ -150,9 +152,7 @@ exports.Prisma.Participate_TournamentScalarFieldEnum = {
   P_Id: 'P_Id',
   T_Id: 'T_Id',
   CreatedAt: 'CreatedAt',
-  UpdatedAt: 'UpdatedAt',
-  result: 'result',
-  Winner_Id: 'Winner_Id'
+  UpdatedAt: 'UpdatedAt'
 };
 
 exports.Prisma.MatchScalarFieldEnum = {
@@ -161,11 +161,19 @@ exports.Prisma.MatchScalarFieldEnum = {
   P2_Id: 'P2_Id',
   Ball_x: 'Ball_x',
   Ball_y: 'Ball_y',
+  Player1_x: 'Player1_x',
+  Player1_y: 'Player1_y',
+  Player2_x: 'Player2_x',
+  Player2_y: 'Player2_y',
+  score_player1: 'score_player1',
+  score_player2: 'score_player2',
   CreatedAt: 'CreatedAt',
   UpdatedAt: 'UpdatedAt',
   result: 'result',
   Winner_Id: 'Winner_Id',
-  tournamentId: 'tournamentId'
+  tournamentId: 'tournamentId',
+  match_start: 'match_start',
+  chrono: 'chrono'
 };
 
 exports.Prisma.SortOrder = {
@@ -183,7 +191,7 @@ exports.FriendRequestStatus = exports.$Enums.FriendRequestStatus = {
   REJECTED: 'REJECTED'
 };
 
-exports.MatchResult = exports.$Enums.MatchResult = {
+exports.Result = exports.$Enums.Result = {
   PENDING: 'PENDING',
   WIN: 'WIN',
   LOSE: 'LOSE',

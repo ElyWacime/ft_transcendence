@@ -5,7 +5,9 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN apt-get update -y && apt-get install -y openssl
-RUN npm install
+# Use legacy peer deps during image build to avoid ERESOLVE failures from dev-only
+# packages (e.g. prisma-erd-generator) that require older @prisma/client versions.
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN mkdir -p /app/prisma/db

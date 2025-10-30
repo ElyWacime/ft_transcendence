@@ -52,14 +52,14 @@ export namespace $Enums {
 export type FriendRequestStatus = (typeof FriendRequestStatus)[keyof typeof FriendRequestStatus]
 
 
-export const MatchResult: {
+export const Result: {
   PENDING: 'PENDING',
   WIN: 'WIN',
   LOSE: 'LOSE',
   DRAW: 'DRAW'
 };
 
-export type MatchResult = (typeof MatchResult)[keyof typeof MatchResult]
+export type Result = (typeof Result)[keyof typeof Result]
 
 }
 
@@ -67,9 +67,9 @@ export type FriendRequestStatus = $Enums.FriendRequestStatus
 
 export const FriendRequestStatus: typeof $Enums.FriendRequestStatus
 
-export type MatchResult = $Enums.MatchResult
+export type Result = $Enums.Result
 
-export const MatchResult: typeof $Enums.MatchResult
+export const Result: typeof $Enums.Result
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1325,7 +1325,7 @@ export namespace Prisma {
    * UserCountOutputType without action
    */
   export type UserCountOutputTypeCountWin_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Participate_TournamentWhereInput
+    where?: TournamentWhereInput
   }
 
   /**
@@ -1534,7 +1534,7 @@ export namespace Prisma {
   export type UserGroupByOutputType = {
     id: string
     email: string
-    name: string | null
+    name: string
     password: string
     loggedIn: boolean
     Auto_Match: boolean
@@ -1633,13 +1633,13 @@ export namespace Prisma {
       Matchw: Prisma.$MatchPayload<ExtArgs>[]
       Match2: Prisma.$MatchPayload<ExtArgs>[]
       Match1: Prisma.$MatchPayload<ExtArgs>[]
-      Win_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
+      Win_Tournament: Prisma.$TournamentPayload<ExtArgs>[]
       Participate_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       email: string
-      name: string | null
+      name: string
       password: string
       loggedIn: boolean
       Auto_Match: boolean
@@ -2044,7 +2044,7 @@ export namespace Prisma {
     Matchw<T extends User$MatchwArgs<ExtArgs> = {}>(args?: Subset<T, User$MatchwArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     Match2<T extends User$Match2Args<ExtArgs> = {}>(args?: Subset<T, User$Match2Args<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     Match1<T extends User$Match1Args<ExtArgs> = {}>(args?: Subset<T, User$Match1Args<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    Win_Tournament<T extends User$Win_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, User$Win_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    Win_Tournament<T extends User$Win_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, User$Win_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     Participate_Tournament<T extends User$Participate_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, User$Participate_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2593,23 +2593,23 @@ export namespace Prisma {
    */
   export type User$Win_TournamentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Participate_Tournament
+     * Select specific fields to fetch from the Tournament
      */
-    select?: Participate_TournamentSelect<ExtArgs> | null
+    select?: TournamentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Participate_Tournament
+     * Omit specific fields from the Tournament
      */
-    omit?: Participate_TournamentOmit<ExtArgs> | null
+    omit?: TournamentOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Participate_TournamentInclude<ExtArgs> | null
-    where?: Participate_TournamentWhereInput
-    orderBy?: Participate_TournamentOrderByWithRelationInput | Participate_TournamentOrderByWithRelationInput[]
-    cursor?: Participate_TournamentWhereUniqueInput
+    include?: TournamentInclude<ExtArgs> | null
+    where?: TournamentWhereInput
+    orderBy?: TournamentOrderByWithRelationInput | TournamentOrderByWithRelationInput[]
+    cursor?: TournamentWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: Participate_TournamentScalarFieldEnum | Participate_TournamentScalarFieldEnum[]
+    distinct?: TournamentScalarFieldEnum | TournamentScalarFieldEnum[]
   }
 
   /**
@@ -3754,26 +3754,32 @@ export namespace Prisma {
 
   export type TournamentMinAggregateOutputType = {
     id: string | null
+    Label: string | null
     CreatedAt: Date | null
     UpdatedAt: Date | null
     count_player: number | null
-    result: $Enums.MatchResult | null
+    result: $Enums.Result | null
+    Winner_Id: string | null
   }
 
   export type TournamentMaxAggregateOutputType = {
     id: string | null
+    Label: string | null
     CreatedAt: Date | null
     UpdatedAt: Date | null
     count_player: number | null
-    result: $Enums.MatchResult | null
+    result: $Enums.Result | null
+    Winner_Id: string | null
   }
 
   export type TournamentCountAggregateOutputType = {
     id: number
+    Label: number
     CreatedAt: number
     UpdatedAt: number
     count_player: number
     result: number
+    Winner_Id: number
     _all: number
   }
 
@@ -3788,26 +3794,32 @@ export namespace Prisma {
 
   export type TournamentMinAggregateInputType = {
     id?: true
+    Label?: true
     CreatedAt?: true
     UpdatedAt?: true
     count_player?: true
     result?: true
+    Winner_Id?: true
   }
 
   export type TournamentMaxAggregateInputType = {
     id?: true
+    Label?: true
     CreatedAt?: true
     UpdatedAt?: true
     count_player?: true
     result?: true
+    Winner_Id?: true
   }
 
   export type TournamentCountAggregateInputType = {
     id?: true
+    Label?: true
     CreatedAt?: true
     UpdatedAt?: true
     count_player?: true
     result?: true
+    Winner_Id?: true
     _all?: true
   }
 
@@ -3899,10 +3911,12 @@ export namespace Prisma {
 
   export type TournamentGroupByOutputType = {
     id: string
+    Label: string
     CreatedAt: Date
     UpdatedAt: Date
     count_player: number
-    result: $Enums.MatchResult
+    result: $Enums.Result
+    Winner_Id: string
     _count: TournamentCountAggregateOutputType | null
     _avg: TournamentAvgAggregateOutputType | null
     _sum: TournamentSumAggregateOutputType | null
@@ -3926,60 +3940,79 @@ export namespace Prisma {
 
   export type TournamentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    Label?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     count_player?: boolean
     result?: boolean
+    Winner_Id?: boolean
     Match?: boolean | Tournament$MatchArgs<ExtArgs>
     Participate_Tournament?: boolean | Tournament$Participate_TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | TournamentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tournament"]>
 
   export type TournamentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    Label?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     count_player?: boolean
     result?: boolean
+    Winner_Id?: boolean
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tournament"]>
 
   export type TournamentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    Label?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     count_player?: boolean
     result?: boolean
+    Winner_Id?: boolean
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tournament"]>
 
   export type TournamentSelectScalar = {
     id?: boolean
+    Label?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     count_player?: boolean
     result?: boolean
+    Winner_Id?: boolean
   }
 
-  export type TournamentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "CreatedAt" | "UpdatedAt" | "count_player" | "result", ExtArgs["result"]["tournament"]>
+  export type TournamentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "Label" | "CreatedAt" | "UpdatedAt" | "count_player" | "result" | "Winner_Id", ExtArgs["result"]["tournament"]>
   export type TournamentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     Match?: boolean | Tournament$MatchArgs<ExtArgs>
     Participate_Tournament?: boolean | Tournament$Participate_TournamentArgs<ExtArgs>
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | TournamentCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type TournamentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type TournamentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type TournamentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TournamentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Winner?: boolean | UserDefaultArgs<ExtArgs>
+  }
 
   export type $TournamentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Tournament"
     objects: {
       Match: Prisma.$MatchPayload<ExtArgs>[]
       Participate_Tournament: Prisma.$Participate_TournamentPayload<ExtArgs>[]
+      Winner: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      Label: string
       CreatedAt: Date
       UpdatedAt: Date
       count_player: number
-      result: $Enums.MatchResult
+      result: $Enums.Result
+      Winner_Id: string
     }, ExtArgs["result"]["tournament"]>
     composites: {}
   }
@@ -4376,6 +4409,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     Match<T extends Tournament$MatchArgs<ExtArgs> = {}>(args?: Subset<T, Tournament$MatchArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     Participate_Tournament<T extends Tournament$Participate_TournamentArgs<ExtArgs> = {}>(args?: Subset<T, Tournament$Participate_TournamentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Participate_TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    Winner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4406,10 +4440,12 @@ export namespace Prisma {
    */
   interface TournamentFieldRefs {
     readonly id: FieldRef<"Tournament", 'String'>
+    readonly Label: FieldRef<"Tournament", 'String'>
     readonly CreatedAt: FieldRef<"Tournament", 'DateTime'>
     readonly UpdatedAt: FieldRef<"Tournament", 'DateTime'>
     readonly count_player: FieldRef<"Tournament", 'Int'>
-    readonly result: FieldRef<"Tournament", 'MatchResult'>
+    readonly result: FieldRef<"Tournament", 'Result'>
+    readonly Winner_Id: FieldRef<"Tournament", 'String'>
   }
     
 
@@ -4657,6 +4693,10 @@ export namespace Prisma {
      * The data used to create many Tournaments.
      */
     data: TournamentCreateManyInput | TournamentCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TournamentIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4727,6 +4767,10 @@ export namespace Prisma {
      * Limit how many Tournaments to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TournamentIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4878,8 +4922,6 @@ export namespace Prisma {
     T_Id: string | null
     CreatedAt: Date | null
     UpdatedAt: Date | null
-    result: $Enums.MatchResult | null
-    Winner_Id: string | null
   }
 
   export type Participate_TournamentMaxAggregateOutputType = {
@@ -4888,8 +4930,6 @@ export namespace Prisma {
     T_Id: string | null
     CreatedAt: Date | null
     UpdatedAt: Date | null
-    result: $Enums.MatchResult | null
-    Winner_Id: string | null
   }
 
   export type Participate_TournamentCountAggregateOutputType = {
@@ -4898,8 +4938,6 @@ export namespace Prisma {
     T_Id: number
     CreatedAt: number
     UpdatedAt: number
-    result: number
-    Winner_Id: number
     _all: number
   }
 
@@ -4910,8 +4948,6 @@ export namespace Prisma {
     T_Id?: true
     CreatedAt?: true
     UpdatedAt?: true
-    result?: true
-    Winner_Id?: true
   }
 
   export type Participate_TournamentMaxAggregateInputType = {
@@ -4920,8 +4956,6 @@ export namespace Prisma {
     T_Id?: true
     CreatedAt?: true
     UpdatedAt?: true
-    result?: true
-    Winner_Id?: true
   }
 
   export type Participate_TournamentCountAggregateInputType = {
@@ -4930,8 +4964,6 @@ export namespace Prisma {
     T_Id?: true
     CreatedAt?: true
     UpdatedAt?: true
-    result?: true
-    Winner_Id?: true
     _all?: true
   }
 
@@ -5013,8 +5045,6 @@ export namespace Prisma {
     T_Id: string
     CreatedAt: Date
     UpdatedAt: Date
-    result: $Enums.MatchResult
-    Winner_Id: string
     _count: Participate_TournamentCountAggregateOutputType | null
     _min: Participate_TournamentMinAggregateOutputType | null
     _max: Participate_TournamentMaxAggregateOutputType | null
@@ -5040,9 +5070,6 @@ export namespace Prisma {
     T_Id?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
-    result?: boolean
-    Winner_Id?: boolean
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     T?: boolean | TournamentDefaultArgs<ExtArgs>
     P?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participate_Tournament"]>
@@ -5053,9 +5080,6 @@ export namespace Prisma {
     T_Id?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
-    result?: boolean
-    Winner_Id?: boolean
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     T?: boolean | TournamentDefaultArgs<ExtArgs>
     P?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participate_Tournament"]>
@@ -5066,9 +5090,6 @@ export namespace Prisma {
     T_Id?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
-    result?: boolean
-    Winner_Id?: boolean
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     T?: boolean | TournamentDefaultArgs<ExtArgs>
     P?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participate_Tournament"]>
@@ -5079,23 +5100,18 @@ export namespace Prisma {
     T_Id?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
-    result?: boolean
-    Winner_Id?: boolean
   }
 
-  export type Participate_TournamentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "P_Id" | "T_Id" | "CreatedAt" | "UpdatedAt" | "result" | "Winner_Id", ExtArgs["result"]["participate_Tournament"]>
+  export type Participate_TournamentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "P_Id" | "T_Id" | "CreatedAt" | "UpdatedAt", ExtArgs["result"]["participate_Tournament"]>
   export type Participate_TournamentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     T?: boolean | TournamentDefaultArgs<ExtArgs>
     P?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type Participate_TournamentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     T?: boolean | TournamentDefaultArgs<ExtArgs>
     P?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type Participate_TournamentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    Winner?: boolean | UserDefaultArgs<ExtArgs>
     T?: boolean | TournamentDefaultArgs<ExtArgs>
     P?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -5103,7 +5119,6 @@ export namespace Prisma {
   export type $Participate_TournamentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Participate_Tournament"
     objects: {
-      Winner: Prisma.$UserPayload<ExtArgs>
       T: Prisma.$TournamentPayload<ExtArgs>
       P: Prisma.$UserPayload<ExtArgs>
     }
@@ -5113,8 +5128,6 @@ export namespace Prisma {
       T_Id: string
       CreatedAt: Date
       UpdatedAt: Date
-      result: $Enums.MatchResult
-      Winner_Id: string
     }, ExtArgs["result"]["participate_Tournament"]>
     composites: {}
   }
@@ -5509,7 +5522,6 @@ export namespace Prisma {
    */
   export interface Prisma__Participate_TournamentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    Winner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     T<T extends TournamentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TournamentDefaultArgs<ExtArgs>>): Prisma__TournamentClient<$Result.GetResult<Prisma.$TournamentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     P<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -5546,8 +5558,6 @@ export namespace Prisma {
     readonly T_Id: FieldRef<"Participate_Tournament", 'String'>
     readonly CreatedAt: FieldRef<"Participate_Tournament", 'DateTime'>
     readonly UpdatedAt: FieldRef<"Participate_Tournament", 'DateTime'>
-    readonly result: FieldRef<"Participate_Tournament", 'MatchResult'>
-    readonly Winner_Id: FieldRef<"Participate_Tournament", 'String'>
   }
     
 
@@ -5975,11 +5985,25 @@ export namespace Prisma {
   export type MatchAvgAggregateOutputType = {
     Ball_x: number | null
     Ball_y: number | null
+    Player1_x: number | null
+    Player1_y: number | null
+    Player2_x: number | null
+    Player2_y: number | null
+    score_player1: number | null
+    score_player2: number | null
+    chrono: number | null
   }
 
   export type MatchSumAggregateOutputType = {
     Ball_x: number | null
     Ball_y: number | null
+    Player1_x: number | null
+    Player1_y: number | null
+    Player2_x: number | null
+    Player2_y: number | null
+    score_player1: number | null
+    score_player2: number | null
+    chrono: number | null
   }
 
   export type MatchMinAggregateOutputType = {
@@ -5988,11 +6012,19 @@ export namespace Prisma {
     P2_Id: string | null
     Ball_x: number | null
     Ball_y: number | null
+    Player1_x: number | null
+    Player1_y: number | null
+    Player2_x: number | null
+    Player2_y: number | null
+    score_player1: number | null
+    score_player2: number | null
     CreatedAt: Date | null
     UpdatedAt: Date | null
-    result: $Enums.MatchResult | null
+    result: $Enums.Result | null
     Winner_Id: string | null
     tournamentId: string | null
+    match_start: Date | null
+    chrono: number | null
   }
 
   export type MatchMaxAggregateOutputType = {
@@ -6001,11 +6033,19 @@ export namespace Prisma {
     P2_Id: string | null
     Ball_x: number | null
     Ball_y: number | null
+    Player1_x: number | null
+    Player1_y: number | null
+    Player2_x: number | null
+    Player2_y: number | null
+    score_player1: number | null
+    score_player2: number | null
     CreatedAt: Date | null
     UpdatedAt: Date | null
-    result: $Enums.MatchResult | null
+    result: $Enums.Result | null
     Winner_Id: string | null
     tournamentId: string | null
+    match_start: Date | null
+    chrono: number | null
   }
 
   export type MatchCountAggregateOutputType = {
@@ -6014,11 +6054,19 @@ export namespace Prisma {
     P2_Id: number
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt: number
     UpdatedAt: number
     result: number
     Winner_Id: number
     tournamentId: number
+    match_start: number
+    chrono: number
     _all: number
   }
 
@@ -6026,11 +6074,25 @@ export namespace Prisma {
   export type MatchAvgAggregateInputType = {
     Ball_x?: true
     Ball_y?: true
+    Player1_x?: true
+    Player1_y?: true
+    Player2_x?: true
+    Player2_y?: true
+    score_player1?: true
+    score_player2?: true
+    chrono?: true
   }
 
   export type MatchSumAggregateInputType = {
     Ball_x?: true
     Ball_y?: true
+    Player1_x?: true
+    Player1_y?: true
+    Player2_x?: true
+    Player2_y?: true
+    score_player1?: true
+    score_player2?: true
+    chrono?: true
   }
 
   export type MatchMinAggregateInputType = {
@@ -6039,11 +6101,19 @@ export namespace Prisma {
     P2_Id?: true
     Ball_x?: true
     Ball_y?: true
+    Player1_x?: true
+    Player1_y?: true
+    Player2_x?: true
+    Player2_y?: true
+    score_player1?: true
+    score_player2?: true
     CreatedAt?: true
     UpdatedAt?: true
     result?: true
     Winner_Id?: true
     tournamentId?: true
+    match_start?: true
+    chrono?: true
   }
 
   export type MatchMaxAggregateInputType = {
@@ -6052,11 +6122,19 @@ export namespace Prisma {
     P2_Id?: true
     Ball_x?: true
     Ball_y?: true
+    Player1_x?: true
+    Player1_y?: true
+    Player2_x?: true
+    Player2_y?: true
+    score_player1?: true
+    score_player2?: true
     CreatedAt?: true
     UpdatedAt?: true
     result?: true
     Winner_Id?: true
     tournamentId?: true
+    match_start?: true
+    chrono?: true
   }
 
   export type MatchCountAggregateInputType = {
@@ -6065,11 +6143,19 @@ export namespace Prisma {
     P2_Id?: true
     Ball_x?: true
     Ball_y?: true
+    Player1_x?: true
+    Player1_y?: true
+    Player2_x?: true
+    Player2_y?: true
+    score_player1?: true
+    score_player2?: true
     CreatedAt?: true
     UpdatedAt?: true
     result?: true
     Winner_Id?: true
     tournamentId?: true
+    match_start?: true
+    chrono?: true
     _all?: true
   }
 
@@ -6165,11 +6251,19 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt: Date
     UpdatedAt: Date
-    result: $Enums.MatchResult
+    result: $Enums.Result
     Winner_Id: string
     tournamentId: string | null
+    match_start: Date
+    chrono: number
     _count: MatchCountAggregateOutputType | null
     _avg: MatchAvgAggregateOutputType | null
     _sum: MatchSumAggregateOutputType | null
@@ -6197,11 +6291,19 @@ export namespace Prisma {
     P2_Id?: boolean
     Ball_x?: boolean
     Ball_y?: boolean
+    Player1_x?: boolean
+    Player1_y?: boolean
+    Player2_x?: boolean
+    Player2_y?: boolean
+    score_player1?: boolean
+    score_player2?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     result?: boolean
     Winner_Id?: boolean
     tournamentId?: boolean
+    match_start?: boolean
+    chrono?: boolean
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
     P2?: boolean | UserDefaultArgs<ExtArgs>
@@ -6214,11 +6316,19 @@ export namespace Prisma {
     P2_Id?: boolean
     Ball_x?: boolean
     Ball_y?: boolean
+    Player1_x?: boolean
+    Player1_y?: boolean
+    Player2_x?: boolean
+    Player2_y?: boolean
+    score_player1?: boolean
+    score_player2?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     result?: boolean
     Winner_Id?: boolean
     tournamentId?: boolean
+    match_start?: boolean
+    chrono?: boolean
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
     P2?: boolean | UserDefaultArgs<ExtArgs>
@@ -6231,11 +6341,19 @@ export namespace Prisma {
     P2_Id?: boolean
     Ball_x?: boolean
     Ball_y?: boolean
+    Player1_x?: boolean
+    Player1_y?: boolean
+    Player2_x?: boolean
+    Player2_y?: boolean
+    score_player1?: boolean
+    score_player2?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     result?: boolean
     Winner_Id?: boolean
     tournamentId?: boolean
+    match_start?: boolean
+    chrono?: boolean
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
     P2?: boolean | UserDefaultArgs<ExtArgs>
@@ -6248,14 +6366,22 @@ export namespace Prisma {
     P2_Id?: boolean
     Ball_x?: boolean
     Ball_y?: boolean
+    Player1_x?: boolean
+    Player1_y?: boolean
+    Player2_x?: boolean
+    Player2_y?: boolean
+    score_player1?: boolean
+    score_player2?: boolean
     CreatedAt?: boolean
     UpdatedAt?: boolean
     result?: boolean
     Winner_Id?: boolean
     tournamentId?: boolean
+    match_start?: boolean
+    chrono?: boolean
   }
 
-  export type MatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "P1_Id" | "P2_Id" | "Ball_x" | "Ball_y" | "CreatedAt" | "UpdatedAt" | "result" | "Winner_Id" | "tournamentId", ExtArgs["result"]["match"]>
+  export type MatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "P1_Id" | "P2_Id" | "Ball_x" | "Ball_y" | "Player1_x" | "Player1_y" | "Player2_x" | "Player2_y" | "score_player1" | "score_player2" | "CreatedAt" | "UpdatedAt" | "result" | "Winner_Id" | "tournamentId" | "match_start" | "chrono", ExtArgs["result"]["match"]>
   export type MatchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     Tournament?: boolean | Match$TournamentArgs<ExtArgs>
     Winner?: boolean | UserDefaultArgs<ExtArgs>
@@ -6289,11 +6415,19 @@ export namespace Prisma {
       P2_Id: string
       Ball_x: number
       Ball_y: number
+      Player1_x: number
+      Player1_y: number
+      Player2_x: number
+      Player2_y: number
+      score_player1: number
+      score_player2: number
       CreatedAt: Date
       UpdatedAt: Date
-      result: $Enums.MatchResult
+      result: $Enums.Result
       Winner_Id: string
       tournamentId: string | null
+      match_start: Date
+      chrono: number
     }, ExtArgs["result"]["match"]>
     composites: {}
   }
@@ -6726,11 +6860,19 @@ export namespace Prisma {
     readonly P2_Id: FieldRef<"Match", 'String'>
     readonly Ball_x: FieldRef<"Match", 'Float'>
     readonly Ball_y: FieldRef<"Match", 'Float'>
+    readonly Player1_x: FieldRef<"Match", 'Float'>
+    readonly Player1_y: FieldRef<"Match", 'Float'>
+    readonly Player2_x: FieldRef<"Match", 'Float'>
+    readonly Player2_y: FieldRef<"Match", 'Float'>
+    readonly score_player1: FieldRef<"Match", 'Int'>
+    readonly score_player2: FieldRef<"Match", 'Int'>
     readonly CreatedAt: FieldRef<"Match", 'DateTime'>
     readonly UpdatedAt: FieldRef<"Match", 'DateTime'>
-    readonly result: FieldRef<"Match", 'MatchResult'>
+    readonly result: FieldRef<"Match", 'Result'>
     readonly Winner_Id: FieldRef<"Match", 'String'>
     readonly tournamentId: FieldRef<"Match", 'String'>
+    readonly match_start: FieldRef<"Match", 'DateTime'>
+    readonly chrono: FieldRef<"Match", 'Int'>
   }
     
 
@@ -7201,10 +7343,12 @@ export namespace Prisma {
 
   export const TournamentScalarFieldEnum: {
     id: 'id',
+    Label: 'Label',
     CreatedAt: 'CreatedAt',
     UpdatedAt: 'UpdatedAt',
     count_player: 'count_player',
-    result: 'result'
+    result: 'result',
+    Winner_Id: 'Winner_Id'
   };
 
   export type TournamentScalarFieldEnum = (typeof TournamentScalarFieldEnum)[keyof typeof TournamentScalarFieldEnum]
@@ -7215,9 +7359,7 @@ export namespace Prisma {
     P_Id: 'P_Id',
     T_Id: 'T_Id',
     CreatedAt: 'CreatedAt',
-    UpdatedAt: 'UpdatedAt',
-    result: 'result',
-    Winner_Id: 'Winner_Id'
+    UpdatedAt: 'UpdatedAt'
   };
 
   export type Participate_TournamentScalarFieldEnum = (typeof Participate_TournamentScalarFieldEnum)[keyof typeof Participate_TournamentScalarFieldEnum]
@@ -7229,11 +7371,19 @@ export namespace Prisma {
     P2_Id: 'P2_Id',
     Ball_x: 'Ball_x',
     Ball_y: 'Ball_y',
+    Player1_x: 'Player1_x',
+    Player1_y: 'Player1_y',
+    Player2_x: 'Player2_x',
+    Player2_y: 'Player2_y',
+    score_player1: 'score_player1',
+    score_player2: 'score_player2',
     CreatedAt: 'CreatedAt',
     UpdatedAt: 'UpdatedAt',
     result: 'result',
     Winner_Id: 'Winner_Id',
-    tournamentId: 'tournamentId'
+    tournamentId: 'tournamentId',
+    match_start: 'match_start',
+    chrono: 'chrono'
   };
 
   export type MatchScalarFieldEnum = (typeof MatchScalarFieldEnum)[keyof typeof MatchScalarFieldEnum]
@@ -7296,9 +7446,9 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'MatchResult'
+   * Reference to a field of type 'Result'
    */
-  export type EnumMatchResultFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MatchResult'>
+  export type EnumResultFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Result'>
     
 
 
@@ -7318,7 +7468,7 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     id?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
-    name?: StringNullableFilter<"User"> | string | null
+    name?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     loggedIn?: BoolFilter<"User"> | boolean
     Auto_Match?: BoolFilter<"User"> | boolean
@@ -7329,14 +7479,14 @@ export namespace Prisma {
     Matchw?: MatchListRelationFilter
     Match2?: MatchListRelationFilter
     Match1?: MatchListRelationFilter
-    Win_Tournament?: Participate_TournamentListRelationFilter
+    Win_Tournament?: TournamentListRelationFilter
     Participate_Tournament?: Participate_TournamentListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
     email?: SortOrder
-    name?: SortOrderInput | SortOrder
+    name?: SortOrder
     password?: SortOrder
     loggedIn?: SortOrder
     Auto_Match?: SortOrder
@@ -7347,7 +7497,7 @@ export namespace Prisma {
     Matchw?: MatchOrderByRelationAggregateInput
     Match2?: MatchOrderByRelationAggregateInput
     Match1?: MatchOrderByRelationAggregateInput
-    Win_Tournament?: Participate_TournamentOrderByRelationAggregateInput
+    Win_Tournament?: TournamentOrderByRelationAggregateInput
     Participate_Tournament?: Participate_TournamentOrderByRelationAggregateInput
   }
 
@@ -7368,14 +7518,14 @@ export namespace Prisma {
     Matchw?: MatchListRelationFilter
     Match2?: MatchListRelationFilter
     Match1?: MatchListRelationFilter
-    Win_Tournament?: Participate_TournamentListRelationFilter
+    Win_Tournament?: TournamentListRelationFilter
     Participate_Tournament?: Participate_TournamentListRelationFilter
   }, "id" | "email" | "name">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrder
-    name?: SortOrderInput | SortOrder
+    name?: SortOrder
     password?: SortOrder
     loggedIn?: SortOrder
     Auto_Match?: SortOrder
@@ -7392,7 +7542,7 @@ export namespace Prisma {
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
-    name?: StringNullableWithAggregatesFilter<"User"> | string | null
+    name?: StringWithAggregatesFilter<"User"> | string
     password?: StringWithAggregatesFilter<"User"> | string
     loggedIn?: BoolWithAggregatesFilter<"User"> | boolean
     Auto_Match?: BoolWithAggregatesFilter<"User"> | boolean
@@ -7469,22 +7619,28 @@ export namespace Prisma {
     OR?: TournamentWhereInput[]
     NOT?: TournamentWhereInput | TournamentWhereInput[]
     id?: StringFilter<"Tournament"> | string
+    Label?: StringFilter<"Tournament"> | string
     CreatedAt?: DateTimeFilter<"Tournament"> | Date | string
     UpdatedAt?: DateTimeFilter<"Tournament"> | Date | string
     count_player?: IntFilter<"Tournament"> | number
-    result?: EnumMatchResultFilter<"Tournament"> | $Enums.MatchResult
+    result?: EnumResultFilter<"Tournament"> | $Enums.Result
+    Winner_Id?: StringFilter<"Tournament"> | string
     Match?: MatchListRelationFilter
     Participate_Tournament?: Participate_TournamentListRelationFilter
+    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type TournamentOrderByWithRelationInput = {
     id?: SortOrder
+    Label?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     count_player?: SortOrder
     result?: SortOrder
+    Winner_Id?: SortOrder
     Match?: MatchOrderByRelationAggregateInput
     Participate_Tournament?: Participate_TournamentOrderByRelationAggregateInput
+    Winner?: UserOrderByWithRelationInput
   }
 
   export type TournamentWhereUniqueInput = Prisma.AtLeast<{
@@ -7492,20 +7648,25 @@ export namespace Prisma {
     AND?: TournamentWhereInput | TournamentWhereInput[]
     OR?: TournamentWhereInput[]
     NOT?: TournamentWhereInput | TournamentWhereInput[]
+    Label?: StringFilter<"Tournament"> | string
     CreatedAt?: DateTimeFilter<"Tournament"> | Date | string
     UpdatedAt?: DateTimeFilter<"Tournament"> | Date | string
     count_player?: IntFilter<"Tournament"> | number
-    result?: EnumMatchResultFilter<"Tournament"> | $Enums.MatchResult
+    result?: EnumResultFilter<"Tournament"> | $Enums.Result
+    Winner_Id?: StringFilter<"Tournament"> | string
     Match?: MatchListRelationFilter
     Participate_Tournament?: Participate_TournamentListRelationFilter
+    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
 
   export type TournamentOrderByWithAggregationInput = {
     id?: SortOrder
+    Label?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     count_player?: SortOrder
     result?: SortOrder
+    Winner_Id?: SortOrder
     _count?: TournamentCountOrderByAggregateInput
     _avg?: TournamentAvgOrderByAggregateInput
     _max?: TournamentMaxOrderByAggregateInput
@@ -7518,10 +7679,12 @@ export namespace Prisma {
     OR?: TournamentScalarWhereWithAggregatesInput[]
     NOT?: TournamentScalarWhereWithAggregatesInput | TournamentScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Tournament"> | string
+    Label?: StringWithAggregatesFilter<"Tournament"> | string
     CreatedAt?: DateTimeWithAggregatesFilter<"Tournament"> | Date | string
     UpdatedAt?: DateTimeWithAggregatesFilter<"Tournament"> | Date | string
     count_player?: IntWithAggregatesFilter<"Tournament"> | number
-    result?: EnumMatchResultWithAggregatesFilter<"Tournament"> | $Enums.MatchResult
+    result?: EnumResultWithAggregatesFilter<"Tournament"> | $Enums.Result
+    Winner_Id?: StringWithAggregatesFilter<"Tournament"> | string
   }
 
   export type Participate_TournamentWhereInput = {
@@ -7533,9 +7696,6 @@ export namespace Prisma {
     T_Id?: StringFilter<"Participate_Tournament"> | string
     CreatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
     UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
-    result?: EnumMatchResultFilter<"Participate_Tournament"> | $Enums.MatchResult
-    Winner_Id?: StringFilter<"Participate_Tournament"> | string
-    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
     T?: XOR<TournamentScalarRelationFilter, TournamentWhereInput>
     P?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -7546,9 +7706,6 @@ export namespace Prisma {
     T_Id?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
-    result?: SortOrder
-    Winner_Id?: SortOrder
-    Winner?: UserOrderByWithRelationInput
     T?: TournamentOrderByWithRelationInput
     P?: UserOrderByWithRelationInput
   }
@@ -7562,9 +7719,6 @@ export namespace Prisma {
     T_Id?: StringFilter<"Participate_Tournament"> | string
     CreatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
     UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
-    result?: EnumMatchResultFilter<"Participate_Tournament"> | $Enums.MatchResult
-    Winner_Id?: StringFilter<"Participate_Tournament"> | string
-    Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
     T?: XOR<TournamentScalarRelationFilter, TournamentWhereInput>
     P?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -7575,8 +7729,6 @@ export namespace Prisma {
     T_Id?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
-    result?: SortOrder
-    Winner_Id?: SortOrder
     _count?: Participate_TournamentCountOrderByAggregateInput
     _max?: Participate_TournamentMaxOrderByAggregateInput
     _min?: Participate_TournamentMinOrderByAggregateInput
@@ -7591,8 +7743,6 @@ export namespace Prisma {
     T_Id?: StringWithAggregatesFilter<"Participate_Tournament"> | string
     CreatedAt?: DateTimeWithAggregatesFilter<"Participate_Tournament"> | Date | string
     UpdatedAt?: DateTimeWithAggregatesFilter<"Participate_Tournament"> | Date | string
-    result?: EnumMatchResultWithAggregatesFilter<"Participate_Tournament"> | $Enums.MatchResult
-    Winner_Id?: StringWithAggregatesFilter<"Participate_Tournament"> | string
   }
 
   export type MatchWhereInput = {
@@ -7604,11 +7754,19 @@ export namespace Prisma {
     P2_Id?: StringFilter<"Match"> | string
     Ball_x?: FloatFilter<"Match"> | number
     Ball_y?: FloatFilter<"Match"> | number
+    Player1_x?: FloatFilter<"Match"> | number
+    Player1_y?: FloatFilter<"Match"> | number
+    Player2_x?: FloatFilter<"Match"> | number
+    Player2_y?: FloatFilter<"Match"> | number
+    score_player1?: IntFilter<"Match"> | number
+    score_player2?: IntFilter<"Match"> | number
     CreatedAt?: DateTimeFilter<"Match"> | Date | string
     UpdatedAt?: DateTimeFilter<"Match"> | Date | string
-    result?: EnumMatchResultFilter<"Match"> | $Enums.MatchResult
+    result?: EnumResultFilter<"Match"> | $Enums.Result
     Winner_Id?: StringFilter<"Match"> | string
     tournamentId?: StringNullableFilter<"Match"> | string | null
+    match_start?: DateTimeFilter<"Match"> | Date | string
+    chrono?: IntFilter<"Match"> | number
     Tournament?: XOR<TournamentNullableScalarRelationFilter, TournamentWhereInput> | null
     Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
     P2?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -7621,11 +7779,19 @@ export namespace Prisma {
     P2_Id?: SortOrder
     Ball_x?: SortOrder
     Ball_y?: SortOrder
+    Player1_x?: SortOrder
+    Player1_y?: SortOrder
+    Player2_x?: SortOrder
+    Player2_y?: SortOrder
+    score_player1?: SortOrder
+    score_player2?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     result?: SortOrder
     Winner_Id?: SortOrder
     tournamentId?: SortOrderInput | SortOrder
+    match_start?: SortOrder
+    chrono?: SortOrder
     Tournament?: TournamentOrderByWithRelationInput
     Winner?: UserOrderByWithRelationInput
     P2?: UserOrderByWithRelationInput
@@ -7641,11 +7807,19 @@ export namespace Prisma {
     P2_Id?: StringFilter<"Match"> | string
     Ball_x?: FloatFilter<"Match"> | number
     Ball_y?: FloatFilter<"Match"> | number
+    Player1_x?: FloatFilter<"Match"> | number
+    Player1_y?: FloatFilter<"Match"> | number
+    Player2_x?: FloatFilter<"Match"> | number
+    Player2_y?: FloatFilter<"Match"> | number
+    score_player1?: IntFilter<"Match"> | number
+    score_player2?: IntFilter<"Match"> | number
     CreatedAt?: DateTimeFilter<"Match"> | Date | string
     UpdatedAt?: DateTimeFilter<"Match"> | Date | string
-    result?: EnumMatchResultFilter<"Match"> | $Enums.MatchResult
+    result?: EnumResultFilter<"Match"> | $Enums.Result
     Winner_Id?: StringFilter<"Match"> | string
     tournamentId?: StringNullableFilter<"Match"> | string | null
+    match_start?: DateTimeFilter<"Match"> | Date | string
+    chrono?: IntFilter<"Match"> | number
     Tournament?: XOR<TournamentNullableScalarRelationFilter, TournamentWhereInput> | null
     Winner?: XOR<UserScalarRelationFilter, UserWhereInput>
     P2?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -7658,11 +7832,19 @@ export namespace Prisma {
     P2_Id?: SortOrder
     Ball_x?: SortOrder
     Ball_y?: SortOrder
+    Player1_x?: SortOrder
+    Player1_y?: SortOrder
+    Player2_x?: SortOrder
+    Player2_y?: SortOrder
+    score_player1?: SortOrder
+    score_player2?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     result?: SortOrder
     Winner_Id?: SortOrder
     tournamentId?: SortOrderInput | SortOrder
+    match_start?: SortOrder
+    chrono?: SortOrder
     _count?: MatchCountOrderByAggregateInput
     _avg?: MatchAvgOrderByAggregateInput
     _max?: MatchMaxOrderByAggregateInput
@@ -7679,17 +7861,25 @@ export namespace Prisma {
     P2_Id?: StringWithAggregatesFilter<"Match"> | string
     Ball_x?: FloatWithAggregatesFilter<"Match"> | number
     Ball_y?: FloatWithAggregatesFilter<"Match"> | number
+    Player1_x?: FloatWithAggregatesFilter<"Match"> | number
+    Player1_y?: FloatWithAggregatesFilter<"Match"> | number
+    Player2_x?: FloatWithAggregatesFilter<"Match"> | number
+    Player2_y?: FloatWithAggregatesFilter<"Match"> | number
+    score_player1?: IntWithAggregatesFilter<"Match"> | number
+    score_player2?: IntWithAggregatesFilter<"Match"> | number
     CreatedAt?: DateTimeWithAggregatesFilter<"Match"> | Date | string
     UpdatedAt?: DateTimeWithAggregatesFilter<"Match"> | Date | string
-    result?: EnumMatchResultWithAggregatesFilter<"Match"> | $Enums.MatchResult
+    result?: EnumResultWithAggregatesFilter<"Match"> | $Enums.Result
     Winner_Id?: StringWithAggregatesFilter<"Match"> | string
     tournamentId?: StringNullableWithAggregatesFilter<"Match"> | string | null
+    match_start?: DateTimeWithAggregatesFilter<"Match"> | Date | string
+    chrono?: IntWithAggregatesFilter<"Match"> | number
   }
 
   export type UserCreateInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -7700,14 +7890,14 @@ export namespace Prisma {
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
     Match2?: MatchCreateNestedManyWithoutP2Input
     Match1?: MatchCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -7718,14 +7908,14 @@ export namespace Prisma {
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
     Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
     Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentUncheckedCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
   export type UserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -7736,14 +7926,14 @@ export namespace Prisma {
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUpdateManyWithoutP2NestedInput
     Match1?: MatchUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -7754,14 +7944,14 @@ export namespace Prisma {
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
     Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUncheckedUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
   export type UserCreateManyInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -7772,7 +7962,7 @@ export namespace Prisma {
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -7783,7 +7973,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -7854,74 +8044,85 @@ export namespace Prisma {
 
   export type TournamentCreateInput = {
     id?: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     count_player?: number
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Match?: MatchCreateNestedManyWithoutTournamentInput
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutTInput
+    Winner: UserCreateNestedOneWithoutWin_TournamentInput
   }
 
   export type TournamentUncheckedCreateInput = {
     id?: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     count_player?: number
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    Winner_Id: string
     Match?: MatchUncheckedCreateNestedManyWithoutTournamentInput
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutTInput
   }
 
   export type TournamentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Match?: MatchUpdateManyWithoutTournamentNestedInput
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutTNestedInput
+    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
   }
 
   export type TournamentUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    Winner_Id?: StringFieldUpdateOperationsInput | string
     Match?: MatchUncheckedUpdateManyWithoutTournamentNestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutTNestedInput
   }
 
   export type TournamentCreateManyInput = {
     id?: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     count_player?: number
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    Winner_Id: string
   }
 
   export type TournamentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
   }
 
   export type TournamentUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
   export type Participate_TournamentCreateInput = {
     id?: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner: UserCreateNestedOneWithoutWin_TournamentInput
     T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
     P: UserCreateNestedOneWithoutParticipate_TournamentInput
   }
@@ -7932,16 +8133,12 @@ export namespace Prisma {
     T_Id: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
   export type Participate_TournamentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
     T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
     P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
   }
@@ -7952,8 +8149,6 @@ export namespace Prisma {
     T_Id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
   export type Participate_TournamentCreateManyInput = {
@@ -7962,15 +8157,12 @@ export namespace Prisma {
     T_Id: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
   export type Participate_TournamentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
   }
 
   export type Participate_TournamentUncheckedUpdateManyInput = {
@@ -7979,17 +8171,23 @@ export namespace Prisma {
     T_Id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
   export type MatchCreateInput = {
     id?: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    match_start?: Date | string
+    chrono?: number
     Tournament?: TournamentCreateNestedOneWithoutMatchInput
     Winner: UserCreateNestedOneWithoutMatchwInput
     P2: UserCreateNestedOneWithoutMatch2Input
@@ -8002,20 +8200,36 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
     Tournament?: TournamentUpdateOneWithoutMatchNestedInput
     Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
     P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
@@ -8028,11 +8242,19 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchCreateManyInput = {
@@ -8041,20 +8263,36 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchUncheckedUpdateManyInput = {
@@ -8063,11 +8301,19 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -8084,6 +8330,11 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | null
@@ -8098,11 +8349,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type FriendRequestListRelationFilter = {
     every?: FriendRequestWhereInput
     some?: FriendRequestWhereInput
@@ -8113,6 +8359,12 @@ export namespace Prisma {
     every?: MatchWhereInput
     some?: MatchWhereInput
     none?: MatchWhereInput
+  }
+
+  export type TournamentListRelationFilter = {
+    every?: TournamentWhereInput
+    some?: TournamentWhereInput
+    none?: TournamentWhereInput
   }
 
   export type Participate_TournamentListRelationFilter = {
@@ -8131,6 +8383,10 @@ export namespace Prisma {
   }
 
   export type MatchOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TournamentOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -8188,6 +8444,14 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | null
@@ -8203,14 +8467,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type EnumFriendRequestStatusFilter<$PrismaModel = never> = {
@@ -8303,19 +8559,21 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type EnumMatchResultFilter<$PrismaModel = never> = {
-    equals?: $Enums.MatchResult | EnumMatchResultFieldRefInput<$PrismaModel>
-    in?: $Enums.MatchResult[]
-    notIn?: $Enums.MatchResult[]
-    not?: NestedEnumMatchResultFilter<$PrismaModel> | $Enums.MatchResult
+  export type EnumResultFilter<$PrismaModel = never> = {
+    equals?: $Enums.Result | EnumResultFieldRefInput<$PrismaModel>
+    in?: $Enums.Result[]
+    notIn?: $Enums.Result[]
+    not?: NestedEnumResultFilter<$PrismaModel> | $Enums.Result
   }
 
   export type TournamentCountOrderByAggregateInput = {
     id?: SortOrder
+    Label?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     count_player?: SortOrder
     result?: SortOrder
+    Winner_Id?: SortOrder
   }
 
   export type TournamentAvgOrderByAggregateInput = {
@@ -8324,18 +8582,22 @@ export namespace Prisma {
 
   export type TournamentMaxOrderByAggregateInput = {
     id?: SortOrder
+    Label?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     count_player?: SortOrder
     result?: SortOrder
+    Winner_Id?: SortOrder
   }
 
   export type TournamentMinOrderByAggregateInput = {
     id?: SortOrder
+    Label?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     count_player?: SortOrder
     result?: SortOrder
+    Winner_Id?: SortOrder
   }
 
   export type TournamentSumOrderByAggregateInput = {
@@ -8358,14 +8620,14 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type EnumMatchResultWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.MatchResult | EnumMatchResultFieldRefInput<$PrismaModel>
-    in?: $Enums.MatchResult[]
-    notIn?: $Enums.MatchResult[]
-    not?: NestedEnumMatchResultWithAggregatesFilter<$PrismaModel> | $Enums.MatchResult
+  export type EnumResultWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Result | EnumResultFieldRefInput<$PrismaModel>
+    in?: $Enums.Result[]
+    notIn?: $Enums.Result[]
+    not?: NestedEnumResultWithAggregatesFilter<$PrismaModel> | $Enums.Result
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumMatchResultFilter<$PrismaModel>
-    _max?: NestedEnumMatchResultFilter<$PrismaModel>
+    _min?: NestedEnumResultFilter<$PrismaModel>
+    _max?: NestedEnumResultFilter<$PrismaModel>
   }
 
   export type TournamentScalarRelationFilter = {
@@ -8379,8 +8641,6 @@ export namespace Prisma {
     T_Id?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
-    result?: SortOrder
-    Winner_Id?: SortOrder
   }
 
   export type Participate_TournamentMaxOrderByAggregateInput = {
@@ -8389,8 +8649,6 @@ export namespace Prisma {
     T_Id?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
-    result?: SortOrder
-    Winner_Id?: SortOrder
   }
 
   export type Participate_TournamentMinOrderByAggregateInput = {
@@ -8399,8 +8657,6 @@ export namespace Prisma {
     T_Id?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
-    result?: SortOrder
-    Winner_Id?: SortOrder
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -8425,16 +8681,31 @@ export namespace Prisma {
     P2_Id?: SortOrder
     Ball_x?: SortOrder
     Ball_y?: SortOrder
+    Player1_x?: SortOrder
+    Player1_y?: SortOrder
+    Player2_x?: SortOrder
+    Player2_y?: SortOrder
+    score_player1?: SortOrder
+    score_player2?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     result?: SortOrder
     Winner_Id?: SortOrder
     tournamentId?: SortOrder
+    match_start?: SortOrder
+    chrono?: SortOrder
   }
 
   export type MatchAvgOrderByAggregateInput = {
     Ball_x?: SortOrder
     Ball_y?: SortOrder
+    Player1_x?: SortOrder
+    Player1_y?: SortOrder
+    Player2_x?: SortOrder
+    Player2_y?: SortOrder
+    score_player1?: SortOrder
+    score_player2?: SortOrder
+    chrono?: SortOrder
   }
 
   export type MatchMaxOrderByAggregateInput = {
@@ -8443,11 +8714,19 @@ export namespace Prisma {
     P2_Id?: SortOrder
     Ball_x?: SortOrder
     Ball_y?: SortOrder
+    Player1_x?: SortOrder
+    Player1_y?: SortOrder
+    Player2_x?: SortOrder
+    Player2_y?: SortOrder
+    score_player1?: SortOrder
+    score_player2?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     result?: SortOrder
     Winner_Id?: SortOrder
     tournamentId?: SortOrder
+    match_start?: SortOrder
+    chrono?: SortOrder
   }
 
   export type MatchMinOrderByAggregateInput = {
@@ -8456,16 +8735,31 @@ export namespace Prisma {
     P2_Id?: SortOrder
     Ball_x?: SortOrder
     Ball_y?: SortOrder
+    Player1_x?: SortOrder
+    Player1_y?: SortOrder
+    Player2_x?: SortOrder
+    Player2_y?: SortOrder
+    score_player1?: SortOrder
+    score_player2?: SortOrder
     CreatedAt?: SortOrder
     UpdatedAt?: SortOrder
     result?: SortOrder
     Winner_Id?: SortOrder
     tournamentId?: SortOrder
+    match_start?: SortOrder
+    chrono?: SortOrder
   }
 
   export type MatchSumOrderByAggregateInput = {
     Ball_x?: SortOrder
     Ball_y?: SortOrder
+    Player1_x?: SortOrder
+    Player1_y?: SortOrder
+    Player2_x?: SortOrder
+    Player2_y?: SortOrder
+    score_player1?: SortOrder
+    score_player2?: SortOrder
+    chrono?: SortOrder
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -8519,11 +8813,11 @@ export namespace Prisma {
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
-  export type Participate_TournamentCreateNestedManyWithoutWinnerInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  export type TournamentCreateNestedManyWithoutWinnerInput = {
+    create?: XOR<TournamentCreateWithoutWinnerInput, TournamentUncheckedCreateWithoutWinnerInput> | TournamentCreateWithoutWinnerInput[] | TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: TournamentCreateOrConnectWithoutWinnerInput | TournamentCreateOrConnectWithoutWinnerInput[]
+    createMany?: TournamentCreateManyWinnerInputEnvelope
+    connect?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
   }
 
   export type Participate_TournamentCreateNestedManyWithoutPInput = {
@@ -8568,11 +8862,11 @@ export namespace Prisma {
     connect?: MatchWhereUniqueInput | MatchWhereUniqueInput[]
   }
 
-  export type Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
+  export type TournamentUncheckedCreateNestedManyWithoutWinnerInput = {
+    create?: XOR<TournamentCreateWithoutWinnerInput, TournamentUncheckedCreateWithoutWinnerInput> | TournamentCreateWithoutWinnerInput[] | TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: TournamentCreateOrConnectWithoutWinnerInput | TournamentCreateOrConnectWithoutWinnerInput[]
+    createMany?: TournamentCreateManyWinnerInputEnvelope
+    connect?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
   }
 
   export type Participate_TournamentUncheckedCreateNestedManyWithoutPInput = {
@@ -8586,12 +8880,12 @@ export namespace Prisma {
     set?: string
   }
 
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type FriendRequestUpdateManyWithoutReceiverNestedInput = {
@@ -8664,18 +8958,18 @@ export namespace Prisma {
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type Participate_TournamentUpdateManyWithoutWinnerNestedInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    update?: Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
-    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutWinnerInput | Participate_TournamentUpdateManyWithWhereWithoutWinnerInput[]
-    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+  export type TournamentUpdateManyWithoutWinnerNestedInput = {
+    create?: XOR<TournamentCreateWithoutWinnerInput, TournamentUncheckedCreateWithoutWinnerInput> | TournamentCreateWithoutWinnerInput[] | TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: TournamentCreateOrConnectWithoutWinnerInput | TournamentCreateOrConnectWithoutWinnerInput[]
+    upsert?: TournamentUpsertWithWhereUniqueWithoutWinnerInput | TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
+    createMany?: TournamentCreateManyWinnerInputEnvelope
+    set?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    disconnect?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    delete?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    connect?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    update?: TournamentUpdateWithWhereUniqueWithoutWinnerInput | TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
+    updateMany?: TournamentUpdateManyWithWhereWithoutWinnerInput | TournamentUpdateManyWithWhereWithoutWinnerInput[]
+    deleteMany?: TournamentScalarWhereInput | TournamentScalarWhereInput[]
   }
 
   export type Participate_TournamentUpdateManyWithoutPNestedInput = {
@@ -8762,18 +9056,18 @@ export namespace Prisma {
     deleteMany?: MatchScalarWhereInput | MatchScalarWhereInput[]
   }
 
-  export type Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput = {
-    create?: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput> | Participate_TournamentCreateWithoutWinnerInput[] | Participate_TournamentUncheckedCreateWithoutWinnerInput[]
-    connectOrCreate?: Participate_TournamentCreateOrConnectWithoutWinnerInput | Participate_TournamentCreateOrConnectWithoutWinnerInput[]
-    upsert?: Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
-    createMany?: Participate_TournamentCreateManyWinnerInputEnvelope
-    set?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    disconnect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    delete?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
-    update?: Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput | Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
-    updateMany?: Participate_TournamentUpdateManyWithWhereWithoutWinnerInput | Participate_TournamentUpdateManyWithWhereWithoutWinnerInput[]
-    deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+  export type TournamentUncheckedUpdateManyWithoutWinnerNestedInput = {
+    create?: XOR<TournamentCreateWithoutWinnerInput, TournamentUncheckedCreateWithoutWinnerInput> | TournamentCreateWithoutWinnerInput[] | TournamentUncheckedCreateWithoutWinnerInput[]
+    connectOrCreate?: TournamentCreateOrConnectWithoutWinnerInput | TournamentCreateOrConnectWithoutWinnerInput[]
+    upsert?: TournamentUpsertWithWhereUniqueWithoutWinnerInput | TournamentUpsertWithWhereUniqueWithoutWinnerInput[]
+    createMany?: TournamentCreateManyWinnerInputEnvelope
+    set?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    disconnect?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    delete?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    connect?: TournamentWhereUniqueInput | TournamentWhereUniqueInput[]
+    update?: TournamentUpdateWithWhereUniqueWithoutWinnerInput | TournamentUpdateWithWhereUniqueWithoutWinnerInput[]
+    updateMany?: TournamentUpdateManyWithWhereWithoutWinnerInput | TournamentUpdateManyWithWhereWithoutWinnerInput[]
+    deleteMany?: TournamentScalarWhereInput | TournamentScalarWhereInput[]
   }
 
   export type Participate_TournamentUncheckedUpdateManyWithoutPNestedInput = {
@@ -8840,6 +9134,12 @@ export namespace Prisma {
     connect?: Participate_TournamentWhereUniqueInput | Participate_TournamentWhereUniqueInput[]
   }
 
+  export type UserCreateNestedOneWithoutWin_TournamentInput = {
+    create?: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
+    connectOrCreate?: UserCreateOrConnectWithoutWin_TournamentInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type MatchUncheckedCreateNestedManyWithoutTournamentInput = {
     create?: XOR<MatchCreateWithoutTournamentInput, MatchUncheckedCreateWithoutTournamentInput> | MatchCreateWithoutTournamentInput[] | MatchUncheckedCreateWithoutTournamentInput[]
     connectOrCreate?: MatchCreateOrConnectWithoutTournamentInput | MatchCreateOrConnectWithoutTournamentInput[]
@@ -8862,8 +9162,8 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type EnumMatchResultFieldUpdateOperationsInput = {
-    set?: $Enums.MatchResult
+  export type EnumResultFieldUpdateOperationsInput = {
+    set?: $Enums.Result
   }
 
   export type MatchUpdateManyWithoutTournamentNestedInput = {
@@ -8894,6 +9194,14 @@ export namespace Prisma {
     deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
   }
 
+  export type UserUpdateOneRequiredWithoutWin_TournamentNestedInput = {
+    create?: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
+    connectOrCreate?: UserCreateOrConnectWithoutWin_TournamentInput
+    upsert?: UserUpsertWithoutWin_TournamentInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutWin_TournamentInput, UserUpdateWithoutWin_TournamentInput>, UserUncheckedUpdateWithoutWin_TournamentInput>
+  }
+
   export type MatchUncheckedUpdateManyWithoutTournamentNestedInput = {
     create?: XOR<MatchCreateWithoutTournamentInput, MatchUncheckedCreateWithoutTournamentInput> | MatchCreateWithoutTournamentInput[] | MatchUncheckedCreateWithoutTournamentInput[]
     connectOrCreate?: MatchCreateOrConnectWithoutTournamentInput | MatchCreateOrConnectWithoutTournamentInput[]
@@ -8922,12 +9230,6 @@ export namespace Prisma {
     deleteMany?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
   }
 
-  export type UserCreateNestedOneWithoutWin_TournamentInput = {
-    create?: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutWin_TournamentInput
-    connect?: UserWhereUniqueInput
-  }
-
   export type TournamentCreateNestedOneWithoutParticipate_TournamentInput = {
     create?: XOR<TournamentCreateWithoutParticipate_TournamentInput, TournamentUncheckedCreateWithoutParticipate_TournamentInput>
     connectOrCreate?: TournamentCreateOrConnectWithoutParticipate_TournamentInput
@@ -8938,14 +9240,6 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
     connectOrCreate?: UserCreateOrConnectWithoutParticipate_TournamentInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type UserUpdateOneRequiredWithoutWin_TournamentNestedInput = {
-    create?: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutWin_TournamentInput
-    upsert?: UserUpsertWithoutWin_TournamentInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutWin_TournamentInput, UserUpdateWithoutWin_TournamentInput>, UserUncheckedUpdateWithoutWin_TournamentInput>
   }
 
   export type TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput = {
@@ -9044,6 +9338,11 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | null
@@ -9056,11 +9355,6 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -9091,6 +9385,14 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | null
@@ -9117,14 +9419,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumFriendRequestStatusFilter<$PrismaModel = never> = {
@@ -9169,11 +9463,11 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type NestedEnumMatchResultFilter<$PrismaModel = never> = {
-    equals?: $Enums.MatchResult | EnumMatchResultFieldRefInput<$PrismaModel>
-    in?: $Enums.MatchResult[]
-    notIn?: $Enums.MatchResult[]
-    not?: NestedEnumMatchResultFilter<$PrismaModel> | $Enums.MatchResult
+  export type NestedEnumResultFilter<$PrismaModel = never> = {
+    equals?: $Enums.Result | EnumResultFieldRefInput<$PrismaModel>
+    in?: $Enums.Result[]
+    notIn?: $Enums.Result[]
+    not?: NestedEnumResultFilter<$PrismaModel> | $Enums.Result
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -9203,14 +9497,14 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type NestedEnumMatchResultWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.MatchResult | EnumMatchResultFieldRefInput<$PrismaModel>
-    in?: $Enums.MatchResult[]
-    notIn?: $Enums.MatchResult[]
-    not?: NestedEnumMatchResultWithAggregatesFilter<$PrismaModel> | $Enums.MatchResult
+  export type NestedEnumResultWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Result | EnumResultFieldRefInput<$PrismaModel>
+    in?: $Enums.Result[]
+    notIn?: $Enums.Result[]
+    not?: NestedEnumResultWithAggregatesFilter<$PrismaModel> | $Enums.Result
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumMatchResultFilter<$PrismaModel>
-    _max?: NestedEnumMatchResultFilter<$PrismaModel>
+    _min?: NestedEnumResultFilter<$PrismaModel>
+    _max?: NestedEnumResultFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -9283,9 +9577,17 @@ export namespace Prisma {
     id?: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    match_start?: Date | string
+    chrono?: number
     Tournament?: TournamentCreateNestedOneWithoutMatchInput
     P2: UserCreateNestedOneWithoutMatch2Input
     P1: UserCreateNestedOneWithoutMatch1Input
@@ -9297,10 +9599,18 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchCreateOrConnectWithoutWinnerInput = {
@@ -9316,9 +9626,17 @@ export namespace Prisma {
     id?: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    match_start?: Date | string
+    chrono?: number
     Tournament?: TournamentCreateNestedOneWithoutMatchInput
     Winner: UserCreateNestedOneWithoutMatchwInput
     P1: UserCreateNestedOneWithoutMatch1Input
@@ -9329,11 +9647,19 @@ export namespace Prisma {
     P1_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchCreateOrConnectWithoutP2Input = {
@@ -9349,9 +9675,17 @@ export namespace Prisma {
     id?: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    match_start?: Date | string
+    chrono?: number
     Tournament?: TournamentCreateNestedOneWithoutMatchInput
     Winner: UserCreateNestedOneWithoutMatchwInput
     P2: UserCreateNestedOneWithoutMatch2Input
@@ -9362,11 +9696,19 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchCreateOrConnectWithoutP1Input = {
@@ -9378,39 +9720,41 @@ export namespace Prisma {
     data: MatchCreateManyP1Input | MatchCreateManyP1Input[]
   }
 
-  export type Participate_TournamentCreateWithoutWinnerInput = {
+  export type TournamentCreateWithoutWinnerInput = {
     id?: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
-    P: UserCreateNestedOneWithoutParticipate_TournamentInput
+    count_player?: number
+    result?: $Enums.Result
+    Match?: MatchCreateNestedManyWithoutTournamentInput
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutTInput
   }
 
-  export type Participate_TournamentUncheckedCreateWithoutWinnerInput = {
+  export type TournamentUncheckedCreateWithoutWinnerInput = {
     id?: string
-    P_Id: string
-    T_Id: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    count_player?: number
+    result?: $Enums.Result
+    Match?: MatchUncheckedCreateNestedManyWithoutTournamentInput
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutTInput
   }
 
-  export type Participate_TournamentCreateOrConnectWithoutWinnerInput = {
-    where: Participate_TournamentWhereUniqueInput
-    create: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput>
+  export type TournamentCreateOrConnectWithoutWinnerInput = {
+    where: TournamentWhereUniqueInput
+    create: XOR<TournamentCreateWithoutWinnerInput, TournamentUncheckedCreateWithoutWinnerInput>
   }
 
-  export type Participate_TournamentCreateManyWinnerInputEnvelope = {
-    data: Participate_TournamentCreateManyWinnerInput | Participate_TournamentCreateManyWinnerInput[]
+  export type TournamentCreateManyWinnerInputEnvelope = {
+    data: TournamentCreateManyWinnerInput | TournamentCreateManyWinnerInput[]
   }
 
   export type Participate_TournamentCreateWithoutPInput = {
     id?: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner: UserCreateNestedOneWithoutWin_TournamentInput
     T: TournamentCreateNestedOneWithoutParticipate_TournamentInput
   }
 
@@ -9419,8 +9763,6 @@ export namespace Prisma {
     T_Id: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
   export type Participate_TournamentCreateOrConnectWithoutPInput = {
@@ -9501,11 +9843,19 @@ export namespace Prisma {
     P2_Id?: StringFilter<"Match"> | string
     Ball_x?: FloatFilter<"Match"> | number
     Ball_y?: FloatFilter<"Match"> | number
+    Player1_x?: FloatFilter<"Match"> | number
+    Player1_y?: FloatFilter<"Match"> | number
+    Player2_x?: FloatFilter<"Match"> | number
+    Player2_y?: FloatFilter<"Match"> | number
+    score_player1?: IntFilter<"Match"> | number
+    score_player2?: IntFilter<"Match"> | number
     CreatedAt?: DateTimeFilter<"Match"> | Date | string
     UpdatedAt?: DateTimeFilter<"Match"> | Date | string
-    result?: EnumMatchResultFilter<"Match"> | $Enums.MatchResult
+    result?: EnumResultFilter<"Match"> | $Enums.Result
     Winner_Id?: StringFilter<"Match"> | string
     tournamentId?: StringNullableFilter<"Match"> | string | null
+    match_start?: DateTimeFilter<"Match"> | Date | string
+    chrono?: IntFilter<"Match"> | number
   }
 
   export type MatchUpsertWithWhereUniqueWithoutP2Input = {
@@ -9540,33 +9890,33 @@ export namespace Prisma {
     data: XOR<MatchUpdateManyMutationInput, MatchUncheckedUpdateManyWithoutP1Input>
   }
 
-  export type Participate_TournamentUpsertWithWhereUniqueWithoutWinnerInput = {
-    where: Participate_TournamentWhereUniqueInput
-    update: XOR<Participate_TournamentUpdateWithoutWinnerInput, Participate_TournamentUncheckedUpdateWithoutWinnerInput>
-    create: XOR<Participate_TournamentCreateWithoutWinnerInput, Participate_TournamentUncheckedCreateWithoutWinnerInput>
+  export type TournamentUpsertWithWhereUniqueWithoutWinnerInput = {
+    where: TournamentWhereUniqueInput
+    update: XOR<TournamentUpdateWithoutWinnerInput, TournamentUncheckedUpdateWithoutWinnerInput>
+    create: XOR<TournamentCreateWithoutWinnerInput, TournamentUncheckedCreateWithoutWinnerInput>
   }
 
-  export type Participate_TournamentUpdateWithWhereUniqueWithoutWinnerInput = {
-    where: Participate_TournamentWhereUniqueInput
-    data: XOR<Participate_TournamentUpdateWithoutWinnerInput, Participate_TournamentUncheckedUpdateWithoutWinnerInput>
+  export type TournamentUpdateWithWhereUniqueWithoutWinnerInput = {
+    where: TournamentWhereUniqueInput
+    data: XOR<TournamentUpdateWithoutWinnerInput, TournamentUncheckedUpdateWithoutWinnerInput>
   }
 
-  export type Participate_TournamentUpdateManyWithWhereWithoutWinnerInput = {
-    where: Participate_TournamentScalarWhereInput
-    data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutWinnerInput>
+  export type TournamentUpdateManyWithWhereWithoutWinnerInput = {
+    where: TournamentScalarWhereInput
+    data: XOR<TournamentUpdateManyMutationInput, TournamentUncheckedUpdateManyWithoutWinnerInput>
   }
 
-  export type Participate_TournamentScalarWhereInput = {
-    AND?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
-    OR?: Participate_TournamentScalarWhereInput[]
-    NOT?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
-    id?: StringFilter<"Participate_Tournament"> | string
-    P_Id?: StringFilter<"Participate_Tournament"> | string
-    T_Id?: StringFilter<"Participate_Tournament"> | string
-    CreatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
-    UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
-    result?: EnumMatchResultFilter<"Participate_Tournament"> | $Enums.MatchResult
-    Winner_Id?: StringFilter<"Participate_Tournament"> | string
+  export type TournamentScalarWhereInput = {
+    AND?: TournamentScalarWhereInput | TournamentScalarWhereInput[]
+    OR?: TournamentScalarWhereInput[]
+    NOT?: TournamentScalarWhereInput | TournamentScalarWhereInput[]
+    id?: StringFilter<"Tournament"> | string
+    Label?: StringFilter<"Tournament"> | string
+    CreatedAt?: DateTimeFilter<"Tournament"> | Date | string
+    UpdatedAt?: DateTimeFilter<"Tournament"> | Date | string
+    count_player?: IntFilter<"Tournament"> | number
+    result?: EnumResultFilter<"Tournament"> | $Enums.Result
+    Winner_Id?: StringFilter<"Tournament"> | string
   }
 
   export type Participate_TournamentUpsertWithWhereUniqueWithoutPInput = {
@@ -9585,10 +9935,21 @@ export namespace Prisma {
     data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutPInput>
   }
 
+  export type Participate_TournamentScalarWhereInput = {
+    AND?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+    OR?: Participate_TournamentScalarWhereInput[]
+    NOT?: Participate_TournamentScalarWhereInput | Participate_TournamentScalarWhereInput[]
+    id?: StringFilter<"Participate_Tournament"> | string
+    P_Id?: StringFilter<"Participate_Tournament"> | string
+    T_Id?: StringFilter<"Participate_Tournament"> | string
+    CreatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
+    UpdatedAt?: DateTimeFilter<"Participate_Tournament"> | Date | string
+  }
+
   export type UserCreateWithoutReceivedRequestsInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -9598,14 +9959,14 @@ export namespace Prisma {
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
     Match2?: MatchCreateNestedManyWithoutP2Input
     Match1?: MatchCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateWithoutReceivedRequestsInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -9615,7 +9976,7 @@ export namespace Prisma {
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
     Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
     Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentUncheckedCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
@@ -9627,7 +9988,7 @@ export namespace Prisma {
   export type UserCreateWithoutSentRequestsInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -9637,14 +9998,14 @@ export namespace Prisma {
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
     Match2?: MatchCreateNestedManyWithoutP2Input
     Match1?: MatchCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateWithoutSentRequestsInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -9654,7 +10015,7 @@ export namespace Prisma {
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
     Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
     Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentUncheckedCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
@@ -9677,7 +10038,7 @@ export namespace Prisma {
   export type UserUpdateWithoutReceivedRequestsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -9687,14 +10048,14 @@ export namespace Prisma {
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUpdateManyWithoutP2NestedInput
     Match1?: MatchUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -9704,7 +10065,7 @@ export namespace Prisma {
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
     Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUncheckedUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
@@ -9722,7 +10083,7 @@ export namespace Prisma {
   export type UserUpdateWithoutSentRequestsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -9732,14 +10093,14 @@ export namespace Prisma {
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUpdateManyWithoutP2NestedInput
     Match1?: MatchUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSentRequestsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -9749,7 +10110,7 @@ export namespace Prisma {
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
     Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUncheckedUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
@@ -9757,9 +10118,17 @@ export namespace Prisma {
     id?: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    match_start?: Date | string
+    chrono?: number
     Winner: UserCreateNestedOneWithoutMatchwInput
     P2: UserCreateNestedOneWithoutMatch2Input
     P1: UserCreateNestedOneWithoutMatch1Input
@@ -9771,10 +10140,18 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchCreateOrConnectWithoutTournamentInput = {
@@ -9790,8 +10167,6 @@ export namespace Prisma {
     id?: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner: UserCreateNestedOneWithoutWin_TournamentInput
     P: UserCreateNestedOneWithoutParticipate_TournamentInput
   }
 
@@ -9800,8 +10175,6 @@ export namespace Prisma {
     P_Id: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
   export type Participate_TournamentCreateOrConnectWithoutTInput = {
@@ -9811,6 +10184,45 @@ export namespace Prisma {
 
   export type Participate_TournamentCreateManyTInputEnvelope = {
     data: Participate_TournamentCreateManyTInput | Participate_TournamentCreateManyTInput[]
+  }
+
+  export type UserCreateWithoutWin_TournamentInput = {
+    id?: string
+    email: string
+    name: string
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
+    Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
+  }
+
+  export type UserUncheckedCreateWithoutWin_TournamentInput = {
+    id?: string
+    email: string
+    name: string
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
+    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
+  }
+
+  export type UserCreateOrConnectWithoutWin_TournamentInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
   }
 
   export type MatchUpsertWithWhereUniqueWithoutTournamentInput = {
@@ -9845,107 +10257,6 @@ export namespace Prisma {
     data: XOR<Participate_TournamentUpdateManyMutationInput, Participate_TournamentUncheckedUpdateManyWithoutTInput>
   }
 
-  export type UserCreateWithoutWin_TournamentInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    Auto_Match?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
-    Matchw?: MatchCreateNestedManyWithoutWinnerInput
-    Match2?: MatchCreateNestedManyWithoutP2Input
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
-  }
-
-  export type UserUncheckedCreateWithoutWin_TournamentInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    Auto_Match?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
-    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
-  }
-
-  export type UserCreateOrConnectWithoutWin_TournamentInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
-  }
-
-  export type TournamentCreateWithoutParticipate_TournamentInput = {
-    id?: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    count_player?: number
-    result?: $Enums.MatchResult
-    Match?: MatchCreateNestedManyWithoutTournamentInput
-  }
-
-  export type TournamentUncheckedCreateWithoutParticipate_TournamentInput = {
-    id?: string
-    CreatedAt?: Date | string
-    UpdatedAt?: Date | string
-    count_player?: number
-    result?: $Enums.MatchResult
-    Match?: MatchUncheckedCreateNestedManyWithoutTournamentInput
-  }
-
-  export type TournamentCreateOrConnectWithoutParticipate_TournamentInput = {
-    where: TournamentWhereUniqueInput
-    create: XOR<TournamentCreateWithoutParticipate_TournamentInput, TournamentUncheckedCreateWithoutParticipate_TournamentInput>
-  }
-
-  export type UserCreateWithoutParticipate_TournamentInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    Auto_Match?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
-    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
-    Matchw?: MatchCreateNestedManyWithoutWinnerInput
-    Match2?: MatchCreateNestedManyWithoutP2Input
-    Match1?: MatchCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
-  }
-
-  export type UserUncheckedCreateWithoutParticipate_TournamentInput = {
-    id?: string
-    email: string
-    name?: string | null
-    password: string
-    loggedIn?: boolean
-    Auto_Match?: boolean
-    isOnline?: boolean
-    avatar?: string | null
-    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
-    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
-    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
-    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
-    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
-  }
-
-  export type UserCreateOrConnectWithoutParticipate_TournamentInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
-  }
-
   export type UserUpsertWithoutWin_TournamentInput = {
     update: XOR<UserUpdateWithoutWin_TournamentInput, UserUncheckedUpdateWithoutWin_TournamentInput>
     create: XOR<UserCreateWithoutWin_TournamentInput, UserUncheckedCreateWithoutWin_TournamentInput>
@@ -9960,7 +10271,7 @@ export namespace Prisma {
   export type UserUpdateWithoutWin_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -9977,7 +10288,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutWin_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -9989,6 +10300,72 @@ export namespace Prisma {
     Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
     Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
+  }
+
+  export type TournamentCreateWithoutParticipate_TournamentInput = {
+    id?: string
+    Label: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    count_player?: number
+    result?: $Enums.Result
+    Match?: MatchCreateNestedManyWithoutTournamentInput
+    Winner: UserCreateNestedOneWithoutWin_TournamentInput
+  }
+
+  export type TournamentUncheckedCreateWithoutParticipate_TournamentInput = {
+    id?: string
+    Label: string
+    CreatedAt?: Date | string
+    UpdatedAt?: Date | string
+    count_player?: number
+    result?: $Enums.Result
+    Winner_Id: string
+    Match?: MatchUncheckedCreateNestedManyWithoutTournamentInput
+  }
+
+  export type TournamentCreateOrConnectWithoutParticipate_TournamentInput = {
+    where: TournamentWhereUniqueInput
+    create: XOR<TournamentCreateWithoutParticipate_TournamentInput, TournamentUncheckedCreateWithoutParticipate_TournamentInput>
+  }
+
+  export type UserCreateWithoutParticipate_TournamentInput = {
+    id?: string
+    email: string
+    name: string
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
+    Matchw?: MatchCreateNestedManyWithoutWinnerInput
+    Match2?: MatchCreateNestedManyWithoutP2Input
+    Match1?: MatchCreateNestedManyWithoutP1Input
+    Win_Tournament?: TournamentCreateNestedManyWithoutWinnerInput
+  }
+
+  export type UserUncheckedCreateWithoutParticipate_TournamentInput = {
+    id?: string
+    email: string
+    name: string
+    password: string
+    loggedIn?: boolean
+    Auto_Match?: boolean
+    isOnline?: boolean
+    avatar?: string | null
+    receivedRequests?: FriendRequestUncheckedCreateNestedManyWithoutReceiverInput
+    sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
+    Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
+    Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
+    Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
+    Win_Tournament?: TournamentUncheckedCreateNestedManyWithoutWinnerInput
+  }
+
+  export type UserCreateOrConnectWithoutParticipate_TournamentInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutParticipate_TournamentInput, UserUncheckedCreateWithoutParticipate_TournamentInput>
   }
 
   export type TournamentUpsertWithoutParticipate_TournamentInput = {
@@ -10004,19 +10381,23 @@ export namespace Prisma {
 
   export type TournamentUpdateWithoutParticipate_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Match?: MatchUpdateManyWithoutTournamentNestedInput
+    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
   }
 
   export type TournamentUncheckedUpdateWithoutParticipate_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    Winner_Id?: StringFieldUpdateOperationsInput | string
     Match?: MatchUncheckedUpdateManyWithoutTournamentNestedInput
   }
 
@@ -10034,7 +10415,7 @@ export namespace Prisma {
   export type UserUpdateWithoutParticipate_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10045,13 +10426,13 @@ export namespace Prisma {
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUpdateManyWithoutP2NestedInput
     Match1?: MatchUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUpdateManyWithoutWinnerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutParticipate_TournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10062,24 +10443,28 @@ export namespace Prisma {
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
     Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUncheckedUpdateManyWithoutWinnerNestedInput
   }
 
   export type TournamentCreateWithoutMatchInput = {
     id?: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     count_player?: number
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutTInput
+    Winner: UserCreateNestedOneWithoutWin_TournamentInput
   }
 
   export type TournamentUncheckedCreateWithoutMatchInput = {
     id?: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
     count_player?: number
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
+    Winner_Id: string
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutTInput
   }
 
@@ -10091,7 +10476,7 @@ export namespace Prisma {
   export type UserCreateWithoutMatchwInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -10101,14 +10486,14 @@ export namespace Prisma {
     sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     Match2?: MatchCreateNestedManyWithoutP2Input
     Match1?: MatchCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateWithoutMatchwInput = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -10118,7 +10503,7 @@ export namespace Prisma {
     sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
     Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentUncheckedCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
@@ -10130,7 +10515,7 @@ export namespace Prisma {
   export type UserCreateWithoutMatch2Input = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -10140,14 +10525,14 @@ export namespace Prisma {
     sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
     Match1?: MatchCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateWithoutMatch2Input = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -10157,7 +10542,7 @@ export namespace Prisma {
     sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
     Match1?: MatchUncheckedCreateNestedManyWithoutP1Input
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentUncheckedCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
@@ -10169,7 +10554,7 @@ export namespace Prisma {
   export type UserCreateWithoutMatch1Input = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -10179,14 +10564,14 @@ export namespace Prisma {
     sentRequests?: FriendRequestCreateNestedManyWithoutSenderInput
     Matchw?: MatchCreateNestedManyWithoutWinnerInput
     Match2?: MatchCreateNestedManyWithoutP2Input
-    Win_Tournament?: Participate_TournamentCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentCreateNestedManyWithoutPInput
   }
 
   export type UserUncheckedCreateWithoutMatch1Input = {
     id?: string
     email: string
-    name?: string | null
+    name: string
     password: string
     loggedIn?: boolean
     Auto_Match?: boolean
@@ -10196,7 +10581,7 @@ export namespace Prisma {
     sentRequests?: FriendRequestUncheckedCreateNestedManyWithoutSenderInput
     Matchw?: MatchUncheckedCreateNestedManyWithoutWinnerInput
     Match2?: MatchUncheckedCreateNestedManyWithoutP2Input
-    Win_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutWinnerInput
+    Win_Tournament?: TournamentUncheckedCreateNestedManyWithoutWinnerInput
     Participate_Tournament?: Participate_TournamentUncheckedCreateNestedManyWithoutPInput
   }
 
@@ -10218,19 +10603,23 @@ export namespace Prisma {
 
   export type TournamentUpdateWithoutMatchInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutTNestedInput
+    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
   }
 
   export type TournamentUncheckedUpdateWithoutMatchInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     count_player?: IntFieldUpdateOperationsInput | number
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    Winner_Id?: StringFieldUpdateOperationsInput | string
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutTNestedInput
   }
 
@@ -10248,7 +10637,7 @@ export namespace Prisma {
   export type UserUpdateWithoutMatchwInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10258,14 +10647,14 @@ export namespace Prisma {
     sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     Match2?: MatchUpdateManyWithoutP2NestedInput
     Match1?: MatchUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMatchwInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10275,7 +10664,7 @@ export namespace Prisma {
     sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
     Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUncheckedUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
@@ -10293,7 +10682,7 @@ export namespace Prisma {
   export type UserUpdateWithoutMatch2Input = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10303,14 +10692,14 @@ export namespace Prisma {
     sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
     Match1?: MatchUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMatch2Input = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10320,7 +10709,7 @@ export namespace Prisma {
     sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
     Match1?: MatchUncheckedUpdateManyWithoutP1NestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUncheckedUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
@@ -10338,7 +10727,7 @@ export namespace Prisma {
   export type UserUpdateWithoutMatch1Input = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10348,14 +10737,14 @@ export namespace Prisma {
     sentRequests?: FriendRequestUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUpdateManyWithoutP2NestedInput
-    Win_Tournament?: Participate_TournamentUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUpdateManyWithoutPNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMatch1Input = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     loggedIn?: BoolFieldUpdateOperationsInput | boolean
     Auto_Match?: BoolFieldUpdateOperationsInput | boolean
@@ -10365,7 +10754,7 @@ export namespace Prisma {
     sentRequests?: FriendRequestUncheckedUpdateManyWithoutSenderNestedInput
     Matchw?: MatchUncheckedUpdateManyWithoutWinnerNestedInput
     Match2?: MatchUncheckedUpdateManyWithoutP2NestedInput
-    Win_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutWinnerNestedInput
+    Win_Tournament?: TournamentUncheckedUpdateManyWithoutWinnerNestedInput
     Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutPNestedInput
   }
 
@@ -10391,10 +10780,18 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchCreateManyP2Input = {
@@ -10402,11 +10799,19 @@ export namespace Prisma {
     P1_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type MatchCreateManyP1Input = {
@@ -10414,20 +10819,28 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
     tournamentId?: string | null
+    match_start?: Date | string
+    chrono?: number
   }
 
-  export type Participate_TournamentCreateManyWinnerInput = {
+  export type TournamentCreateManyWinnerInput = {
     id?: string
-    P_Id: string
-    T_Id: string
+    Label: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    count_player?: number
+    result?: $Enums.Result
   }
 
   export type Participate_TournamentCreateManyPInput = {
@@ -10435,8 +10848,6 @@ export namespace Prisma {
     T_Id: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
   export type FriendRequestUpdateWithoutReceiverInput = {
@@ -10491,9 +10902,17 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
     Tournament?: TournamentUpdateOneWithoutMatchNestedInput
     P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
     P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
@@ -10505,10 +10924,18 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchUncheckedUpdateManyWithoutWinnerInput = {
@@ -10517,19 +10944,35 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchUpdateWithoutP2Input = {
     id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
     Tournament?: TournamentUpdateOneWithoutMatchNestedInput
     Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
     P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
@@ -10540,11 +10983,19 @@ export namespace Prisma {
     P1_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchUncheckedUpdateManyWithoutP2Input = {
@@ -10552,20 +11003,36 @@ export namespace Prisma {
     P1_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchUpdateWithoutP1Input = {
     id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
     Tournament?: TournamentUpdateOneWithoutMatchNestedInput
     Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
     P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
@@ -10576,11 +11043,19 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchUncheckedUpdateManyWithoutP1Input = {
@@ -10588,46 +11063,56 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
     tournamentId?: NullableStringFieldUpdateOperationsInput | string | null
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
-  export type Participate_TournamentUpdateWithoutWinnerInput = {
+  export type TournamentUpdateWithoutWinnerInput = {
     id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
-    P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
+    count_player?: IntFieldUpdateOperationsInput | number
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    Match?: MatchUpdateManyWithoutTournamentNestedInput
+    Participate_Tournament?: Participate_TournamentUpdateManyWithoutTNestedInput
   }
 
-  export type Participate_TournamentUncheckedUpdateWithoutWinnerInput = {
+  export type TournamentUncheckedUpdateWithoutWinnerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    P_Id?: StringFieldUpdateOperationsInput | string
-    T_Id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    count_player?: IntFieldUpdateOperationsInput | number
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    Match?: MatchUncheckedUpdateManyWithoutTournamentNestedInput
+    Participate_Tournament?: Participate_TournamentUncheckedUpdateManyWithoutTNestedInput
   }
 
-  export type Participate_TournamentUncheckedUpdateManyWithoutWinnerInput = {
+  export type TournamentUncheckedUpdateManyWithoutWinnerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    P_Id?: StringFieldUpdateOperationsInput | string
-    T_Id?: StringFieldUpdateOperationsInput | string
+    Label?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    count_player?: IntFieldUpdateOperationsInput | number
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
   }
 
   export type Participate_TournamentUpdateWithoutPInput = {
     id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
     T?: TournamentUpdateOneRequiredWithoutParticipate_TournamentNestedInput
   }
 
@@ -10636,8 +11121,6 @@ export namespace Prisma {
     T_Id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
   export type Participate_TournamentUncheckedUpdateManyWithoutPInput = {
@@ -10645,8 +11128,6 @@ export namespace Prisma {
     T_Id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
   export type MatchCreateManyTournamentInput = {
@@ -10655,10 +11136,18 @@ export namespace Prisma {
     P2_Id: string
     Ball_x: number
     Ball_y: number
+    Player1_x: number
+    Player1_y: number
+    Player2_x: number
+    Player2_y: number
+    score_player1: number
+    score_player2: number
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
+    result?: $Enums.Result
     Winner_Id: string
+    match_start?: Date | string
+    chrono?: number
   }
 
   export type Participate_TournamentCreateManyTInput = {
@@ -10666,17 +11155,23 @@ export namespace Prisma {
     P_Id: string
     CreatedAt?: Date | string
     UpdatedAt?: Date | string
-    result?: $Enums.MatchResult
-    Winner_Id: string
   }
 
   export type MatchUpdateWithoutTournamentInput = {
     id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
     Winner?: UserUpdateOneRequiredWithoutMatchwNestedInput
     P2?: UserUpdateOneRequiredWithoutMatch2NestedInput
     P1?: UserUpdateOneRequiredWithoutMatch1NestedInput
@@ -10688,10 +11183,18 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type MatchUncheckedUpdateManyWithoutTournamentInput = {
@@ -10700,18 +11203,24 @@ export namespace Prisma {
     P2_Id?: StringFieldUpdateOperationsInput | string
     Ball_x?: FloatFieldUpdateOperationsInput | number
     Ball_y?: FloatFieldUpdateOperationsInput | number
+    Player1_x?: FloatFieldUpdateOperationsInput | number
+    Player1_y?: FloatFieldUpdateOperationsInput | number
+    Player2_x?: FloatFieldUpdateOperationsInput | number
+    Player2_y?: FloatFieldUpdateOperationsInput | number
+    score_player1?: IntFieldUpdateOperationsInput | number
+    score_player2?: IntFieldUpdateOperationsInput | number
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
+    result?: EnumResultFieldUpdateOperationsInput | $Enums.Result
     Winner_Id?: StringFieldUpdateOperationsInput | string
+    match_start?: DateTimeFieldUpdateOperationsInput | Date | string
+    chrono?: IntFieldUpdateOperationsInput | number
   }
 
   export type Participate_TournamentUpdateWithoutTInput = {
     id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner?: UserUpdateOneRequiredWithoutWin_TournamentNestedInput
     P?: UserUpdateOneRequiredWithoutParticipate_TournamentNestedInput
   }
 
@@ -10720,8 +11229,6 @@ export namespace Prisma {
     P_Id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
   export type Participate_TournamentUncheckedUpdateManyWithoutTInput = {
@@ -10729,8 +11236,6 @@ export namespace Prisma {
     P_Id?: StringFieldUpdateOperationsInput | string
     CreatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     UpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    result?: EnumMatchResultFieldUpdateOperationsInput | $Enums.MatchResult
-    Winner_Id?: StringFieldUpdateOperationsInput | string
   }
 
 

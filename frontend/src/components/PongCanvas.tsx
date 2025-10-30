@@ -41,7 +41,7 @@ export const PongCanvas = ({
   player1Name = "Player 1", 
   player2Name = "Player 2", 
   onGameEnd,
-  maxScore = 11 
+  maxScore = 5 
 }: PongCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();

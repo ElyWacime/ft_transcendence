@@ -111,10 +111,12 @@ exports.Prisma.FriendRequestScalarFieldEnum = {
 
 exports.Prisma.TournamentScalarFieldEnum = {
   id: 'id',
+  Label: 'Label',
   CreatedAt: 'CreatedAt',
   UpdatedAt: 'UpdatedAt',
   count_player: 'count_player',
-  result: 'result'
+  result: 'result',
+  Winner_Id: 'Winner_Id'
 };
 
 exports.Prisma.Participate_TournamentScalarFieldEnum = {
@@ -122,9 +124,7 @@ exports.Prisma.Participate_TournamentScalarFieldEnum = {
   P_Id: 'P_Id',
   T_Id: 'T_Id',
   CreatedAt: 'CreatedAt',
-  UpdatedAt: 'UpdatedAt',
-  result: 'result',
-  Winner_Id: 'Winner_Id'
+  UpdatedAt: 'UpdatedAt'
 };
 
 exports.Prisma.MatchScalarFieldEnum = {
@@ -133,11 +133,19 @@ exports.Prisma.MatchScalarFieldEnum = {
   P2_Id: 'P2_Id',
   Ball_x: 'Ball_x',
   Ball_y: 'Ball_y',
+  Player1_x: 'Player1_x',
+  Player1_y: 'Player1_y',
+  Player2_x: 'Player2_x',
+  Player2_y: 'Player2_y',
+  score_player1: 'score_player1',
+  score_player2: 'score_player2',
   CreatedAt: 'CreatedAt',
   UpdatedAt: 'UpdatedAt',
   result: 'result',
   Winner_Id: 'Winner_Id',
-  tournamentId: 'tournamentId'
+  tournamentId: 'tournamentId',
+  match_start: 'match_start',
+  chrono: 'chrono'
 };
 
 exports.Prisma.SortOrder = {
@@ -155,7 +163,7 @@ exports.FriendRequestStatus = exports.$Enums.FriendRequestStatus = {
   REJECTED: 'REJECTED'
 };
 
-exports.MatchResult = exports.$Enums.MatchResult = {
+exports.Result = exports.$Enums.Result = {
   PENDING: 'PENDING',
   WIN: 'WIN',
   LOSE: 'LOSE',
@@ -180,7 +188,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/lhwask02/Desktop/trance/services/auth-service/generated/prisma",
+      "value": "/app/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -194,12 +202,12 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/lhwask02/Desktop/trance/services/auth-service/prisma/schema.prisma",
+    "sourceFilePath": "/app/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
     "rootEnvPath": null,
-    "schemaEnvPath": "../../prisma/.env"
+    "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
   "clientVersion": "6.16.3",
@@ -208,6 +216,7 @@ const config = {
     "db"
   ],
   "activeProvider": "sqlite",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -216,13 +225,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id                     String                   @id @default(cuid())\n  email                  String                   @unique\n  name                   String?                  @unique\n  password               String\n  loggedIn               Boolean                  @default(false)\n  Auto_Match             Boolean                  @default(false)\n  isOnline               Boolean                  @default(false)\n  avatar                 String?                  @default(\"https://www.gravatar.com/avatar/\")\n  receivedRequests       FriendRequest[]          @relation(\"ReceivedRequests\")\n  sentRequests           FriendRequest[]          @relation(\"SentRequests\")\n  Matchw                 Match[]                  @relation(\"As_Winner\")\n  Match2                 Match[]                  @relation(\"As_P2\")\n  Match1                 Match[]                  @relation(\"As_P1\")\n  Win_Tournament         Participate_Tournament[] @relation(\"Win\")\n  Participate_Tournament Participate_Tournament[] @relation(\"Participate\")\n}\n\nmodel FriendRequest {\n  id         String              @id @default(cuid())\n  senderId   String\n  receiverId String\n  status     FriendRequestStatus @default(PENDING)\n  CreatedAt  DateTime            @default(now())\n  UpdatedAt  DateTime            @updatedAt\n  receiver   User                @relation(\"ReceivedRequests\", fields: [receiverId], references: [id])\n  sender     User                @relation(\"SentRequests\", fields: [senderId], references: [id])\n\n  @@unique([senderId, receiverId])\n}\n\nmodel Tournament {\n  id                     String                   @id @default(cuid())\n  CreatedAt              DateTime                 @default(now())\n  UpdatedAt              DateTime                 @updatedAt\n  count_player           Int                      @default(0)\n  result                 MatchResult              @default(PENDING)\n  Match                  Match[]                  @relation(\"In_Tournament\")\n  Participate_Tournament Participate_Tournament[] @relation(\"Played\")\n}\n\nmodel Participate_Tournament {\n  id        String      @id @default(cuid())\n  P_Id      String\n  T_Id      String\n  CreatedAt DateTime    @default(now())\n  UpdatedAt DateTime    @updatedAt\n  result    MatchResult @default(PENDING)\n  Winner_Id String\n  Winner    User        @relation(\"Win\", fields: [Winner_Id], references: [id])\n  T         Tournament  @relation(\"Played\", fields: [T_Id], references: [id])\n  P         User        @relation(\"Participate\", fields: [P_Id], references: [id])\n}\n\nmodel Match {\n  id           String      @id @default(cuid())\n  P1_Id        String\n  P2_Id        String\n  Ball_x       Float\n  Ball_y       Float\n  CreatedAt    DateTime    @default(now())\n  UpdatedAt    DateTime    @updatedAt\n  result       MatchResult @default(PENDING)\n  Winner_Id    String\n  tournamentId String?\n  Tournament   Tournament? @relation(\"In_Tournament\", fields: [tournamentId], references: [id])\n  Winner       User        @relation(\"As_Winner\", fields: [Winner_Id], references: [id])\n  P2           User        @relation(\"As_P2\", fields: [P2_Id], references: [id])\n  P1           User        @relation(\"As_P1\", fields: [P1_Id], references: [id])\n}\n\nenum FriendRequestStatus {\n  PENDING\n  ACCEPTED\n  REJECTED\n}\n\nenum MatchResult {\n  PENDING\n  WIN\n  LOSE\n  DRAW\n}\n",
-  "inlineSchemaHash": "f5939d0b7a643c7d256c64d6a0be1d25beea2237c0c2150c29acaaeeef33a1f1",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum FriendRequestStatus {\n  PENDING\n  ACCEPTED\n  REJECTED\n}\n\nenum Result {\n  PENDING\n  WIN\n  LOSE\n  DRAW\n}\n\nmodel User {\n  id                     String                   @id @default(cuid())\n  email                  String                   @unique\n  name                   String                   @unique\n  password               String\n  loggedIn               Boolean                  @default(false)\n  Auto_Match             Boolean                  @default(false)\n  isOnline               Boolean                  @default(false)\n  avatar                 String?                  @default(\"https://www.gravatar.com/avatar/\")\n  receivedRequests       FriendRequest[]          @relation(\"ReceivedRequests\")\n  sentRequests           FriendRequest[]          @relation(\"SentRequests\")\n  Matchw                 Match[]                  @relation(\"As_Winner\")\n  Match2                 Match[]                  @relation(\"As_P2\")\n  Match1                 Match[]                  @relation(\"As_P1\")\n  Win_Tournament         Tournament[]             @relation(\"Win\")\n  Participate_Tournament Participate_Tournament[] @relation(\"Participate\")\n}\n\nmodel FriendRequest {\n  id         String              @id @default(cuid())\n  senderId   String\n  receiverId String\n  status     FriendRequestStatus @default(PENDING)\n  CreatedAt  DateTime            @default(now())\n  UpdatedAt  DateTime            @updatedAt\n  receiver   User                @relation(\"ReceivedRequests\", fields: [receiverId], references: [id])\n  sender     User                @relation(\"SentRequests\", fields: [senderId], references: [id])\n\n  @@unique([senderId, receiverId])\n}\n\nmodel Tournament {\n  id                     String                   @id @default(cuid())\n  Label                  String //Tournament Name\n  CreatedAt              DateTime                 @default(now())\n  UpdatedAt              DateTime                 @updatedAt\n  count_player           Int                      @default(0)\n  result                 Result                   @default(PENDING)\n  Winner_Id              String\n  Match                  Match[]                  @relation(\"In_Tournament\")\n  Participate_Tournament Participate_Tournament[] @relation(\"Played\")\n  Winner                 User                     @relation(\"Win\", fields: [Winner_Id], references: [id])\n}\n\nmodel Participate_Tournament {\n  id        String     @id @default(cuid())\n  P_Id      String\n  T_Id      String\n  CreatedAt DateTime   @default(now())\n  UpdatedAt DateTime   @updatedAt\n  T         Tournament @relation(\"Played\", fields: [T_Id], references: [id])\n  P         User       @relation(\"Participate\", fields: [P_Id], references: [id])\n}\n\nmodel Match {\n  id            String      @id @default(cuid())\n  P1_Id         String\n  P2_Id         String\n  Ball_x        Float\n  Ball_y        Float\n  Player1_x     Float\n  Player1_y     Float\n  Player2_x     Float\n  Player2_y     Float\n  score_player1 Int\n  score_player2 Int\n  CreatedAt     DateTime    @default(now())\n  UpdatedAt     DateTime    @updatedAt\n  result        Result      @default(PENDING)\n  Winner_Id     String\n  tournamentId  String? //  Null in case OFFline not null in case in tournament\n  match_start   DateTime    @default(now())\n  chrono        Int         @default(60) // 60s in a match \n  Tournament    Tournament? @relation(\"In_Tournament\", fields: [tournamentId], references: [id])\n  Winner        User        @relation(\"As_Winner\", fields: [Winner_Id], references: [id])\n  P2            User        @relation(\"As_P2\", fields: [P2_Id], references: [id])\n  P1            User        @relation(\"As_P1\", fields: [P1_Id], references: [id])\n}\n",
+  "inlineSchemaHash": "acb2ce3bc3b2454feb0d663fd763d4d55670a3db48f46cdec4940c1a5e2882ea",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"loggedIn\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"Auto_Match\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"isOnline\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"avatar\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"receivedRequests\",\"kind\":\"object\",\"type\":\"FriendRequest\",\"relationName\":\"ReceivedRequests\"},{\"name\":\"sentRequests\",\"kind\":\"object\",\"type\":\"FriendRequest\",\"relationName\":\"SentRequests\"},{\"name\":\"Matchw\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"As_Winner\"},{\"name\":\"Match2\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"As_P2\"},{\"name\":\"Match1\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"As_P1\"},{\"name\":\"Win_Tournament\",\"kind\":\"object\",\"type\":\"Participate_Tournament\",\"relationName\":\"Win\"},{\"name\":\"Participate_Tournament\",\"kind\":\"object\",\"type\":\"Participate_Tournament\",\"relationName\":\"Participate\"}],\"dbName\":null},\"FriendRequest\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"senderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"receiverId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"FriendRequestStatus\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"receiver\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ReceivedRequests\"},{\"name\":\"sender\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SentRequests\"}],\"dbName\":null},\"Tournament\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"count_player\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"result\",\"kind\":\"enum\",\"type\":\"MatchResult\"},{\"name\":\"Match\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"In_Tournament\"},{\"name\":\"Participate_Tournament\",\"kind\":\"object\",\"type\":\"Participate_Tournament\",\"relationName\":\"Played\"}],\"dbName\":null},\"Participate_Tournament\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"P_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"T_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"result\",\"kind\":\"enum\",\"type\":\"MatchResult\"},{\"name\":\"Winner_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"Winner\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Win\"},{\"name\":\"T\",\"kind\":\"object\",\"type\":\"Tournament\",\"relationName\":\"Played\"},{\"name\":\"P\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Participate\"}],\"dbName\":null},\"Match\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"P1_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"P2_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"Ball_x\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Ball_y\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"result\",\"kind\":\"enum\",\"type\":\"MatchResult\"},{\"name\":\"Winner_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tournamentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"Tournament\",\"kind\":\"object\",\"type\":\"Tournament\",\"relationName\":\"In_Tournament\"},{\"name\":\"Winner\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"As_Winner\"},{\"name\":\"P2\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"As_P2\"},{\"name\":\"P1\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"As_P1\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"loggedIn\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"Auto_Match\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"isOnline\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"avatar\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"receivedRequests\",\"kind\":\"object\",\"type\":\"FriendRequest\",\"relationName\":\"ReceivedRequests\"},{\"name\":\"sentRequests\",\"kind\":\"object\",\"type\":\"FriendRequest\",\"relationName\":\"SentRequests\"},{\"name\":\"Matchw\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"As_Winner\"},{\"name\":\"Match2\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"As_P2\"},{\"name\":\"Match1\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"As_P1\"},{\"name\":\"Win_Tournament\",\"kind\":\"object\",\"type\":\"Tournament\",\"relationName\":\"Win\"},{\"name\":\"Participate_Tournament\",\"kind\":\"object\",\"type\":\"Participate_Tournament\",\"relationName\":\"Participate\"}],\"dbName\":null},\"FriendRequest\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"senderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"receiverId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"FriendRequestStatus\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"receiver\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ReceivedRequests\"},{\"name\":\"sender\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SentRequests\"}],\"dbName\":null},\"Tournament\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"Label\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"count_player\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"result\",\"kind\":\"enum\",\"type\":\"Result\"},{\"name\":\"Winner_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"Match\",\"kind\":\"object\",\"type\":\"Match\",\"relationName\":\"In_Tournament\"},{\"name\":\"Participate_Tournament\",\"kind\":\"object\",\"type\":\"Participate_Tournament\",\"relationName\":\"Played\"},{\"name\":\"Winner\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Win\"}],\"dbName\":null},\"Participate_Tournament\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"P_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"T_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"T\",\"kind\":\"object\",\"type\":\"Tournament\",\"relationName\":\"Played\"},{\"name\":\"P\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"Participate\"}],\"dbName\":null},\"Match\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"P1_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"P2_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"Ball_x\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Ball_y\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Player1_x\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Player1_y\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Player2_x\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Player2_y\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"score_player1\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"score_player2\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"CreatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"UpdatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"result\",\"kind\":\"enum\",\"type\":\"Result\"},{\"name\":\"Winner_Id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tournamentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"match_start\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"chrono\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"Tournament\",\"kind\":\"object\",\"type\":\"Tournament\",\"relationName\":\"In_Tournament\"},{\"name\":\"Winner\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"As_Winner\"},{\"name\":\"P2\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"As_P2\"},{\"name\":\"P1\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"As_P1\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

@@ -1,12 +1,5 @@
 generator client {
-  // provider = "prisma-client-js"
-  // output   = "../generated/prisma"
-  // provider = "prisma-erd-generator"
-  // output   = "./ERD/diagram.svg" // ✅ file name with extension
-  // format   = "svg"
-  provider = "prisma-erd-generator"
-  output   = "./ERD/diagram.md" // Mermaid Markdown file
-  format   = "mermaid"
+  provider = "prisma-client-js"
 }
 
 datasource db {

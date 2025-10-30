@@ -87,7 +87,7 @@ const Game = () => {
             player1Name={player1.alias}
             player2Name={player2.alias}
             onGameEnd={handleGameEnd}
-            maxScore={11}
+            maxScore={5}
           />
         </div>
 
