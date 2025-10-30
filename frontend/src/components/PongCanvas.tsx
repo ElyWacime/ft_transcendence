@@ -41,7 +41,7 @@ export const PongCanvas = ({
   player1Name = "Player 1", 
   player2Name = "Player 2", 
   onGameEnd,
-  maxScore = 11 
+  maxScore = 5 
 }: PongCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -51,8 +51,8 @@ export const PongCanvas = ({
     ball: {
       x: 400,
       y: 300,
-      dx: 2,
-      dy: 1,
+      dx: 1.5,
+      dy: 0.5,
       radius: 8
     },
     paddle1: {
@@ -73,36 +73,44 @@ export const PongCanvas = ({
     },
     gameStatus: 'waiting'
   });
+  // helper to create a fresh ball object (keeps logic in one place)
+  const createBall = useCallback(() => {
+    // small random angle so ball isn't perfectly horizontal
+    const angle =  (Math.PI / 6); // +/- 30 degrees
+    // const angle = (Math.random() - 0.5) * (Math.PI / 6); // +/- 30 degrees
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    return {
+      x: 400,
+      y: 300,
+      dx: dir * BALL_SPEED * Math.cos(angle),
+      dy: BALL_SPEED * Math.sin(angle),
+      radius: 8
+    };
+  }, []);
+
+  // Physics tuning constants
+  const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
+  const MAX_DY = 6; // clamp for vertical velocity
+  const BALL_SPEED = 0.9; // constant total speed (pixels per frame)
+  const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
 
   const resetGame = useCallback(() => {
     setGameState(prev => ({
       ...prev,
-      ball: {
-        x: 400,
-        y: 300,
-        dx: Math.random() > 0.5 ? 2 : -2,
-        dy: (Math.random() - 0.5) * 3,
-        radius: 8
-      },
+      ball: createBall(),
       paddle1: { ...prev.paddle1, y: 250 },
       paddle2: { ...prev.paddle2, y: 250 },
       score: { player1: 0, player2: 0 },
       gameStatus: 'waiting'
     }));
-  }, []);
+  }, [createBall]);
 
   const resetBall = useCallback(() => {
     setGameState(prev => ({
       ...prev,
-      ball: {
-        x: 400,
-        y: 300,
-        dx: Math.random() > 0.5 ? 2 : -2,
-        dy: (Math.random() - 0.5) * 3,
-        radius: 8
-      }
+      ball: createBall()
     }));
-  }, []);
+  }, [createBall]);
 
   const updateGame = useCallback(() => {
     setGameState(prev => {
@@ -113,7 +121,7 @@ export const PongCanvas = ({
       if (!canvas) return prev;
 
       // Move paddles based on keys
-      const paddleSpeed = 7;
+      const paddleSpeed = 2;
       if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) {
         newState.paddle1.y -= paddleSpeed;
       }
@@ -132,22 +140,68 @@ export const PongCanvas = ({
       newState.ball.y += newState.ball.dy;
 
       // Ball collision with top/bottom walls
-      if (newState.ball.y <= newState.ball.radius || newState.ball.y >= canvas.height - newState.ball.radius) {
-        newState.ball.dy = -newState.ball.dy;
+      if (newState.ball.y <= newState.ball.radius) {
+        // Hit top: force vertical component to go down (positive)
+        newState.ball.dy = Math.abs(newState.ball.dy) || 0.5;
+        // reduce vertical component to widen outgoing angle
+        newState.ball.dy *= WALL_BOUNCE_DY_REDUCTION;
+        // clamp vertical speed for safety
+        newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
+        // recompute horizontal component so total speed remains BALL_SPEED
+        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const dyAbs = Math.abs(newState.ball.dy);
+        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
+        newState.ball.dx = signX * dxMag;
+      } else if (newState.ball.y >= canvas.height - newState.ball.radius) {
+        // Hit bottom: force vertical component to go up (negative)
+        newState.ball.dy = -Math.abs(newState.ball.dy) || -0.5;
+        // reduce vertical component to widen outgoing angle
+        newState.ball.dy *= WALL_BOUNCE_DY_REDUCTION;
+        // clamp vertical speed for safety
+        newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
+        // recompute horizontal component so total speed remains BALL_SPEED
+        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const dyAbs = Math.abs(newState.ball.dy);
+        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
+        newState.ball.dx = signX * dxMag;
       }
 
-      // Ball collision with paddles
-      const ball = newState.ball;
-      const p1 = newState.paddle1;
-      const p2 = newState.paddle2;
+  // Ball collision with paddles
+  const ball = newState.ball;
+  // store incoming velocity before collision adjustments
+  const incomingDx = ball.dx;
+  const incomingDy = ball.dy;
+  const p1 = newState.paddle1;
+  const p2 = newState.paddle2;
 
       // Left paddle collision
       if (ball.x - ball.radius <= p1.x + p1.width &&
           ball.y >= p1.y &&
           ball.y <= p1.y + p1.height &&
           ball.dx < 0) {
-        ball.dx = -ball.dx;
-        ball.dy += (ball.y - (p1.y + p1.height / 2)) * 0.1; // Add spin
+        // Nudge ball outside the paddle to avoid repeat collisions
+        ball.x = p1.x + p1.width + ball.radius;
+        // detect whether paddle moved this frame (using prev)
+        const p1Moved = prev.paddle1.y !== p1.y;
+        if (!p1Moved) {
+          // Paddle didn't move: preserve incoming angle (keep dy) and flip horizontal direction
+          const dy = incomingDy;
+          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+          ball.dx = Math.abs(dxMag); // go right
+          ball.dy = dy;
+        } else {
+          // Paddle moved: apply spin based on impact point relative to paddle center
+          ball.dx = -ball.dx; // reverse horizontal direction
+          ball.dy += (ball.y - (p1.y + p1.height / 2)) * SPIN_FACTOR;
+          // Clamp vertical speed
+          ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
+          // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
+          const speed = Math.hypot(ball.dx, ball.dy) || 1;
+          const scale = 1;
+          // const scale = BALL_SPEED / speed;
+          ball.dx *= scale;
+          ball.dy *= scale;
+        }
       }
 
       // Right paddle collision
@@ -155,17 +209,37 @@ export const PongCanvas = ({
           ball.y >= p2.y &&
           ball.y <= p2.y + p2.height &&
           ball.dx > 0) {
-        ball.dx = -ball.dx;
-        ball.dy += (ball.y - (p2.y + p2.height / 2)) * 0.1; // Add spin
+        // Nudge ball outside the paddle to avoid repeat collisions
+        ball.x = p2.x - ball.radius;
+        // detect whether paddle moved this frame
+        const p2Moved = prev.paddle2.y !== p2.y;
+        if (!p2Moved) {
+          // Paddle didn't move: preserve incoming angle (keep dy) and flip horizontal direction
+          const dy = incomingDy;
+          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+          ball.dx = -Math.abs(dxMag); // go left
+          ball.dy = dy;
+        } else {
+          // Paddle moved: apply spin based on impact point relative to paddle center
+          ball.dx = -ball.dx; // reverse horizontal direction
+          ball.dy += (ball.y - (p2.y + p2.height / 2)) * SPIN_FACTOR;
+          // Clamp vertical speed
+          ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
+          // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
+          const speed = Math.hypot(ball.dx, ball.dy) || 1;
+          const scale = BALL_SPEED / speed;
+          ball.dx *= scale;
+          ball.dy *= scale;
+        }
       }
 
       // Scoring
       if (ball.x < 0) {
         newState.score.player2++;
-        resetBall();
+        newState.ball = createBall();
       } else if (ball.x > canvas.width) {
         newState.score.player1++;
-        resetBall();
+        newState.ball = createBall();
       }
 
       // Check for game end
@@ -246,6 +320,15 @@ export const PongCanvas = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't block typing in inputs/textareas or contentEditable elements
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+
+      // While playing, prevent ArrowUp/ArrowDown from scrolling the page
+      if (gameState.gameStatus === 'playing' && (e.code === 'ArrowUp' || e.code === 'ArrowDown')) {
+        e.preventDefault();
+      }
+
       keysPressed.current.add(e.code);
     };
 
@@ -253,14 +336,14 @@ export const PongCanvas = ({
       keysPressed.current.delete(e.code);
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
     window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [gameState.gameStatus]);
 
   useEffect(() => {
     draw();
@@ -268,6 +351,15 @@ export const PongCanvas = ({
 
   const startGame = () => {
     setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+    // Focus and center the canvas in the viewport when the game starts
+    const canvas = canvasRef.current;
+    if (canvas) {
+      // make sure the canvas is focusable and receive keyboard events
+      canvas.tabIndex = 0;
+      canvas.focus({ preventScroll: true });
+      // center the canvas smoothly in the viewport
+      canvas.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
   };
 
   const pauseGame = () => {
@@ -305,7 +397,7 @@ export const PongCanvas = ({
               </Button>
             )}
             {gameState.gameStatus === 'playing' && (
-              <Button onClick={pauseGame} variant="outline">
+              <Button onClick={pauseGame} className="border border-border">
                 <Pause className="w-4 h-4 mr-2" />
                 Pause
               </Button>
@@ -317,7 +409,7 @@ export const PongCanvas = ({
               </Button>
             )}
             <div className="flex space-x-2">
-              <Button onClick={resetGame} variant="outline" size="sm">
+              <Button onClick={resetGame} className="px-2 py-1 text-sm border border-border">
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Reset
               </Button>
@@ -347,6 +439,10 @@ export const PongCanvas = ({
             ref={canvasRef}
             width={800}
             height={600}
+            tabIndex={0}
+            onFocus={() => {
+              /* keep focus on canvas for keyboard controls */
+            }}
             className="border border-border rounded-lg bg-card shadow-card"
           />
           {gameState.gameStatus === 'finished' && (

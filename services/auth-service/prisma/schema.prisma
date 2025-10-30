@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,40 +7,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id String @id @default(cuid())
-  email String @unique
-  name String?
-  password String
-  loggedIn Boolean @default(false)
-  // isOnline   Boolean          @default(false)
-  // avatar     String?          @default("https://www.gravatar.com/avatar/")
-  //
-  // friends    User[]           @relation("UserFriends")
-  // friendOf   User[]           @relation("UserFriends")
-  //
-  // sentRequests     FriendRequest[] @relation("SentRequests")
-  // receivedRequests FriendRequest[] @relation("ReceivedRequests")
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
-// model FriendRequest {
-//   id          String   @id @default(cuid())
-//
-//   sender      User     @relation("SentRequests", fields: [senderId], references: [id])
-//   senderId    String
-//
-//   receiver    User     @relation("ReceivedRequests", fields: [receiverId], references: [id])
-//   receiverId  String
-//
-//   status      FriendRequestStatus @default(PENDING)
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-//
-//   @@unique([senderId, receiverId]) // prevent duplicate requests
-// }
-//
-// enum FriendRequestStatus {
-//   PENDING
-//   ACCEPTED
-//   REJECTED
-// }
+enum Result {
+  PENDING
+  WIN
+  LOSE
+  DRAW
+}
+
+model User {
+  id                     String                   @id @default(cuid())
+  email                  String                   @unique
+  name                   String                   @unique
+  password               String
+  loggedIn               Boolean                  @default(false)
+  Auto_Match             Boolean                  @default(false)
+  isOnline               Boolean                  @default(false)
+  avatar                 String?                  @default("https://www.gravatar.com/avatar/")
+  receivedRequests       FriendRequest[]          @relation("ReceivedRequests")
+  sentRequests           FriendRequest[]          @relation("SentRequests")
+  Matchw                 Match[]                  @relation("As_Winner")
+  Match2                 Match[]                  @relation("As_P2")
+  Match1                 Match[]                  @relation("As_P1")
+  Win_Tournament         Tournament[]             @relation("Win")
+  Participate_Tournament Participate_Tournament[] @relation("Participate")
+}
+
+model FriendRequest {
+  id         String              @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     FriendRequestStatus @default(PENDING)
+  CreatedAt  DateTime            @default(now())
+  UpdatedAt  DateTime            @updatedAt
+  receiver   User                @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  sender     User                @relation("SentRequests", fields: [senderId], references: [id])
+
+  @@unique([senderId, receiverId])
+}
+
+model Tournament {
+  id                     String                   @id @default(cuid())
+  Label                  String //Tournament Name
+  CreatedAt              DateTime                 @default(now())
+  UpdatedAt              DateTime                 @updatedAt
+  count_player           Int                      @default(0)
+  result                 Result                   @default(PENDING)
+  Winner_Id              String
+  Match                  Match[]                  @relation("In_Tournament")
+  Participate_Tournament Participate_Tournament[] @relation("Played")
+  Winner                 User                     @relation("Win", fields: [Winner_Id], references: [id])
+}
+
+model Participate_Tournament {
+  id        String     @id @default(cuid())
+  P_Id      String
+  T_Id      String
+  CreatedAt DateTime   @default(now())
+  UpdatedAt DateTime   @updatedAt
+  T         Tournament @relation("Played", fields: [T_Id], references: [id])
+  P         User       @relation("Participate", fields: [P_Id], references: [id])
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  P1_Id         String
+  P2_Id         String
+  Ball_x        Float
+  Ball_y        Float
+  Player1_x     Float
+  Player1_y     Float
+  Player2_x     Float
+  Player2_y     Float
+  score_player1 Int
+  score_player2 Int
+  CreatedAt     DateTime    @default(now())
+  UpdatedAt     DateTime    @updatedAt
+  result        Result      @default(PENDING)
+  Winner_Id     String
+  tournamentId  String? //  Null in case OFFline not null in case in tournament
+  match_start   DateTime    @default(now())
+  chrono        Int         @default(60) // 60s in a match 
+  Tournament    Tournament? @relation("In_Tournament", fields: [tournamentId], references: [id])
+  Winner        User        @relation("As_Winner", fields: [Winner_Id], references: [id])
+  P2            User        @relation("As_P2", fields: [P2_Id], references: [id])
+  P1            User        @relation("As_P1", fields: [P1_Id], references: [id])
+}
