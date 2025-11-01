@@ -36,6 +36,8 @@ model User {
   Match1                 Match[]                  @relation("As_P1")
   Win_Tournament         Tournament[]             @relation("Win")
   Participate_Tournament Participate_Tournament[] @relation("Participate")
+  Message_sender         Message[]                @relation("As_C1")
+  Message_receiver       Message[]                @relation("As_C2")
 }
 
 model FriendRequest {
@@ -97,4 +99,22 @@ model Match {
   Winner        User        @relation("As_Winner", fields: [Winner_Id], references: [id])
   P2            User        @relation("As_P2", fields: [P2_Id], references: [id])
   P1            User        @relation("As_P1", fields: [P1_Id], references: [id])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  Text           String
+  CreatedAt      DateTime     @default(now())
+  UpdatedAt      DateTime     @updatedAt
+  conversationId String
+  Sender         String
+  Receiver       String
+  P1             User         @relation("As_C1", fields: [Sender], references: [id])
+  P2             User         @relation("As_C2", fields: [Receiver], references: [id])
+  convers        Conversation @relation("Conv", fields: [conversationId], references: [id])
+}
+
+model Conversation {
+  id      String    @id @default(cuid())
+  Message Message[] @relation("Conv")
 }
