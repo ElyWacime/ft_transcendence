@@ -36,23 +36,30 @@ interface GameState {
   };
   gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
 }
+// Physics tuning constants
+const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
+const MAX_DY = 6; // clamp for vertical velocity
+const BALL_SPEED = 0.25; // constant total speed (pixels per frame)
+const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
+const angle = (Math.PI / 6); // +/- 30 degrees
+const paddleSpeed = 0.4;
 
-export const PongCanvas = ({ 
-  player1Name = "Player 1", 
-  player2Name = "Player 2", 
+export const PongCanvas = ({
+  player1Name = "Player 1",
+  player2Name = "Player 2",
   onGameEnd,
-  maxScore = 5 
+  maxScore = 5
 }: PongCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const keysPressed = useRef<Set<string>>(new Set());
-  
+
   const [gameState, setGameState] = useState<GameState>({
     ball: {
       x: 400,
       y: 300,
-      dx: 1.5,
-      dy: 0.5,
+      dx: BALL_SPEED * Math.cos(angle),
+      dy: BALL_SPEED * Math.sin(angle),
       radius: 8
     },
     paddle1: {
@@ -76,7 +83,7 @@ export const PongCanvas = ({
   // helper to create a fresh ball object (keeps logic in one place)
   const createBall = useCallback(() => {
     // small random angle so ball isn't perfectly horizontal
-    const angle =  (Math.PI / 6); // +/- 30 degrees
+
     // const angle = (Math.random() - 0.5) * (Math.PI / 6); // +/- 30 degrees
     const dir = Math.random() > 0.5 ? 1 : -1;
     return {
@@ -88,11 +95,6 @@ export const PongCanvas = ({
     };
   }, []);
 
-  // Physics tuning constants
-  const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
-  const MAX_DY = 6; // clamp for vertical velocity
-  const BALL_SPEED = 0.9; // constant total speed (pixels per frame)
-  const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
 
   const resetGame = useCallback(() => {
     setGameState(prev => ({
@@ -121,7 +123,6 @@ export const PongCanvas = ({
       if (!canvas) return prev;
 
       // Move paddles based on keys
-      const paddleSpeed = 2;
       if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) {
         newState.paddle1.y -= paddleSpeed;
       }
@@ -166,19 +167,19 @@ export const PongCanvas = ({
         newState.ball.dx = signX * dxMag;
       }
 
-  // Ball collision with paddles
-  const ball = newState.ball;
-  // store incoming velocity before collision adjustments
-  const incomingDx = ball.dx;
-  const incomingDy = ball.dy;
-  const p1 = newState.paddle1;
-  const p2 = newState.paddle2;
+      // Ball collision with paddles
+      const ball = newState.ball;
+      // store incoming velocity before collision adjustments
+      const incomingDx = ball.dx;
+      const incomingDy = ball.dy;
+      const p1 = newState.paddle1;
+      const p2 = newState.paddle2;
 
       // Left paddle collision
       if (ball.x - ball.radius <= p1.x + p1.width &&
-          ball.y >= p1.y &&
-          ball.y <= p1.y + p1.height &&
-          ball.dx < 0) {
+        ball.y >= p1.y &&
+        ball.y <= p1.y + p1.height &&
+        ball.dx < 0) {
         // Nudge ball outside the paddle to avoid repeat collisions
         ball.x = p1.x + p1.width + ball.radius;
         // detect whether paddle moved this frame (using prev)
@@ -206,9 +207,9 @@ export const PongCanvas = ({
 
       // Right paddle collision
       if (ball.x + ball.radius >= p2.x &&
-          ball.y >= p2.y &&
-          ball.y <= p2.y + p2.height &&
-          ball.dx > 0) {
+        ball.y >= p2.y &&
+        ball.y <= p2.y + p2.height &&
+        ball.dx > 0) {
         // Nudge ball outside the paddle to avoid repeat collisions
         ball.x = p2.x - ball.radius;
         // detect whether paddle moved this frame
