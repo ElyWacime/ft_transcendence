@@ -144,12 +144,14 @@ export const PongCanvas = ({
       if (newState.ball.y <= newState.ball.radius) {
         // Hit top: force vertical component to go down (positive)
         newState.ball.dy = Math.abs(newState.ball.dy) || 0.5;
+        // newState.ball.dy = Math.abs(newState.ball.dy) || 0.5;
         // reduce vertical component to widen outgoing angle
         newState.ball.dy *= WALL_BOUNCE_DY_REDUCTION;
         // clamp vertical speed for safety
         newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
         // recompute horizontal component so total speed remains BALL_SPEED
-        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const signX = Math.sign(newState.ball.dx);
+        // const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
         const dyAbs = Math.abs(newState.ball.dy);
         const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
         newState.ball.dx = signX * dxMag;
@@ -161,7 +163,8 @@ export const PongCanvas = ({
         // clamp vertical speed for safety
         newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
         // recompute horizontal component so total speed remains BALL_SPEED
-        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const signX = Math.sign(newState.ball.dx);
+        // const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
         const dyAbs = Math.abs(newState.ball.dy);
         const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
         newState.ball.dx = signX * dxMag;
@@ -184,25 +187,10 @@ export const PongCanvas = ({
         ball.x = p1.x + p1.width + ball.radius;
         // detect whether paddle moved this frame (using prev)
         const p1Moved = prev.paddle1.y !== p1.y;
-        if (!p1Moved) {
-          // Paddle didn't move: preserve incoming angle (keep dy) and flip horizontal direction
-          const dy = incomingDy;
-          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
-          ball.dx = Math.abs(dxMag); // go right
-          ball.dy = dy;
-        } else {
-          // Paddle moved: apply spin based on impact point relative to paddle center
-          ball.dx = -ball.dx; // reverse horizontal direction
-          ball.dy += (ball.y - (p1.y + p1.height / 2)) * SPIN_FACTOR;
-          // Clamp vertical speed
-          ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
-          // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
-          const speed = Math.hypot(ball.dx, ball.dy) || 1;
-          const scale = 1;
-          // const scale = BALL_SPEED / speed;
-          ball.dx *= scale;
-          ball.dy *= scale;
-        }
+        const dy = incomingDy;
+        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+        ball.dx = Math.abs(dxMag); // go right
+        ball.dy = dy;
       }
 
       // Right paddle collision
@@ -214,24 +202,10 @@ export const PongCanvas = ({
         ball.x = p2.x - ball.radius;
         // detect whether paddle moved this frame
         const p2Moved = prev.paddle2.y !== p2.y;
-        if (!p2Moved) {
-          // Paddle didn't move: preserve incoming angle (keep dy) and flip horizontal direction
-          const dy = incomingDy;
-          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
-          ball.dx = -Math.abs(dxMag); // go left
-          ball.dy = dy;
-        } else {
-          // Paddle moved: apply spin based on impact point relative to paddle center
-          ball.dx = -ball.dx; // reverse horizontal direction
-          ball.dy += (ball.y - (p2.y + p2.height / 2)) * SPIN_FACTOR;
-          // Clamp vertical speed
-          ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, ball.dy));
-          // Normalize overall speed to BALL_SPEED so collisions don't change magnitude
-          const speed = Math.hypot(ball.dx, ball.dy) || 1;
-          const scale = BALL_SPEED / speed;
-          ball.dx *= scale;
-          ball.dy *= scale;
-        }
+        const dy = incomingDy;
+        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+        ball.dx = -Math.abs(dxMag); // go left
+        ball.dy = dy;
       }
 
       // Scoring
