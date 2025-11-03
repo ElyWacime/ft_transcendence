@@ -42,7 +42,7 @@ interface GameState {
   const BALL_SPEED = 1.2; // constant total speed (pixels per frame)
   const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
   const paddleSpeed = 2;
-  const angle = (Math.PI / 6); // +/- 30 degrees
+  const angle = (Math.PI / 8); // +/- 30 degrees
 
 export const PongCanvas = ({ 
   player1Name = "Player 1", 
@@ -83,7 +83,6 @@ export const PongCanvas = ({
   // helper to create a fresh ball object (keeps logic in one place)
   const createBall = useCallback(() => {
     // small random angle so ball isn't perfectly horizontal
-    // const angle = (Math.random() - 0.5) * (Math.PI / 6); // +/- 30 degrees
     const dir = Math.random() > 0.5 ? 1 : -1;
     return {
       x: 400,
@@ -139,7 +138,8 @@ export const PongCanvas = ({
       // Move ball
       newState.ball.x += newState.ball.dx;
       newState.ball.y += newState.ball.dy;
-
+      newState.ball.dy *= 1.0001; // slight air resistance
+      newState.ball.dx *= 1.0001; // slight air resistance
       // Ball collision with top/bottom walls
       if (newState.ball.y <= newState.ball.radius) {
         newState.ball.dy = -(newState.ball.dy);
