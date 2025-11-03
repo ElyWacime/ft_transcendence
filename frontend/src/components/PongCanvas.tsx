@@ -144,14 +144,11 @@ export const PongCanvas = ({
       if (newState.ball.y <= newState.ball.radius) {
         // Hit top: force vertical component to go down (positive)
         newState.ball.dy = Math.abs(newState.ball.dy) || 0.5;
-        // newState.ball.dy = Math.abs(newState.ball.dy) || 0.5;
         // reduce vertical component to widen outgoing angle
-        newState.ball.dy *= WALL_BOUNCE_DY_REDUCTION;
         // clamp vertical speed for safety
         newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
         // recompute horizontal component so total speed remains BALL_SPEED
-        const signX = Math.sign(newState.ball.dx);
-        // const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
         const dyAbs = Math.abs(newState.ball.dy);
         const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
         newState.ball.dx = signX * dxMag;
@@ -159,12 +156,10 @@ export const PongCanvas = ({
         // Hit bottom: force vertical component to go up (negative)
         newState.ball.dy = -Math.abs(newState.ball.dy) || -0.5;
         // reduce vertical component to widen outgoing angle
-        newState.ball.dy *= WALL_BOUNCE_DY_REDUCTION;
         // clamp vertical speed for safety
         newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
         // recompute horizontal component so total speed remains BALL_SPEED
-        const signX = Math.sign(newState.ball.dx);
-        // const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
+        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
         const dyAbs = Math.abs(newState.ball.dy);
         const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
         newState.ball.dx = signX * dxMag;
@@ -173,41 +168,39 @@ export const PongCanvas = ({
   // Ball collision with paddles
   const ball = newState.ball;
   // store incoming velocity before collision adjustments
-  const incomingDx = ball.dx;
+  // const incomingDx = ball.dx;
   const incomingDy = ball.dy;
   const p1 = newState.paddle1;
   const p2 = newState.paddle2;
 
       // Left paddle collision
       if (ball.x - ball.radius <= p1.x + p1.width &&
-          ball.y >= p1.y &&
-          ball.y <= p1.y + p1.height &&
+           ((ball.y - ball.radius <= p1.y + (p1.height) &&
+          p1.y <= ball.y - ball.radius) || 
+          (ball.y + ball.radius <= p1.y + (p1.height) &&
+          p1.y <= ball.y + ball.radius)) &&
           ball.dx < 0) {
         // Nudge ball outside the paddle to avoid repeat collisions
         ball.x = p1.x + p1.width + ball.radius;
-        // detect whether paddle moved this frame (using prev)
-        const p1Moved = prev.paddle1.y !== p1.y;
-        const dy = incomingDy;
-        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
-        ball.dx = Math.abs(dxMag); // go right
-        ball.dy = dy;
+          const dy = incomingDy;
+          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+          ball.dx = Math.abs(dxMag); // go right
+          ball.dy = dy;
       }
 
       // Right paddle collision
       if (ball.x + ball.radius >= p2.x &&
-          ball.y >= p2.y &&
-          ball.y <= p2.y + p2.height &&
+           ((ball.y - ball.radius <= p2.y + (p2.height) &&
+          p2.y <= ball.y - ball.radius) || 
+          (ball.y + ball.radius <= p2.y + (p2.height) &&
+          p2.y <= ball.y + ball.radius)) &&
           ball.dx > 0) {
-        // Nudge ball outside the paddle to avoid repeat collisions
-        ball.x = p2.x - ball.radius;
-        // detect whether paddle moved this frame
-        const p2Moved = prev.paddle2.y !== p2.y;
-        const dy = incomingDy;
-        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
-        ball.dx = -Math.abs(dxMag); // go left
-        ball.dy = dy;
+          ball.x = p2.x - ball.radius;
+          const dy = incomingDy;
+          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
+          ball.dx = -Math.abs(dxMag); // go left
+          ball.dy = dy;
       }
-
       // Scoring
       if (ball.x < 0) {
         newState.score.player2++;
