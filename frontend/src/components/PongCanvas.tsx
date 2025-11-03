@@ -39,10 +39,10 @@ interface GameState {
   // Physics tuning constants
   const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
   const MAX_DY = 6; // clamp for vertical velocity
-  const BALL_SPEED = 0.9; // constant total speed (pixels per frame)
+  const BALL_SPEED = 1.2; // constant total speed (pixels per frame)
   const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
   const paddleSpeed = 2;
-  const angle = (Math.random() - 0.5) * (Math.PI / 6); // +/- 30 degrees
+  const angle = (Math.PI / 6); // +/- 30 degrees
 
 export const PongCanvas = ({ 
   player1Name = "Player 1", 
@@ -142,36 +142,18 @@ export const PongCanvas = ({
 
       // Ball collision with top/bottom walls
       if (newState.ball.y <= newState.ball.radius) {
-        // Hit top: force vertical component to go down (positive)
-        newState.ball.dy = Math.abs(newState.ball.dy) || 0.5;
-        // reduce vertical component to widen outgoing angle
-        // clamp vertical speed for safety
-        newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
-        // recompute horizontal component so total speed remains BALL_SPEED
-        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
-        const dyAbs = Math.abs(newState.ball.dy);
-        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
-        newState.ball.dx = signX * dxMag;
-      } else if (newState.ball.y >= canvas.height - newState.ball.radius) {
-        // Hit bottom: force vertical component to go up (negative)
-        newState.ball.dy = -Math.abs(newState.ball.dy) || -0.5;
-        // reduce vertical component to widen outgoing angle
-        // clamp vertical speed for safety
-        newState.ball.dy = Math.max(-MAX_DY, Math.min(MAX_DY, newState.ball.dy));
-        // recompute horizontal component so total speed remains BALL_SPEED
-        const signX = Math.sign(newState.ball.dx) || (Math.random() > 0.5 ? 1 : -1);
-        const dyAbs = Math.abs(newState.ball.dy);
-        const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dyAbs * dyAbs));
-        newState.ball.dx = signX * dxMag;
+        newState.ball.dy = -(newState.ball.dy);
+      } 
+      else if (newState.ball.y >= canvas.height - newState.ball.radius) {
+        newState.ball.dy = -(newState.ball.dy);
       }
 
   // Ball collision with paddles
-  const ball = newState.ball;
-  // store incoming velocity before collision adjustments
-  // const incomingDx = ball.dx;
-  const incomingDy = ball.dy;
-  const p1 = newState.paddle1;
-  const p2 = newState.paddle2;
+    const ball = newState.ball;
+    const incomingDy = ball.dy;
+    const incomingDx = ball.dx;
+    const p1 = newState.paddle1;
+    const p2 = newState.paddle2;
 
       // Left paddle collision
       if (ball.x - ball.radius <= p1.x + p1.width &&
@@ -181,11 +163,9 @@ export const PongCanvas = ({
           p1.y <= ball.y + ball.radius)) &&
           ball.dx < 0) {
         // Nudge ball outside the paddle to avoid repeat collisions
-        ball.x = p1.x + p1.width + ball.radius;
-          const dy = incomingDy;
-          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
-          ball.dx = Math.abs(dxMag); // go right
-          ball.dy = dy;
+          ball.x = p1.x + p1.width + ball.radius;
+          ball.dx = -incomingDx // go right
+          ball.dy = incomingDy;
       }
 
       // Right paddle collision
@@ -195,11 +175,10 @@ export const PongCanvas = ({
           (ball.y + ball.radius <= p2.y + (p2.height) &&
           p2.y <= ball.y + ball.radius)) &&
           ball.dx > 0) {
+        // Nudge ball outside the paddle to avoid repeat collisions
           ball.x = p2.x - ball.radius;
-          const dy = incomingDy;
-          const dxMag = Math.sqrt(Math.max(0, BALL_SPEED * BALL_SPEED - dy * dy));
-          ball.dx = -Math.abs(dxMag); // go left
-          ball.dy = dy;
+          ball.dx = -incomingDx; // go left
+          ball.dy = incomingDy;
       }
       // Scoring
       if (ball.x < 0) {
