@@ -37,15 +37,12 @@ interface GameState {
   gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
 }
 // Physics tuning constants
-const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
-const MAX_DY = 6; // clamp for vertical velocity
-const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
-
 const Mac1 = 0.1; // if you're on debian set it to 1
 const Mac2 = 0.2; // if you're on debian set it to 1
 const BALL_SPEED = 1.2 * Mac1; // constant total speed (pixels per frame)
 const paddleSpeed = 2 * Mac2;
-const accelerateSpeed = 1.0001;
+let accelerateSpeed = 1.0001;
+const max_Speed = 5 * Mac1;// Speed == 0.5497785951214637 (0.50792919144553, -0.21039115982193848)
 const angle = (Math.PI / 8); // +/- 30 degrees
 
 export const PongCanvas = ({
@@ -55,7 +52,7 @@ export const PongCanvas = ({
   maxScore = 5
 }: PongCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
   const keysPressed = useRef<Set<string>>(new Set());
 
   const [gameState, setGameState] = useState<GameState>({
@@ -88,6 +85,7 @@ export const PongCanvas = ({
   const createBall = useCallback(() => {
     // small random angle so ball isn't perfectly horizontal
     const dir = Math.random() > 0.5 ? 1 : -1;
+    accelerateSpeed = 1.0001;
     return {
       x: 400,
       y: 300,
@@ -144,6 +142,8 @@ export const PongCanvas = ({
       newState.ball.y += newState.ball.dy;
       newState.ball.dy *= accelerateSpeed;
       newState.ball.dx *= accelerateSpeed;
+      if (newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx >= max_Speed * max_Speed)
+        accelerateSpeed = 1;
       // Ball collision with top/bottom walls
       if (newState.ball.y <= newState.ball.radius) {
         newState.ball.dy = -(newState.ball.dy);
@@ -189,6 +189,7 @@ export const PongCanvas = ({
         newState.score.player2++;
         newState.ball = createBall();
       } else if (ball.x > canvas.width) {
+        // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)))
         newState.score.player1++;
         newState.ball = createBall();
       }
@@ -197,6 +198,9 @@ export const PongCanvas = ({
       if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
         newState.gameStatus = 'finished';
         if (onGameEnd) {
+          // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)));
+          // console.log("(", ball.dx, ", ", ball.dy, ")");
+
           onGameEnd(newState.score.player1, newState.score.player2);
         }
       }
