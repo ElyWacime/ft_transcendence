@@ -6,6 +6,8 @@ import { Play, Pause, RotateCcw } from "lucide-react";
 interface PongCanvasProps {
   player1Name?: string;
   player2Name?: string;
+  player3Name?: string;
+  player4Name?: string;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
 }
@@ -30,6 +32,18 @@ interface GameState {
     width: number;
     height: number;
   };
+  paddle3: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  paddle4: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
   score: {
     player1: number;
     player2: number;
@@ -42,12 +56,15 @@ const Mac2 = 0.2; // if you're on debian set it to 1
 const BALL_SPEED = 1.2 * Mac1; // constant total speed (pixels per frame)
 const paddleSpeed = 2 * Mac2;
 let accelerateSpeed = 1.0001;
+let Mode = 4;
 const max_Speed = 5 * Mac1;// Speed == 0.5497785951214637 (0.50792919144553, -0.21039115982193848)
 const angle = (Math.PI / 8); // +/- 30 degrees
 
 export const PongCanvas = ({
   player1Name = "Player 1",
   player2Name = "Player 2",
+  player3Name = "Player 3",
+  player4Name = "Player 4",
   onGameEnd,
   maxScore = 5
 }: PongCanvasProps) => {
@@ -71,6 +88,18 @@ export const PongCanvas = ({
     },
     paddle2: {
       x: 765,
+      y: 250,
+      width: 15,
+      height: 100
+    },
+    paddle3: {
+      x: 60,
+      y: 250,
+      width: 15,
+      height: 100
+    },
+    paddle4: {
+      x: 725,
       y: 250,
       width: 15,
       height: 100
@@ -136,7 +165,20 @@ export const PongCanvas = ({
       if (keysPressed.current.has('ArrowDown') && newState.paddle2.y < canvas.height - newState.paddle2.height) {
         newState.paddle2.y += paddleSpeed;
       }
-
+      if (Mode == 4) {
+        if (keysPressed.current.has('KeyP') && newState.paddle3.y > 0) {
+          newState.paddle3.y -= paddleSpeed;
+        }
+        if (keysPressed.current.has('KeyL') && newState.paddle3.y < canvas.height - newState.paddle3.height) {
+          newState.paddle3.y += paddleSpeed;
+        }
+        if (keysPressed.current.has('KeyU') && newState.paddle4.y > 0) {
+          newState.paddle4.y -= paddleSpeed;
+        }
+        if (keysPressed.current.has('KeyH') && newState.paddle4.y < canvas.height - newState.paddle4.height) {
+          newState.paddle4.y += paddleSpeed;
+        }
+      }
       // Move ball
       newState.ball.x += newState.ball.dx;
       newState.ball.y += newState.ball.dy;
@@ -158,7 +200,8 @@ export const PongCanvas = ({
       const incomingDx = ball.dx;
       const p1 = newState.paddle1;
       const p2 = newState.paddle2;
-
+      const p3 = newState.paddle3;
+      const p4 = newState.paddle4;
       // Left paddle collision
       if (ball.x - ball.radius <= p1.x + p1.width &&
         ((ball.y - ball.radius <= p1.y + (p1.height) &&
@@ -171,7 +214,6 @@ export const PongCanvas = ({
         ball.dx = -incomingDx // go right
         ball.dy = incomingDy;
       }
-
       // Right paddle collision
       if (ball.x + ball.radius >= p2.x &&
         ((ball.y - ball.radius <= p2.y + (p2.height) &&
@@ -184,6 +226,31 @@ export const PongCanvas = ({
         ball.dx = -incomingDx; // go left
         ball.dy = incomingDy;
       }
+      if (Mode == 4) {
+        if (ball.x - ball.radius <= p3.x + p3.width &&
+          ((ball.y - ball.radius <= p3.y + (p3.height) &&
+            p3.y <= ball.y - ball.radius) ||
+            (ball.y + ball.radius <= p3.y + (p3.height) &&
+              p3.y <= ball.y + ball.radius)) &&
+          ball.dx < 0) {
+          // Nudge ball outside the paddle to avoid repeat collisions
+          ball.x = p3.x + p1.width + ball.radius;
+          ball.dx = -incomingDx // go right
+          ball.dy = incomingDy;
+        }
+        if (ball.x + ball.radius >= p4.x &&
+          ((ball.y - ball.radius <= p4.y + (p4.height) &&
+            p4.y <= ball.y - ball.radius) ||
+            (ball.y + ball.radius <= p4.y + (p4.height) &&
+              p4.y <= ball.y + ball.radius)) &&
+          ball.dx > 0) {
+          // Nudge ball outside the paddle to avoid repeat collisions
+          ball.x = p4.x - ball.radius;
+          ball.dx = -incomingDx; // go left
+          ball.dy = incomingDy;
+        }
+      }
+
       // Scoring
       if (ball.x < 0) {
         newState.score.player2++;
@@ -232,7 +299,10 @@ export const PongCanvas = ({
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
     ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
-
+    if (Mode == 4) {
+      ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.paddle3.width, gameState.paddle3.height);
+      ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.paddle4.width, gameState.paddle4.height);
+    }
     // Draw ball
     ctx.beginPath();
     ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
@@ -430,6 +500,8 @@ export const PongCanvas = ({
           <div className="text-center text-sm text-muted-foreground">
             <p><strong>{player1Name}:</strong> Use W/S keys to move paddle up/down</p>
             <p><strong>{player2Name}:</strong> Use Arrow Up/Down keys to move paddle up/down</p>
+            <p><strong>{player3Name}:</strong> Use P/L keys to move paddle up/down</p>
+            <p><strong>{player4Name}:</strong> Use Arrow U/H keys to move paddle up/down</p>
             <p>First to {maxScore} points wins!</p>
           </div>
         </CardContent>
