@@ -36,24 +36,28 @@ interface GameState {
   };
   gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
 }
-  // Physics tuning constants
-  const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
-  const MAX_DY = 6; // clamp for vertical velocity
-  const BALL_SPEED = 1.2; // constant total speed (pixels per frame)
-  const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
-  const paddleSpeed = 2;
-  const angle = (Math.PI / 8); // +/- 30 degrees
+// Physics tuning constants
+const SPIN_FACTOR = 0.08; // how strongly paddle offset affects vertical velocity
+const MAX_DY = 6; // clamp for vertical velocity
+const WALL_BOUNCE_DY_REDUCTION = 0.6; // reduce vertical component on wall bounce to widen angle
 
-export const PongCanvas = ({ 
-  player1Name = "Player 1", 
-  player2Name = "Player 2", 
+const Mac1 = 0.1; // if you're on debian set it to 1
+const Mac2 = 0.2; // if you're on debian set it to 1
+const BALL_SPEED = 1.2 * Mac1; // constant total speed (pixels per frame)
+const paddleSpeed = 2 * Mac2;
+const accelerateSpeed = 1.0001;
+const angle = (Math.PI / 8); // +/- 30 degrees
+
+export const PongCanvas = ({
+  player1Name = "Player 1",
+  player2Name = "Player 2",
   onGameEnd,
-  maxScore = 5 
+  maxScore = 5
 }: PongCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const keysPressed = useRef<Set<string>>(new Set());
-  
+
   const [gameState, setGameState] = useState<GameState>({
     ball: {
       x: 400,
@@ -121,7 +125,7 @@ export const PongCanvas = ({
       if (!canvas) return prev;
 
       // Move paddles based on keys
-    
+
       if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) {
         newState.paddle1.y -= paddleSpeed;
       }
@@ -138,47 +142,47 @@ export const PongCanvas = ({
       // Move ball
       newState.ball.x += newState.ball.dx;
       newState.ball.y += newState.ball.dy;
-      newState.ball.dy *= 1.0001; // slight air resistance
-      newState.ball.dx *= 1.0001; // slight air resistance
+      newState.ball.dy *= accelerateSpeed;
+      newState.ball.dx *= accelerateSpeed;
       // Ball collision with top/bottom walls
       if (newState.ball.y <= newState.ball.radius) {
         newState.ball.dy = -(newState.ball.dy);
-      } 
+      }
       else if (newState.ball.y >= canvas.height - newState.ball.radius) {
         newState.ball.dy = -(newState.ball.dy);
       }
 
-  // Ball collision with paddles
-    const ball = newState.ball;
-    const incomingDy = ball.dy;
-    const incomingDx = ball.dx;
-    const p1 = newState.paddle1;
-    const p2 = newState.paddle2;
+      // Ball collision with paddles
+      const ball = newState.ball;
+      const incomingDy = ball.dy;
+      const incomingDx = ball.dx;
+      const p1 = newState.paddle1;
+      const p2 = newState.paddle2;
 
       // Left paddle collision
       if (ball.x - ball.radius <= p1.x + p1.width &&
-           ((ball.y - ball.radius <= p1.y + (p1.height) &&
-          p1.y <= ball.y - ball.radius) || 
+        ((ball.y - ball.radius <= p1.y + (p1.height) &&
+          p1.y <= ball.y - ball.radius) ||
           (ball.y + ball.radius <= p1.y + (p1.height) &&
-          p1.y <= ball.y + ball.radius)) &&
-          ball.dx < 0) {
+            p1.y <= ball.y + ball.radius)) &&
+        ball.dx < 0) {
         // Nudge ball outside the paddle to avoid repeat collisions
-          ball.x = p1.x + p1.width + ball.radius;
-          ball.dx = -incomingDx // go right
-          ball.dy = incomingDy;
+        ball.x = p1.x + p1.width + ball.radius;
+        ball.dx = -incomingDx // go right
+        ball.dy = incomingDy;
       }
 
       // Right paddle collision
       if (ball.x + ball.radius >= p2.x &&
-           ((ball.y - ball.radius <= p2.y + (p2.height) &&
-          p2.y <= ball.y - ball.radius) || 
+        ((ball.y - ball.radius <= p2.y + (p2.height) &&
+          p2.y <= ball.y - ball.radius) ||
           (ball.y + ball.radius <= p2.y + (p2.height) &&
-          p2.y <= ball.y + ball.radius)) &&
-          ball.dx > 0) {
+            p2.y <= ball.y + ball.radius)) &&
+        ball.dx > 0) {
         // Nudge ball outside the paddle to avoid repeat collisions
-          ball.x = p2.x - ball.radius;
-          ball.dx = -incomingDx; // go left
-          ball.dy = incomingDy;
+        ball.x = p2.x - ball.radius;
+        ball.dx = -incomingDx; // go left
+        ball.dy = incomingDy;
       }
       // Scoring
       if (ball.x < 0) {
