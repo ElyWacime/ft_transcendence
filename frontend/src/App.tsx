@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Register from "./pages/Register";
+import GameOnline from "./pages/GameOnline";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                 }
               />
               <Route path="/game" element={<Game />} />
+              <Route path="/gameOnline" element={<GameOnline />} />
               <Route path="/result" element={<Result />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />

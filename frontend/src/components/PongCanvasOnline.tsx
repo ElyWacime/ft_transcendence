@@ -1,181 +1,575 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pause, Play, RotateCcw } from "lucide-react";
 
-interface PongCanvasOnlineProps {
+interface PongCanvasProps {
   player1Name?: string;
   player2Name?: string;
+  player3Name?: string;
+  player4Name?: string;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
-  serverUrl?: string; // e.g. http://localhost:3001
-  roomId?: string;
 }
 
 interface GameState {
-  ball: { x: number; y: number; dx: number; dy: number; radius: number };
-  paddle1: { x: number; y: number; width: number; height: number };
-  paddle2: { x: number; y: number; width: number; height: number };
-  score: { player1: number; player2: number };
+  ball: {
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+    radius: number;
+  };
+  paddle1: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  paddle2: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  paddle3: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  paddle4: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  score: {
+    player1: number;
+    player2: number;
+  };
   gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
 }
+// Physics tuning constants
+const Mac1 = 0.1; // if you're on debian set it to 1
+const Mac2 = 0.2; // if you're on debian set it to 1
+const BALL_SPEED = 1.2 * Mac1; // constant total speed (pixels per frame)
+const paddleSpeed = 2 * Mac2;
+let accelerateSpeed = 1.0001;
+let Mode = 2;
+const max_Speed = 5 * Mac1;// Speed == 0.5497785951214637 (0.50792919144553, -0.21039115982193848)
+const angle = (Math.PI / 8); // +/- 30 degrees
 
-export const PongCanvasOnline: React.FC<PongCanvasOnlineProps> = ({
-  player1Name = 'Player 1',
-  player2Name = 'Player 2',
+export const PongCanvasOnline = ({
+  player1Name = "Player 1",
+  player2Name = "Player 2",
+  player3Name = "Player 3",
+  player4Name = "Player 4",
   onGameEnd,
-  maxScore = 5,
-  serverUrl = 'http://localhost:3001',
-  roomId
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationRef = useRef<number | null>(null);
+  maxScore = 5
+}: PongCanvasProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>(0);
   const keysPressed = useRef<Set<string>>(new Set());
-  const socketRef = useRef<Socket | null>(null);
-  const playerIdRef = useRef<number | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
-    ball: { x: 400, y: 300, dx: 1.5, dy: 0.5, radius: 8 },
-    paddle1: { x: 20, y: 250, width: 15, height: 100 },
-    paddle2: { x: 765, y: 250, width: 15, height: 100 },
-    score: { player1: 0, player2: 0 },
+    ball: {
+      x: 400,
+      y: 300,
+      dx: BALL_SPEED * Math.cos(angle),
+      dy: BALL_SPEED * Math.sin(angle),
+      radius: 8
+    },
+    paddle1: {
+      x: 20,
+      y: 250,
+      width: 15,
+      height: 100
+    },
+    paddle2: {
+      x: 765,
+      y: 250,
+      width: 15,
+      height: 100
+    },
+    paddle3: {
+      x: 60,
+      y: 250,
+      width: 15,
+      height: 100
+    },
+    paddle4: {
+      x: 725,
+      y: 250,
+      width: 15,
+      height: 100
+    },
+    score: {
+      player1: 0,
+      player2: 0
+    },
     gameStatus: 'waiting'
   });
 
-  const BALL_SPEED = 0.9; // visual/legacy value kept for local prediction
-
-  // Connect to server and wire events
-  useEffect(() => {
-    const socket = io(serverUrl);
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      socket.emit('join', { roomId });
-    });
-
-    socket.on('joined', (data: any) => {
-      if (data?.playerId !== undefined) playerIdRef.current = data.playerId;
-    });
-
-    socket.on('state', (payload: any) => {
-      setGameState(prev => ({
-        ...prev,
-        paddle1: { ...prev.paddle1, y: payload.players?.[0]?.y ?? prev.paddle1.y },
-        paddle2: { ...prev.paddle2, y: payload.players?.[1]?.y ?? prev.paddle2.y },
-        ball: { x: payload.ball.x, y: payload.ball.y, dx: payload.ball.vx ?? prev.ball.dx, dy: payload.ball.vy ?? prev.ball.dy, radius: payload.ball.radius ?? prev.ball.radius },
-        score: { player1: payload.score?.[0] ?? prev.score.player1, player2: payload.score?.[1] ?? prev.score.player2 },
-        gameStatus: 'playing'
-      }));
-    });
-
-    socket.on('disconnect', () => {
-      playerIdRef.current = null;
-    });
-
-    return () => {
-      try { socket.disconnect(); } catch (e) { /* ignore */ }
-      socketRef.current = null;
-    };
-  }, [serverUrl, roomId]);
-
-  // keyboard handling + emit inputs
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
-      keysPressed.current.add(e.code);
-      const myId = playerIdRef.current;
-      if (socketRef.current && myId !== null) {
-        const up = myId === 0 ? keysPressed.current.has('KeyW') : keysPressed.current.has('ArrowUp');
-        const down = myId === 0 ? keysPressed.current.has('KeyS') : keysPressed.current.has('ArrowDown');
-        socketRef.current.emit('input', { up, down });
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      keysPressed.current.delete(e.code);
-      const myId = playerIdRef.current;
-      if (socketRef.current && myId !== null) {
-        const up = myId === 0 ? keysPressed.current.has('KeyW') : keysPressed.current.has('ArrowUp');
-        const down = myId === 0 ? keysPressed.current.has('KeyS') : keysPressed.current.has('ArrowDown');
-        socketRef.current.emit('input', { up, down });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown, { passive: false });
-    window.addEventListener('keyup', handleKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+  const createBall = useCallback(() => {
+    // small random angle so ball isn't perfectly horizontal
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    accelerateSpeed = 1.0001;
+    return {
+      x: 400,
+      y: 300,
+      dx: dir * BALL_SPEED * Math.cos(angle),
+      dy: BALL_SPEED * Math.sin(angle),
+      radius: 8
     };
   }, []);
 
-  // simple renderer -- draw according to latest server state
+  const resetGame = useCallback(() => {
+    setGameState(prev => ({
+      ...prev,
+      ball: createBall(),
+      paddle1: { ...prev.paddle1, y: 250 },
+      paddle2: { ...prev.paddle2, y: 250 },
+      score: { player1: 0, player2: 0 },
+      gameStatus: 'waiting'
+    }));
+  }, [createBall]);
+
+  const resetBall = useCallback(() => {
+    setGameState(prev => ({
+      ...prev,
+      ball: createBall()
+    }));
+  }, [createBall]);
+
+  const updateGame = useCallback(() => {
+    setGameState(prev => {
+      if (prev.gameStatus !== 'playing') return prev;
+
+      const newState = { ...prev };
+      const canvas = canvasRef.current;
+      if (!canvas) return prev;
+
+      // Move paddles based on keys
+
+      if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) {
+        newState.paddle1.y -= paddleSpeed;
+      }
+      if (keysPressed.current.has('KeyS') && newState.paddle1.y < canvas.height - newState.paddle1.height) {
+        newState.paddle1.y += paddleSpeed;
+      }
+      if (keysPressed.current.has('ArrowUp') && newState.paddle2.y > 0) {
+        newState.paddle2.y -= paddleSpeed;
+      }
+      if (keysPressed.current.has('ArrowDown') && newState.paddle2.y < canvas.height - newState.paddle2.height) {
+        newState.paddle2.y += paddleSpeed;
+      }
+      if (Mode == 4) {
+        if (keysPressed.current.has('KeyP') && newState.paddle3.y > 0) {
+          newState.paddle3.y -= paddleSpeed;
+        }
+        if (keysPressed.current.has('KeyL') && newState.paddle3.y < canvas.height - newState.paddle3.height) {
+          newState.paddle3.y += paddleSpeed;
+        }
+        if (keysPressed.current.has('KeyU') && newState.paddle4.y > 0) {
+          newState.paddle4.y -= paddleSpeed;
+        }
+        if (keysPressed.current.has('KeyH') && newState.paddle4.y < canvas.height - newState.paddle4.height) {
+          newState.paddle4.y += paddleSpeed;
+        }
+      }
+      // Move ball
+      newState.ball.x += newState.ball.dx;
+      newState.ball.y += newState.ball.dy;
+      newState.ball.dy *= accelerateSpeed;
+      newState.ball.dx *= accelerateSpeed;
+      if (newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx >= max_Speed * max_Speed)
+        accelerateSpeed = 1;
+      // Ball collision with top/bottom walls
+      if (newState.ball.y <= newState.ball.radius) {
+        newState.ball.dy = -(newState.ball.dy);
+      }
+      else if (newState.ball.y >= canvas.height - newState.ball.radius) {
+        newState.ball.dy = -(newState.ball.dy);
+      }
+
+      // Ball collision with paddles
+      const ball = newState.ball;
+      const incomingDy = ball.dy;
+      const incomingDx = ball.dx;
+      const p1 = newState.paddle1;
+      const p2 = newState.paddle2;
+      const p3 = newState.paddle3;
+      const p4 = newState.paddle4;
+      // Left paddle collision
+      if (ball.x - ball.radius <= p1.x + p1.width &&
+        ((ball.y - ball.radius <= p1.y + (p1.height) &&
+          p1.y <= ball.y - ball.radius) ||
+          (ball.y + ball.radius <= p1.y + (p1.height) &&
+            p1.y <= ball.y + ball.radius)) &&
+        ball.dx < 0) {
+        // Nudge ball outside the paddle to avoid repeat collisions
+        ball.x = p1.x + p1.width + ball.radius;
+        ball.dx = -incomingDx // go right
+        ball.dy = incomingDy;
+      }
+      // Right paddle collision
+      if (ball.x + ball.radius >= p2.x &&
+        ((ball.y - ball.radius <= p2.y + (p2.height) &&
+          p2.y <= ball.y - ball.radius) ||
+          (ball.y + ball.radius <= p2.y + (p2.height) &&
+            p2.y <= ball.y + ball.radius)) &&
+        ball.dx > 0) {
+        // Nudge ball outside the paddle to avoid repeat collisions
+        ball.x = p2.x - ball.radius;
+        ball.dx = -incomingDx; // go left
+        ball.dy = incomingDy;
+      }
+      if (Mode == 4) {
+        if (ball.x - ball.radius <= p3.x + p3.width &&
+          ((ball.y - ball.radius <= p3.y + (p3.height) &&
+            p3.y <= ball.y - ball.radius) ||
+            (ball.y + ball.radius <= p3.y + (p3.height) &&
+              p3.y <= ball.y + ball.radius)) &&
+          ball.dx < 0) {
+          // Nudge ball outside the paddle to avoid repeat collisions
+          ball.x = p3.x + p1.width + ball.radius;
+          ball.dx = -incomingDx // go right
+          ball.dy = incomingDy;
+        }
+        if (ball.x + ball.radius >= p4.x &&
+          ((ball.y - ball.radius <= p4.y + (p4.height) &&
+            p4.y <= ball.y - ball.radius) ||
+            (ball.y + ball.radius <= p4.y + (p4.height) &&
+              p4.y <= ball.y + ball.radius)) &&
+          ball.dx > 0) {
+          // Nudge ball outside the paddle to avoid repeat collisions
+          ball.x = p4.x - ball.radius;
+          ball.dx = -incomingDx; // go left
+          ball.dy = incomingDy;
+        }
+      }
+
+      // Scoring
+      if (ball.x < 0) {
+        newState.score.player2++;
+        newState.ball = createBall();
+      } else if (ball.x > canvas.width) {
+        // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)))
+        newState.score.player1++;
+        newState.ball = createBall();
+      }
+
+      // Check for game end
+      if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
+        newState.gameStatus = 'finished';
+        if (onGameEnd) {
+          // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)));
+          // console.log("(", ball.dx, ", ", ball.dy, ")");
+
+          onGameEnd(newState.score.player1, newState.score.player2);
+        }
+      }
+
+      return newState;
+    });
+  }, [maxScore, onGameEnd, resetBall]);
+
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
+    // Clear canvas
     ctx.fillStyle = 'hsl(222 47% 4%)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw center line
     ctx.strokeStyle = 'hsl(222 47% 12%)';
-    ctx.setLineDash([10,10]);
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 10]);
     ctx.beginPath();
-    ctx.moveTo(canvas.width/2,0);
-    ctx.lineTo(canvas.width/2,canvas.height);
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // Draw paddles
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
     ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
-
+    if (Mode == 4) {
+      ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.paddle3.width, gameState.paddle3.height);
+      ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.paddle4.width, gameState.paddle4.height);
+    }
+    // Draw ball
     ctx.beginPath();
-    ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI*2);
+    ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fill();
 
+    // Add glow effect to ball
     ctx.shadowColor = 'hsl(217 91% 60%)';
     ctx.shadowBlur = 20;
     ctx.fill();
     ctx.shadowBlur = 0;
 
+    // Draw scores
     ctx.fillStyle = 'hsl(210 40% 98%)';
     ctx.font = '48px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(gameState.score.player1.toString(), canvas.width/4, 60);
-    ctx.fillText(gameState.score.player2.toString(), (canvas.width*3)/4, 60);
+    ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
+    ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, [gameState]);
 
-  // animation loop
+  const gameLoop = useCallback(() => {
+    updateGame();
+    draw();
+    animationRef.current = requestAnimationFrame(gameLoop);
+  }, [updateGame, draw]);
+
   useEffect(() => {
-    const loop = () => {
-      draw();
-      animationRef.current = requestAnimationFrame(loop);
-    };
-    animationRef.current = requestAnimationFrame(loop);
+    if (gameState.gameStatus === 'playing') {
+      gameLoop();
+    } else if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
     return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
+  }, [gameState.gameStatus, gameLoop]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't block typing in inputs/textareas or contentEditable elements
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+
+      // While playing, prevent ArrowUp/ArrowDown from scrolling the page
+      if (gameState.gameStatus === 'playing' && (e.code === 'ArrowUp' || e.code === 'ArrowDown')) {
+        e.preventDefault();
+      }
+
+      keysPressed.current.add(e.code);
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressed.current.delete(e.code);
+    };
+
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [gameState.gameStatus]);
+
+  useEffect(() => {
+    draw();
   }, [draw]);
+
+  const startGame = () => {
+    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+    // Focus and center the canvas in the viewport when the game starts
+    const canvas = canvasRef.current;
+    if (canvas) {
+      // make sure the canvas is focusable and receive keyboard events
+      canvas.tabIndex = 0;
+      canvas.focus({ preventScroll: true });
+      // center the canvas smoothly in the viewport
+      canvas.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+  };
+
+  // const pauseGame = () => {
+  //   setGameState(prev => ({ ...prev, gameStatus: 'paused' }));
+  // };
+
+  // const resumeGame = () => {
+  //   setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+  // };
+
+  interface User {
+    id: string;
+    lastKey: string;
+    color: string;
+  }
+
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [users, setUsers] = useState<Record<string, User>>({});
+  const [myId, setMyId] = useState<string | null>(null);
+
+  // // Assign a random color to each new user
+  // const randomColor = () => {
+  //   const colors = ["#f87171", "#34d399", "#60a5fa", "#fbbf24", "#a78bfa"];
+  //   return colors[Math.floor(Math.random() * colors.length)];
+  // };
+
+  // Connect to WebSocket server
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3000");
+    setSocket(ws);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === "init") {
+        setMyId(data.id);
+      }
+
+      if (data.type === "userKeyPress") {
+        setUsers((prev) => {
+          const updated = { ...prev };
+          if (!updated[data.id]) {
+            updated[data.id] = { id: data.id, lastKey: data.key, color: randomColor() };
+          } else {
+            updated[data.id].lastKey = data.key;
+          }
+          return updated;
+        });
+      }
+
+      if (data.type === "userDisconnect") {
+        setUsers((prev) => {
+          const updated = { ...prev };
+          delete updated[data.id];
+          return updated;
+        });
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  // Send key press to server
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.send(e.key);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [socket]);
 
   return (
     <div className="space-y-6">
+      {/* Game Info */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gradient-secondary border-border">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-center text-lg">{player1Name}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <div className="text-3xl font-game font-bold text-primary">
+              {gameState.score.player1}
+            </div>
+            <div className="text-sm text-muted-foreground mt-2">
+              W/S Keys
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-center">
+          <div className="space-y-2">
+            {/* {gameState.gameStatus === 'waiting' && (
+              <Button onClick={startGame} className="bg-gradient-primary">
+                <Play className="w-4 h-4 mr-2" />
+                Start Game
+              </Button>
+            )} */}
+            {/* {gameState.gameStatus === 'playing' && (
+              <Button onClick={pauseGame} className="border border-border">
+                <Pause className="w-4 h-4 mr-2" />
+                Pause
+              </Button>
+            )}
+            {gameState.gameStatus === 'paused' && (
+              <Button onClick={resumeGame} className="bg-gradient-primary">
+                <Play className="w-4 h-4 mr-2" />
+                Resume
+              </Button>
+            )} */}
+            <div className="flex space-x-2">
+              {/* <Button onClick={resetGame} className="px-2 py-1 text-sm border border-border">
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reset
+              </Button> */}
+            </div>
+          </div>
+        </div>
+
+        <Card className="bg-gradient-secondary border-border">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-center text-lg">{player2Name}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <div className="text-3xl font-game font-bold text-primary">
+              {gameState.score.player2}
+            </div>
+            <div className="text-sm text-muted-foreground mt-2">
+              Arrow Keys
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Game Canvas */}
       <div className="flex justify-center">
-        <canvas ref={canvasRef} width={800} height={600} className="border border-border rounded-lg bg-card" />
-      </div>
-      <div className="flex justify-between max-w-3xl mx-auto">
-        <div className="text-center">
-          <div className="text-3xl font-game font-bold text-primary">{gameState.score.player1}</div>
-          <div className="text-sm text-muted-foreground">W / S</div>
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            tabIndex={0}
+            onFocus={() => {
+              /* keep focus on canvas for keyboard controls */
+            }}
+            className="border border-border rounded-lg bg-card shadow-card"
+          />
+          {gameState.gameStatus === 'finished' && (
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+              <Card className="bg-gradient-secondary border-border text-center">
+                <CardHeader>
+                  <CardTitle className="font-game text-2xl glow-text">Game Over!</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-lg">
+                    {gameState.score.player1 > gameState.score.player2 ? player1Name : player2Name} Wins!
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Final Score: {gameState.score.player1} - {gameState.score.player2}
+                  </div>
+                  <Button onClick={resetGame} className="bg-gradient-primary">
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Play Again
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
-        <div className="text-center">
-          <div className="text-3xl font-game font-bold text-primary">{gameState.score.player2}</div>
-          <div className="text-sm text-muted-foreground">↑ / ↓</div>
-        </div>
       </div>
+
+      {/* Controls Help */}
+      <Card className="bg-gradient-secondary border-border">
+        <CardContent className="pt-6">
+          <div className="text-center text-sm text-muted-foreground">
+            <p><strong>{player1Name}:</strong> Use W/S keys to move paddle up/down</p>
+            <p><strong>{player2Name}:</strong> Use Arrow Up/Down keys to move paddle up/down</p>
+            <p><strong>{player3Name}:</strong> Use P/L keys to move paddle up/down</p>
+            <p><strong>{player4Name}:</strong> Use Arrow U/H keys to move paddle up/down</p>
+            <p>First to {maxScore} points wins!</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
-
-export default PongCanvasOnline;

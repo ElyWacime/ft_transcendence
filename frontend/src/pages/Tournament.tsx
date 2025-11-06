@@ -13,7 +13,7 @@ import { toast } from "sonner";
 const Tournament = () => {
   const navigate = useNavigate();
   // const { isLoggedIn } = useAuth();
- 
+
   const [tournament, setTournament] = useState<TournamentType | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<{ id: string; alias: string } | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -55,10 +55,10 @@ const Tournament = () => {
       if (updatedTournament) {
         setTournament(updatedTournament);
         toast.success(`${alias} joined the tournament!`);
-        
+
         // Send system message
         await api.sendSystemMessage(`${alias} joined the tournament`);
-        
+
         // Set as current player if first one added
         if (!currentPlayer) {
           setCurrentPlayer({ id: player.id, alias: player.alias });
@@ -80,7 +80,7 @@ const Tournament = () => {
       const startedTournament = await api.startTournament();
       setTournament(startedTournament);
       toast.success("Tournament started! Let the games begin!");
-      
+
       // Send system message
       await api.sendSystemMessage("Tournament has started! Good luck to all players!");
     } catch (error) {
@@ -93,10 +93,10 @@ const Tournament = () => {
     try {
       // Send system message
       await api.sendSystemMessage(`Match starting: ${match.player1.alias} vs ${match.player2.alias}`);
-      
+
       // Navigate to game with match data
-      navigate("/game", { 
-        state: { 
+      navigate("/game", {
+        state: {
           match,
           player1: match.player1,
           player2: match.player2

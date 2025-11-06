@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Pause, Play, RotateCcw } from "lucide-react";
 
 interface PongCanvasProps {
   player1Name?: string;
@@ -56,7 +56,7 @@ const Mac2 = 0.2; // if you're on debian set it to 1
 const BALL_SPEED = 1.2 * Mac1; // constant total speed (pixels per frame)
 const paddleSpeed = 2 * Mac2;
 let accelerateSpeed = 1.0001;
-let Mode = 4;
+let Mode = 2;
 const max_Speed = 5 * Mac1;// Speed == 0.5497785951214637 (0.50792919144553, -0.21039115982193848)
 const angle = (Math.PI / 8); // +/- 30 degrees
 
@@ -110,7 +110,7 @@ export const PongCanvas = ({
     },
     gameStatus: 'waiting'
   });
-  // helper to create a fresh ball object (keeps logic in one place)
+
   const createBall = useCallback(() => {
     // small random angle so ball isn't perfectly horizontal
     const dir = Math.random() > 0.5 ? 1 : -1;
@@ -123,7 +123,6 @@ export const PongCanvas = ({
       radius: 8
     };
   }, []);
-
 
   const resetGame = useCallback(() => {
     setGameState(prev => ({
