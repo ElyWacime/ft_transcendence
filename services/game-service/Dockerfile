@@ -11,9 +11,10 @@ RUN npm install
 COPY . .
 
 # ---------- Build (if using TypeScript) ----------
-RUN npm run build
+# RUN npm run build
 
 # ---------- Expose & Run ----------
 EXPOSE 3001
 # CMD ["npm", "run", "start"]
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
+CMD ["node", "server.js"]

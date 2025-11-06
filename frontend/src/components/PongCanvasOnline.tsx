@@ -386,14 +386,13 @@ export const PongCanvasOnline = ({
     }
   };
 
-  // const pauseGame = () => {
-  //   setGameState(prev => ({ ...prev, gameStatus: 'paused' }));
-  // };
+  const pauseGame = () => {
+    setGameState(prev => ({ ...prev, gameStatus: 'paused' }));
+  };
 
-  // const resumeGame = () => {
-  //   setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
-  // };
-
+  const resumeGame = () => {
+    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+  };
   interface User {
     id: string;
     lastKey: string;
@@ -405,10 +404,10 @@ export const PongCanvasOnline = ({
   const [myId, setMyId] = useState<string | null>(null);
 
   // // Assign a random color to each new user
-  // const randomColor = () => {
-  //   const colors = ["#f87171", "#34d399", "#60a5fa", "#fbbf24", "#a78bfa"];
-  //   return colors[Math.floor(Math.random() * colors.length)];
-  // };
+  const randomColor = () => {
+    const colors = ["#f87171", "#34d399", "#60a5fa", "#fbbf24", "#a78bfa"];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
 
   // Connect to WebSocket server
   useEffect(() => {
@@ -459,6 +458,7 @@ export const PongCanvasOnline = ({
     return () => window.removeEventListener("keydown", handleKey);
   }, [socket]);
 
+
   return (
     <div className="space-y-6">
       {/* Game Info */}
@@ -479,13 +479,13 @@ export const PongCanvasOnline = ({
 
         <div className="flex items-center justify-center">
           <div className="space-y-2">
-            {/* {gameState.gameStatus === 'waiting' && (
+            {gameState.gameStatus === 'waiting' && (
               <Button onClick={startGame} className="bg-gradient-primary">
                 <Play className="w-4 h-4 mr-2" />
                 Start Game
               </Button>
-            )} */}
-            {/* {gameState.gameStatus === 'playing' && (
+            )}
+            {gameState.gameStatus === 'playing' && (
               <Button onClick={pauseGame} className="border border-border">
                 <Pause className="w-4 h-4 mr-2" />
                 Pause
@@ -496,12 +496,12 @@ export const PongCanvasOnline = ({
                 <Play className="w-4 h-4 mr-2" />
                 Resume
               </Button>
-            )} */}
+            )}
             <div className="flex space-x-2">
-              {/* <Button onClick={resetGame} className="px-2 py-1 text-sm border border-border">
+              <Button onClick={resetGame} className="px-2 py-1 text-sm border border-border">
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Reset
-              </Button> */}
+              </Button>
             </div>
           </div>
         </div>
