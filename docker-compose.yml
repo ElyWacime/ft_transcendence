@@ -45,14 +45,14 @@ services:
       dockerfile: Dockerfile
     container_name: game-service
     ports:
-      - "3001:3001"
+      - "3000:3000"
     depends_on:
       - frontend
       - auth-service
     networks:
       - transcendence
     environment:
-      - PORT=3001
+      - PORT=3000
       - NODE_ENV=development
 
   # ---------- GATEWAY (NGINX) ----------

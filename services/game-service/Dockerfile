@@ -14,7 +14,7 @@ COPY . .
 # RUN npm run build
 
 # ---------- Expose & Run ----------
-EXPOSE 3001
+EXPOSE 3000
 # CMD ["npm", "run", "start"]
 # CMD ["npm", "run", "dev"]
 CMD ["node", "server.js"]
