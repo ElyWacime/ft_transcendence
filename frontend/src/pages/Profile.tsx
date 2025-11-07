@@ -6,9 +6,9 @@ import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Trophy, Github } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-// import { PrismaClient } from "../../../services/auth-service/src/generated/prisma";
-// const prisma = new PrismaClient();
-// const user = await prisma.user.findUnique({ where: { email: localStorage.getItem("email") } });
+import { PrismaClient } from "../../../services/auth-service/node_modules/@prisma/client";
+const prisma = new PrismaClient();
+const user = await prisma.user.findUnique({ where: { email: localStorage.getItem("email") } });
 const Profile = () => {
     const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ const Profile = () => {
             <div className="mb-10">
                 <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
 
-                    {/* <span>{user.name}</span> */}
+                    <span>{user.name}</span>
                 </h1>
                 <p className="text-muted-foreground mt-2 text-sm md:text-base">
                     Online/Offline  🕹️
@@ -27,6 +27,7 @@ const Profile = () => {
             <div className="mb-10">
                 <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
                     <span>Picture</span>
+                    <img src={user.avatar}></img>
                 </h1>
             </div>
             <div className="mb-10">
