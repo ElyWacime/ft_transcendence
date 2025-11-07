@@ -21,6 +21,7 @@ export const Navigation = () => {
     { path: "/tournament", label: "Tournament", icon: Trophy },
     { path: "/game", label: "Game", icon: Gamepad2 },
     { path: "/gameOnline", label: "RankedGame", icon: Gamepad2 },
+    { path: "/Profile", label: "Profile", icon: Gamepad2 },
   ];
 
   // Add either Login or Logout depending on auth state
