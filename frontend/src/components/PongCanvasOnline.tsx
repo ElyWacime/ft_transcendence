@@ -451,7 +451,14 @@ export const PongCanvasOnline = ({
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (socket?.readyState === WebSocket.OPEN) {
-        socket.send(e.key);
+        const email = localStorage.getItem("email");
+        socket.send(
+          JSON.stringify({
+            type: "userKeyPress",
+            email,
+            key: e.key,
+          })
+        );
       }
     };
     window.addEventListener("keydown", handleKey);
