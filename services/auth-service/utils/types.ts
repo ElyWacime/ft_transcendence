@@ -1,5 +1,4 @@
-import { JWT } from "@fastify/jwt";
-
+import { JWT } from "../node_modules/@fastify/jwt";
 declare module "fastify" {
   interface FastifyRequest {
     jwt: JWT;

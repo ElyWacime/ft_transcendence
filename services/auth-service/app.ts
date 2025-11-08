@@ -1,10 +1,10 @@
-import Fastify, { FastifyReply, FastifyRequest } from "fastify";
-import { userRoutes } from "./modules/user/user.route";
+import Fastify, { FastifyReply, FastifyRequest } from "./node_modules/fastify";
+import { userRoutes } from "./user/user.route";
 import fjwt, { FastifyJWT } from "@fastify/jwt";
 import fCookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { oauthRoutes } from "./modules/user/oauth.route";
+import { oauthRoutes } from "./user/oauth.route";
 
 const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 

@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance } from "../node_modules/fastify";
 import fetch from "node-fetch";
 import jwt from "jsonwebtoken";
 import prisma from "../utils/prisma";

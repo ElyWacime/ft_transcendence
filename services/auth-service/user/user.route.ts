@@ -1,6 +1,6 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance } from "../node_modules/fastify";
 import { createUser, login, logout } from "./user.controller";
-import { FastifyInstance } from "fastify";
+
 
 export async function userRoutes(app: FastifyInstance) {
   app.get("/", { preHandler: [app.authenticate] }, async () => {

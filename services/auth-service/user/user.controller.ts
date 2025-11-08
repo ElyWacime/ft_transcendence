@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from "../node_modules/fastify";
 import { CreateUserInput, LoginUserInput } from "./user.schema";
 import bcrypt from "bcrypt";
 import prisma from "../utils/prisma";
