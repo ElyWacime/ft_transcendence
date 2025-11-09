@@ -5,9 +5,10 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN apt-get update -y && apt-get install -y openssl
+COPY . .
 RUN npm install
 
-COPY . .
+
 RUN mkdir -p /app/prisma/db
 
 # Generate Prisma client inside Debian
