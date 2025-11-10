@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
+import { Trophy, Users, Gamepad2, Zap, Bot } from "lucide-react";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -14,13 +14,18 @@ const Home = () => {
     },
     {
       icon: Users,
-      title: "Multiplayer Ready",
-      description: "Play with friends on the same keyboard or online"
+      title: "Multiplayer",
+      description: "Play with friends on the same keyboard"
     },
     {
       icon: Gamepad2,
-      title: "Classic Pong",
-      description: "Retro gameplay with modern, responsive controls"
+      title: "1 vs 1",
+      description: "Gameplay with a player online"
+    },
+    {
+      icon: Bot,
+      title: "1 VS Ai",
+      description: "Play against Ai"
     },
     {
       icon: Zap,
@@ -28,6 +33,15 @@ const Home = () => {
       description: "Communicate with opponents during matches"
     }
   ];
+
+  function nav(index: number) {
+    if (index == 0)
+      navigate("/tournament");
+    if (index == 1)
+      navigate("/gameonline");
+    if (index == 2)
+      navigate("/playervs");
+  }
 
   return (
     <div className="min-h-screen pt-16">
@@ -40,7 +54,7 @@ const Home = () => {
             <span className="text-primary"> ARENA</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            The ultimate retro gaming tournament experience. 
+            The ultimate retro gaming tournament experience.
             Compete, dominate, and become the Pong champion!
           </p>
           <Button
@@ -64,6 +78,7 @@ const Home = () => {
             {features.map((feature, index) => (
               <Card
                 key={index}
+                onClick={() => nav(index)}
                 className="p-6 bg-gradient-secondary border-border hover:border-primary transition-all duration-300 hover:shadow-glow group"
               >
                 <div className="flex flex-col items-center text-center space-y-4">

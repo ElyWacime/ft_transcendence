@@ -64,7 +64,6 @@ services:
     build:
       context: ./services/game-service   
       dockerfile: Dockerfile
-    container_name: game-service
     ports:
       - "3000:3000"
     depends_on:

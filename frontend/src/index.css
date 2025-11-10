@@ -41,17 +41,17 @@
     --neon-green: 142 76% 36%;
     --neon-purple: 270 95% 75%;
     --electric: 195 100% 50%;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(195 100% 50%));
     --gradient-secondary: linear-gradient(135deg, hsl(222 47% 6%), hsl(222 47% 12%));
     --gradient-glow: linear-gradient(135deg, hsl(217 91% 60% / 0.2), hsl(142 76% 36% / 0.2));
-    
+
     /* Shadows and effects */
     --shadow-neon: 0 0 20px hsl(217 91% 60% / 0.3);
     --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.2);
     --shadow-card: 0 8px 32px hsl(222 47% 4% / 0.8);
-    
+
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -110,18 +110,24 @@
 
   /* Custom animations */
   @keyframes pulse-glow {
-    0%, 100% {
+
+    0%,
+    100% {
       box-shadow: 0 0 20px hsl(217 91% 60% / 0.3);
     }
+
     50% {
       box-shadow: 0 0 40px hsl(217 91% 60% / 0.6);
     }
   }
 
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
+
     50% {
       transform: translateY(-10px);
     }

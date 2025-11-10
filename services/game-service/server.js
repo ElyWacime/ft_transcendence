@@ -11,10 +11,10 @@ app.use(express.static("public"));
 
 wss.on("connection", (ws) => {
   const userId = randomUUID();
-  console.log(`User connected: ${userId}`);
+  console.log(`User connected: ${userId} email:${localStorage.getItem("email")}`);
 
   // Tell the client its ID
-  ws.send(JSON.stringify({ type: "init", id: userId }));
+  ws.send(JSON.stringify({ type: localStorage.getItem("email"), id: userId }));
 
   ws.on("message", (msg) => {
     let data;
@@ -35,7 +35,8 @@ wss.on("connection", (ws) => {
       });
 
       wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) client.send(event);
+        if (client.readyState === WebSocket.OPEN)
+          client.send(event);
       });
     }
   });

@@ -11,6 +11,7 @@ import Game from "./pages/Game";
 import GameOnline from "./pages/GameOnline";
 import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
+import PlayerVs from "./pages/PlayerVs";
 import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -24,7 +25,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
+        <AuthProvider children={undefined}>
           <div className="min-h-screen bg-background">
             <Navigation />
             <Routes>
@@ -32,11 +33,12 @@ const App = () => (
               <Route
                 path="/tournament"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute children={undefined}>
                     <Tournament />
                   </ProtectedRoute>
                 }
               />
+              <Route path="/playervs" element={<PlayerVs />} />
               <Route path="/gameonline" element={<GameOnline />} />
               <Route path="/game" element={<Game />} />
               <Route path="/result" element={<Result />} />
