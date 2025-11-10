@@ -8,6 +8,7 @@ import { Navigation } from "@/components/ui/navigation";
 import Home from "./pages/Home";
 import Tournament from "./pages/Tournament";
 import Game from "./pages/Game";
+import GameOnline from "./pages/GameOnline";
 import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -36,6 +37,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/gameonline" element={<GameOnline />} />
               <Route path="/game" element={<Game />} />
               <Route path="/result" element={<Result />} />
               <Route path="/login" element={<Login />} />

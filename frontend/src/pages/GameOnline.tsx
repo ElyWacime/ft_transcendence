@@ -1,13 +1,13 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PongCanvas } from "@/components/PongCanvas";
+import { PongCanvasOnline } from "@/components/PongCanvasOnline";
 import { Chat } from "@/components/Chat";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { Match, api } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
 
-const Game = () => {
+const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -83,7 +83,7 @@ const Game = () => {
 
         {/* Game Canvas */}
         <div className="max-w-6xl mx-auto">
-          <PongCanvas
+          <PongCanvasOnline
             player1Name={player1.alias}
             player2Name={player2.alias}
             onGameEnd={handleGameEnd}
@@ -111,4 +111,4 @@ const Game = () => {
   );
 };
 
-export default Game;
+export default GameOnline;

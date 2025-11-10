@@ -60,7 +60,7 @@ let Mode = 2;
 const max_Speed = 5 * Mac1;// Speed == 0.5497785951214637 (0.50792919144553, -0.21039115982193848)
 const angle = (Math.PI / 8); // +/- 30 degrees
 
-export const PongCanvas = ({
+export const PongCanvasOnline = ({
   player1Name = "Player 1",
   player2Name = "Player 2",
   player3Name = "Player 3",
@@ -393,6 +393,78 @@ export const PongCanvas = ({
   const resumeGame = () => {
     setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
   };
+  interface User {
+    id: string;
+    lastKey: string;
+    color: string;
+  }
+
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [users, setUsers] = useState<Record<string, User>>({});
+  const [myId, setMyId] = useState<string | null>(null);
+
+  // // Assign a random color to each new user
+  const randomColor = () => {
+    const colors = ["#f87171", "#34d399", "#60a5fa", "#fbbf24", "#a78bfa"];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
+  // Connect to WebSocket server
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3000");
+    setSocket(ws);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === "init") {
+        setMyId(data.id);
+      }
+
+      if (data.type === "userKeyPress") {
+        setUsers((prev) => {
+          const updated = { ...prev };
+          if (!updated[data.id]) {
+            updated[data.id] = { id: data.id, lastKey: data.key, color: randomColor() };
+          } else {
+            updated[data.id].lastKey = data.key;
+          }
+          return updated;
+        });
+      }
+
+      if (data.type === "userDisconnect") {
+        setUsers((prev) => {
+          const updated = { ...prev };
+          delete updated[data.id];
+          return updated;
+        });
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  // Send key press to server
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (socket?.readyState === WebSocket.OPEN) {
+        const email = localStorage.getItem("email");
+        socket.send(
+          JSON.stringify({
+            type: "userKeyPress",
+            email,
+            key: e.key,
+          })
+        );
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [socket]);
+
 
   return (
     <div className="space-y-6">

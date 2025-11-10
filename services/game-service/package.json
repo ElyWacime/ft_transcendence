@@ -1,0 +1,22 @@
+{
+  "name": "pong-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Server-authoritative Pong relay/game server (WebSocket)",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.1",
+    "@types/ws": "^8.5.6",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.2"
+  }
+}

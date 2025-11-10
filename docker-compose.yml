@@ -56,12 +56,34 @@ services:
   #   networks:
   #     - transcendence
   #
+
+
+
+    # ----------  GAME  ----------
+  game-service:
+    build:
+      context: ./services/game-service   
+      dockerfile: Dockerfile
+    container_name: game-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - frontend
+      - auth-service
+    networks:
+      - transcendence
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+
+
   # ---------- GATEWAY (NGINX) ----------
   gateway:
     image: nginx:stable-alpine
     depends_on:
       - frontend
       - auth-service
+      - game-service
       # - tournament-service
     ports:
       - "80:80"

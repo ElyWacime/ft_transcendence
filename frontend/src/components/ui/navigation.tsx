@@ -20,27 +20,29 @@ export const Navigation = () => {
     { path: "/", label: "Home", icon: Home },
     { path: "/tournament", label: "Tournament", icon: Trophy },
     { path: "/game", label: "Game", icon: Gamepad2 },
+    { path: "/gameonline", label: "gameonline", icon: Gamepad2 },
+
   ];
 
   // Add either Login or Logout depending on auth state
   const navItems = isLoggedIn
     ? [
-        ...baseNavItems,
-        {
-          path: "#",
-          label: "Logout",
-          icon: LogOut,
-          onClick: handleLogout,
-        },
-      ]
+      ...baseNavItems,
+      {
+        path: "#",
+        label: "Logout",
+        icon: LogOut,
+        onClick: handleLogout,
+      },
+    ]
     : [
-        ...baseNavItems,
-        {
-          path: "/login",
-          label: "Login",
-          icon: LogIn,
-        },
-      ];
+      ...baseNavItems,
+      {
+        path: "/login",
+        label: "Login",
+        icon: LogIn,
+      },
+    ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
