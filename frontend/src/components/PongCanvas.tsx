@@ -337,6 +337,7 @@ export const PongCanvas = ({
   };
 
   const resumeGame = () => {
+    lastTimeRef.current = null;
     setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
   };
 
