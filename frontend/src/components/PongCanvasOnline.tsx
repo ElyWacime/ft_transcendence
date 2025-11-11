@@ -50,15 +50,13 @@ interface GameState {
   };
   gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
 }
-// Physics tuning constants
-const Mac1 = 0.1; // if you're on debian set it to 1
-const Mac2 = 0.2; // if you're on debian set it to 1
-const BALL_SPEED = 1.2 * Mac1; // constant total speed (pixels per frame)
-const paddleSpeed = 2 * Mac2;
-let accelerateSpeed = 1.0001;
+
+const BALL_SPEED = 5;
+const paddleSpeed = 10;
+const accelerateSpeed = 1.002;
 let Mode = 2;
-const max_Speed = 5 * Mac1;// Speed == 0.5497785951214637 (0.50792919144553, -0.21039115982193848)
-const angle = (Math.PI / 8); // +/- 30 degrees
+const max_Speed = 25;
+const angle = (Math.PI / 8);
 
 export const PongCanvasOnline = ({
   player1Name = "Player 1",
@@ -71,6 +69,8 @@ export const PongCanvasOnline = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const keysPressed = useRef<Set<string>>(new Set());
+  const lastTimeRef = useRef<number | null>(null);
+  const gameStateRef = useRef<GameState | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
     ball: {
@@ -112,13 +112,12 @@ export const PongCanvasOnline = ({
   });
 
   const createBall = useCallback(() => {
-    // small random angle so ball isn't perfectly horizontal
-    const dir = Math.random() > 0.5 ? 1 : -1;
-    accelerateSpeed = 1.0001;
+    const dirx = Math.random() > 0.5 ? 1 : -1;
+    const diry = Math.random() > 0.5 ? 1 : -1;
     return {
       x: 400,
       y: 300,
-      dx: dir * BALL_SPEED * Math.cos(angle),
+      dx: dirx * BALL_SPEED * Math.cos(angle),
       dy: BALL_SPEED * Math.sin(angle),
       radius: 8
     };
@@ -142,138 +141,115 @@ export const PongCanvasOnline = ({
     }));
   }, [createBall]);
 
-  const updateGame = useCallback(() => {
-    setGameState(prev => {
-      if (prev.gameStatus !== 'playing') return prev;
 
-      const newState = { ...prev };
-      const canvas = canvasRef.current;
-      if (!canvas) return prev;
+  const updateGame = useCallback((delta: number) => {
+    if (!gameStateRef.current) return;
+    const prev = gameStateRef.current;
+    if (prev.gameStatus !== 'playing') return;
 
-      // Move paddles based on keys
+    const newState = { ...prev };
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-      if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) {
-        newState.paddle1.y -= paddleSpeed;
-      }
-      if (keysPressed.current.has('KeyS') && newState.paddle1.y < canvas.height - newState.paddle1.height) {
-        newState.paddle1.y += paddleSpeed;
-      }
-      if (keysPressed.current.has('ArrowUp') && newState.paddle2.y > 0) {
-        newState.paddle2.y -= paddleSpeed;
-      }
-      if (keysPressed.current.has('ArrowDown') && newState.paddle2.y < canvas.height - newState.paddle2.height) {
-        newState.paddle2.y += paddleSpeed;
-      }
-      if (Mode == 4) {
-        if (keysPressed.current.has('KeyP') && newState.paddle3.y > 0) {
-          newState.paddle3.y -= paddleSpeed;
-        }
-        if (keysPressed.current.has('KeyL') && newState.paddle3.y < canvas.height - newState.paddle3.height) {
-          newState.paddle3.y += paddleSpeed;
-        }
-        if (keysPressed.current.has('KeyU') && newState.paddle4.y > 0) {
-          newState.paddle4.y -= paddleSpeed;
-        }
-        if (keysPressed.current.has('KeyH') && newState.paddle4.y < canvas.height - newState.paddle4.height) {
-          newState.paddle4.y += paddleSpeed;
-        }
-      }
-      // Move ball
-      newState.ball.x += newState.ball.dx;
-      newState.ball.y += newState.ball.dy;
-      newState.ball.dy *= accelerateSpeed;
+    // Paddles movement
+    if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) newState.paddle1.y -= paddleSpeed * delta;
+    if (keysPressed.current.has('KeyS') && newState.paddle1.y < canvas.height - newState.paddle1.height) newState.paddle1.y += paddleSpeed * delta;
+    if (keysPressed.current.has('ArrowUp') && newState.paddle2.y > 0) newState.paddle2.y -= paddleSpeed * delta;
+    if (keysPressed.current.has('ArrowDown') && newState.paddle2.y < canvas.height - newState.paddle2.height) newState.paddle2.y += paddleSpeed * delta;
+
+    if (Mode == 4) {
+      if (keysPressed.current.has('KeyP') && newState.paddle3.y > 0) newState.paddle3.y -= paddleSpeed * delta;
+      if (keysPressed.current.has('KeyL') && newState.paddle3.y < canvas.height - newState.paddle3.height) newState.paddle3.y += paddleSpeed * delta;
+      if (keysPressed.current.has('KeyU') && newState.paddle4.y > 0) newState.paddle4.y -= paddleSpeed * delta;
+      if (keysPressed.current.has('KeyH') && newState.paddle4.y < canvas.height - newState.paddle4.height) newState.paddle4.y += paddleSpeed * delta;
+    }
+
+    // Ball movement
+    newState.ball.x += newState.ball.dx * delta;
+    newState.ball.y += newState.ball.dy * delta;
+    if (newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx < max_Speed * max_Speed) {
       newState.ball.dx *= accelerateSpeed;
-      if (newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx >= max_Speed * max_Speed)
-        accelerateSpeed = 1;
-      // Ball collision with top/bottom walls
-      if (newState.ball.y <= newState.ball.radius) {
-        newState.ball.dy = -(newState.ball.dy);
-      }
-      else if (newState.ball.y >= canvas.height - newState.ball.radius) {
-        newState.ball.dy = -(newState.ball.dy);
-      }
+      newState.ball.dy *= accelerateSpeed;
+    }
 
-      // Ball collision with paddles
-      const ball = newState.ball;
-      const incomingDy = ball.dy;
-      const incomingDx = ball.dx;
-      const p1 = newState.paddle1;
-      const p2 = newState.paddle2;
-      const p3 = newState.paddle3;
-      const p4 = newState.paddle4;
-      // Left paddle collision
-      if (ball.x - ball.radius <= p1.x + p1.width &&
-        ((ball.y - ball.radius <= p1.y + (p1.height) &&
-          p1.y <= ball.y - ball.radius) ||
-          (ball.y + ball.radius <= p1.y + (p1.height) &&
-            p1.y <= ball.y + ball.radius)) &&
+    console.log(accelerateSpeed, newState.ball.dx, " ----- ", newState.ball.dy, " === ", newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx)
+    // Ball collision with top/bottom
+    if (newState.ball.y <= newState.ball.radius || newState.ball.y >= canvas.height - newState.ball.radius) {
+      newState.ball.dy = -newState.ball.dy;
+    }
+
+    const ball = newState.ball;
+    const p1 = newState.paddle1;
+    const p2 = newState.paddle2;
+    const p3 = newState.paddle3;
+    const p4 = newState.paddle4;
+    const incomingDx = ball.dx;
+    const incomingDy = ball.dy;
+
+    // Left paddle collision
+    if (ball.x - ball.radius <= p1.x + p1.width &&
+      ball.x - ball.radius >= p1.x &&
+      ball.y + ball.radius >= p1.y &&
+      ball.y - ball.radius <= p1.y + p1.height &&
+      ball.dx < 0) {
+      ball.x = p1.x + p1.width + ball.radius;
+      ball.dx = -incomingDx;
+      ball.dy = incomingDy;
+    }
+
+    // Right paddle collision
+    if (ball.x + ball.radius >= p2.x &&
+      ball.x + ball.radius <= p2.x + p2.width &&
+      ball.y + ball.radius >= p2.y &&
+      ball.y - ball.radius <= p2.y + p2.height &&
+      ball.dx > 0) {
+      ball.x = p2.x - ball.radius;
+      ball.dx = -incomingDx;
+      ball.dy = incomingDy;
+    }
+
+    // Paddle3 & Paddle4 for Mode 4
+    if (Mode === 4) {
+      if (ball.x - ball.radius <= p3.x + p3.width &&
+        ball.x - ball.radius >= p3.x &&
+        ball.y + ball.radius >= p3.y &&
+        ball.y - ball.radius <= p3.y + p3.height &&
         ball.dx < 0) {
-        // Nudge ball outside the paddle to avoid repeat collisions
-        ball.x = p1.x + p1.width + ball.radius;
-        ball.dx = -incomingDx // go right
+        ball.x = p3.x + p3.width + ball.radius;
+        ball.dx = -incomingDx;
         ball.dy = incomingDy;
       }
-      // Right paddle collision
-      if (ball.x + ball.radius >= p2.x &&
-        ((ball.y - ball.radius <= p2.y + (p2.height) &&
-          p2.y <= ball.y - ball.radius) ||
-          (ball.y + ball.radius <= p2.y + (p2.height) &&
-            p2.y <= ball.y + ball.radius)) &&
+      if (ball.x + ball.radius >= p4.x &&
+        ball.x + ball.radius <= p4.x + p4.width &&
+        ball.y + ball.radius >= p4.y &&
+        ball.y - ball.radius <= p4.y + p4.height &&
         ball.dx > 0) {
-        // Nudge ball outside the paddle to avoid repeat collisions
-        ball.x = p2.x - ball.radius;
-        ball.dx = -incomingDx; // go left
+        ball.x = p4.x - ball.radius;
+        ball.dx = -incomingDx;
         ball.dy = incomingDy;
       }
-      if (Mode == 4) {
-        if (ball.x - ball.radius <= p3.x + p3.width &&
-          ((ball.y - ball.radius <= p3.y + (p3.height) &&
-            p3.y <= ball.y - ball.radius) ||
-            (ball.y + ball.radius <= p3.y + (p3.height) &&
-              p3.y <= ball.y + ball.radius)) &&
-          ball.dx < 0) {
-          // Nudge ball outside the paddle to avoid repeat collisions
-          ball.x = p3.x + p1.width + ball.radius;
-          ball.dx = -incomingDx // go right
-          ball.dy = incomingDy;
-        }
-        if (ball.x + ball.radius >= p4.x &&
-          ((ball.y - ball.radius <= p4.y + (p4.height) &&
-            p4.y <= ball.y - ball.radius) ||
-            (ball.y + ball.radius <= p4.y + (p4.height) &&
-              p4.y <= ball.y + ball.radius)) &&
-          ball.dx > 0) {
-          // Nudge ball outside the paddle to avoid repeat collisions
-          ball.x = p4.x - ball.radius;
-          ball.dx = -incomingDx; // go left
-          ball.dy = incomingDy;
-        }
-      }
+    }
 
-      // Scoring
-      if (ball.x < 0) {
-        newState.score.player2++;
-        newState.ball = createBall();
-      } else if (ball.x > canvas.width) {
-        // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)))
-        newState.score.player1++;
-        newState.ball = createBall();
-      }
+    // Scoring
+    if (ball.x < 0) {
+      newState.score.player2++;
+      newState.ball = createBall();
+    } else if (ball.x > canvas.width) {
+      // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)))
+      newState.score.player1++;
+      newState.ball = createBall();
+    }
+    // Check game end
+    if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
+      newState.gameStatus = 'finished';
+      if (onGameEnd) onGameEnd(newState.score.player1, newState.score.player2);
+    }
 
-      // Check for game end
-      if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
-        newState.gameStatus = 'finished';
-        if (onGameEnd) {
-          // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)));
-          // console.log("(", ball.dx, ", ", ball.dy, ")");
-
-          onGameEnd(newState.score.player1, newState.score.player2);
-        }
-      }
-
-      return newState;
-    });
-  }, [maxScore, onGameEnd, resetBall]);
+    // Update refs and state
+    gameStateRef.current = newState;
+    setGameState(newState);
+  }, [maxScore, onGameEnd, createBall]);
+  // *****
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -322,23 +298,27 @@ export const PongCanvasOnline = ({
     ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, [gameState]);
 
-  const gameLoop = useCallback(() => {
-    updateGame();
+
+  const gameLoop = useCallback((time: number) => {
+    let delta = 1;
+    if (lastTimeRef.current != null)
+      delta = (time - lastTimeRef.current) / 16.67;
+    lastTimeRef.current = time;
+
+    updateGame(delta);
     draw();
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [updateGame, draw]);
 
+  // *******
   useEffect(() => {
-    if (gameState.gameStatus === 'playing') {
-      gameLoop();
+    if (gameState.gameStatus === "playing") {
+      animationRef.current = requestAnimationFrame(gameLoop);
     } else if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
-
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, [gameState.gameStatus, gameLoop]);
 
@@ -374,15 +354,16 @@ export const PongCanvasOnline = ({
   }, [draw]);
 
   const startGame = () => {
-    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
-    // Focus and center the canvas in the viewport when the game starts
+    setGameState(prev => {
+      const next = { ...prev, gameStatus: "playing" };
+      gameStateRef.current = next;
+      return next;
+    });
     const canvas = canvasRef.current;
     if (canvas) {
-      // make sure the canvas is focusable and receive keyboard events
       canvas.tabIndex = 0;
       canvas.focus({ preventScroll: true });
-      // center the canvas smoothly in the viewport
-      canvas.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      canvas.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -393,6 +374,7 @@ export const PongCanvasOnline = ({
   const resumeGame = () => {
     setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
   };
+
   interface User {
     id: string;
     lastKey: string;
@@ -530,53 +512,15 @@ export const PongCanvasOnline = ({
 
       {/* Game Canvas */}
       <div className="flex justify-center">
-        <div className="relative">
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={600}
-            tabIndex={0}
-            onFocus={() => {
-              /* keep focus on canvas for keyboard controls */
-            }}
-            className="border border-border rounded-lg bg-card shadow-card"
-          />
-          {gameState.gameStatus === 'finished' && (
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
-              <Card className="bg-gradient-secondary border-border text-center">
-                <CardHeader>
-                  <CardTitle className="font-game text-2xl glow-text">Game Over!</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-lg">
-                    {gameState.score.player1 > gameState.score.player2 ? player1Name : player2Name} Wins!
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Final Score: {gameState.score.player1} - {gameState.score.player2}
-                  </div>
-                  <Button onClick={resetGame} className="bg-gradient-primary">
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Play Again
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          tabIndex={0}
+          className="border border-border rounded-lg bg-card shadow-card"
+        />
       </div>
-
-      {/* Controls Help */}
-      <Card className="bg-gradient-secondary border-border">
-        <CardContent className="pt-6">
-          <div className="text-center text-sm text-muted-foreground">
-            <p><strong>{player1Name}:</strong> Use W/S keys to move paddle up/down</p>
-            <p><strong>{player2Name}:</strong> Use Arrow Up/Down keys to move paddle up/down</p>
-            <p><strong>{player3Name}:</strong> Use P/L keys to move paddle up/down</p>
-            <p><strong>{player4Name}:</strong> Use Arrow U/H keys to move paddle up/down</p>
-            <p>First to {maxScore} points wins!</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
+
   );
 };

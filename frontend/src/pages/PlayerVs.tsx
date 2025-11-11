@@ -5,6 +5,36 @@ import { Trophy, Users, Gamepad2, Zap, Bot } from "lucide-react";
 
 const PlayerVs = () => {
   const navigate = useNavigate();
+  const socket = new WebSocket("ws://localhost:3000");
+
+  socket.addEventListener("open", () => {
+    const email = localStorage.getItem("email");
+    localStorage.setItem("email", email);
+
+    // Register the user with the server
+    socket.send(JSON.stringify({ type: "register", email }));
+  });
+
+  socket.addEventListener("message", (event) => {
+    const data = JSON.parse(event.data);
+    console.log("📨 Message from server >>> :", data);
+
+    if (data.type === "userConnected") {
+      console.log(`👋 ${data.email} just joined!`);
+    }
+
+    if (data.type === "userDisconnect") {
+      console.log(`👋 ${data.email} left the game.`);
+    }
+
+    if (data.type === "userKeyPress") {
+      console.log(`${data.email} pressed ${data.key}`);
+    }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    socket.send(JSON.stringify({ type: "userKeyPress", key: e.key }));
+  });
 
   return (
     <div className="min-h-screen pt-16">
