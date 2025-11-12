@@ -118,7 +118,7 @@ export const PongCanvasOnline = ({
       x: 400,
       y: 300,
       dx: dirx * BALL_SPEED * Math.cos(angle),
-      dy: BALL_SPEED * Math.sin(angle),
+      dy: diry * BALL_SPEED * Math.sin(angle),
       radius: 8
     };
   }, []);
@@ -167,12 +167,13 @@ export const PongCanvasOnline = ({
     // Ball movement
     newState.ball.x += newState.ball.dx * delta;
     newState.ball.y += newState.ball.dy * delta;
+    //accelerate
     if (newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx < max_Speed * max_Speed) {
       newState.ball.dx *= accelerateSpeed;
       newState.ball.dy *= accelerateSpeed;
     }
 
-    console.log(accelerateSpeed, newState.ball.dx, " ----- ", newState.ball.dy, " === ", newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx)
+    // console.log(accelerateSpeed, newState.ball.dx, " ----- ", newState.ball.dy, " === ", newState.ball.dy * newState.ball.dy + newState.ball.dx * newState.ball.dx)
     // Ball collision with top/bottom
     if (newState.ball.y <= newState.ball.radius || newState.ball.y >= canvas.height - newState.ball.radius) {
       newState.ball.dy = -newState.ball.dy;
@@ -242,7 +243,10 @@ export const PongCanvasOnline = ({
     // Check game end
     if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
       newState.gameStatus = 'finished';
-      if (onGameEnd) onGameEnd(newState.score.player1, newState.score.player2);
+      if (onGameEnd) {
+        onGameEnd(newState.score.player1, newState.score.player2);
+        lastTimeRef.current = null;
+      }
     }
 
     // Update refs and state
