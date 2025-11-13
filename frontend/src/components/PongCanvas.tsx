@@ -121,6 +121,7 @@ export const PongCanvas = ({
   }, []);
 
   const resetGame = useCallback(() => {
+    lastTimeRef.current = null;
     setGameState(prev => ({
       ...prev,
       ball: createBall(),
