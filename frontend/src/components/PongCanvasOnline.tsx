@@ -153,17 +153,17 @@ export const PongCanvasOnline = ({
     if (!canvas) return;
 
     // Paddles movement
-    if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) newState.paddle1.y -= paddleSpeed * delta;
-    if (keysPressed.current.has('KeyS') && newState.paddle1.y < canvas.height - newState.paddle1.height) newState.paddle1.y += paddleSpeed * delta;
+    // if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) newState.paddle1.y -= paddleSpeed * delta;
+    // if (keysPressed.current.has('KeyS') && newState.paddle1.y < canvas.height - newState.paddle1.height) newState.paddle1.y += paddleSpeed * delta;
     if (keysPressed.current.has('ArrowUp') && newState.paddle2.y > 0) newState.paddle2.y -= paddleSpeed * delta;
     if (keysPressed.current.has('ArrowDown') && newState.paddle2.y < canvas.height - newState.paddle2.height) newState.paddle2.y += paddleSpeed * delta;
 
-    if (Mode == 4) {
-      if (keysPressed.current.has('KeyP') && newState.paddle3.y > 0) newState.paddle3.y -= paddleSpeed * delta;
-      if (keysPressed.current.has('KeyL') && newState.paddle3.y < canvas.height - newState.paddle3.height) newState.paddle3.y += paddleSpeed * delta;
-      if (keysPressed.current.has('KeyU') && newState.paddle4.y > 0) newState.paddle4.y -= paddleSpeed * delta;
-      if (keysPressed.current.has('KeyH') && newState.paddle4.y < canvas.height - newState.paddle4.height) newState.paddle4.y += paddleSpeed * delta;
-    }
+    // if (Mode == 4) {
+    //   if (keysPressed.current.has('KeyP') && newState.paddle3.y > 0) newState.paddle3.y -= paddleSpeed * delta;
+    //   if (keysPressed.current.has('KeyL') && newState.paddle3.y < canvas.height - newState.paddle3.height) newState.paddle3.y += paddleSpeed * delta;
+    //   if (keysPressed.current.has('KeyU') && newState.paddle4.y > 0) newState.paddle4.y -= paddleSpeed * delta;
+    //   if (keysPressed.current.has('KeyH') && newState.paddle4.y < canvas.height - newState.paddle4.height) newState.paddle4.y += paddleSpeed * delta;
+    // }
 
     // Ball movement
     newState.ball.x += newState.ball.dx * delta;
@@ -279,10 +279,10 @@ export const PongCanvasOnline = ({
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
     ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
-    if (Mode == 4) {
-      ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.paddle3.width, gameState.paddle3.height);
-      ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.paddle4.width, gameState.paddle4.height);
-    }
+    // if (Mode == 4) {
+    //   ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.paddle3.width, gameState.paddle3.height);
+    //   ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.paddle4.width, gameState.paddle4.height);
+    // }
     // Draw ball
     ctx.beginPath();
     ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
@@ -410,13 +410,18 @@ export const PongCanvasOnline = ({
       }
 
       if (data.type === "userKeyPress") {
-        setUsers((prev) => {
+        setUsers((p) => {
+          const prev = gameStateRef.current;
           const updated = { ...prev };
-          if (!updated[data.id]) {
-            updated[data.id] = { id: data.id, lastKey: data.key, color: randomColor() };
-          } else {
-            updated[data.id].lastKey = data.key;
-          }
+          // console.log(prev);
+          if (data.key == 'KeyW' && gameState.paddle1.y > 0) gameState.paddle1.y -= paddleSpeed;
+          if (data.key == 'KeyS' && gameState.paddle1.y < canvasRef.canvas.height - gameState.paddle1.height) gameState.paddle1.y += paddleSpeed;
+          // if (!updated[data.id]) {
+          //   updated[data.id] = { id: data.id, lastKey: data.key, color: randomColor() };
+          // } else {
+          //   updated[data.id].lastKey = data.key;
+          // }
+          setGameState(updated);
           return updated;
         });
       }
