@@ -70,6 +70,38 @@ services:
     networks:
       - transcendence
 
+  # ---------- FASTIFY TYPESCRIPT BACKEND ----------
+  pong-server:
+    build:
+      context: ./services/fastify
+      dockerfile: Dockerfile
+    container_name: pong-game
+    ports:
+      - "3000:3000"
+    command: npm start
+    depends_on:
+      - frontend
+      - auth-service
+      - gateway
+    networks:
+      - transcendence
+  # pong-server:
+  #   build:
+  #     context: ./services/game
+  #     dockerfile: Dockerfile
+  #   container_name: game-pong
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - frontend
+  #     - auth-service
+  #     - gateway
+  #   networks:
+  #     - transcendence
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   command: npm start
 networks:
   transcendence:
     driver: bridge

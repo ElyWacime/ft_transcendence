@@ -20,6 +20,7 @@ export const Navigation = () => {
     { path: "/", label: "Home", icon: Home },
     { path: "/tournament", label: "Tournament", icon: Trophy },
     { path: "/game", label: "Game", icon: Gamepad2 },
+    { path: "/game-online", label: "Game Online", icon: Gamepad2 },
   ];
 
   // Add either Login or Logout depending on auth state
