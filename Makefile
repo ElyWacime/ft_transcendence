@@ -4,4 +4,4 @@ rm:
 	docker stop $$(docker ps -aq) && docker rm $$(docker ps -aq) && docker rmi $$(docker images -aq) && sudo docker system prune -a --volumes
 re: rm up
 git:
-	sudo git add . && sudo git commit -m "Updts" && sudo git push
+	sudo git add . && sudo git commit -m "FUpdts" && sudo git push

@@ -73,7 +73,7 @@ services:
   # ---------- FASTIFY TYPESCRIPT BACKEND ----------
   pong-server:
     build:
-      context: ./services/fastify
+      context: ./services/fgame
       dockerfile: Dockerfile
     container_name: pong-game
     ports:

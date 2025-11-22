@@ -227,45 +227,80 @@ export const PongCanvasOnline = ({
   };
 
 
-useEffect(() => {
-  // Connect to WebSocket
-  const ws = new WebSocket("ws://localhost:3000/"); // matches your Fastify route
+// useEffect(() => {
+//   // Connect to WebSocket
+//   const ws = new WebSocket("ws://localhost:3000/"); // matches your Fastify route
 
-  ws.onopen = () => console.log("Connected to WS server");
+//   ws.onopen = () => console.log("Connected to WS server");
 
-  ws.onmessage = (event) => {
+//   ws.onmessage = (event) => {
+//     try {
+//       const data = JSON.parse(event.data);
+//       console.log("Received from server:", data);
+//     } catch (err) {
+//       console.error("Failed to parse WS message:", err);
+//     }
+//   };
+
+//   ws.onclose = () => console.log("WS connection closed");
+//   ws.onerror = (err) => console.error("WS error:", err);
+
+//   // Send key presses
+//   const handleKey = (e: KeyboardEvent) => {
+//     if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+//     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+//       ws.send(JSON.stringify({
+//         email: localStorage.getItem("email"),
+//         type: "userKeyPress",
+//         key: e.key
+//       }));
+//     }
+//   };
+
+//   window.addEventListener("keydown", handleKey);
+
+//   return () => {
+//     ws.close();
+//     window.removeEventListener("keydown", handleKey);
+//   };
+// }, []);
+
+  const [count, setCount] = useState(10);
+
+  const handleAction = async (action) => {
+    const endpoint = (action == 'up' ? 'multiply' : 'divide');
     try {
-      const data = JSON.parse(event.data);
-      console.log("Received from server:", data);
+      const res = await fetch(`http://localhost:3000/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count })
+      });
+      if (!res.ok) throw new Error('Network response was not ok');
+      const data = await res.json();
+      // only update if server returned a numeric count
+      const n = Number(data.count);
+      if (!Number.isNaN(n))
+      {
+         setCount(n);
+         console.log(`Count updated to ${n}`);
+      }
     } catch (err) {
-      console.error("Failed to parse WS message:", err);
+      console.error('Error sending count to server:', err);
     }
-  };
+  }
 
-  ws.onclose = () => console.log("WS connection closed");
-  ws.onerror = (err) => console.error("WS error:", err);
-
-  // Send key presses
-  const handleKey = (e: KeyboardEvent) => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      ws.send(JSON.stringify({
-        email: localStorage.getItem("email"),
-        type: "userKeyPress",
-        key: e.key
-      }));
-    }
-  };
-
-  window.addEventListener("keydown", handleKey);
-
-  return () => {
-    ws.close();
-    window.removeEventListener("keydown", handleKey);
-  };
-}, []);
-
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'ArrowUp') {
+        handleAction('up');
+      } else if (e.key === 'ArrowDown') {
+        handleAction('down');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [count]);
 
   return (
     <div className="space-y-6">
