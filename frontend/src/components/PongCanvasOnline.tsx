@@ -269,7 +269,7 @@ export const PongCanvasOnline = ({
   const [count, setCount] = useState(10);
 
   const handleAction = async (action) => {
-    const endpoint = (action == 'up' ? 'multiply' : 'divide');
+    const endpoint = (action == 'up' ? 'up' : 'down');
     try {
       const res = await fetch(`http://localhost:3000/${endpoint}`, {
         method: 'POST',

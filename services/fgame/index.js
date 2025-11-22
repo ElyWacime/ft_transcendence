@@ -9,8 +9,8 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Hello from Fastify!' };
 });
 
-// POST /multiply - accepts JSON { count: number } and returns { count: number }
-fastify.post('/multiply', async (request, reply) => {
+// POST /up - accepts JSON { count: number } and returns { count: number }
+fastify.post('/up', async (request, reply) => {
   const { count } = request.body || {};
   const n = Number(count) || 1;
   const result = n * 10;
@@ -18,8 +18,8 @@ fastify.post('/multiply', async (request, reply) => {
   return { count: result };
 });
 
-// POST /divide - accepts JSON { count: number } and returns { count: number }
-fastify.post('/divide', async (request, reply) => {
+// POST /down - accepts JSON { count: number } and returns { count: number }
+fastify.post('/down', async (request, reply) => {
   const { count } = request.body || {};
   const n = Number(count) || 1;
   const result = n / 10;
