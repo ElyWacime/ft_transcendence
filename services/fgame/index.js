@@ -1,4 +1,29 @@
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')({ logger: false });
+
+class GameState {
+  constructor() {
+    this.Mode = 0;
+
+    this.ball = {
+      x: 0,
+      y: 0,
+      dx: 0,
+      dy: 0,
+      radius: 10,
+    };
+    this.paddle1 = { x: 0, y: 0, width: 0, height: 0 };
+    this.paddle2 = { x: 0, y: 0, width: 0, height: 0 };
+    this.paddle3 = { x: 0, y: 0, width: 0, height: 0 };
+    this.paddle4 = { x: 0, y: 0, width: 0, height: 0 };
+    this.score = {
+      player1: 0,
+      player2: 0,
+    };
+    this.gameStatus = "waiting";
+  }
+}
+let game1 = new GameState();
+
 
 // Enable CORS so the client (Vite dev server) can call this API
 fastify.register(require('@fastify/cors'), {

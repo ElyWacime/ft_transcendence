@@ -63,12 +63,12 @@ export const PongCanvasOnline = ({
 
 
   const [gameState, setGameState] = useState<GameState>({
-    Mode:2,
+    Mode: 2,
     ball: {
       x: 400,
       y: 300,
-      dx: Math.cos(Math.PI/8),
-      dy: Math.sin(Math.PI/8),
+      dx: Math.cos(Math.PI / 8),
+      dy: Math.sin(Math.PI / 8),
       radius: 8
     },
     paddle1: {
@@ -139,7 +139,7 @@ export const PongCanvasOnline = ({
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
     ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
-   if (gameState.Mode == 4) {
+    if (gameState.Mode == 4) {
       ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.paddle3.width, gameState.paddle3.height);
       ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.paddle4.width, gameState.paddle4.height);
     }
@@ -227,44 +227,44 @@ export const PongCanvasOnline = ({
   };
 
 
-// useEffect(() => {
-//   // Connect to WebSocket
-//   const ws = new WebSocket("ws://localhost:3000/"); // matches your Fastify route
+  // useEffect(() => {
+  //   // Connect to WebSocket
+  //   const ws = new WebSocket("ws://localhost:3000/"); // matches your Fastify route
 
-//   ws.onopen = () => console.log("Connected to WS server");
+  //   ws.onopen = () => console.log("Connected to WS server");
 
-//   ws.onmessage = (event) => {
-//     try {
-//       const data = JSON.parse(event.data);
-//       console.log("Received from server:", data);
-//     } catch (err) {
-//       console.error("Failed to parse WS message:", err);
-//     }
-//   };
+  //   ws.onmessage = (event) => {
+  //     try {
+  //       const data = JSON.parse(event.data);
+  //       console.log("Received from server:", data);
+  //     } catch (err) {
+  //       console.error("Failed to parse WS message:", err);
+  //     }
+  //   };
 
-//   ws.onclose = () => console.log("WS connection closed");
-//   ws.onerror = (err) => console.error("WS error:", err);
+  //   ws.onclose = () => console.log("WS connection closed");
+  //   ws.onerror = (err) => console.error("WS error:", err);
 
-//   // Send key presses
-//   const handleKey = (e: KeyboardEvent) => {
-//     if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  //   // Send key presses
+  //   const handleKey = (e: KeyboardEvent) => {
+  //     if (!ws || ws.readyState !== WebSocket.OPEN) return;
 
-//     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-//       ws.send(JSON.stringify({
-//         email: localStorage.getItem("email"),
-//         type: "userKeyPress",
-//         key: e.key
-//       }));
-//     }
-//   };
+  //     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+  //       ws.send(JSON.stringify({
+  //         email: localStorage.getItem("email"),
+  //         type: "userKeyPress",
+  //         key: e.key
+  //       }));
+  //     }
+  //   };
 
-//   window.addEventListener("keydown", handleKey);
+  //   window.addEventListener("keydown", handleKey);
 
-//   return () => {
-//     ws.close();
-//     window.removeEventListener("keydown", handleKey);
-//   };
-// }, []);
+  //   return () => {
+  //     ws.close();
+  //     window.removeEventListener("keydown", handleKey);
+  //   };
+  // }, []);
 
   const [count, setCount] = useState(10);
 
@@ -280,10 +280,9 @@ export const PongCanvasOnline = ({
       const data = await res.json();
       // only update if server returned a numeric count
       const n = Number(data.count);
-      if (!Number.isNaN(n))
-      {
-         setCount(n);
-         console.log(`Count updated to ${n}`);
+      if (!Number.isNaN(n)) {
+        setCount(n);
+        console.log(`Count updated to ${n}`);
       }
     } catch (err) {
       console.error('Error sending count to server:', err);
@@ -304,7 +303,7 @@ export const PongCanvasOnline = ({
 
   return (
     <div className="space-y-6">
-      {}
+      { }
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
