@@ -4,7 +4,27 @@
 		"@fastify/jwt": "^10.0.0",
 		"@fastify/websocket": "^11.2.0",
 		"fastify": "^5.6.2",
+		"fastify-websocket": "^4.2.2",
 		"lucide-react": "^0.554.0",
 		"react": "^19.2.0"
-	}
+	},
+	"name": "ft_transcendence",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ElyWacime/ft_transcendence.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "commonjs",
+	"bugs": {
+		"url": "https://github.com/ElyWacime/ft_transcendence/issues"
+	},
+	"homepage": "https://github.com/ElyWacime/ft_transcendence#readme"
 }

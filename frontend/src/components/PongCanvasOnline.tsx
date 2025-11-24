@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
-
+import React from "react";
 interface PongCanvasProps {
   player1Name?: string;
   player2Name?: string;
@@ -61,6 +61,8 @@ export const PongCanvasOnline = ({
   const keysPressed = useRef<Set<string>>(new Set());
   const gameStateRef = useRef<GameState | null>(null);
 
+  const wsRef = useRef(null);
+  const [role, setRole] = useState(null);
 
   const [gameState, setGameState] = useState<GameState>({
     Mode: 2,
@@ -211,8 +213,13 @@ export const PongCanvasOnline = ({
   useEffect(() => {
     draw();
   }, [draw]);
+  const ws = new WebSocket("ws://localhost:3000/ws");
 
   const startGame = () => {
+    ws.send(JSON.stringify({
+      type: "register",
+      email: localStorage.getItem("email")
+    }));
     setGameState(prev => {
       const next = { ...prev, gameStatus: "playing" };
       gameStateRef.current = next;
@@ -227,84 +234,99 @@ export const PongCanvasOnline = ({
   };
 
 
-  // useEffect(() => {
-  //   // Connect to WebSocket
-  //   const ws = new WebSocket("ws://localhost:3000/"); // matches your Fastify route
-
-  //   ws.onopen = () => console.log("Connected to WS server");
-
-  //   ws.onmessage = (event) => {
-  //     try {
-  //       const data = JSON.parse(event.data);
-  //       console.log("Received from server:", data);
-  //     } catch (err) {
-  //       console.error("Failed to parse WS message:", err);
-  //     }
-  //   };
-
-  //   ws.onclose = () => console.log("WS connection closed");
-  //   ws.onerror = (err) => console.error("WS error:", err);
-
-  //   // Send key presses
-  //   const handleKey = (e: KeyboardEvent) => {
-  //     if (!ws || ws.readyState !== WebSocket.OPEN) return;
-
-  //     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-  //       ws.send(JSON.stringify({
-  //         email: localStorage.getItem("email"),
-  //         type: "userKeyPress",
-  //         key: e.key
-  //       }));
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleKey);
-
-  //   return () => {
-  //     ws.close();
-  //     window.removeEventListener("keydown", handleKey);
-  //   };
-  // }, []);
-
-  const [count, setCount] = useState(10);
-
-  const handleAction = async (action) => {
-    const endpoint = (action == 'up' ? 'up' : 'down');
-    try {
-      const res = await fetch(`http://localhost:3000/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ count })
-      });
-      if (!res.ok) throw new Error('Network response was not ok');
-      const data = await res.json();
-      // only update if server returned a numeric count
-      const n = Number(data.count);
-      if (!Number.isNaN(n)) {
-        setCount(n);
-        console.log(`Count updated to ${n}`);
-      }
-    } catch (err) {
-      console.error('Error sending count to server:', err);
-    }
-  }
-
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'ArrowUp') {
-        handleAction('up');
-      } else if (e.key === 'ArrowDown') {
-        handleAction('down');
+    const email = localStorage.getItem("email") || prompt("Enter email for dev/testing");
+
+    const ws = new WebSocket("ws://localhost:3000/ws");
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: "register", email }));
+    };
+
+    ws.onmessage = (evt) => {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === "role") {
+        setRole(msg.role);
+        console.log("Assigned role:", msg.role);
+      } else if (msg.type === "start") {
+        setGameState(msg.gameState);
+        console.log("Game started");
+      } else if (msg.type === "state" || msg.type === "score" || msg.type === "pause") {
+        // 'state' and 'score' both carry gameState
+        if (msg.gameState) setGameState({ ...msg.gameState });
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [count]);
+
+    ws.onclose = () => {
+      console.log("WS closed");
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  // Send move to server
+  const sendMove = (direction) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== ws.OPEN) return;
+    ws.send(JSON.stringify({ type: "move", direction }));
+  };
+
+  // Key listener - attach once
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "ArrowUp") sendMove("up");
+      if (e.key === "ArrowDown") sendMove("down");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Draw loop: draw whenever gameState updates
+  useEffect(() => {
+    if (!gameState) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    // clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // background
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // paddles
+    ctx.fillStyle = "#fff";
+    const p1 = gameState.paddle1;
+    const p2 = gameState.paddle2;
+    ctx.fillRect(p1.x, p1.y, p1.width, p1.height);
+    ctx.fillRect(p2.x, p2.y, p2.width, p2.height);
+
+    // ball
+    const b = gameState.ball;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // scores
+    ctx.font = "24px monospace";
+    ctx.fillText(String(gameState.score1 || 0), canvas.width * 0.25, 30);
+    ctx.fillText(String(gameState.score2 || 0), canvas.width * 0.75, 30);
+
+  }, [gameState]);
+
+
 
   return (
+
     <div className="space-y-6">
-      { }
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Player Info & Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+
+        {/* Player 1 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-center text-lg">{player1Name}</CardTitle>
@@ -314,27 +336,26 @@ export const PongCanvasOnline = ({
               {gameState.score.player1}
             </div>
             <div className="text-sm text-muted-foreground mt-2">
-              W/S Keys
+              W / S Keys
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-center">
-          <div className="space-y-2">
-            {gameState.gameStatus === 'waiting' && (
-              <Button onClick={startGame} className="bg-gradient-primary">
-                <Play className="w-4 h-4 mr-2" />
-                Start Game
-              </Button>
-            )}
-            <div className="flex space-x-2">
-              <Button className="px-2 py-1 text-sm border border-border">
-                <RotateCcw className="w-4 h-4 mr-2" />
-              </Button>
-            </div>
-          </div>
+        {/* Center Controls */}
+        <div className="flex flex-col items-center justify-center space-y-4">
+          {gameState.gameStatus === 'waiting' && (
+            <Button onClick={startGame} className="bg-gradient-primary flex items-center">
+              <Play className="w-4 h-4 mr-2" />
+              Start Game
+            </Button>
+          )}
+          <Button className="px-2 py-1 text-sm border border-border flex items-center">
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Reset
+          </Button>
         </div>
 
+        {/* Player 2 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-center text-lg">{player2Name}</CardTitle>
@@ -348,21 +369,23 @@ export const PongCanvasOnline = ({
             </div>
           </CardContent>
         </Card>
+
       </div>
 
       {/* Game Canvas */}
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-6">
         <canvas
           ref={canvasRef}
           width={800}
           height={600}
           tabIndex={0}
-          className="border border-border rounded-lg bg-card shadow-card"
+          className="border border-border rounded-lg bg-card shadow-card focus:outline-none"
         />
       </div>
-    </div>
 
+    </div>
   );
+
 };
 
 
