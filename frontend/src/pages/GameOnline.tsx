@@ -7,6 +7,9 @@ import { ArrowLeft, Trophy } from "lucide-react";
 import { Match, api } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
+// import { useMemo } from "react";
+
+// const ws = useMemo(() => new WebSocket("ws://localhost:3000/ws"), []);
 
 const GameOnline = () => {
   const location = useLocation();
@@ -89,6 +92,8 @@ const GameOnline = () => {
             player2Name={player2.alias}
             onGameEnd={handleGameEnd}
             maxScore={5}
+            ws={new WebSocket("ws://localhost:3000/ws")}
+          // ws={ws}
           />
         </div>
 
