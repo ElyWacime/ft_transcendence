@@ -1,10 +1,13 @@
-// server.js (CommonJS)
-const Fastify = require("fastify");
-const fastifyWebsocket = require("fastify-websocket");
-const { randomUUID } = require("crypto");
+import Fastify from "fastify";
+import websocket from "@fastify/websocket";
 
 const fastify = Fastify({ logger: true });
-fastify.register(fastifyWebsocket);
+
+await fastify.register(websocket);
+
+// Keep track of all connected clients
+const clients = new Set();
+import { randomUUID } from "crypto";
 
 // --- Shared game state ---
 let players = {}; // { wsId: { email, role, socket } }
@@ -23,76 +26,106 @@ const TICK_RATE = 60; // ticks per second
 const PADDLE_SPEED = 10;
 
 // --- WebSocket route ---
-fastify.get("/ws", { websocket: true }, (connection /* { socket } */, req) => {
-  const ws = connection.socket;
-  ws.id = randomUUID();
+// fastify.get("/ws", { websocket: true }, (connection /* { socket } */, req) => {
+//   const ws = connection.socket;
+//   ws.id = randomUUID();
 
-  fastify.log.info(`WS connected: ${ws.id}`);
+//   fastify.log.info(`WS connected: ${ws.id}`);
 
-  ws.on("message", (raw) => {
-    let data;
-    try {
-      data = JSON.parse(raw.toString());
-    } catch (err) {
-      fastify.log.warn("Invalid JSON from client", err);
-      return;
-    }
+//   ws.on("message", (raw) => {
+//     let data;
+//     try {
+//       data = JSON.parse(raw.toString());
+//     } catch (err) {
+//       fastify.log.warn("Invalid JSON from client", err);
+//       return;
+//     }
 
-    // Register player (first message should be register)
-    if (data.type === "register") {
-      players[ws.id] = {
-        email: data.email || `guest-${ws.id.slice(0, 6)}`,
-        role: Object.values(players).some(p => p.role === "player1") ? "player2" : "player1",
-        socket: ws
-      };
+//     // Register player (first message should be register)
+//     if (data.type === "register") {
+//       players[ws.id] = {
+//         email: data.email || `guest-${ws.id.slice(0, 6)}`,
+//         role: Object.values(players).some(p => p.role === "player1") ? "player2" : "player1",
+//         socket: ws
+//       };
 
-      fastify.log.info(`Registered ${players[ws.id].email} as ${players[ws.id].role}`);
+//       fastify.log.info(`Registered ${players[ws.id].email} as ${players[ws.id].role}`);
 
-      send(ws, { type: "role", role: players[ws.id].role });
+//       send(ws, { type: "role", role: players[ws.id].role });
 
-      // If two players are connected, start the game
-      if (Object.keys(players).length >= 2 && gameState.gameStatus !== "playing") {
-        gameState.gameStatus = "playing";
-        broadcast({ type: "start", gameState });
-        fastify.log.info("Game started");
+//       // If two players are connected, start the game
+//       if (Object.keys(players).length >= 2 && gameState.gameStatus !== "playing") {
+//         gameState.gameStatus = "playing";
+//         broadcast({ type: "start", gameState });
+//         fastify.log.info("Game started");
+//       }
+
+//       return;
+//     }
+
+//     // Movement messages
+//     if (data.type === "move") {
+//       const p = players[ws.id];
+//       if (!p) return;
+//       if (p.role === "player1") {
+//         if (data.direction === "up") gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
+//         if (data.direction === "down") gameState.paddle1.y = Math.min(gameState.height - gameState.paddle1.height, gameState.paddle1.y + PADDLE_SPEED);
+//       } else if (p.role === "player2") {
+//         if (data.direction === "up") gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
+//         if (data.direction === "down") gameState.paddle2.y = Math.min(gameState.height - gameState.paddle2.height, gameState.paddle2.y + PADDLE_SPEED);
+//       }
+
+//       // After applying movement, broadcast authoritative state
+//       broadcast({ type: "state", gameState });
+//       return;
+//     }
+
+//     // Optional: handle ping/pong or custom messages
+//   });
+
+//   ws.on("close", () => {
+//     fastify.log.info(`WS disconnected: ${ws.id}`);
+//     delete players[ws.id];
+
+//     // If less than 2 players, pause the game
+//     if (Object.keys(players).length < 2 && gameState.gameStatus === "playing") {
+//       gameState.gameStatus = "waiting";
+//       broadcast({ type: "pause", reason: "player-disconnect", gameState });
+//     }
+//   });
+
+//   // send initial "waiting" state
+//   send(ws, { type: "state", gameState });
+// });
+
+
+fastify.get("/ws", { websocket: true }, (connection, req) => {
+  clients.add(connection);
+  console.log("Client connected. Total clients:", clients.size);
+
+    // Handle incoming messages from this client
+    connection.on("message", (msg) => {
+    console.log("Received:", msg.toString());
+
+    // Broadcast to all other clients
+    for (const client of clients) {
+      if (client !== connection) {
+        client.send(msg.toString());
       }
-
-      return;
     }
-
-    // Movement messages
-    if (data.type === "move") {
-      const p = players[ws.id];
-      if (!p) return;
-      if (p.role === "player1") {
-        if (data.direction === "up") gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
-        if (data.direction === "down") gameState.paddle1.y = Math.min(gameState.height - gameState.paddle1.height, gameState.paddle1.y + PADDLE_SPEED);
-      } else if (p.role === "player2") {
-        if (data.direction === "up") gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
-        if (data.direction === "down") gameState.paddle2.y = Math.min(gameState.height - gameState.paddle2.height, gameState.paddle2.y + PADDLE_SPEED);
-      }
-
-      // After applying movement, broadcast authoritative state
-      broadcast({ type: "state", gameState });
-      return;
-    }
-
-    // Optional: handle ping/pong or custom messages
   });
 
-  ws.on("close", () => {
-    fastify.log.info(`WS disconnected: ${ws.id}`);
-    delete players[ws.id];
+  // Periodic server message to this client
+  const interval = setInterval(() => {
+    connection.send("Hello from Fastify server");
+  }, 5000);
 
-    // If less than 2 players, pause the game
-    if (Object.keys(players).length < 2 && gameState.gameStatus === "playing") {
-      gameState.gameStatus = "waiting";
-      broadcast({ type: "pause", reason: "player-disconnect", gameState });
-    }
+  // Cleanup on disconnect
+  connection.on("close", () => {
+    clients.delete(connection);
+    clearInterval(interval);
+    console.log("Client disconnected. Total clients:", clients.size);
   });
-
-  // send initial "waiting" state
-  send(ws, { type: "state", gameState });
 });
 
 // Helpers
@@ -173,7 +206,7 @@ function resetBall(direction = 1) {
 setInterval(() => tick(1 / TICK_RATE), 1000 / TICK_RATE);
 
 // Start server
-fastify.listen({ port: 3000 }, (err, address) => {
+fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);

@@ -213,7 +213,35 @@ export const PongCanvasOnline = ({
   useEffect(() => {
     draw();
   }, [draw]);
-  const ws = new WebSocket("ws://localhost:3000/ws");
+
+    const ws = new WebSocket("ws://localhost:3000/ws");
+    // const messages = document.getElementById("messages");
+    // const input = document.getElementById("messageInput");
+    // const sendBtn = document.getElementById("sendBtn");
+
+    // ws.addEventListener("open", () => {
+    //   const email = localStorage.getItem("email");
+    //   console.log(email, " is Connected to WebSocket server");
+    //    ws.send(JSON.stringify({ type: "register", email }));
+    // });
+
+    // ws.addEventListener("message", (event) => {
+    //   const li = document.createElement("li");
+    //   li.textContent = event.data;
+    //   messages.appendChild(li);
+    // });
+
+    // sendBtn.addEventListener("click", () => {
+    //   if (input.value.trim() !== "") {
+    //     ws.send(input.value);
+    //     input.value = "";
+    //   }
+    // });
+
+    // ws.addEventListener("close", () => {
+    //   console.log(localStorage.getItem("email"), "Disconnected from server");
+    // });
+  ///********* */
 
   const startGame = () => {
     ws.send(JSON.stringify({
@@ -235,7 +263,8 @@ export const PongCanvasOnline = ({
 
 
   useEffect(() => {
-    const email = localStorage.getItem("email") || prompt("Enter email for dev/testing");
+    const email = localStorage.getItem("email");
+    // const email = localStorage.getItem("email") || prompt("Enter email for dev/testing");
 
     const ws = new WebSocket("ws://localhost:3000/ws");
     wsRef.current = ws;
@@ -265,7 +294,7 @@ export const PongCanvasOnline = ({
     return () => {
       ws.close();
     };
-  }, []);
+  }, [gameState]);
 
   // Send move to server
   const sendMove = (direction) => {
@@ -282,7 +311,7 @@ export const PongCanvasOnline = ({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [gameState]);
 
   // Draw loop: draw whenever gameState updates
   useEffect(() => {
@@ -317,7 +346,6 @@ export const PongCanvasOnline = ({
     ctx.fillText(String(gameState.score2 || 0), canvas.width * 0.75, 30);
 
   }, [gameState]);
-
 
 
   return (
