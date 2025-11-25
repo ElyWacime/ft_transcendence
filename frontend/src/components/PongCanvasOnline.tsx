@@ -8,6 +8,7 @@ interface PongCanvasProps {
   player2Name?: string;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
+  ws: WebSocket;
 }
 
 interface GameState {
@@ -54,14 +55,15 @@ export const PongCanvasOnline = ({
   player1Name = localStorage.getItem("email"),
   player2Name = "Player 2",
   onGameEnd,
-  maxScore = 5
+  maxScore = 5,
+  ws
 }: PongCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const keysPressed = useRef<Set<string>>(new Set());
   const gameStateRef = useRef<GameState | null>(null);
 
-  const wsRef = useRef(null);
+  // const wsRef = useRef(null);
   const [role, setRole] = useState(null);
 
   const [gameState, setGameState] = useState<GameState>({
@@ -168,7 +170,7 @@ export const PongCanvasOnline = ({
 
   const gameLoop = useCallback((time: number) => {
     draw();
-    animationRef.current = requestAnimationFrame(draw);
+    animationRef.current = requestAnimationFrame(gameLoop);
   }, [draw]);
 
   // *******
@@ -213,8 +215,29 @@ export const PongCanvasOnline = ({
   useEffect(() => {
     draw();
   }, [draw]);
+  // const wsRef = useRef(null);
 
-  const ws = new WebSocket("ws://localhost:3000/ws");
+  useEffect(() => {
+    // Connect once
+    // wsRef.current = new WebSocket("ws://pong-server:3000/ws");
+    ws.onopen = () => {
+      console.log("Connected to WebSocket server");
+    };
+
+    ws.onmessage = (event) => {
+      console.log("from server  ", event);
+      // setMessages((prev) => [...prev, event.data]);
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected from server");
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+  // const ws = new WebSocket("ws://localhost:3000/ws");
   // const messages = document.getElementById("messages");
   // const input = document.getElementById("messageInput");
   // const sendBtn = document.getElementById("sendBtn");
@@ -244,15 +267,17 @@ export const PongCanvasOnline = ({
   ///********* */
 
   const startGame = () => {
-    ws.send(JSON.stringify({
-      type: "register",
-      email: localStorage.getItem("email")
-    }));
-    setGameState(prev => {
-      const next = { ...prev, gameStatus: "playing" };
-      gameStateRef.current = next;
-      return next;
-    });
+
+    // const ws = new WebSocket("ws://localhost:3000/ws");
+    // ws.send(JSON.stringify({
+    //   type: "register",
+    //   email: localStorage.getItem("email")
+    // }));
+    // setGameState(prev => {
+    //   const next = { ...prev, gameStatus: "playing" };
+    //   gameStateRef.current = next;
+    //   return next;
+    // });
     const canvas = canvasRef.current;
     if (canvas) {
       canvas.tabIndex = 0;
@@ -262,45 +287,47 @@ export const PongCanvasOnline = ({
   };
 
 
-  useEffect(() => {
-    const email = localStorage.getItem("email");
-    // const email = localStorage.getItem("email") || prompt("Enter email for dev/testing");
+  // useEffect(() => {
+  //   const email = localStorage.getItem("email");
+  //   // const email = localStorage.getItem("email") || prompt("Enter email for dev/testing");
 
-    const ws = new WebSocket("ws://localhost:3000/ws");
-    wsRef.current = ws;
+  //   const ws = new WebSocket("ws://localhost:3000/ws");
+  //   // wsRef.current = ws;
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ type: "register", email }));
-    };
+  //   ws.onopen = () => {
+  //     ws.send(JSON.stringify({ type: "register", email }));
+  //   };
 
-    ws.onmessage = (evt) => {
-      const msg = JSON.parse(evt.data);
-      if (msg.type === "role") {
-        setRole(msg.role);
-        console.log("Assigned role:", msg.role);
-      } else if (msg.type === "start") {
-        setGameState(msg.gameState);
-        console.log("Game started");
-      } else if (msg.type === "state" || msg.type === "score" || msg.type === "pause") {
-        // 'state' and 'score' both carry gameState
-        if (msg.gameState) setGameState({ ...msg.gameState });
-      }
-    };
+  //   ws.onmessage = (evt) => {
+  //     const msg = JSON.parse(evt.data);
+  //     console.log("From Server  ", msg);
+  //     // if (msg.type === "role") {
+  //     //   setRole(msg.role);
+  //     //   console.log("Assigned role:", msg.role);
+  //     // } else if (msg.type === "start") {
+  //     //   setGameState(msg.gameState);
+  //     //   console.log("Game started");
+  //     // } else if (msg.type === "state" || msg.type === "score" || msg.type === "pause") {
+  //     //   // 'state' and 'score' both carry gameState
+  //     //   if (msg.gameState) setGameState({ ...msg.gameState });
+  //     // }
+  //   };
 
-    ws.onclose = () => {
-      console.log("WS closed");
-    };
+  //   ws.onclose = () => {
+  //     console.log("WS closed");
+  //   };
 
-    return () => {
-      ws.close();
-    };
-  }, [gameState]);
+  //   return () => {
+  //     ws.close();
+  //   };
+  // }, [gameState]);
 
   // Send move to server
   const sendMove = (direction) => {
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== ws.OPEN) return;
-    ws.send(JSON.stringify({ type: "move", direction }));
+
+    // const ws = new WebSocket("ws://localhost:3000/ws");
+    // if (!ws || ws.readyState !== ws.OPEN) return;
+    // ws.send(JSON.stringify({ type: "move", direction }));
   };
 
   // Key listener - attach once

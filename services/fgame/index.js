@@ -1,12 +1,16 @@
 import Fastify from "fastify";
 import websocket from "@fastify/websocket";
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
 
 // Keep track of all connected clients
 const clients = new Set();
+
+fastify.get('/', async (request, reply) => {
+  return { message: 'Server is running' };
+});
 
 fastify.get("/ws", { websocket: true }, (connection, req) => {
   clients.add(connection);

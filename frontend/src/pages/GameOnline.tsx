@@ -89,6 +89,8 @@ const GameOnline = () => {
             player2Name={player2.alias}
             onGameEnd={handleGameEnd}
             maxScore={5}
+            ws={new WebSocket("ws://localhost:3000/ws")}
+          // ws={new new WebSocket("ws://pong-server:3000/ws")}
           />
         </div>
 
