@@ -3,14 +3,12 @@
   "version": "1.0.0",
   "description": "Simple Fastify server listening on port 3000",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@fastify/cors": "^8.2.0",
-    "@fastify/websocket": "^11.2.0",
-    "fastify": "^5.0.0"
+    "fastify": "^4.17.0",
+    "@fastify/cors": "^8.2.0"
   },
   "engines": {
     "node": ">=16"

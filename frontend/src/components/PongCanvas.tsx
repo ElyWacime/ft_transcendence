@@ -53,10 +53,10 @@ interface GameState {
 }
 
 const BALL_SPEED: number = 5;
-const paddleSpeed: number = 10;
+const paddleSpeed : number = 10;
 const accelerateSpeed: number = 1.002;
-const max_Speed: number = 25;
-const angle: number = (Math.PI / 8);
+const max_Speed : number = 25;
+const angle : number = (Math.PI / 8);
 
 export const PongCanvas = ({
   player1Name = localStorage.getItem("email"),
@@ -170,12 +170,12 @@ export const PongCanvas = ({
     // Ball movement
     newState.ball.x += newState.ball.dx * delta;
     newState.ball.y += newState.ball.dy * delta;
-    if (newState.ball.dy == 0)//To check
-    {
+    if (newState.ball.dy == 0 )//To check
+     {
       console.log("Error: dy is zero");
       //  exit(1);
-    }
-    if ((newState.ball.dy * newState.ball.dy) + (newState.ball.dx * newState.ball.dx) < (max_Speed * max_Speed)) {
+     }
+    if ((newState.ball.dy * newState.ball.dy) +(newState.ball.dx * newState.ball.dx) < (max_Speed * max_Speed)) {
       newState.ball.dx *= accelerateSpeed;
       newState.ball.dy *= accelerateSpeed;
     }
@@ -186,7 +186,7 @@ export const PongCanvas = ({
       newState.ball.y = canvas.height - newState.ball.radius;
 
     }
-    else if (newState.ball.y - newState.ball.radius <= 0) {
+   else if (newState.ball.y - newState.ball.radius <= 0 ) {
       newState.ball.dy = -newState.ball.dy;
       newState.ball.y = newState.ball.radius;
     }
@@ -217,7 +217,7 @@ export const PongCanvas = ({
       ball.x = p2.x - ball.radius;
       ball.dx = -incomingDx;
     }
-    if (Mode === 4) {
+ if (Mode === 4) {
       if (ball.x - ball.radius <= p3.x + p3.width &&
         ball.x - ball.radius >= p3.x &&
         ball.y + ball.radius >= p3.y &&
@@ -284,7 +284,7 @@ export const PongCanvas = ({
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
     ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
-    if (Mode == 4) {
+   if (Mode == 4) {
       ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.paddle3.width, gameState.paddle3.height);
       ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.paddle4.width, gameState.paddle4.height);
     }
