@@ -31,7 +31,7 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
 
   // Periodic server message to this client
   const interval = setInterval(() => {
-    connection.send("Hello from Fastify server");
+    // connection.send("Hello from Fastify server");
   }, 5000);
 
   // Cleanup on disconnect
