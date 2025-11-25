@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fastify WebSocket Client</title>
+</head>
+<body>
+  <h1>Fastify WebSocket Demo</h1>
+  <input type="text" id="messageInput" placeholder="Type a message"/>
+  <button id="sendBtn">Send</button>
+  <ul id="messages"></ul>
+
+  <script>
+    const ws = new WebSocket("ws://localhost:3000/ws");
+    const messages = document.getElementById("messages");
+    const input = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    ws.addEventListener("open", () => {
+      console.log("Connected to WebSocket server");
+    });
+
+    ws.addEventListener("message", (event) => {
+      const li = document.createElement("li");
+      li.textContent = event.data;
+      messages.appendChild(li);
+    });
+
+    sendBtn.addEventListener("click", () => {
+      if (input.value.trim() !== "") {
+        ws.send(input.value);
+        input.value = "";
+      }
+    });
+
+    ws.addEventListener("close", () => {
+      console.log("Disconnected from server");
+    });
+  </script>
+</body>
+</html>
