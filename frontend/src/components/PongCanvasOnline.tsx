@@ -214,33 +214,33 @@ export const PongCanvasOnline = ({
     draw();
   }, [draw]);
 
-    const ws = new WebSocket("ws://localhost:3000/ws");
-    // const messages = document.getElementById("messages");
-    // const input = document.getElementById("messageInput");
-    // const sendBtn = document.getElementById("sendBtn");
+  const ws = new WebSocket("ws://localhost:3000/ws");
+  // const messages = document.getElementById("messages");
+  // const input = document.getElementById("messageInput");
+  // const sendBtn = document.getElementById("sendBtn");
 
-    // ws.addEventListener("open", () => {
-    //   const email = localStorage.getItem("email");
-    //   console.log(email, " is Connected to WebSocket server");
-    //    ws.send(JSON.stringify({ type: "register", email }));
-    // });
+  // ws.addEventListener("open", () => {
+  //   const email = localStorage.getItem("email");
+  //   console.log(email, " is Connected to WebSocket server");
+  //    ws.send(JSON.stringify({ type: "register", email }));
+  // });
 
-    // ws.addEventListener("message", (event) => {
-    //   const li = document.createElement("li");
-    //   li.textContent = event.data;
-    //   messages.appendChild(li);
-    // });
+  // ws.addEventListener("message", (event) => {
+  //   const li = document.createElement("li");
+  //   li.textContent = event.data;
+  //   messages.appendChild(li);
+  // });
 
-    // sendBtn.addEventListener("click", () => {
-    //   if (input.value.trim() !== "") {
-    //     ws.send(input.value);
-    //     input.value = "";
-    //   }
-    // });
+  // sendBtn.addEventListener("click", () => {
+  //   if (input.value.trim() !== "") {
+  //     ws.send(input.value);
+  //     input.value = "";
+  //   }
+  // });
 
-    // ws.addEventListener("close", () => {
-    //   console.log(localStorage.getItem("email"), "Disconnected from server");
-    // });
+  // ws.addEventListener("close", () => {
+  //   console.log(localStorage.getItem("email"), "Disconnected from server");
+  // });
   ///********* */
 
   const startGame = () => {
@@ -313,39 +313,39 @@ export const PongCanvasOnline = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [gameState]);
 
-  // Draw loop: draw whenever gameState updates
-  useEffect(() => {
-    if (!gameState) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+  // // Draw loop: draw whenever gameState updates
+  // useEffect(() => {
+  //   if (!gameState) return;
+  //   const canvas = canvasRef.current;
+  //   if (!canvas) return;
+  //   const ctx = canvas.getContext("2d");
 
-    // clear
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   // clear
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // background
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //   // background
+  //   ctx.fillStyle = "#000";
+  //   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // paddles
-    ctx.fillStyle = "#fff";
-    const p1 = gameState.paddle1;
-    const p2 = gameState.paddle2;
-    ctx.fillRect(p1.x, p1.y, p1.width, p1.height);
-    ctx.fillRect(p2.x, p2.y, p2.width, p2.height);
+  //   // paddles
+  //   ctx.fillStyle = "#fff";
+  //   const p1 = gameState.paddle1;
+  //   const p2 = gameState.paddle2;
+  //   ctx.fillRect(p1.x, p1.y, p1.width, p1.height);
+  //   ctx.fillRect(p2.x, p2.y, p2.width, p2.height);
 
-    // ball
-    const b = gameState.ball;
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-    ctx.fill();
+  //   // ball
+  //   const b = gameState.ball;
+  //   ctx.beginPath();
+  //   ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+  //   ctx.fill();
 
-    // scores
-    ctx.font = "24px monospace";
-    ctx.fillText(String(gameState.score1 || 0), canvas.width * 0.25, 30);
-    ctx.fillText(String(gameState.score2 || 0), canvas.width * 0.75, 30);
+  //   // scores
+  //   ctx.font = "24px monospace";
+  //   ctx.fillText(String(gameState.score1 || 0), canvas.width * 0.25, 30);
+  //   ctx.fillText(String(gameState.score2 || 0), canvas.width * 0.75, 30);
 
-  }, [gameState]);
+  // }, [gameState]);
 
 
   return (
