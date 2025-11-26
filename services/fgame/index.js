@@ -18,14 +18,13 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
 
   // Handle incoming messages from this client
   connection.on("message", (msg) => {
-    console.log("Received:", msg.toString());
+    console.log(">>>>>>>>> Received: ", msg.toString());
 
     // Broadcast to all other clients
-    for (const client of clients) {
-      // if (client !== connection) 
-      // {
-      client.send(msg.toString());
-      // }
+    if (clients.size == 2) {
+      for (const client of clients) {
+        client.send(msg.toString());
+      }
     }
   });
 

@@ -105,7 +105,7 @@ export const PongCanvasOnline = ({
     },
     gameStatus: 'waiting'
   });
-
+  const email = localStorage.getItem("email");
   const updateGame = useCallback((delta: number) => {
     if (!gameStateRef.current) return;
     const prev = gameStateRef.current;
@@ -225,7 +225,7 @@ export const PongCanvasOnline = ({
     };
 
     ws.onmessage = (event) => {
-      console.log("from server  ", event);
+      console.log("from server >>>>>>  ", event.data);
       // setMessages((prev) => [...prev, event.data]);
     };
 
@@ -239,22 +239,25 @@ export const PongCanvasOnline = ({
   }, []);
 
   const startGame = () => {
-
-    ws.send(JSON.stringify({
-      type: "register",
-      email: localStorage.getItem("email")
-    }));
-    // setGameState(prev => {
-    //   const next = { ...prev, gameStatus: "playing" };
-    //   gameStateRef.current = next;
-    //   return next;
-    // });
     const canvas = canvasRef.current;
     if (canvas) {
       canvas.tabIndex = 0;
       canvas.focus({ preventScroll: true });
       canvas.scrollIntoView({ behavior: "smooth", block: "center" });
     }
+    // if (!ws || ws.readyState !== ws.OPEN) return;
+    // else
+
+    ws.send(JSON.stringify({
+      type: "register",
+      email: email
+    }));
+    // setGameState(prev => {
+    //   const next = { ...prev, gameStatus: "playing" };
+    //   gameStateRef.current = next;
+    //   return next;
+    // });
+
   };
 
 
@@ -263,7 +266,7 @@ export const PongCanvasOnline = ({
 
     // const ws = new WebSocket("ws://localhost:3000/ws");
     if (!ws || ws.readyState !== ws.OPEN) return;
-    ws.send(JSON.stringify({ type: "move", direction }));
+    ws.send(JSON.stringify({ type: "move", direction, email }));
   };
 
   // Key listener - attach once
