@@ -4,7 +4,18 @@ import websocket from "@fastify/websocket";
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
+let players = {}; // { wsId: { email, role, socket } }
 
+let gameState = {
+  width: 640,
+  height: 400,
+  paddle1: { x: 20, y: 160, width: 10, height: 80 },
+  paddle2: { x: 610, y: 160, width: 10, height: 80 },
+  ball: { x: 320, y: 200, dx: 3, dy: 2, radius: 8 },
+  score1: 0,
+  score2: 0,
+  gameStatus: "waiting" // waiting | playing | paused
+};
 // Keep track of all connected clients
 const clients = new Set();
 
@@ -18,19 +29,21 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
 
   // Handle incoming messages from this client
   connection.on("message", (msg) => {
-    console.log(">>>>>>>>> Received: ", msg.toString());
+    console.log(">>>>>>>>> Received: ", msg);
 
     // Broadcast to all other clients
     if (clients.size == 2) {
+      if (gameState.gameStatus != "playing")
+        gameState.gameStatus = "playing";
       for (const client of clients) {
-        client.send(msg.toString());
+        client.send(JSON.stringify(gameState));
       }
     }
   });
 
   // Periodic server message to this client
   const interval = setInterval(() => {
-    // connection.send("Hello from Fastify server");
+    connection.send("5s Updates from Fastify server");
   }, 5000);
 
   // Cleanup on disconnect
@@ -55,17 +68,7 @@ fastify.listen({ port: 3000, host: "0.0.0.0" });
 // import { randomUUID } from "crypto";
 
 // // --- Shared game state ---
-// let players = {}; // { wsId: { email, role, socket } }
-// let gameState = {
-//   width: 640,
-//   height: 400,
-//   paddle1: { x: 20, y: 160, width: 10, height: 80 },
-//   paddle2: { x: 610, y: 160, width: 10, height: 80 },
-//   ball: { x: 320, y: 200, dx: 3, dy: 2, radius: 8 },
-//   score1: 0,
-//   score2: 0,
-//   gameStatus: "waiting" // waiting | playing | paused
-// };
+
 
 // const TICK_RATE = 60; // ticks per second
 // const PADDLE_SPEED = 10;

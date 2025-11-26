@@ -215,11 +215,10 @@ export const PongCanvasOnline = ({
   useEffect(() => {
     draw();
   }, [draw]);
-  // const wsRef = useRef(null);
+
 
   useEffect(() => {
-    // Connect once
-    // wsRef.current = new WebSocket("ws://pong-server:3000/ws");
+
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
     };
@@ -264,8 +263,7 @@ export const PongCanvasOnline = ({
   // Send move to server
   const sendMove = (direction) => {
 
-    // const ws = new WebSocket("ws://localhost:3000/ws");
-    if (!ws || ws.readyState !== ws.OPEN) return;
+    // if (!ws || ws.readyState !== ws.OPEN) return;
     ws.send(JSON.stringify({ type: "move", direction, email }));
   };
 
