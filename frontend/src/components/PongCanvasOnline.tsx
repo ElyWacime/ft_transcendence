@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import React from "react";
+import { formToJSON } from "axios";
 interface PongCanvasProps {
   player1Name?: string;
   player2Name?: string;
@@ -216,22 +217,24 @@ export const PongCanvasOnline = ({
     draw();
   }, [draw]);
 
-
   useEffect(() => {
-
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
     };
 
     ws.onmessage = (event) => {
-      console.log("from server >>>>>>  ", event.data);
-      // setMessages((prev) => [...prev, event.data]);
+      let data = JSON.parse(event.data);
+      let vs = data.player1Name;
+      if (email == vs)
+        vs = data.player2Name;
+      setGameState((prev) => ({
+        ...prev,
+        player2Name: vs// safely update
+      }));
     };
-
     ws.onclose = () => {
       console.log("Disconnected from server");
     };
-
     return () => {
       ws.close();
     };

@@ -14,6 +14,8 @@ let gameState = {
   ball: { x: 320, y: 200, dx: 3, dy: 2, radius: 8 },
   score1: 0,
   score2: 0,
+  player1Name: "",
+  player2Name: "",
   gameStatus: "waiting" // waiting | playing | paused
 };
 // Keep track of all connected clients
@@ -29,9 +31,19 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
 
   // Handle incoming messages from this client
   connection.on("message", (msg) => {
-    console.log(">>>>>>>>> Received: ", msg);
+    const request = JSON.parse(msg);
 
-    // Broadcast to all other clients
+    if (request.type == "register") {
+      if (gameState.player1Name == "")
+        gameState.player1Name = request.email;
+      else if (gameState.player2Name == "")
+        gameState.player2Name = request.email;
+    }
+    //insert into database a new registration
+    // if (request.type == "move") {
+    //   if (request.email == "www@www.w")
+    // }
+    console.log("Client says: :", request);
     if (clients.size == 2) {
       if (gameState.gameStatus != "playing")
         gameState.gameStatus = "playing";
@@ -43,7 +55,8 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
 
   // Periodic server message to this client
   const interval = setInterval(() => {
-    connection.send("5s Updates from Fastify server");
+    connection.send(JSON.stringify(gameState));
+    console.log("5s Updates from Fastify server");
   }, 5000);
 
   // Cleanup on disconnect
