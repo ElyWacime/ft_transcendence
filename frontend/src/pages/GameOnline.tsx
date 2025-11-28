@@ -20,34 +20,6 @@ const GameOnline = () => {
   const player2 = location.state?.player2 || { alias: "Player 2" };
 
   const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
-  // const wsRef = useRef<WebSocket | null>(null);
-  // const [wsReady, setWsReady] = useState(false);
-
-  // useEffect(() => {
-  //   // Create WebSocket ONCE
-  //   if (!wsRef.current) {
-  //     console.log("in parent Creating WebSocket...");
-  //     wsRef.current = new WebSocket("ws://localhost:3000/ws");
-  //   }
-  //   const ws = wsRef.current;
-  //   const handleOpen = () => {
-  //     console.log("in parent Connected to WS");
-  //     setWsReady(true);
-  //   };
-  //   const handleClose = () => {
-  //     console.log("in parent WS Closed");  
-  //     setWsReady(false);
-  //   };
-  //   ws.addEventListener("open", handleOpen);
-  //   ws.addEventListener("close", handleClose);
-  //   return () => {
-  //     // Strict mode cleanup (runs twice in dev)
-  //     ws.removeEventListener("open", handleOpen);
-  //     ws.removeEventListener("close", handleClose);
-  //     // Close socket only on **final unmount**
-  //     ws.close();
-  //   };
-  // }, []); // <-- EMPTY ARRAY = run ONCE
 
   const handleGameEnd = async (player1Score: number, player2Score: number) => {
     try {
@@ -114,17 +86,17 @@ const GameOnline = () => {
         </div>
 
         {/* Game Canvas */}
-        {isReady && (
-          <div className="max-w-6xl mx-auto">
+        {<div className="max-w-6xl mx-auto">
+          {isReady && (
             <PongCanvasOnline
               player1Name={player1.alias}
               player2Name={player2.alias}
-              onGameEnd={handleGameEnd}
+              ws={ws} // child receives stable WS
+              onGameEnd={(result) => send({ type: "gameEnd", result })}
               maxScore={5}
-              ws={ws}
             />
-          </div>
-        )}
+          )}
+        </div>}
 
         {/* Match Info */}
         {match && (

@@ -103,7 +103,7 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
   // Periodic server message to this client
   const interval = setInterval(() => {
     connection.send(JSON.stringify(gameState));
-    // console.log("5s Updates from Fastify server");
+    console.log("5s Updates from Fastify server");
   }, 5000);
 
   // Cleanup on disconnect

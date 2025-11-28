@@ -217,62 +217,28 @@ export const PongCanvasOnline = ({
     draw();
   }, [draw]);
 
+
   useEffect(() => {
     if (!ws) return;
+
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       let vs = data.player1Name;
       if (email === vs) vs = data.player2Name;
 
-      setGameState(prev => ({
+      setGameState((prev) => ({
         ...prev,
-        player2Name: vs
+        player2Name: vs,
       }));
     };
 
-    const handleOpen = () => {
-      console.log("Child: WebSocket connected");
-    };
-
-    const handleClose = () => {
-      console.log("Child: WebSocket disconnected");
-    };
-
     ws.addEventListener("message", handleMessage);
-    ws.addEventListener("close", handleClose);
-    ws.addEventListener("open", handleOpen);
 
     return () => {
       ws.removeEventListener("message", handleMessage);
-      ws.removeEventListener("close", handleClose);
-      ws.removeEventListener("open", handleOpen);
     };
-
   }, [ws]);
 
-  // useEffect(() => {
-  //   ws.onopen = () => {
-  //     console.log("in child Connected to WebSocket server");
-  //   };
-
-  //   ws.onmessage = (event) => {
-  //     let data = JSON.parse(event.data);
-  //     let vs = data.player1Name;
-  //     console.log("server says ", data);
-  //     if (email == vs)
-  //       vs = data.player2Name;
-  //     setGameState((prev) => ({
-  //       ...prev,
-  //       player2Name: vs// safely update
-  //     }));
-  //   };
-  //   ws.onclose = () => {
-  //     console.log("in child Disconnected from server");
-  //   };
-  //   return () => {
-  //     ws.close();
-  //   };
-  // }, []);
 
   const startGame = () => {
     const canvas = canvasRef.current;
@@ -281,30 +247,18 @@ export const PongCanvasOnline = ({
       canvas.focus({ preventScroll: true });
       canvas.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-    // if (!ws || ws.readyState !== ws.OPEN) return;
-    // else
-
     ws.send(JSON.stringify({
       type: "register",
       email: email
     }));
-    // setGameState(prev => {
-    //   const next = { ...prev, gameStatus: "playing" };
-    //   gameStateRef.current = next;
-    //   return next;
-    // });
-
   };
 
 
-  // Send move to server
   const sendMove = (direction) => {
-
-    // if (!ws || ws.readyState !== ws.OPEN) return;
+    if (!ws || ws.readyState !== ws.OPEN) return;
     ws.send(JSON.stringify({ type: "move", direction, email }));
   };
 
-  // Key listener - attach once
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "ArrowUp") sendMove("up");
@@ -314,10 +268,7 @@ export const PongCanvasOnline = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [gameState]);
 
-
-
   return (
-
     <div className="space-y-6">
       {/* Player Info & Controls */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
