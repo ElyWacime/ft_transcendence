@@ -113,8 +113,7 @@ export const PongCanvas = ({
     gameStatus: 'waiting'
   });
 
-  const createBall = useCallback(() => {
-    const dirx = Math.random() > 0.5 ? 1 : -1;
+  const createBall = useCallback((dirx: number) => {
     const diry = Math.random() > 0.5 ? 1 : -1;
     return {
       x: 400,
@@ -170,11 +169,11 @@ export const PongCanvas = ({
     // Ball movement
     newState.ball.x += newState.ball.dx * delta;
     newState.ball.y += newState.ball.dy * delta;
-    if (newState.ball.dy == 0)//To check
-    {
-      console.log("Error: dy is zero");
-      //  exit(1);
-    }
+    // if (newState.ball.dy == 0)//To check
+    // {
+    //   console.log("Error: dy is zero");
+    //   //  exit(1);
+    // }
     if ((newState.ball.dy * newState.ball.dy) + (newState.ball.dx * newState.ball.dx) < (max_Speed * max_Speed)) {
       newState.ball.dx *= accelerateSpeed;
       newState.ball.dy *= accelerateSpeed;
@@ -240,11 +239,11 @@ export const PongCanvas = ({
     // Scoring
     if (ball.x < 0) {
       newState.score.player2++;
-      newState.ball = createBall();
+      newState.ball = createBall(-1);
     } else if (ball.x > canvas.width) {
       // console.log("Speed == ", Math.sqrt((ball.dx * ball.dx) + (ball.dy * ball.dy)))
       newState.score.player1++;
-      newState.ball = createBall();
+      newState.ball = createBall(1);
     }
     // Check game end
     if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
@@ -358,6 +357,7 @@ export const PongCanvas = ({
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [gameState.gameStatus]);
+
 
   useEffect(() => {
     draw();

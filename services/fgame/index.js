@@ -28,7 +28,7 @@ let gameState = {
 const clients = new Set();
 
 // // --- Server-side game tick: ball movement and collision ---
-function tick(dt) {
+function tick() {
   if (gameState.gameStatus !== "playing") return;
 
   // Move ball
@@ -71,6 +71,9 @@ function tick(dt) {
     resetBall(1);
     // broadcast({ type: "score", gameState });
   }
+  if (gameState.score2 == 5 || gameState.score1 == 5)
+    gameState.gameStatus = "finished";
+
 
   // Broadcast state each tick (you can decimate frequency if needed)
   // broadcast({ type: "state", gameState });
@@ -130,7 +133,7 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
 
   // Periodic server message to this client
   const interval = setInterval(() => {
-    tick(1 / TICK_RATE);
+    tick();
     connection.send(JSON.stringify(gameState));
     // console.log("5s Updates from Fastify server");
   }, TICK_RATE);

@@ -244,6 +244,10 @@ export const PongCanvasOnline = ({
           x: data.paddle4.x,
           y: data.paddle4.y,
         },
+        score: {
+          player1: data.score1,
+          player2: data.score2
+        },
         player2Name: vs,
       }));
     };
@@ -254,7 +258,6 @@ export const PongCanvasOnline = ({
       ws.removeEventListener("message", handleMessage);
     };
   }, [ws]);
-
 
   const startGame = () => {
     const canvas = canvasRef.current;
@@ -275,14 +278,31 @@ export const PongCanvasOnline = ({
     ws.send(JSON.stringify({ type: "move", direction, email }));
   };
 
+
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "ArrowUp") sendMove("up");
-      if (e.key === "ArrowDown") sendMove("down");
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === "ArrowUp" || e.code === "ArrowDown")
+        e.preventDefault();
+      if (e.code === "ArrowUp") sendMove("up");
+      if (e.code === "ArrowDown") sendMove("down");
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [gameState]);
+
+    window.addEventListener("keydown", onKey, { passive: false });
+
+    return () =>
+      window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // useEffect(() => {
+  //   const onKey = (e) => {
+  //     if (gameState.gameStatus === 'playing' && (e.code === 'ArrowUp' || e.code === 'ArrowDown'))
+  //       e.preventDefault();
+  //     if (e.key === "ArrowUp") sendMove("up");
+  //     if (e.key === "ArrowDown") sendMove("down");
+  //   };
+  //   window.addEventListener("keydown", onKey);
+  //   return () => window.removeEventListener("keydown", onKey);
+  // }, [gameState]);
 
   return (
     <div className="space-y-6">
