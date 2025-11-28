@@ -9,7 +9,8 @@ const TICK_RATE = 60; // ticks per second
 const PADDLE_SPEED = 10;
 
 let gameState = {
-  ball: { x: 400, y: 300, dx: Math.cos(Math.PI / 8), dy: Math.sin(Math.PI / 8), radius: 8 },
+  ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
+  // ball: { x: 400, y: 300, dx: Math.cos(Math.PI / 8), dy: Math.sin(Math.PI / 8), radius: 8 },
   paddle1: { x: 20, y: 250 },
   paddle2: { x: 765, y: 250 },
   paddle3: { x: 60, y: 250 },

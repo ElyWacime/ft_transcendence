@@ -218,7 +218,7 @@ export const PongCanvasOnline = ({
       let vs = data.player1Name;
       if (email === vs)
         vs = data.player2Name;
-      console.log("server says: :", data);
+      // console.log("server says: :", data);
       setGameState((prev) => ({
         ...prev,
         ball: {
