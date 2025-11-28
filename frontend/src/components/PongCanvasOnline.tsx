@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import React from "react";
 import { formToJSON } from "axios";
+
 interface PongCanvasProps {
   player1Name?: string;
   player2Name?: string;
@@ -13,7 +14,14 @@ interface PongCanvasProps {
 }
 
 interface GameState {
-  Mode: number;
+  paddle1: {
+    x: number;
+    y: number;
+  };
+  paddle2: {
+    x: number;
+    y: number;
+  };
   ball: {
     x: number;
     y: number;
@@ -21,40 +29,26 @@ interface GameState {
     dy: number;
     radius: number;
   };
-  paddle1: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  paddle2: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
   paddle3: {
     x: number;
     y: number;
-    width: number;
-    height: number;
   };
   paddle4: {
     x: number;
     y: number;
-    width: number;
-    height: number;
   };
   score: {
     player1: number;
     player2: number;
   };
+  Mode: number;
+  sizePaddle: { width: number, height: number };
   gameStatus: string;
 }
 
 export const PongCanvasOnline = ({
   player1Name = localStorage.getItem("email"),
-  player2Name = "Player 2",
+  player2Name = "Player 22",
   onGameEnd,
   maxScore = 5,
   ws
@@ -68,7 +62,6 @@ export const PongCanvasOnline = ({
   const [role, setRole] = useState(null);
 
   const [gameState, setGameState] = useState<GameState>({
-    Mode: 2,
     ball: {
       x: 400,
       y: 300,
@@ -78,48 +71,46 @@ export const PongCanvasOnline = ({
     },
     paddle1: {
       x: 20,
-      y: 250,
-      width: 15,
-      height: 100
+      y: 250
     },
     paddle2: {
       x: 765,
-      y: 250,
-      width: 15,
-      height: 100
+      y: 250
     },
     paddle3: {
       x: 60,
       y: 250,
-      width: 15,
-      height: 100
     },
     paddle4: {
       x: 725,
       y: 250,
-      width: 15,
-      height: 100
     },
     score: {
       player1: 0,
       player2: 0
     },
+    sizePaddle: {
+      width: 15,
+      height: 100
+    },
+    Mode: 2,
     gameStatus: 'waiting'
   });
   const email = localStorage.getItem("email");
-  const updateGame = useCallback((delta: number) => {
-    if (!gameStateRef.current) return;
-    const prev = gameStateRef.current;
-    if (prev.gameStatus !== 'playing') return;
 
-    const newState = { ...prev };
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // const updateGame = useCallback((delta: number) => {
+  //   if (!gameStateRef.current) return;
+  //   const prev = gameStateRef.current;
+  //   if (prev.gameStatus !== 'playing') return;
 
-    // Update Game state
-    gameStateRef.current = newState;
-    setGameState(newState);
-  }, [maxScore, onGameEnd]);
+  //   const newState = { ...prev };
+  //   const canvas = canvasRef.current;
+  //   if (!canvas) return;
+
+  //   // Update Game state
+  //   gameStateRef.current = newState;
+  //   setGameState(newState);
+  // }, [maxScore, onGameEnd]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -142,14 +133,15 @@ export const PongCanvasOnline = ({
 
     // Draw paddles
     ctx.fillStyle = 'hsl(217 91% 60%)';
-    ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
-    ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
+    ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+    ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
     if (gameState.Mode == 4) {
-      ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.paddle3.width, gameState.paddle3.height);
-      ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.paddle4.width, gameState.paddle4.height);
+      ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+      ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
     }
     // Draw ball
     ctx.beginPath();
+    console.log(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
     ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fill();
@@ -169,7 +161,7 @@ export const PongCanvasOnline = ({
   }, [gameState]);
 
 
-  const gameLoop = useCallback((time: number) => {
+  const gameLoop = useCallback(() => {
     draw();
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [draw]);
@@ -224,10 +216,34 @@ export const PongCanvasOnline = ({
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       let vs = data.player1Name;
-      if (email === vs) vs = data.player2Name;
-
+      if (email === vs)
+        vs = data.player2Name;
+      console.log("server says: :", data);
       setGameState((prev) => ({
         ...prev,
+        ball: {
+          x: data.ball.x,
+          y: data.ball.y,
+          dx: data.ball.dx,
+          dy: data.ball.dy,
+          radius: data.ball.radius
+        },
+        paddle1: {
+          x: data.paddle1.x,
+          y: data.paddle1.y,
+        },
+        paddle2: {
+          x: data.paddle2.x,
+          y: data.paddle2.y,
+        },
+        paddle3: {
+          x: data.paddle3.x,
+          y: data.paddle3.y,
+        },
+        paddle4: {
+          x: data.paddle4.x,
+          y: data.paddle4.y,
+        },
         player2Name: vs,
       }));
     };
@@ -305,7 +321,7 @@ export const PongCanvasOnline = ({
         {/* Player 2 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{gameState.player2Name || "Player2"}</CardTitle>
+            <CardTitle className="text-center text-lg">{gameState.player2Name || "Player52"}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-game font-bold text-primary">

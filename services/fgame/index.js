@@ -5,15 +5,20 @@ const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
 let players = {}; // { wsId: { email, role, socket } }
+const TICK_RATE = 60; // ticks per second
+const PADDLE_SPEED = 10;
 
 let gameState = {
-  width: 640,
-  height: 400,
-  paddle1: { x: 20, y: 160, width: 10, height: 80 },
-  paddle2: { x: 610, y: 160, width: 10, height: 80 },
-  ball: { x: 320, y: 200, dx: 3, dy: 2, radius: 8 },
+  ball: { x: 400, y: 300, dx: Math.cos(Math.PI / 8), dy: Math.sin(Math.PI / 8), radius: 8 },
+  paddle1: { x: 20, y: 250 },
+  paddle2: { x: 765, y: 250 },
+  paddle3: { x: 60, y: 250 },
+  paddle4: { x: 725, y: 250 },
+  width: 800,
+  height: 600,
   score1: 0,
   score2: 0,
+  sizePaddle: { width: 15, height: 100 },
   player1Name: "",
   player2Name: "",
   gameStatus: "waiting" // waiting | playing | paused
@@ -21,53 +26,71 @@ let gameState = {
 // Keep track of all connected clients
 const clients = new Set();
 
+// // --- Server-side game tick: ball movement and collision ---
+function tick(dt) {
+  if (gameState.gameStatus !== "playing") return;
+
+  // Move ball
+  gameState.ball.x += gameState.ball.dx;
+  gameState.ball.y += gameState.ball.dy;
+
+  // Top/Bottom wall collision
+  if (gameState.ball.y - gameState.ball.radius <= 0 || gameState.ball.y + gameState.ball.radius >= gameState.height) {
+    gameState.ball.dy *= -1;
+    // clamp position
+    gameState.ball.y = Math.max(gameState.ball.radius, Math.min(gameState.height - gameState.ball.radius, gameState.ball.y));
+  }
+
+  // Paddle collisions (simple AABB -> circle approx)
+  // Left paddle
+  if (gameState.ball.x - gameState.ball.radius <= gameState.paddle1.x + gameState.sizePaddle.width) {
+    if (gameState.ball.y >= gameState.paddle1.y && gameState.ball.y <= gameState.paddle1.y + gameState.sizePaddle.height) {
+      gameState.ball.dx = Math.abs(gameState.ball.dx); // bounce right
+      // small speed up
+      gameState.ball.dx *= 1.05;
+    }
+  }
+
+  // Right paddle
+  if (gameState.ball.x + gameState.ball.radius >= gameState.paddle2.x) {
+    if (gameState.ball.y >= gameState.paddle2.y && gameState.ball.y <= gameState.paddle2.y + gameState.sizePaddle.height) {
+      gameState.ball.dx = -Math.abs(gameState.ball.dx); // bounce left
+      gameState.ball.dx *= 1.05;
+    }
+  }
+
+  // Scoring: ball passed left or right
+  if (gameState.ball.x < 0) {
+    // point for player2
+    gameState.score2 += 1;
+    resetBall(-1);
+    // broadcast({ type: "score", gameState });
+  } else if (gameState.ball.x > gameState.width) {
+    gameState.score1 += 1;
+    resetBall(1);
+    // broadcast({ type: "score", gameState });
+  }
+
+  // Broadcast state each tick (you can decimate frequency if needed)
+  // broadcast({ type: "state", gameState });
+}
+
+function resetBall(direction = 1) {
+  gameState.ball.x = gameState.width / 2;
+  gameState.ball.y = gameState.height / 2;
+  gameState.ball.dx = 3 * direction;
+  gameState.ball.dy = 2 * (Math.random() > 0.5 ? 1 : -1);
+}
+
+
 fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
-
-// fastify.get("/ws", { websocket: true }, (connection, req) => {
-//   const ws = connection.socket;
-//   clients.add(ws);
-//   ws.send(JSON.stringify(gameState));
-//   console.log("Client connected. Total clients:", clients.size);
-//   ws.on("message", (msg) => {
-//     const request = JSON.parse(msg);
-
-//     if (request.type == "register") {
-//       if (gameState.player1Name == "")
-//         gameState.player1Name = request.email;
-//       else if (gameState.player2Name == "")
-//         gameState.player2Name = request.email;
-//     }
-
-
-//     if (clients.size == 2) {
-//       if (gameState.gameStatus != "playing")
-//         gameState.gameStatus = "playing";
-//       for (const client of clients) {
-//         client.send(JSON.stringify(gameState));
-//       }
-//     }
-//   });
-
-//   const interval = setInterval(() => {
-//     client.send(JSON.stringify(gameState));
-//     // console.log("5s Updates from Fastify server");
-//   }, 5000);
-
-//   ws.on("close", () => {
-//     console.log("Client disconnected. Total clients:", clients.size);
-//     clients.delete(ws);
-//     clearInterval(interval);
-//   });
-// });
 
 
 fastify.get("/ws", { websocket: true }, (connection, req) => {
   clients.add(connection);
   console.log("Client connected. Total clients:", clients.size);
-
-  // Handle incoming messages from this client
   connection.on("message", (msg) => {
     const request = JSON.parse(msg);
 
@@ -77,20 +100,18 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
       else if (gameState.player2Name == "")
         gameState.player2Name = request.email;
     }
-
-    // if (request.email == "www@www.w") {
-    //   if (request.direction === "up")
-    //     gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
-    //   else
-    //     gameState.paddle1.y = Math.min(gameState.height - gameState.paddle1.height, gameState.paddle1.y + PADDLE_SPEED);
-    // } else if (request.email == "qaqq@qqaq.q") {
-    //   if (request.direction === "up")
-    //     gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
-    //   else
-    //     gameState.paddle2.y = Math.min(gameState.height - gameState.paddle2.height, gameState.paddle2.y + PADDLE_SPEED);
-    // }
-
-    console.log("Client says: :", request);
+    if (request.email == "www@www.w") {
+      if (request.direction === "up")
+        gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
+      else if (request.direction === "down")
+        gameState.paddle1.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle1.y + PADDLE_SPEED);
+    } else if (request.email == "qaqq@qqaq.q") {
+      if (request.direction === "up")
+        gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
+      else if (request.direction === "down")
+        gameState.paddle2.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle2.y + PADDLE_SPEED);
+    }
+    // tick(1);
     if (clients.size == 2) {
       if (gameState.gameStatus != "playing")
         gameState.gameStatus = "playing";
@@ -100,11 +121,18 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
     }
   });
 
+  // const interval = setInterval(() => {
+  //   tick(1 / TICK_RATE);
+  //   // console.log("5s Updates from Fastify server");
+  //   connection.send(JSON.stringify(gameState));
+  // }, 10000);
+
   // Periodic server message to this client
   const interval = setInterval(() => {
+    tick(1 / TICK_RATE);
     connection.send(JSON.stringify(gameState));
-    console.log("5s Updates from Fastify server");
-  }, 5000);
+    // console.log("5s Updates from Fastify server");
+  }, TICK_RATE);
 
   // Cleanup on disconnect
   connection.on("close", () => {
@@ -113,6 +141,8 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
     console.log("Client disconnected. Total clients:", clients.size);
   });
 });
+
+
 
 fastify.listen({ port: 3000, host: "0.0.0.0" });
 
@@ -130,8 +160,7 @@ fastify.listen({ port: 3000, host: "0.0.0.0" });
 // // --- Shared game state ---
 
 
-// const TICK_RATE = 60; // ticks per second
-// const PADDLE_SPEED = 10;
+
 
 // // --- WebSocket route ---
 // // fastify.get("/ws", { websocket: true }, (connection /* { socket } */, req) => {
@@ -253,65 +282,6 @@ fastify.listen({ port: 3000, host: "0.0.0.0" });
 //     }
 //   }
 // }
-
-// // --- Server-side game tick: ball movement and collision ---
-// function tick(dt) {
-//   if (gameState.gameStatus !== "playing") return;
-
-//   // Move ball
-//   gameState.ball.x += gameState.ball.dx;
-//   gameState.ball.y += gameState.ball.dy;
-
-//   // Top/Bottom wall collision
-//   if (gameState.ball.y - gameState.ball.radius <= 0 || gameState.ball.y + gameState.ball.radius >= gameState.height) {
-//     gameState.ball.dy *= -1;
-//     // clamp position
-//     gameState.ball.y = Math.max(gameState.ball.radius, Math.min(gameState.height - gameState.ball.radius, gameState.ball.y));
-//   }
-
-//   // Paddle collisions (simple AABB -> circle approx)
-//   // Left paddle
-//   if (gameState.ball.x - gameState.ball.radius <= gameState.paddle1.x + gameState.paddle1.width) {
-//     if (gameState.ball.y >= gameState.paddle1.y && gameState.ball.y <= gameState.paddle1.y + gameState.paddle1.height) {
-//       gameState.ball.dx = Math.abs(gameState.ball.dx); // bounce right
-//       // small speed up
-//       gameState.ball.dx *= 1.05;
-//     }
-//   }
-
-//   // Right paddle
-//   if (gameState.ball.x + gameState.ball.radius >= gameState.paddle2.x) {
-//     if (gameState.ball.y >= gameState.paddle2.y && gameState.ball.y <= gameState.paddle2.y + gameState.paddle2.height) {
-//       gameState.ball.dx = -Math.abs(gameState.ball.dx); // bounce left
-//       gameState.ball.dx *= 1.05;
-//     }
-//   }
-
-//   // Scoring: ball passed left or right
-//   if (gameState.ball.x < 0) {
-//     // point for player2
-//     gameState.score2 += 1;
-//     resetBall(-1);
-//     broadcast({ type: "score", gameState });
-//   } else if (gameState.ball.x > gameState.width) {
-//     gameState.score1 += 1;
-//     resetBall(1);
-//     broadcast({ type: "score", gameState });
-//   }
-
-//   // Broadcast state each tick (you can decimate frequency if needed)
-//   broadcast({ type: "state", gameState });
-// }
-
-// function resetBall(direction = 1) {
-//   gameState.ball.x = gameState.width / 2;
-//   gameState.ball.y = gameState.height / 2;
-//   gameState.ball.dx = 3 * direction;
-//   gameState.ball.dy = 2 * (Math.random() > 0.5 ? 1 : -1);
-// }
-
-// // Start the tick loop
-// setInterval(() => tick(1 / TICK_RATE), 1000 / TICK_RATE);
 
 // // Start server
 // fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
