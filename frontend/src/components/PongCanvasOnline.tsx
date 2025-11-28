@@ -218,28 +218,61 @@ export const PongCanvasOnline = ({
   }, [draw]);
 
   useEffect(() => {
-    ws.onopen = () => {
-      console.log("Connected to WebSocket server");
-    };
-
-    ws.onmessage = (event) => {
-      let data = JSON.parse(event.data);
+    if (!ws) return;
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
       let vs = data.player1Name;
-      console.log("server says ", data);
-      if (email == vs)
-        vs = data.player2Name;
-      setGameState((prev) => ({
+      if (email === vs) vs = data.player2Name;
+
+      setGameState(prev => ({
         ...prev,
-        player2Name: vs// safely update
+        player2Name: vs
       }));
     };
-    ws.onclose = () => {
-      console.log("Disconnected from server");
+
+    const handleOpen = () => {
+      console.log("Child: WebSocket connected");
     };
+
+    const handleClose = () => {
+      console.log("Child: WebSocket disconnected");
+    };
+
+    ws.addEventListener("message", handleMessage);
+    ws.addEventListener("close", handleClose);
+    ws.addEventListener("open", handleOpen);
+
     return () => {
-      ws.close();
+      ws.removeEventListener("message", handleMessage);
+      ws.removeEventListener("close", handleClose);
+      ws.removeEventListener("open", handleOpen);
     };
-  }, []);
+
+  }, [ws]);
+
+  // useEffect(() => {
+  //   ws.onopen = () => {
+  //     console.log("in child Connected to WebSocket server");
+  //   };
+
+  //   ws.onmessage = (event) => {
+  //     let data = JSON.parse(event.data);
+  //     let vs = data.player1Name;
+  //     console.log("server says ", data);
+  //     if (email == vs)
+  //       vs = data.player2Name;
+  //     setGameState((prev) => ({
+  //       ...prev,
+  //       player2Name: vs// safely update
+  //     }));
+  //   };
+  //   ws.onclose = () => {
+  //     console.log("in child Disconnected from server");
+  //   };
+  //   return () => {
+  //     ws.close();
+  //   };
+  // }, []);
 
   const startGame = () => {
     const canvas = canvasRef.current;

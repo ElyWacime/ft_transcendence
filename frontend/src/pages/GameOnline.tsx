@@ -6,7 +6,8 @@ import { Chat } from "@/components/Chat";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { Match, api } from "@/lib/api";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 const GameOnline = () => {
   const location = useLocation();
@@ -17,6 +18,36 @@ const GameOnline = () => {
   const match = location.state?.match as Match | undefined;
   const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
   const player2 = location.state?.player2 || { alias: "Player 2" };
+
+  const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
+  // const wsRef = useRef<WebSocket | null>(null);
+  // const [wsReady, setWsReady] = useState(false);
+
+  // useEffect(() => {
+  //   // Create WebSocket ONCE
+  //   if (!wsRef.current) {
+  //     console.log("in parent Creating WebSocket...");
+  //     wsRef.current = new WebSocket("ws://localhost:3000/ws");
+  //   }
+  //   const ws = wsRef.current;
+  //   const handleOpen = () => {
+  //     console.log("in parent Connected to WS");
+  //     setWsReady(true);
+  //   };
+  //   const handleClose = () => {
+  //     console.log("in parent WS Closed");  
+  //     setWsReady(false);
+  //   };
+  //   ws.addEventListener("open", handleOpen);
+  //   ws.addEventListener("close", handleClose);
+  //   return () => {
+  //     // Strict mode cleanup (runs twice in dev)
+  //     ws.removeEventListener("open", handleOpen);
+  //     ws.removeEventListener("close", handleClose);
+  //     // Close socket only on **final unmount**
+  //     ws.close();
+  //   };
+  // }, []); // <-- EMPTY ARRAY = run ONCE
 
   const handleGameEnd = async (player1Score: number, player2Score: number) => {
     try {
@@ -83,16 +114,17 @@ const GameOnline = () => {
         </div>
 
         {/* Game Canvas */}
-        <div className="max-w-6xl mx-auto">
-          <PongCanvasOnline
-            player1Name={player1.alias}
-            player2Name={player2.alias}
-            onGameEnd={handleGameEnd}
-            maxScore={5}
-            ws={new WebSocket("ws://localhost:3000/ws")}
-          // ws={new new WebSocket("ws://pong-server:3000/ws")}
-          />
-        </div>
+        {isReady && (
+          <div className="max-w-6xl mx-auto">
+            <PongCanvasOnline
+              player1Name={player1.alias}
+              player2Name={player2.alias}
+              onGameEnd={handleGameEnd}
+              maxScore={5}
+              ws={ws}
+            />
+          </div>
+        )}
 
         {/* Match Info */}
         {match && (
