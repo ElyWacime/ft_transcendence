@@ -25,6 +25,44 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
+// fastify.get("/ws", { websocket: true }, (connection, req) => {
+//   const ws = connection.socket;
+//   clients.add(ws);
+//   ws.send(JSON.stringify(gameState));
+//   console.log("Client connected. Total clients:", clients.size);
+//   ws.on("message", (msg) => {
+//     const request = JSON.parse(msg);
+
+//     if (request.type == "register") {
+//       if (gameState.player1Name == "")
+//         gameState.player1Name = request.email;
+//       else if (gameState.player2Name == "")
+//         gameState.player2Name = request.email;
+//     }
+
+
+//     if (clients.size == 2) {
+//       if (gameState.gameStatus != "playing")
+//         gameState.gameStatus = "playing";
+//       for (const client of clients) {
+//         client.send(JSON.stringify(gameState));
+//       }
+//     }
+//   });
+
+//   const interval = setInterval(() => {
+//     client.send(JSON.stringify(gameState));
+//     // console.log("5s Updates from Fastify server");
+//   }, 5000);
+
+//   ws.on("close", () => {
+//     console.log("Client disconnected. Total clients:", clients.size);
+//     clients.delete(ws);
+//     clearInterval(interval);
+//   });
+// });
+
+
 fastify.get("/ws", { websocket: true }, (connection, req) => {
   clients.add(connection);
   console.log("Client connected. Total clients:", clients.size);
@@ -39,10 +77,19 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
       else if (gameState.player2Name == "")
         gameState.player2Name = request.email;
     }
-    //insert into database a new registration
-    // if (request.type == "move") {
-    //   if (request.email == "www@www.w")
+
+    // if (request.email == "www@www.w") {
+    //   if (request.direction === "up")
+    //     gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
+    //   else
+    //     gameState.paddle1.y = Math.min(gameState.height - gameState.paddle1.height, gameState.paddle1.y + PADDLE_SPEED);
+    // } else if (request.email == "qaqq@qqaq.q") {
+    //   if (request.direction === "up")
+    //     gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
+    //   else
+    //     gameState.paddle2.y = Math.min(gameState.height - gameState.paddle2.height, gameState.paddle2.y + PADDLE_SPEED);
     // }
+
     console.log("Client says: :", request);
     if (clients.size == 2) {
       if (gameState.gameStatus != "playing")

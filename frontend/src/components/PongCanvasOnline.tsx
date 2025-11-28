@@ -225,6 +225,7 @@ export const PongCanvasOnline = ({
     ws.onmessage = (event) => {
       let data = JSON.parse(event.data);
       let vs = data.player1Name;
+      console.log("server says ", data);
       if (email == vs)
         vs = data.player2Name;
       setGameState((prev) => ({
@@ -320,7 +321,7 @@ export const PongCanvasOnline = ({
         {/* Player 2 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{player2Name}</CardTitle>
+            <CardTitle className="text-center text-lg">{gameState.player2Name || "Player2"}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-game font-bold text-primary">
