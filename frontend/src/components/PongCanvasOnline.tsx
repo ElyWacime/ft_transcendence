@@ -45,7 +45,8 @@ interface GameState {
   sizePaddle: { width: number, height: number };
   gameStatus: string;
 }
-
+let vss: string = "Player 2x";
+let Me: string = localStorage.getItem("email");
 export const PongCanvasOnline = ({
   player1Name = localStorage.getItem("email"),
   player2Name = "Player 22",
@@ -215,10 +216,10 @@ export const PongCanvasOnline = ({
 
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      let vs = data.player1Name;
-      if (email === vs)
-        vs = data.player2Name;
-      // console.log("server says: :", data);
+      vss = data.player1Name;
+      if (data.player1Name == Me)
+        vss = data.player2Name;
+      console.log("server says:  :", Me, "+++++", vss, "----", data.player1Name, data.player2Name);
       setGameState((prev) => ({
         ...prev,
         ball: {
@@ -248,7 +249,7 @@ export const PongCanvasOnline = ({
           player1: data.score1,
           player2: data.score2
         },
-        player2Name: vs,
+        player2Name: vss,
       }));
     };
 
@@ -258,6 +259,19 @@ export const PongCanvasOnline = ({
       ws.removeEventListener("message", handleMessage);
     };
   }, [ws]);
+
+  const resettGame = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.tabIndex = 0;
+      canvas.focus({ preventScroll: true });
+      canvas.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    ws.send(JSON.stringify({
+      type: "reset",
+      email: email
+    }));
+  };
 
   const startGame = () => {
     const canvas = canvasRef.current;
@@ -312,7 +326,7 @@ export const PongCanvasOnline = ({
         {/* Player 1 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{player1Name}</CardTitle>
+            <CardTitle className="text-center text-lg">{Me || "Player52"}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-game font-bold text-primary">
@@ -332,7 +346,7 @@ export const PongCanvasOnline = ({
               Start Game
             </Button>
           )}
-          <Button className="px-2 py-1 text-sm border border-border flex items-center">
+          <Button onClick={resettGame} className="px-2 py-1 text-sm border border-border flex items-center">
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset
           </Button>
@@ -341,7 +355,7 @@ export const PongCanvasOnline = ({
         {/* Player 2 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{gameState.player2Name || "Player52"}</CardTitle>
+            <CardTitle className="text-center text-lg">{vss || "Player52"}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-game font-bold text-primary">
