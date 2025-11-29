@@ -8,52 +8,57 @@ import { Match, api } from "@/lib/api";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { useWebSocket } from "../hooks/useWebSocket";
+interface GameOnlineProps {
+  player1Name: string;
+  player2Name: string;
+}
 
 const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  const { player1Name, player2Name } = location.state as GameOnlineProps;
   // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
-  const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
-  const player2 = location.state?.player2 || { alias: "Player 2" };
+  // const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
+  // const player2 = location.state?.player2 || { alias: "Player 2" };
 
   const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
 
-  const handleGameEnd = async (player1Score: number, player2Score: number) => {
-    try {
-      if (match) {
-        // Update match result in tournament
-        await api.updateMatchResult(match.id, player1Score, player2Score);
+  // const handleGameEnd = async (player1Score: number, player2Score: number) => {
+  //   try {
+  //     if (match) {
+  //       // Update match result in tournament
+  //       await api.updateMatchResult(match.id, player1Score, player2Score);
 
-        const winner = player1Score > player2Score ? player1.alias : player2.alias;
+  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
 
-        // Send system message
-        await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
+  //       // Send system message
+  //       await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
 
-        toast.success(`${winner} wins the match!`);
+  //       toast.success(`${winner} wins the match!`);
 
-        // Navigate to result page
-        setTimeout(() => {
-          navigate("/result", {
-            state: {
-              match,
-              winner: player1Score > player2Score ? player1 : player2,
-              finalScore: { player1: player1Score, player2: player2Score }
-            }
-          });
-        }, 2000);
-      } else {
-        // Quick game - no tournament
-        const winner = player1Score > player2Score ? player1.alias : player2.alias;
-        toast.success(`${winner} wins!`);
-      }
-    } catch (error) {
-      console.error("Failed to update match result:", error);
-      toast.error("Failed to save match result");
-    }
-  };
+  //       // Navigate to result page
+  //       setTimeout(() => {
+  //         navigate("/result", {
+  //           state: {
+  //             match,
+  //             winner: player1Score > player2Score ? player1 : player2,
+  //             finalScore: { player1: player1Score, player2: player2Score }
+  //           }
+  //         });
+  //       }, 2000);
+  //     } else {
+  //       // Quick game - no tournament
+  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
+  //       toast.success(`${winner} wins!`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to update match result:", error);
+  //     toast.error("Failed to save match result");
+  //   }
+  // };
 
   return (
     <div className="min-h-screen pt-16 pb-8">
@@ -89,14 +94,15 @@ const GameOnline = () => {
         {<div className="max-w-6xl mx-auto">
           {isReady && (
             <PongCanvasOnline
-              player1Name={player1.alias}
-              player2Name={player2.alias}
-              ws={ws} // child receives stable WS
+              player1Name={player1Name}
+              player2Name={player2Name}
+              ws={ws}
               onGameEnd={(result) => send({ type: "gameEnd", result })}
               maxScore={5}
             />
           )}
         </div>}
+
 
         {/* Match Info */}
         {match && (

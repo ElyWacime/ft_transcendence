@@ -19,13 +19,13 @@ const Login = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-  
+
     if (token) {
       localStorage.setItem("token", token);
-  
+
       // 👇 instantly update auth context
       login(token, "github_user");
-  
+
       toast.success("Successfully logged in with GitHub!");
       navigate("/tournament", { replace: true });
     }

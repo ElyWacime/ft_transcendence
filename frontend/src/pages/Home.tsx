@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
+import { useEffect } from "react";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -37,7 +38,6 @@ const Home = () => {
       description: "Outsmart this AI "
     }
   ];
-
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
@@ -54,7 +54,7 @@ const Home = () => {
           </p>
           <Button
             size="lg"
-            onClick={() => navigate("/tournament")}
+            onClick={() => { navigate("/tournament") }}
             className="bg-gradient-primary hover:scale-105 transition-transform duration-300 animate-pulse-glow text-lg px-8 py-4 font-game"
           >
             <Trophy className="w-6 h-6 mr-2" />
@@ -96,7 +96,7 @@ const Home = () => {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigate("/tournament")}
+              onClick={() => { navigate("/tournament") }}
               className="font-medium"
             >
               <Users className="w-5 h-5 mr-2" />
@@ -105,7 +105,7 @@ const Home = () => {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigate("/game")}
+              onClick={() => { navigate("/game") }}
               className="font-medium"
             >
               <Gamepad2 className="w-5 h-5 mr-2" />

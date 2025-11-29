@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
@@ -6,8 +7,8 @@ import React from "react";
 import { formToJSON } from "axios";
 
 interface PongCanvasProps {
-  player1Name?: string;
-  player2Name?: string;
+  player1Name;
+  player2Name;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
   ws: WebSocket;
@@ -46,10 +47,13 @@ interface GameState {
   gameStatus: string;
 }
 let vss: string = "Player 2x";
+
 let Me: string = localStorage.getItem("email");
+// const location = useLocation();
+// const { player1Name, player2Name } = location.state as PongCanvasProps;
 export const PongCanvasOnline = ({
-  player1Name = localStorage.getItem("email"),
-  player2Name = "Player 22",
+  player1Name,
+  player2Name,
   onGameEnd,
   maxScore = 5,
   ws
@@ -142,7 +146,6 @@ export const PongCanvasOnline = ({
     }
     // Draw ball
     ctx.beginPath();
-    console.log(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
     ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
     ctx.fillStyle = 'hsl(217 91% 60%)';
     ctx.fill();
@@ -219,7 +222,6 @@ export const PongCanvasOnline = ({
       vss = data.player1Name;
       if (data.player1Name == Me)
         vss = data.player2Name;
-      console.log("server says:  :", Me, "+++++", vss, "----", data.player1Name, data.player2Name);
       setGameState((prev) => ({
         ...prev,
         ball: {
@@ -288,7 +290,8 @@ export const PongCanvasOnline = ({
 
 
   const sendMove = (direction) => {
-    if (!ws || ws.readyState !== ws.OPEN) return;
+    if (!ws || ws.readyState !== ws.OPEN)
+      return;
     ws.send(JSON.stringify({ type: "move", direction, email }));
   };
 
@@ -326,7 +329,7 @@ export const PongCanvasOnline = ({
         {/* Player 1 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{Me || "Player52"}</CardTitle>
+            <CardTitle className="text-center text-lg">{player1Name}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-game font-bold text-primary">
@@ -355,7 +358,7 @@ export const PongCanvasOnline = ({
         {/* Player 2 Card */}
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{vss || "Player52"}</CardTitle>
+            <CardTitle className="text-center text-lg">{player2Name}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-game font-bold text-primary">

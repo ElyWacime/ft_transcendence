@@ -6,9 +6,6 @@ const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
 
-const TICK_RATE = 60;
-
-const PADDLE_SPEED = 10;
 
 let gameState = {
   ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
@@ -23,10 +20,15 @@ let gameState = {
   sizePaddle: { width: 15, height: 100 },
   player1Name: "",
   player2Name: "",
-  gameStatus: "waiting"
+  gameStatus: "waiting",
+  count: 0
 };
 
 const clients = new Set();
+
+const PADDLE_SPEED = 20;
+const TICK_RATE = 60;
+
 
 function tick() {
   if (gameState.gameStatus !== "playing") return;
@@ -74,14 +76,19 @@ fastify.get('/', async (request, reply) => {
 fastify.get("/ws", { websocket: true }, (connection, req) => {
   clients.add(connection);
   console.log("Client connected. Total clients:", clients.size);
+  // console.log("connection >>> ", connection.url());
   connection.on("message", (msg) => {
     const request = JSON.parse(msg);
 
     if (request.type == "register") {
-      if (gameState.player1Name == "")
+      if (gameState.player1Name == "") {
         gameState.player1Name = request.email;
-      else if (gameState.player2Name == "" && request.email != gameState.player1Name)
+        gameState.count++;
+      }
+      else if (gameState.player2Name == "" && request.email != gameState.player1Name) {
         gameState.player2Name = request.email;
+        gameState.count++;
+      }
     }
 
     if (request.type == "reset") {
@@ -112,10 +119,11 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
   });
 
   const interval = setInterval(() => {
-    if (clients.size === 0) return;
+    if (clients.size === 0)
+      return;
     tick();
     connection.send(JSON.stringify(gameState));
-  }, TICK_RATE);
+  }, 1000 / TICK_RATE);
   connection.on("close", () => {
     clients.delete(connection);
     clearInterval(interval);
