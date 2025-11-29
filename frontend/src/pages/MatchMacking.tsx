@@ -73,7 +73,7 @@ const MatchMacking = () => {
                     f.title === "Player 2" ? { ...f, title: vs } : f
                 )
             );
-            if (data.count == 2)
+            if (data.count == mode)
                 navigate("/game-online", {
                     state: {
                         player1Name: data.player1Name,
