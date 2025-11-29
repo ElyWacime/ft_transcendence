@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Register from "./pages/Register";
+import MatchMacking from "./pages/MatchMacking";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +25,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
+        <AuthProvider children={undefined}>
           <div className="min-h-screen bg-background">
             <Navigation />
             <Routes>
@@ -32,11 +33,12 @@ const App = () => (
               <Route
                 path="/tournament"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute children={undefined}>
                     <Tournament />
                   </ProtectedRoute>
                 }
               />
+              <Route path="/loading" element={<MatchMacking />} />
               <Route path="/game" element={<Game />} />
               <Route path="/game-online" element={<GameOnline />} />
               <Route path="/result" element={<Result />} />

@@ -62,8 +62,8 @@ function tick() {
 function resetBall(direction = 1) {
   gameState.ball.x = gameState.width / 2;
   gameState.ball.y = gameState.height / 2;
-  gameState.ball.dx = 3 * direction;
-  gameState.ball.dy = 2 * (Math.random() > 0.5 ? 1 : -1);
+  gameState.ball.dx = 2 * direction;
+  gameState.ball.dy = 2;
 }
 
 fastify.get('/', async (request, reply) => {
