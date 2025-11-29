@@ -82,19 +82,20 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
+const email1 = "www@www.w";
+const email2 = "qaqq@qqaq.q";
 
 fastify.get("/ws", { websocket: true }, (connection, req) => {
   clients.add(connection);
   console.log("Client connected. Total clients:", clients.size);
-  // console.log("connection >>> ", connection.url());
   connection.on("message", (msg) => {
     const request = JSON.parse(msg);
     if (request.type == "register") {
-      if (request.email == "www@www.w" && gameState.player1Name == "") {
+      if (request.email == email1 && gameState.player1Name == "") {
         gameState.player1Name = request.email;
         gameState.count++;
       }
-      else if (request.email == "qaqq@qqaq.q" && gameState.player2Name == "") {
+      else if (request.email == email2 && gameState.player2Name == "") {
         gameState.player2Name = request.email;
         gameState.count++;
       }
@@ -105,11 +106,11 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
       gameState.score2 = 0;
       resetBall(1);
     }
-    if (request.email == "www@www.w") {
+    if (request.email == email1) {
       gameState.p1keys.ArrowUp = request.keys.ArrowUp;
       gameState.p1keys.ArrowDown = request.keys.ArrowDown;
     }
-    else if (request.email == "qaqq@qqaq.q") {
+    else if (request.email == email2) {
       gameState.p2keys.ArrowUp = request.keys.ArrowUp;
       gameState.p2keys.ArrowDown = request.keys.ArrowDown;
     }
@@ -121,13 +122,13 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
       }
     }
     // console.log(request);
-    // if (request.email == "www@www.w") {
+    // if (request.email == email1) {
     //   if (request.keys.ArrowUp) {
     //     gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
     //   }
     //   if (request.keys.ArrowDown)
     //     gameState.paddle1.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle1.y + PADDLE_SPEED);
-    // } else if (request.email == "qaqq@qqaq.q") {
+    // } else if (request.email == email2) {
     //   if (request.keys.ArrowUp)
     //     gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
     //   if (request.keys.ArrowDown)
