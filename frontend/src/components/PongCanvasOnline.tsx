@@ -47,7 +47,7 @@ interface GameState {
   gameStatus: string;
 }
 let vss: string = "Player 2x";
-
+let keys = { ArrowUp: false, ArrowDown: false };
 let Me: string = localStorage.getItem("email");
 // const location = useLocation();
 // const { player1Name, player2Name } = location.state as PongCanvasProps;
@@ -271,7 +271,8 @@ export const PongCanvasOnline = ({
     }
     ws.send(JSON.stringify({
       type: "reset",
-      email: email
+      email: email,
+      keys
     }));
   };
 
@@ -284,7 +285,8 @@ export const PongCanvasOnline = ({
     }
     ws.send(JSON.stringify({
       type: "register",
-      email: email
+      email: email,
+      keys
     }));
   };
 
@@ -292,22 +294,41 @@ export const PongCanvasOnline = ({
   const sendMove = (direction) => {
     if (!ws || ws.readyState !== ws.OPEN)
       return;
-    ws.send(JSON.stringify({ type: "move", direction, email }));
+    ws.send(JSON.stringify({ type: "move", direction, email, keys }));
   };
 
-
+  let keys = { ArrowUp: false, ArrowDown: false };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "ArrowUp" || e.code === "ArrowDown")
         e.preventDefault();
-      if (e.code === "ArrowUp") sendMove("up");
-      if (e.code === "ArrowDown") sendMove("down");
+      if (e.code === "ArrowUp") {
+        keys.ArrowUp = true;
+        sendMove("up");
+      }
+      if (e.code === "ArrowDown") {
+        keys.ArrowDown = true;
+        sendMove("down");
+      }
     };
-
+    const onKeyD = (e: KeyboardEvent) => {
+      if (e.code === "ArrowUp" || e.code === "ArrowDown")
+        e.preventDefault();
+      if (e.code === "ArrowUp") {
+        keys.ArrowUp = false;
+        sendMove("up");
+      }
+      if (e.code === "ArrowDown") {
+        keys.ArrowDown = false;
+        sendMove("down");
+      }
+    };
     window.addEventListener("keydown", onKey, { passive: false });
-
-    return () =>
+    window.addEventListener("keyup", onKeyD, { passive: false });
+    return () => {
       window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKeyD);
+    }
   }, []);
 
   // useEffect(() => {

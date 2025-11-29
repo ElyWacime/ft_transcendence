@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 const MatchMacking = () => {
     const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
+    let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [role, setRole] = useState<boolean>(true);
@@ -46,7 +47,8 @@ const MatchMacking = () => {
     const startGame = () => {
         ws.send(JSON.stringify({
             type: "register",
-            email: localStorage.getItem("email")
+            email: localStorage.getItem("email"),
+            keys
         }));
     };
 

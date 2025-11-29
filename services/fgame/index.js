@@ -21,12 +21,14 @@ let gameState = {
   player1Name: "",
   player2Name: "",
   gameStatus: "waiting",
-  count: 0
+  count: 0,
+  p1keys: { ArrowUp: false, ArrowDown: false },
+  p2keys: { ArrowUp: false, ArrowDown: false }
 };
 
 const clients = new Set();
 
-const PADDLE_SPEED = 20;
+const PADDLE_SPEED = 8;
 const TICK_RATE = 60;
 
 
@@ -50,6 +52,14 @@ function tick() {
       gameState.ball.dx *= 1.05;
     }
   }
+  if (gameState.p1keys.ArrowUp)
+    gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
+  else if (gameState.p1keys.ArrowDown)
+    gameState.paddle1.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle1.y + PADDLE_SPEED);
+  if (gameState.p2keys.ArrowUp)
+    gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
+  else if (gameState.p2keys.ArrowDown)
+    gameState.paddle2.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle2.y + PADDLE_SPEED);
   if (gameState.ball.x < 0) {
     gameState.score2 += 1;
     resetBall(-1);
@@ -79,35 +89,29 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
   // console.log("connection >>> ", connection.url());
   connection.on("message", (msg) => {
     const request = JSON.parse(msg);
-
     if (request.type == "register") {
-      if (gameState.player1Name == "") {
+      if (request.email == "www@www.w" && gameState.player1Name == "") {
         gameState.player1Name = request.email;
         gameState.count++;
       }
-      else if (gameState.player2Name == "" && request.email != gameState.player1Name) {
+      else if (request.email == "qaqq@qqaq.q" && gameState.player2Name == "") {
         gameState.player2Name = request.email;
         gameState.count++;
       }
     }
-
     if (request.type == "reset") {
       gameState.gameStatus = "playing";
       gameState.score1 = 0;
       gameState.score2 = 0;
       resetBall(1);
     }
-
     if (request.email == "www@www.w") {
-      if (request.direction === "up")
-        gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
-      else if (request.direction === "down")
-        gameState.paddle1.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle1.y + PADDLE_SPEED);
-    } else if (request.email == "qaqq@qqaq.q") {
-      if (request.direction === "up")
-        gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
-      else if (request.direction === "down")
-        gameState.paddle2.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle2.y + PADDLE_SPEED);
+      gameState.p1keys.ArrowUp = request.keys.ArrowUp;
+      gameState.p1keys.ArrowDown = request.keys.ArrowDown;
+    }
+    else if (request.email == "qaqq@qqaq.q") {
+      gameState.p2keys.ArrowUp = request.keys.ArrowUp;
+      gameState.p2keys.ArrowDown = request.keys.ArrowDown;
     }
     if (clients.size == 2) {
       if (gameState.gameStatus != "playing")
@@ -116,6 +120,26 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
         client.send(JSON.stringify(gameState));
       }
     }
+    // console.log(request);
+    // if (request.email == "www@www.w") {
+    //   if (request.keys.ArrowUp) {
+    //     gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
+    //   }
+    //   if (request.keys.ArrowDown)
+    //     gameState.paddle1.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle1.y + PADDLE_SPEED);
+    // } else if (request.email == "qaqq@qqaq.q") {
+    //   if (request.keys.ArrowUp)
+    //     gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
+    //   if (request.keys.ArrowDown)
+    //     gameState.paddle2.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle2.y + PADDLE_SPEED);
+    // }
+    // if (clients.size == 2) {
+    //   if (gameState.gameStatus != "playing")
+    //     gameState.gameStatus = "playing";
+    //   for (const client of clients) {
+    //     client.send(JSON.stringify(gameState));
+    //   }
+    // }
   });
 
   const interval = setInterval(() => {
