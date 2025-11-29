@@ -251,6 +251,7 @@ export const PongCanvasOnline = ({
           player1: data.score1,
           player2: data.score2
         },
+        gameStatus: data.gameStatus,
         player2Name: vss,
       }));
     };
@@ -364,16 +365,17 @@ export const PongCanvasOnline = ({
 
         {/* Center Controls */}
         <div className="flex flex-col items-center justify-center space-y-4">
-          {gameState.gameStatus === 'waiting' && (
+          {/* {gameState.gameStatus === 'waiting' && (
             <Button onClick={startGame} className="bg-gradient-primary flex items-center">
               <Play className="w-4 h-4 mr-2" />
               Start Game
             </Button>
-          )}
-          <Button onClick={resettGame} className="px-2 py-1 text-sm border border-border flex items-center">
+          )} */}
+          {gameState.gameStatus == 'finished' && < Button onClick={resettGame} className="px-2 py-1 text-sm border border-border flex items-center">
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset
           </Button>
+          }
         </div>
 
         {/* Player 2 Card */}
@@ -404,7 +406,7 @@ export const PongCanvasOnline = ({
         />
       </div>
 
-    </div>
+    </div >
   );
 
 };

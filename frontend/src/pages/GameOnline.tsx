@@ -63,8 +63,8 @@ const GameOnline = () => {
   return (
     <div className="min-h-screen pt-16 pb-8">
       <div className="container mx-auto px-4 space-y-6">
-        {/* Game Header */}
-        <div className="flex items-center justify-between">
+        {/* { } */}
+        {/* <div className="flex items-center justify-between">
           <Button
             onClick={() => navigate(-1)}
             variant="outline"
@@ -86,9 +86,9 @@ const GameOnline = () => {
             )}
           </div>
 
-          <div className="w-20"> {/* Spacer for balance */}
+          <div className="w-20"> { }
           </div>
-        </div>
+        </div> */}
 
         {/* Game Canvas */}
         {<div className="max-w-6xl mx-auto">
