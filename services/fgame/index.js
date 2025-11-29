@@ -121,6 +121,7 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
         client.send(JSON.stringify(gameState));
       }
     }
+    // if (request.closeit) { connection.close(); }
     // console.log(request);
     // if (request.email == email1) {
     //   if (request.keys.ArrowUp) {
@@ -141,14 +142,16 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
     //     client.send(JSON.stringify(gameState));
     //   }
     // }
+
   });
 
   const interval = setInterval(() => {
-    if (clients.size === 0)
+    if (clients.size == 0)
       return;
     tick();
     connection.send(JSON.stringify(gameState));
   }, 1000 / TICK_RATE);
+
   connection.on("close", () => {
     clients.delete(connection);
     clearInterval(interval);
