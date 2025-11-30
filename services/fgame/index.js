@@ -6,7 +6,6 @@ const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
 
-
 let gameState = {
   ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
   paddle1: { x: 20, y: 250 },
@@ -26,11 +25,11 @@ let gameState = {
   p2keys: { ArrowUp: false, ArrowDown: false }
 };
 
+const email1 = "www@www.w";
+const email2 = "qaqq@qqaq.q";
 const clients = new Set();
-
 const PADDLE_SPEED = 8;
 const TICK_RATE = 60;
-
 
 function tick() {
   if (gameState.gameStatus !== "playing") return;
@@ -81,9 +80,6 @@ function resetBall(direction = 1) {
 fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
-
-const email1 = "www@www.w";
-const email2 = "qaqq@qqaq.q";
 
 fastify.get("/ws", { websocket: true }, (connection, req) => {
   clients.add(connection);

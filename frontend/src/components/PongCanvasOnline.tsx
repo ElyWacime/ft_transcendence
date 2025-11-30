@@ -49,8 +49,7 @@ interface GameState {
 let vss: string = "Player 2x";
 let keys = { ArrowUp: false, ArrowDown: false };
 let Me: string = localStorage.getItem("email");
-// const location = useLocation();
-// const { player1Name, player2Name } = location.state as PongCanvasProps;
+const email = localStorage.getItem("email");
 export const PongCanvasOnline = ({
   player1Name,
   player2Name,
@@ -101,21 +100,6 @@ export const PongCanvasOnline = ({
     Mode: 2,
     gameStatus: 'waiting'
   });
-  const email = localStorage.getItem("email");
-
-  // const updateGame = useCallback((delta: number) => {
-  //   if (!gameStateRef.current) return;
-  //   const prev = gameStateRef.current;
-  //   if (prev.gameStatus !== 'playing') return;
-
-  //   const newState = { ...prev };
-  //   const canvas = canvasRef.current;
-  //   if (!canvas) return;
-
-  //   // Update Game state
-  //   gameStateRef.current = newState;
-  //   setGameState(newState);
-  // }, [maxScore, onGameEnd]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -213,7 +197,6 @@ export const PongCanvasOnline = ({
     draw();
   }, [draw]);
 
-
   useEffect(() => {
     if (!ws) return;
 
@@ -291,14 +274,13 @@ export const PongCanvasOnline = ({
     }));
   };
 
-
   const sendMove = (direction) => {
     if (!ws || ws.readyState !== ws.OPEN)
       return;
     ws.send(JSON.stringify({ type: "move", direction, email, keys }));
   };
 
-  let keys = { ArrowUp: false, ArrowDown: false };
+  // let keys = { ArrowUp: false, ArrowDown: false };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "ArrowUp" || e.code === "ArrowDown")
@@ -331,17 +313,6 @@ export const PongCanvasOnline = ({
       window.removeEventListener("keyup", onKeyD);
     }
   }, []);
-
-  // useEffect(() => {
-  //   const onKey = (e) => {
-  //     if (gameState.gameStatus === 'playing' && (e.code === 'ArrowUp' || e.code === 'ArrowDown'))
-  //       e.preventDefault();
-  //     if (e.key === "ArrowUp") sendMove("up");
-  //     if (e.key === "ArrowDown") sendMove("down");
-  //   };
-  //   window.addEventListener("keydown", onKey);
-  //   return () => window.removeEventListener("keydown", onKey);
-  // }, [gameState]);
 
   return (
     <div className="space-y-6">
