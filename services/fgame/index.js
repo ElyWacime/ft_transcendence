@@ -86,6 +86,7 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
   console.log("Client connected. Total clients:", clients.size);
   connection.on("message", (msg) => {
     const request = JSON.parse(msg);
+    // "insert into match values ()"
     if (request.type == "register") {
       if (request.email == email1 && gameState.player1Name == "") {
         gameState.player1Name = request.email;
@@ -117,26 +118,6 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
         client.send(JSON.stringify(gameState));
       }
     }
-    // console.log(request);
-    // if (request.email == email1) {
-    //   if (request.keys.ArrowUp) {
-    //     gameState.paddle1.y = Math.max(0, gameState.paddle1.y - PADDLE_SPEED);
-    //   }
-    //   if (request.keys.ArrowDown)
-    //     gameState.paddle1.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle1.y + PADDLE_SPEED);
-    // } else if (request.email == email2) {
-    //   if (request.keys.ArrowUp)
-    //     gameState.paddle2.y = Math.max(0, gameState.paddle2.y - PADDLE_SPEED);
-    //   if (request.keys.ArrowDown)
-    //     gameState.paddle2.y = Math.min(gameState.height - gameState.sizePaddle.height, gameState.paddle2.y + PADDLE_SPEED);
-    // }
-    // if (clients.size == 2) {
-    //   if (gameState.gameStatus != "playing")
-    //     gameState.gameStatus = "playing";
-    //   for (const client of clients) {
-    //     client.send(JSON.stringify(gameState));
-    //   }
-    // }
   });
 
   const interval = setInterval(() => {

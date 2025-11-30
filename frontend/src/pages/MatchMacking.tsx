@@ -47,7 +47,7 @@ const MatchMacking = () => {
     const startGame = () => {
         ws.send(JSON.stringify({
             type: "register",
-            email: localStorage.getItem("email"),
+            email: email,
             keys
         }));
     };
@@ -70,7 +70,7 @@ const MatchMacking = () => {
                 vs = data.player1Name;
             setFeatures((prev) =>
                 prev.map((f) =>
-                    f.title === "Player 2" ? { ...f, title: vs } : f
+                    f.title === "Player 2" ? { ...f, title: vs || "Player 2" } : f
                 )
             );
             if (data.count == mode)
