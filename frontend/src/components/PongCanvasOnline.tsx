@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
@@ -46,9 +46,11 @@ interface GameState {
   sizePaddle: { width: number, height: number };
   gameStatus: string;
 }
-
 let vss: string = "Player 2x";
+let keys = { ArrowUp: false, ArrowDown: false };
 let Me: string = localStorage.getItem("email");
+// const location = useLocation();
+// const { player1Name, player2Name } = location.state as PongCanvasProps;
 export const PongCanvasOnline = ({
   player1Name,
   player2Name,
@@ -60,7 +62,7 @@ export const PongCanvasOnline = ({
   const animationRef = useRef<number>(0);
   const keysPressed = useRef<Set<string>>(new Set());
   const gameStateRef = useRef<GameState | null>(null);
-  const navigate = useNavigate();
+
   // const wsRef = useRef(null);
   const [role, setRole] = useState(null);
 
@@ -99,19 +101,23 @@ export const PongCanvasOnline = ({
     Mode: 2,
     gameStatus: 'waiting'
   });
+  const email = localStorage.getItem("email");
 
-  let keys = { ArrowUp: false, ArrowDown: false };
+  // const updateGame = useCallback((delta: number) => {
+  //   if (!gameStateRef.current) return;
+  //   const prev = gameStateRef.current;
+  //   if (prev.gameStatus !== 'playing') return;
 
-  const handleGameEnd = () => {
-    setTimeout(() => {
-      navigate("/");
-    }, 2000);
-  };
+  //   const newState = { ...prev };
+  //   const canvas = canvasRef.current;
+  //   if (!canvas) return;
+
+  //   // Update Game state
+  //   gameStateRef.current = newState;
+  //   setGameState(newState);
+  // }, [maxScore, onGameEnd]);
 
   const draw = useCallback(() => {
-    // if (gameState.gameStatus == "finished") {
-    //   navigate("/");
-    // }
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
@@ -164,11 +170,11 @@ export const PongCanvasOnline = ({
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [draw]);
 
+  // *******
   useEffect(() => {
     if (gameState.gameStatus === "playing") {
       animationRef.current = requestAnimationFrame(gameLoop);
-    }
-    else if (animationRef.current) {
+    } else if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
     return () => {
@@ -193,6 +199,7 @@ export const PongCanvasOnline = ({
     const handleKeyUp = (e: KeyboardEvent) => {
       keysPressed.current.delete(e.code);
     };
+
     window.addEventListener('keydown', handleKeyDown, { passive: false });
     window.addEventListener('keyup', handleKeyUp);
 
@@ -208,8 +215,7 @@ export const PongCanvasOnline = ({
 
 
   useEffect(() => {
-    if (!ws)
-      return;
+    if (!ws) return;
 
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
@@ -249,7 +255,9 @@ export const PongCanvasOnline = ({
         player2Name: vss,
       }));
     };
+
     ws.addEventListener("message", handleMessage);
+
     return () => {
       ws.removeEventListener("message", handleMessage);
     };
@@ -264,7 +272,21 @@ export const PongCanvasOnline = ({
     }
     ws.send(JSON.stringify({
       type: "reset",
-      email: Me,
+      email: email,
+      keys
+    }));
+  };
+
+  const startGame = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.tabIndex = 0;
+      canvas.focus({ preventScroll: true });
+      canvas.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    ws.send(JSON.stringify({
+      type: "register",
+      email: email,
       keys
     }));
   };
@@ -273,10 +295,10 @@ export const PongCanvasOnline = ({
   const sendMove = (direction) => {
     if (!ws || ws.readyState !== ws.OPEN)
       return;
-    ws.send(JSON.stringify({ type: "move", direction, Me, keys, closeit: false }));
+    ws.send(JSON.stringify({ type: "move", direction, email, keys }));
   };
 
-
+  let keys = { ArrowUp: false, ArrowDown: false };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "ArrowUp" || e.code === "ArrowDown")
@@ -310,10 +332,16 @@ export const PongCanvasOnline = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (gameState.gameStatus)
-      handleGameEnd();
-  }, [gameState.gameStatus]);
+  // useEffect(() => {
+  //   const onKey = (e) => {
+  //     if (gameState.gameStatus === 'playing' && (e.code === 'ArrowUp' || e.code === 'ArrowDown'))
+  //       e.preventDefault();
+  //     if (e.key === "ArrowUp") sendMove("up");
+  //     if (e.key === "ArrowDown") sendMove("down");
+  //   };
+  //   window.addEventListener("keydown", onKey);
+  //   return () => window.removeEventListener("keydown", onKey);
+  // }, [gameState]);
 
   return (
     <div className="space-y-6">

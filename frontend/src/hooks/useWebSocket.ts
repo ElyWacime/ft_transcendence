@@ -27,7 +27,7 @@ export function useWebSocket(url: string) {
         return () => {
             ws.removeEventListener("open", handleOpen);
             ws.removeEventListener("close", handleClose);
-            ws.close();
+            // ws.close();
         };
     }, [url]);
 

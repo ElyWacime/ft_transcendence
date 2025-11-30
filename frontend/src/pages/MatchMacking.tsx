@@ -48,8 +48,7 @@ const MatchMacking = () => {
         ws.send(JSON.stringify({
             type: "register",
             email: localStorage.getItem("email"),
-            keys,
-            closeit: true
+            keys
         }));
     };
 
