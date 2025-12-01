@@ -16,7 +16,7 @@ export function useWebSocket(url: string) {
         };
 
         const handleClose = () => {
-            console.log("WebSocket closed");
+            console.log(" 3333 WebSocket closed");
             setIsReady(false);
         };
 

@@ -27,10 +27,10 @@ let gameState = {
 
 const email1 = "www@www.w";
 const email2 = "qaqq@qqaq.q";
-const clients = new Set();
+// const clients = new Set();
 const PADDLE_SPEED = 8;
 const TICK_RATE = 60;
-
+const clients = new Map();
 function tick() {
   if (gameState.gameStatus !== "playing") return;
   gameState.ball.x += gameState.ball.dx;
@@ -82,10 +82,22 @@ fastify.get('/', async (request, reply) => {
 });
 
 fastify.get("/ws", { websocket: true }, (connection, req) => {
-  clients.add(connection);
   console.log("Client connected. Total clients:", clients.size);
   connection.on("message", (msg) => {
     const request = JSON.parse(msg);
+    if (clients.has(request.email)) {
+      try {
+        console.log("try    Client old connection closed:");
+        if (clients.get(request.email) != connection) {
+          console.log("Client old connection closed:");
+          clients.get(request.email).close();
+        }
+      }
+      catch {
+        console.log("Client old connection closed caused error:");
+      }
+    }
+    clients.set(request.email, connection);
     // "insert into match values ()"
     if (request.type == "register") {
       if (request.email == email1 && gameState.player1Name == "") {
@@ -111,10 +123,13 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
       gameState.p2keys.ArrowUp = request.keys.ArrowUp;
       gameState.p2keys.ArrowDown = request.keys.ArrowDown;
     }
-    if (clients.size == 2) {
+    if (request.type == "start" && clients.size == 2) {
       if (gameState.gameStatus != "playing")
         gameState.gameStatus = "playing";
-      for (const client of clients) {
+      // for (const client of clients) {
+      //   client.send(JSON.stringify(gameState));
+      // }
+      for (const [email, client] of clients) {
         client.send(JSON.stringify(gameState));
       }
     }
@@ -127,7 +142,14 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
     connection.send(JSON.stringify(gameState));
   }, 1000 / TICK_RATE);
   connection.on("close", () => {
-    clients.delete(connection);
+    console.log("this on Client old connection close:");
+    // clients.delete(connection);
+    for (const [email, client] of clients) {
+      if (client == connection) {
+        clients.delete(email);
+        break;
+      }
+    }
     clearInterval(interval);
     console.log("Client disconnected. Total clients:", clients.size);
   });

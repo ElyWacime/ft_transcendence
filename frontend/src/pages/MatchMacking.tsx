@@ -44,7 +44,7 @@ const MatchMacking = () => {
         ];
     });
 
-    const startGame = () => {
+    const SubscribeToGame = () => {
         ws.send(JSON.stringify({
             type: "register",
             email: email,
@@ -55,7 +55,7 @@ const MatchMacking = () => {
     useEffect(() => {
         if (!ws)
             return;
-        startGame();
+        SubscribeToGame();
         return () => {
             ws.close();
         };

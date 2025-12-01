@@ -25,6 +25,23 @@ const GameOnline = () => {
   // const player2 = location.state?.player2 || { alias: "Player 2" };
 
   const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
+  useEffect(() => {
+    if (!ws) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      if (data.gameStatus == "finished") {
+        navigate("/");
+        console.log("Match Finished >>>>>>>");
+      }
+    };
+
+    ws.addEventListener("message", handleMessage);
+
+    return () => {
+      ws.removeEventListener("message", handleMessage);
+    };
+  }, [ws]);
 
   // const handleGameEnd = async (player1Score: number, player2Score: number) => {
   //   try {

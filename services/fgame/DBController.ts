@@ -128,7 +128,18 @@ export class SQLiteDB {
     async getMatchById(id: number): Promise<Match | undefined> {
         return this.db.get<Match>(`SELECT * FROM Match WHERE id = ?`, id);
     }
-
+    async getMatchPlayable(): Promise<Match | undefined> {
+        return this.db.get<Match>(`SELECT id FROM Match WHERE P2_Id is NULL`);
+    }
+    async getMatchByEmail(email: string): Promise<Match | undefined> {
+        return this.db.get<Match>(`SELECT m.id
+        FROM Match m
+        INNER JOIN Users u ON u.id = m.P1_Id OR u.id = m.P2_Id
+        WHERE u.email = ?
+        ORDER BY m.CreatedAt DESC
+        LIMIT 1;
+        `, email);
+    }
     async updateMatch(id: number, m: Match): Promise<void> {
         await this.db.run(
             `UPDATE Match SET
