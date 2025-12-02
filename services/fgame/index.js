@@ -5,6 +5,14 @@ import websocket from "@fastify/websocket";
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
+import { Users, Match, SQLiteDB } from "./DBController.js";
+
+// let u = new Users();
+// let m = new Match();
+let dbcnx = new SQLiteDB();
+await dbcnx.connect();
+// let indx = await dbcnx.getUserss();
+// console.log(indx);
 
 let gameState = {
   ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
@@ -26,11 +34,12 @@ let gameState = {
 };
 
 const email1 = "www@www.w";
-const email2 = "qaqq@qqaq.q";
+const email2 = "qqqw@qqqw.q";
 // const clients = new Set();
 const PADDLE_SPEED = 8;
 const TICK_RATE = 60;
 const clients = new Map();
+
 function tick() {
   if (gameState.gameStatus !== "playing") return;
   gameState.ball.x += gameState.ball.dx;

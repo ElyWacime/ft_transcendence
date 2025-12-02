@@ -50,10 +50,16 @@ CREATE TABLE IF NOT EXISTS Participate_Tournament (
 );
 
 -- MATCH TABLE
-CREATE TABLE IF NOT EXISTS MatchTable (
+CREATE TABLE IF NOT EXISTS Match (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     P1_Id INTEGER NOT NULL,
     P2_Id INTEGER,
+    Ball_x INTEGER,
+    Ball_y INTEGER,
+    Player1_x INTEGER,
+    Player1_y INTEGER,
+    Player2_x INTEGER,
+    Player2_y INTEGER,
     score_player1 INTEGER NOT NULL DEFAULT 0,
     score_player2 INTEGER NOT NULL DEFAULT 0,
     mode INTEGER NOT NULL DEFAULT 2,

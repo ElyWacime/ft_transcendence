@@ -36,20 +36,16 @@ const GameOnline = () => {
 
   useEffect(() => {
     if (!ws) return;
-
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       if (data.gameStatus == "finished") {
         // ws.close();
-
         endGame();
         console.log("Match Finished try to navigate>>>>>>>");
         navigate("/");
       }
     };
-
     ws.addEventListener("message", handleMessage);
-
     return () => {
       ws.removeEventListener("message", handleMessage);
     };
