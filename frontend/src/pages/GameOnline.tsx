@@ -41,9 +41,10 @@ const GameOnline = () => {
       const data = JSON.parse(event.data);
       if (data.gameStatus == "finished") {
         // ws.close();
+
         endGame();
+        console.log("Match Finished try to navigate>>>>>>>");
         navigate("/");
-        console.log("Match Finished >>>>>>>");
       }
     };
 

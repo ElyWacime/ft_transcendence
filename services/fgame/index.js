@@ -82,22 +82,24 @@ fastify.get('/', async (request, reply) => {
 });
 
 fastify.get("/ws", { websocket: true }, (connection, req) => {
-  console.log("Client connected. Total clients:", clients.size);
+
   connection.on("message", (msg) => {
     const request = JSON.parse(msg);
+    console.log("Client connected : ", request.email);
     if (clients.has(request.email)) {
       try {
-        console.log("try    Client old connection closed:");
+        console.log("try : ", request.email);
         if (clients.get(request.email) != connection) {
-          console.log("Client old connection closed:");
+          console.log("close : ", request.email);
           clients.get(request.email).close();
         }
       }
       catch {
-        console.log("Client old connection closed caused error:");
+        console.log("error: ", request.email);
       }
     }
     clients.set(request.email, connection);
+    console.log("Total clients : ", clients.size);
     // "insert into match values ()"
     if (request.type == "register") {
       if (request.email == email1 && gameState.player1Name == "") {
@@ -116,6 +118,7 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
       resetBall(1);
     }
     if (request.type == "finished") {
+      console.log(request.email, "  server   finished");
       gameState = {
         ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
         paddle1: { x: 20, y: 250 },
@@ -129,12 +132,12 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
         sizePaddle: { width: 15, height: 100 },
         player1Name: "",
         player2Name: "",
-        gameStatus: "waiting",
+        gameStatus: "finished",
         count: 0,
         p1keys: { ArrowUp: false, ArrowDown: false },
         p2keys: { ArrowUp: false, ArrowDown: false }
       };
-      // clients.get(request.email).close();
+      clients.get(request.email).close();
     }
     if (request.email == email1) {
       gameState.p1keys.ArrowUp = request.keys.ArrowUp;
@@ -157,16 +160,16 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
   });
 
   const interval = setInterval(() => {
-    if (clients.size === 0)
+    if (clients.size == 0)
       return;
     tick();
     connection.send(JSON.stringify(gameState));
   }, 1000 / TICK_RATE);
   connection.on("close", () => {
-    console.log("this on Client old connection close:");
     // clients.delete(connection);
     for (const [email, client] of clients) {
       if (client == connection) {
+        console.log("close old :", email);
         clients.delete(email);
         break;
       }
