@@ -17,7 +17,7 @@ const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
-
+  const email = localStorage.getItem("email");
   const { player1Name, player2Name } = location.state as GameOnlineProps;
   // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
@@ -25,12 +25,23 @@ const GameOnline = () => {
   // const player2 = location.state?.player2 || { alias: "Player 2" };
 
   const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
+
+  const endGame = () => {
+    ws.send(JSON.stringify({
+      type: "finished",
+      email: email,
+      keys: { ArrowUp: false, ArrowDown: false }
+    }));
+  };
+
   useEffect(() => {
     if (!ws) return;
 
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       if (data.gameStatus == "finished") {
+        // ws.close();
+        endGame();
         navigate("/");
         console.log("Match Finished >>>>>>>");
       }

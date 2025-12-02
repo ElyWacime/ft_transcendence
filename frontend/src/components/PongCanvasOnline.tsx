@@ -148,7 +148,6 @@ export const PongCanvasOnline = ({
         ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
     }, [gameState]);
 
-
     const gameLoop = useCallback(() => {
         draw();
         animationRef.current = requestAnimationFrame(gameLoop);
@@ -273,14 +272,13 @@ export const PongCanvasOnline = ({
             keys
         }));
     };
-    useEffect(() => { startGame(); }, []);
+
     const sendMove = (direction) => {
         if (!ws || ws.readyState !== ws.OPEN)
             return;
         ws.send(JSON.stringify({ type: "move", direction, email, keys }));
     };
 
-    // let keys = { ArrowUp: false, ArrowDown: false };
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.code === "ArrowUp" || e.code === "ArrowDown")
@@ -313,6 +311,8 @@ export const PongCanvasOnline = ({
             window.removeEventListener("keyup", onKeyD);
         }
     }, []);
+
+    useEffect(() => { startGame(); }, []);
 
     return (
         <div className="space-y-6">

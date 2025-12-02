@@ -115,6 +115,27 @@ fastify.get("/ws", { websocket: true }, (connection, req) => {
       gameState.score2 = 0;
       resetBall(1);
     }
+    if (request.type == "finished") {
+      gameState = {
+        ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
+        paddle1: { x: 20, y: 250 },
+        paddle2: { x: 765, y: 250 },
+        paddle3: { x: 60, y: 250 },
+        paddle4: { x: 725, y: 250 },
+        width: 800,
+        height: 600,
+        score1: 0,
+        score2: 0,
+        sizePaddle: { width: 15, height: 100 },
+        player1Name: "",
+        player2Name: "",
+        gameStatus: "waiting",
+        count: 0,
+        p1keys: { ArrowUp: false, ArrowDown: false },
+        p2keys: { ArrowUp: false, ArrowDown: false }
+      };
+      // clients.get(request.email).close();
+    }
     if (request.email == email1) {
       gameState.p1keys.ArrowUp = request.keys.ArrowUp;
       gameState.p1keys.ArrowDown = request.keys.ArrowDown;
