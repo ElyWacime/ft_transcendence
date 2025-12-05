@@ -128,7 +128,7 @@ export const PongCanvas = ({
     lastTimeRef.current = null;
     setGameState(prev => ({
       ...prev,
-      ball: createBall(),
+      ball: createBall(1),
       paddle1: { ...prev.paddle1, y: 250 },
       paddle2: { ...prev.paddle2, y: 250 },
       paddle3: { ...prev.paddle3, y: 250 },

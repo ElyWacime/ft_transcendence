@@ -12,6 +12,7 @@ interface PongCanvasProps {
     onGameEnd?: (player1Score: number, player2Score: number) => void;
     maxScore?: number;
     ws: WebSocket;
+    mode: number;
 }
 
 interface GameState {
@@ -53,9 +54,10 @@ const email = localStorage.getItem("email");
 export const PongCanvasOnline = ({
     player1Name,
     player2Name,
-    onGameEnd,
-    maxScore = 5,
-    ws
+    // onGameEnd,
+    // maxScore = 5,
+    ws,
+    mode
 }: PongCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationRef = useRef<number>(0);
@@ -207,27 +209,27 @@ export const PongCanvasOnline = ({
             setGameState((prev) => ({
                 ...prev,
                 ball: {
-                    x: data.ball.x,
-                    y: data.ball.y,
-                    dx: data.ball.dx,
-                    dy: data.ball.dy,
-                    radius: data.ball.radius
+                    x: data.Ball_x,
+                    y: data.Ball_y,
+                    dx: data.ball_dx,
+                    dy: data.ball_dy,
+                    radius: data.ball_radius
                 },
                 paddle1: {
-                    x: data.paddle1.x,
-                    y: data.paddle1.y,
+                    x: data.Player1_x,
+                    y: data.Player1_y,
                 },
                 paddle2: {
-                    x: data.paddle2.x,
-                    y: data.paddle2.y,
+                    x: data.Player2_x,
+                    y: data.Player2_y,
                 },
                 paddle3: {
-                    x: data.paddle3.x,
-                    y: data.paddle3.y,
+                    x: data.Player3_x,
+                    y: data.Player3_y,
                 },
                 paddle4: {
-                    x: data.paddle4.x,
-                    y: data.paddle4.y,
+                    x: data.Player4_x,
+                    y: data.Player4_y,
                 },
                 score: {
                     player1: data.score1,
@@ -255,7 +257,10 @@ export const PongCanvasOnline = ({
         ws.send(JSON.stringify({
             type: "reset",
             email: email,
-            keys
+            tournement: false,
+            keys,
+            mode: mode,
+            id: localStorage.getItem("email")
         }));
     };
 
@@ -269,14 +274,17 @@ export const PongCanvasOnline = ({
         ws.send(JSON.stringify({
             type: "start",
             email: email,
-            keys
+            tournement: false,
+            keys,
+            mode: mode,
+            id: localStorage.getItem("email")
         }));
     };
 
     const sendMove = (direction) => {
         if (!ws || ws.readyState !== ws.OPEN)
             return;
-        ws.send(JSON.stringify({ type: "move", direction, email, keys }));
+        ws.send(JSON.stringify({ type: "move", direction, email, keys, tournement: false, mode: mode, id: localStorage.getItem("email") }));
     };
 
     useEffect(() => {

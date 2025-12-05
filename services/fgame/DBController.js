@@ -4,28 +4,31 @@ import sqlite3 from "sqlite3";
 
 export class Users {
     constructor() {
-        this.id = 0;
+        this.id = "";
         this.email = "";
         this.User_name = "";
-        this.User_password = "";
+        this.User_password = "qwerty";
         this.loggedIn = 0;
         this.Auto_Match = 0;
         this.isOnline = 0;
         this.avatar = "";
         this.CreatedAt = new Date();
-        this.UpdatedAt = new Date();
+        // this.UpdatedAt = new Date();
     }
 }
+
 export class Tournament {
     constructor() {
         this.id = 0;
         this.Label = "";
         this.CreatedAt = new Date();
-        this.count_player = 0;
+        this.count_players = 0;
+        this.max_players = 8;
         this.result = "WIN";
-        this.Winner_Id = -1;
+        this.Winner_Id = null;
     }
 }
+
 export class Participate_Tournament {
     constructor() {
         this.id = 0;
@@ -34,25 +37,67 @@ export class Participate_Tournament {
         this.CreatedAt = new Date();
     }
 }
+
+export class GameState {
+    constructor() {
+        this.id_Match = 0;
+        this.P1_Id = null;
+        this.P2_Id = null;
+        this.P3_Id = null;
+        this.P4_Id = null;
+        this.gameStatus = "WAITING";
+        this.T_Id = null;
+        this.count_players = 1;
+        this.mode = 2;
+
+        this.Ball_x = 400;
+        this.Ball_y = 300;
+        this.Ball_dx = 2;
+        this.Ball_dy = 2;
+        this.ball_radius = 8;
+
+        this.Player1_x = 20;
+        this.Player1_y = 250;
+        this.Player2_x = 765;
+        this.Player2_y = 250;
+        this.Player3_x = 60;
+        this.Player3_y = 250;
+        this.Player4_x = 725;
+        this.Player4_y = 250;
+        this.Winner_Id = null;
+        this.score1 = 0;
+        this.score2 = 0;
+
+
+        this.p1UPkey = false;
+        this.p1Downkey = false;
+        this.p2UPkey = false;
+        this.p2Downkey = false;
+        this.p3UPkey = false;
+        this.p3Downkey = false;
+        this.p4UPkey = false;
+        this.p4Downkey = false;
+    }
+}
+
 export class Match {
     constructor() {
         this.id = 0;
         this.P1_Id = 0;
-        this.P2_Id = 0;
-        this.Ball_x = 0;
-        this.Ball_y = 0;
-        this.Player1_x = 0;
-        this.Player1_y = 0;
-        this.Player2_x = 0;
-        this.Player2_y = 0;
+        this.P2_Id = null;
+        this.P3_Id = null;
+        this.P4_Id = null;
         this.score_player1 = 0;
         this.score_player2 = 0;
+        this.mode = 2;
+        this.count_players = 1;
         this.CreatedAt = new Date();
-        this.result = "WIN";
-        this.Winner_Id = 0;
-        this.tournamentId = 0;
+        this.gameStatus = "WAITING";
+        this.Winner_Id = null;
+        this.T_Id = null;
     }
 }
+
 export class SQLiteDB {
 
     constructor() {
@@ -70,119 +115,138 @@ export class SQLiteDB {
     // -------------------------------
     async createTournament(t) {
         let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
-        const result = await this.db.run(`INSERT INTO Tournament (Label, CreatedAt, count_player, result, Winner_Id)
-             VALUES (?, ?, ?, ?, ?)`, t.Label, nowf, t.count_player, t.result, t.Winner_Id);
+        let nowf = now.toLocaleString("fr-FR");//toISOString()
+        const result = await this.db.run(`INSERT INTO Tournament (Label, CreatedAt, result, Winner_Id)
+             VALUES (?, ?, ?, NULL)`, [t.Label, nowf, t.result]);
         return result.lastID;
     }
     async getTournaments() {
         return this.db.all(`SELECT * FROM Tournament`);
     }
     async getTournamentById(id) {
-        return this.db.get(`SELECT * FROM Tournament WHERE id = ?`, id);
+        return this.db.get(`SELECT * FROM Tournament WHERE id = ?`, [id]);
     }
     async updateTournament(id, t) {
         await this.db.run(`UPDATE Tournament 
-             SET Label=?, count_player=?, result=?, Winner_Id=? 
-             WHERE id = ?`, t.Label, t.count_player, t.result, t.Winner_Id, id);
+             SET Label=?, count_players=?, result=?, Winner_Id=? 
+             WHERE id = ?`, [t.Label, t.count_players, t.result, t.Winner_Id, id]);
     }
     async deleteTournament(id) {
-        await this.db.run(`DELETE FROM Tournament WHERE id = ?`, id);
+        await this.db.run(`DELETE FROM Tournament WHERE id = ?`, [id]);
     }
+
     // -------------------------------
     // Match CRUD
     // -------------------------------
     async createMatch(m) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
-        const result = await this.db.run(`INSERT INTO Match (
-                P1_Id, P2_Id, Ball_x, Ball_y,
-                Player1_x, Player1_y, Player2_x, Player2_y,
-                score_player1, score_player2,
-                CreatedAt, result, Winner_Id, tournamentId
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, m.P1_Id, m.P2_Id, m.Ball_x, m.Ball_y, m.Player1_x, m.Player1_y, m.Player2_x, m.Player2_y, m.score_player1, m.score_player2, nowf, m.result, m.Winner_Id, m.tournamentId);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id) VALUES (?, ?)`, [m.P1_Id, m.T_Id]);
+        return result.lastID;
+    }
+    async createMatch_not(m) {
+        const result = await this.db.run(`INSERT INTO Match (P1_Id) VALUES (?)`, [m.P1_Id]);
         return result.lastID;
     }
     async getMatches() {
         return this.db.all(`SELECT * FROM Match`);
     }
     async getMatchById(id) {
-        return this.db.get(`SELECT * FROM Match WHERE id = ?`, id);
+        return this.db.get(`SELECT * FROM Match WHERE id = ?`, [id]);
     }
-    async getMatchPlayable() {
-        return this.db.get(`SELECT id FROM Match WHERE P2_Id is NULL`);
+    async getMatchPlayable(id, mode) {
+        return this.db.get(`SELECT * FROM Match   
+                            WHERE mode = ? and   
+                            count_players <  mode   and 
+                            gameStatus = 'PENDING' and  
+                            (P1_Id != ?) and 
+                            (P2_Id != ? or P2_Id IS NULL) and 
+                            (P3_Id != ? or P3_Id IS NULL)  and 
+                            (P4_Id != ? or P4_Id IS NULL) 
+                            LIMIT 1;`, [mode, id, id, id, id]);
     }
-    async getMatchByEmail(email) {
-        return this.db.get(`SELECT m.id
-        FROM Match m
-        INNER JOIN Users u ON u.id = m.P1_Id OR u.id = m.P2_Id
-        WHERE u.email = ?
-        ORDER BY m.CreatedAt DESC
+
+    async getMatchByPlayerID(id) {
+        return this.db.get(`SELECT *
+        FROM Match
+        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
+        gameStatus = 'PLAYING' OR gameStatus = 'PENDING'
+        ORDER BY CreatedAt DESC
         LIMIT 1;
-        `, email);
+        `, [id]);
     }
-    async updateMatch(id, m) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
-        await this.db.run(`UPDATE Match SET
-                P1_Id=?, P2_Id=?, Ball_x=?, Ball_y=?,
-                Player1_x=?, Player1_y=?, Player2_x=?, Player2_y=?,
+
+    async updateMatch(m) {
+        await this.db.run(`
+            UPDATE Match SET
+                P1_Id=?, P2_Id=?, P3_Id=?, P4_Id=?,
                 score_player1=?, score_player2=?,
-                CreatedAt=?, result=?, Winner_Id=?, tournamentId=?, chrono=?
-             WHERE id = ?`, m.P1_Id, m.P2_Id, m.Ball_x, m.Ball_y, m.Player1_x, m.Player1_y, m.Player2_x, m.Player2_y, m.score_player1, m.score_player2, nowf, m.result, m.Winner_Id, m.tournamentId, id);
+                gameStatus=?, Winner_Id=?, T_Id=?, 
+                count_players=?
+            WHERE id = ?
+        `,
+            [m.P1_Id, m.P2_Id, m.P3_Id, m.P4_Id,
+            m.score_player1, m.score_player2,
+            m.gameStatus, m.Winner_Id, m.T_Id,
+            m.count_players,
+            m.id]
+        );
     }
+
     async deleteMatch(id) {
-        await this.db.run(`DELETE FROM Match WHERE id = ?`, id);
+        await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
     }
+
     // -------------------------------
     // Participate_Tournament CRUD
     // -------------------------------
     async createParticipate(p) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
-        const result = await this.db.run(`INSERT INTO Participate_Tournament (P_Id, T_Id, CreatedAt)
-             VALUES (?, ?, ?)`, p.P_Id, p.T_Id, nowf);
+        const result = await this.db.run(`INSERT INTO Participate_Tournament (P_Id, T_Id)
+             VALUES (?, ?)`, p.P_Id, p.T_Id);
         return result.lastID;
     }
     async getParticipations() {
         return this.db.all(`SELECT * FROM Participate_Tournament`);
     }
     async getParticipationById(id) {
-        return this.db.get(`SELECT * FROM Participate_Tournament WHERE id = ?`, id);
+        return this.db.get(`SELECT * FROM Participate_Tournament WHERE id = ?`, [id]);
     }
     async updateParticipation(id, p) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
         await this.db.run(`UPDATE Participate_Tournament SET 
-                P_Id=?, T_Id=?, CreatedAt=?
-             WHERE id = ?`, p.P_Id, p.T_Id, nowf, id);
+                P_Id=?, T_Id=?
+             WHERE id = ?`, p.P_Id, p.T_Id, id);
     }
     async deleteParticipation(id) {
-        await this.db.run(`DELETE FROM Participate_Tournament WHERE id = ?`, id);
+        await this.db.run(`DELETE FROM Participate_Tournament WHERE id = ?`, [id]);
     }
-    // (email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar,CreatedAt,UpdatedAt)
+
+    // -------------------------------
+    // Users CRUD
+    // -------------------------------
+
     async createUsers(t) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
-        const result = await this.db.run(`INSERT INTO Users (email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar,CreatedAt,UpdatedAt)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, nowf, nowf);
-        return result.lastID;
+        let result = await this.db.get(`SELECT * FROM Users WHERE email = ?`, t.email);
+        if (!result) {
+            result = await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar)
+            VALUES (?,?, ?, ?, ?, ?, ?, ?)`, [t.email, t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar]);
+            return result.lastID;
+        }
+        return result.id;
     }
     async getUserss() {
         return this.db.all(`SELECT * FROM Users`);
     }
-    async getUsersById(id) {
-        return this.db.get(`SELECT * FROM Users WHERE id = ?`, id);
+    async getUserById(id) {
+        return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
+    }
+    async getUserByEmail(email) {
+        return this.db.get(`SELECT * FROM Users WHERE email =  ?`, [email]);
     }
     async updateUsers(id, u) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
         await this.db.run(`UPDATE Users 
              SET 
-             email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ?, UpdatedAt = ?
-             WHERE id = ?`, u.email, u.User_name, u.User_password, u.loggedIn, u.Auto_Match, u.isOnline, u.avatar, nowf, u.id);
+             email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
+             WHERE id = ?`, [u.email, u.User_name, u.User_password, u.loggedIn, u.Auto_Match, u.isOnline, u.avatar, u.id]);
     }
     async deleteUsers(id) {
-        await this.db.run(`DELETE FROM Users WHERE id = ?`, id);
+        await this.db.run(`DELETE FROM Users WHERE id = ?`, [id]);
     }
 }

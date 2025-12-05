@@ -11,6 +11,7 @@ import { useWebSocket } from "../hooks/useWebSocket";
 interface GameOnlineProps {
   player1Name: string;
   player2Name: string;
+  mode: number;
 }
 
 const GameOnline = () => {
@@ -18,7 +19,7 @@ const GameOnline = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const email = localStorage.getItem("email");
-  const { player1Name, player2Name } = location.state as GameOnlineProps;
+  const { player1Name, player2Name, mode } = location.state as GameOnlineProps;
   // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
   // const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
@@ -30,7 +31,10 @@ const GameOnline = () => {
     ws.send(JSON.stringify({
       type: "finished",
       email: email,
-      keys: { ArrowUp: false, ArrowDown: false }
+      tournement: false,
+      keys: { ArrowUp: false, ArrowDown: false },
+      mode: mode,
+      id: localStorage.getItem("email")
     }));
   };
 
@@ -122,8 +126,9 @@ const GameOnline = () => {
               player1Name={player1Name}
               player2Name={player2Name}
               ws={ws}
-              onGameEnd={(result) => send({ type: "gameEnd", result })}
-              maxScore={5}
+              mode={mode}
+            // onGameEnd={(result) => send({ type: "gameEnd", result })}
+            // maxScore={5}
             />
           )}
         </div>}

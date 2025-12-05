@@ -48,7 +48,10 @@ const MatchMacking = () => {
         ws.send(JSON.stringify({
             type: "register",
             email: email,
-            keys
+            tournement: false,
+            keys,
+            mode: mode,
+            id: localStorage.getItem("email")
         }));
     };
 
@@ -73,11 +76,12 @@ const MatchMacking = () => {
                     f.title === "Player 2" ? { ...f, title: vs || "Player 2" } : f
                 )
             );
-            if (data.count == mode)
+            if (data.count_players == mode)
                 navigate("/game-online", {
                     state: {
                         player1Name: data.player1Name,
                         player2Name: data.player2Name,
+                        mode: mode
                     }
                 });
         };
