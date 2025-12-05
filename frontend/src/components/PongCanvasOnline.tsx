@@ -255,7 +255,7 @@ export const PongCanvasOnline = ({
             canvas.scrollIntoView({ behavior: "smooth", block: "center" });
         }
         ws.send(JSON.stringify({
-            type: "reset",
+            type: "RESET",
             email: email,
             tournement: false,
             keys,
@@ -272,7 +272,7 @@ export const PongCanvasOnline = ({
             canvas.scrollIntoView({ behavior: "smooth", block: "center" });
         }
         ws.send(JSON.stringify({
-            type: "start",
+            type: "START",
             email: email,
             tournement: false,
             keys,
@@ -284,7 +284,7 @@ export const PongCanvasOnline = ({
     const sendMove = (direction) => {
         if (!ws || ws.readyState !== ws.OPEN)
             return;
-        ws.send(JSON.stringify({ type: "move", direction, email, keys, tournement: false, mode: mode, id: localStorage.getItem("email") }));
+        ws.send(JSON.stringify({ type: "MOVE", direction, email, keys, tournement: false, mode: mode, id: localStorage.getItem("email") }));
     };
 
     useEffect(() => {

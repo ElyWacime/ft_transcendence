@@ -144,10 +144,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     u.User_name = request.email;
     u.isOnline = true;
     u.Auto_Match = true;
-    if (request.type == "register") {
+    if (request.type == "REGISTER") {
       try {
         await dbcnx.createUsers(u);
-        console.log("createUsers Successfully");
+        // console.log("createUsers Successfully");
       }
       catch (e) {
         console.log("Error : createUsers", e);
@@ -155,7 +155,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
       try {
         m = await dbcnx.getMatchPlayable(u.id, request.mode);
-        console.log("getMatchPlayable Successfully");
+        // console.log("getMatchPlayable Successfully");
       }
       catch (e) {
         console.log("Error : getMatchPlayable ", e);
@@ -169,7 +169,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         if (!request.tournement) {
           try {
             await dbcnx.createMatch_not(m);
-            console.log("createMatch Successfully");
+            // console.log("createMatch Successfully");
           }
           catch (e) {
             console.log("Error : createMatch_not ", e);
@@ -179,7 +179,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         else {
           try {
             await dbcnx.createMatch(m);
-            console.log("createMatch Successfully");
+            // console.log("createMatch Successfully");
           }
           catch (e) { console.log("Error : createMatch ", e); console.log(m); }
         }
@@ -212,7 +212,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         }
         try {
           await dbcnx.updateMatch(m);
-          console.log("1updateMatch Successfully");
+          // console.log("1updateMatch Successfully");
         }
         catch (e) {
           console.log("1Error : updateMatch ", e);
@@ -222,7 +222,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
 
     }
-    else if (request.type == "reset") {
+    else if (request.type == "RESET") {
       m.Ball_x = 400;
       m.Ball_y = 300;
       m.Player1_x = 20;
@@ -246,7 +246,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       m.gameStatus = "PLAYING";
       try {
         await dbcnx.updateMatch(m);
-        console.log("2updateMatch Successfully");
+        // console.log("2updateMatch Successfully");
       }
       catch (e) {
         console.log("2Error : updateMatch ", e);
@@ -262,61 +262,70 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       m.gameStatus = "FINISHED";
       try {
         await dbcnx.updateMatch(m);
-        console.log("3updateMatch Successfully");
+        // console.log("3updateMatch Successfully");
       }
       catch (e) {
         console.log("3Error : updateMatch ", e);
         return;
       }
     }
-    else if (request.type == "move") {
+    else if (request.type == "MOVE") {
       try {
         m = await dbcnx.getMatchByPlayerID(u.id);
-        console.log("4getMatchById Successfully");
+        // console.log("4getMatchById Successfully");
       }
       catch (e) {
         console.log("4Error : getMatchById ", e);
         console.log(u.id);
       }
-      console.log("m ------------- >>>>>> ", m);
-      if (m.P1_Id == u.id) {
-        m.p1UPkey = request.keys.ArrowUp;
-        m.p1Downkey = request.keys.ArrowDown;
+      // console.log("m ------------- >>>>>> ", m);
+      if (m) {
+        if (m.P1_Id == u.id) {
+          m.p1UPkey = request.keys.ArrowUp;
+          m.p1Downkey = request.keys.ArrowDown;
+        }
+        else if (m.P2_Id == u.id) {
+          m.p2UPkey = request.keys.ArrowUp;
+          m.p2Downkey = request.keys.ArrowDown;
+        }
+        else if (m.P3_Id == u.id) {
+          m.p3UPkey = request.keys.ArrowUp;
+          m.p3Downkey = request.keys.ArrowDown;
+        }
+        else if (m.P4_Id == u.id) {
+          m.p4UPkey = request.keys.ArrowUp;
+          m.p4Downkey = request.keys.ArrowDown;
+        }
+        try {
+          await dbcnx.updateMatch(m);
+          // console.log("5updateMatch Successfully");
+        }
+        catch (e) {
+          console.log("5Error : updateMatch ", e);
+          console.log(m);
+        }
+
+        // console.log("game  === ", game);
       }
-      else if (m.P2_Id == u.id) {
-        m.p2UPkey = request.keys.ArrowUp;
-        m.p2Downkey = request.keys.ArrowDown;
-      }
-      else if (m.P3_Id == u.id) {
-        m.p3UPkey = request.keys.ArrowUp;
-        m.p3Downkey = request.keys.ArrowDown;
-      }
-      else if (m.P4_Id == u.id) {
-        m.p4UPkey = request.keys.ArrowUp;
-        m.p4Downkey = request.keys.ArrowDown;
-      }
-      try {
-        await dbcnx.updateMatch(m);
-        console.log("5updateMatch Successfully");
-      }
-      catch (e) {
-        console.log("5Error : updateMatch ", e);
-        console.log(m);
-      }
+      else
+        console.log("match not found ");
     }
 
-    game.id_Match = m.id;
-    game.P1_Id = m.P1_Id;
-    game.P2_Id = m.P2_Id;
-    game.P3_Id = m.P3_Id;
-    game.P4_Id = m.P4_Id;
-    game.gameStatus = m.gameStatus;
-    game.T_Id = m.T_Id;
-    game.count_players = m.count_players;
-    game.mode = m.mode;
-    console.log("game  === ", game);
+    if (m) {
+      game.id_Match = m.id;
+      game.P1_Id = m.P1_Id;
+      game.P2_Id = m.P2_Id;
+      game.P3_Id = m.P3_Id;
+      game.P4_Id = m.P4_Id;
+      game.gameStatus = m.gameStatus;
+      game.T_Id = m.T_Id;
+      game.count_players = m.count_players;
+      game.mode = m.mode;
+    }
+    else
+      console.log("game undefiend ");
     if (clients.size == 2) {
-      console.log("if (clients.size == 2)   === ");
+      // console.log("if (clients.size == 2)   === ");
       if (game.gameStatus != "PLAYING")
         game.gameStatus = "PLAYING";
       // for (const client of clients) {
@@ -324,7 +333,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       // }
       for (const [email, client] of clients) {
         {
-          console.log("client.send(JSON.stringify(game));  ===>", email);
+          // console.log("client.send(JSON.stringify(game));  ===>", email);
           client.send(JSON.stringify(game));
         }
       }

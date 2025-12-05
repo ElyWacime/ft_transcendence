@@ -29,7 +29,7 @@ const GameOnline = () => {
 
   const endGame = () => {
     ws.send(JSON.stringify({
-      type: "finished",
+      type: "FINISHED",
       email: email,
       tournement: false,
       keys: { ArrowUp: false, ArrowDown: false },
@@ -42,10 +42,10 @@ const GameOnline = () => {
     if (!ws) return;
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      if (data.gameStatus == "finished") {
+      if (data.gameStatus == "FINISHED") {
         // ws.close();
         endGame();
-        console.log("Match Finished try to navigate>>>>>>>");
+        console.log("Match FINISHED try to navigate>>>>>>>");
         navigate("/");
       }
     };

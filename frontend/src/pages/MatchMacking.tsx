@@ -46,7 +46,7 @@ const MatchMacking = () => {
 
     const SubscribeToGame = () => {
         ws.send(JSON.stringify({
-            type: "register",
+            type: "REGISTER",
             email: email,
             tournement: false,
             keys,
