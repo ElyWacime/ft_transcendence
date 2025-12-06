@@ -72,7 +72,8 @@ export class GameState {
         this.score2 = 0;
         this.player1Name = "";
         this.player2Name = "";
-
+        this.player3Name = "";
+        this.player4Name = "";
         this.p1UPkey = false;
         this.p1Downkey = false;
         this.p2UPkey = false;

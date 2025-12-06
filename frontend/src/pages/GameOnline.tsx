@@ -45,7 +45,7 @@ const GameOnline = () => {
       if (data.gameStatus == "FINISHED") {
         // ws.close();
         endGame();
-        console.log("Match FINISHED try to navigate>>>>>>>");
+        // console.log("Match FINISHED try to navigate>>>>>>>");
         navigate("/");
       }
     };

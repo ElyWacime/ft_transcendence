@@ -206,7 +206,6 @@ export const PongCanvasOnline = ({
             vss = data.player1Name;
             if (data.player1Name == Me)
                 vss = data.player2Name;
-            // console.log("Server says ===>>>>", data);
             setGameState((prev) => ({
                 ...prev,
                 count: data.count,
