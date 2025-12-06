@@ -100,7 +100,7 @@ export const PongCanvasOnline = ({
             height: 100
         },
         Mode: 2,
-        gameStatus: 'waiting'
+        gameStatus: 'waiting',
     });
 
     const draw = useCallback(() => {
@@ -206,8 +206,11 @@ export const PongCanvasOnline = ({
             vss = data.player1Name;
             if (data.player1Name == Me)
                 vss = data.player2Name;
+            console.log("Server says ===>>>>", data);
             setGameState((prev) => ({
                 ...prev,
+                count: data.count,
+                mode: data.mode,
                 ball: {
                     x: data.Ball_x,
                     y: data.Ball_y,

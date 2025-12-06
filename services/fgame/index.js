@@ -10,9 +10,12 @@ import { exit } from "process";
 
 
 let dbcnx = new SQLiteDB();
+const TICK_RATE = 10;
+const clients = new Map();
+const matches = new Map();
+const PADDLE_SPEED = 8;
+
 await dbcnx.connect();
-// let indx = await dbcnx.getUserss();
-// console.log(indx);
 
 // let gameState = {
 //   ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
@@ -32,67 +35,76 @@ await dbcnx.connect();
 //   p1keys: { ArrowUp: false, ArrowDown: false },
 //   p2keys: { ArrowUp: false, ArrowDown: false }
 // };
-
 // const email1 = "www@www.w";
 // const email2 = "qqqw@qqqw.q";
-// const clients = new Set();
-// const PADDLE_SPEED = 8;
 
-const TICK_RATE = 60;
-const clients = new Map();
 
-function tick() {
+function tick(m) {
   if (m.gameStatus !== "PLAYING") return;
-  m.ball.x += m.ball.dx;
-  m.ball.y += m.ball.dy;
-  if (m.ball.y - m.ball.radius <= 0 || m.ball.y + m.ball.radius >= m.height) {
-    m.ball.dy *= -1;
-    m.ball.y = Math.max(m.ball.radius, Math.min(m.height - m.ball.radius, m.ball.y));
+  m.Ball_x += m.Ball_dx;
+  m.Ball_y += m.Ball_dy;
+  if (m.Ball_y - m.Ball_radius <= 0 || m.Ball_y + m.Ball_radius >= m.height)
+  {
+    m.Ball_dy *= -1;
+    m.Ball_y = Math.max(m.Ball_radius, Math.min(m.height - m.Ball_radius, m.Ball_y));
   }
-  if (m.ball.x - m.ball.radius <= m.paddle1.x + m.sizePaddle.width) {
-    if (m.ball.y >= m.paddle1.y && m.ball.y <= m.paddle1.y + m.sizePaddle.height) {
-      m.ball.dx = Math.abs(m.ball.dx);
-      m.ball.dx *= 1.05;
+  if (m.Ball_x - m.Ball_radius <= m.Player1_x + m.sizePaddle_width)
+  {
+    if (m.Ball_y >= m.Player1_y && m.Ball_y <= m.Player1_y + m.sizePaddle_height) {
+      m.Ball_dx = Math.abs(m.Ball_dx);
+      m.Ball_dx *= 1.05;
     }
   }
-  if (m.ball.x + m.ball.radius >= m.paddle2.x) {
-    if (m.ball.y >= m.paddle2.y && m.ball.y <= m.paddle2.y + m.sizePaddle.height) {
-      m.ball.dx = -Math.abs(m.ball.dx);
-      m.ball.dx *= 1.05;
+  if (m.Ball_x + m.Ball_radius >= m.Player2_x) {
+    if (m.Ball_y >= m.Player2_y && m.Ball_y <= m.Player2_y + m.sizePaddle_height) {
+      m.Ball_dx = -Math.abs(m.Ball_dx);
+      m.Ball_dx *= 1.05;
     }
   }
-  if (m.p1keys.ArrowUp)
-    m.paddle1.y = Math.max(0, m.paddle1.y - PADDLE_SPEED);
-  else if (m.p1keys.ArrowDown)
-    m.paddle1.y = Math.min(m.height - m.sizePaddle.height, m.paddle1.y + PADDLE_SPEED);
-  if (m.p2keys.ArrowUp)
-    m.paddle2.y = Math.max(0, m.paddle2.y - PADDLE_SPEED);
-  else if (m.p2keys.ArrowDown)
-    m.paddle2.y = Math.min(m.height - m.sizePaddle.height, m.paddle2.y + PADDLE_SPEED);
-  if (m.ball.x < 0) {
+  if (m.p1UPkey)
+    m.Player1_y = Math.max(0, m.Player1_y - PADDLE_SPEED);
+  else if (m.p1Downkey)
+    m.Player1_y = Math.min(m.height - m.sizePaddle_height, m.Player1_y + PADDLE_SPEED);
+  if (m.p2UPkey)
+    m.Player2_y = Math.max(0, m.Player2_y - PADDLE_SPEED);
+  else if (m.p2Downkey)
+    m.Player2_y = Math.min(m.height - m.sizePaddle_height, m.Player2_y + PADDLE_SPEED);
+  if (m.P3_Id) {
+    if (m.p3UPkey)
+      m.player3_y = Math.max(0, m.player3_y - PADDLE_SPEED);
+    else if (m.p3Downkey)
+      m.player3_y = Math.min(m.height - m.sizePaddle_height, m.player3_y + PADDLE_SPEED);
+  }
+  if (m.P4_Id) {
+    if (m.p4UPkey)
+      m.player4_y = Math.max(0, m.player4_y - PADDLE_SPEED);
+    else if (m.p4Downkey)
+      m.player4_y = Math.min(m.height - m.sizePaddle_height, m.player4_y + PADDLE_SPEED);
+  }
+  if (m.Ball_x < 0) {
     m.score2 += 1;
-    resetBall(-1);
-  } else if (m.ball.x > m.width) {
+    resetBall(-1, m);
+  } else if (m.Ball_x > m.width) {
     m.score1 += 1;
-    resetBall(1);
+    resetBall(1, m);
   }
   if (m.score2 == 5 || m.score1 == 5)
     m.gameStatus = "finished";
 }
 
-function resetBall(direction = 1) {
-  gameState.ball.x = gameState.width / 2;
-  gameState.ball.y = gameState.height / 2;
-  gameState.ball.dx = 2 * direction;
-  gameState.ball.dy = 2;
+function resetBall(direction = 1, m) {
+  m.Ball_x = m.width / 2;
+  m.Ball_y = m.height / 2;
+  m.Ball_dx = 2 * direction;
+  m.Ball_dy = 2;
 }
 
 fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
-let game = new GameState();
-const matches = new Map();
+// let game = new GameState();
+
 // let gameState = {
 //   ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
 //   paddle1: { x: 20, y: 250 },
@@ -111,6 +123,7 @@ const matches = new Map();
 //   p1keys: { ArrowUp: false, ArrowDown: false },
 //   p2keys: { ArrowUp: false, ArrowDown: false }
 // };
+
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
   connection.on("message", async (msg) => {
@@ -146,6 +159,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       if (!m) {
         m = new Match();
         m.P1_Id = u.id;
+        m.player1Name = u.User_name;
         if (!request.tournement) {
           m.id = await dbcnx.createMatch_not(request.id);
           // console.log("createMatch_not Successfully");
@@ -159,11 +173,13 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       else {
         if (request.mode == 2) {
           m.P2_Id = u.id;
+          m.player2Name = u.User_name;
           m.count_players = 2;
         }
         else {
           if (m.P2_Id == null) {
             m.P2_Id = u.id;
+            m.player2Name = u.User_name;
             m.count_players = 2;
           }
           else if (m.P3_Id == null) {
@@ -191,7 +207,8 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           matches.set(m.id, ngame);
           await dbcnx.updateMatch(m);
           for (const [email, client] of clients) {
-            console.log("client.send(JSON.stringify(game));  ===>", email);
+            // console.log("client.send(JSON.stringify(game));  ===>", email);
+            // console.log("ngame.Player1_x, ngame.Player1_y  ===>", ngame.Player1_x, ngame.Player1_y);
             client.send(JSON.stringify(ngame));
           }
         }
@@ -249,31 +266,35 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     //   await dbcnx.updateMatch(m);
     //   // console.log("3updateMatch Successfully");
     // }
-    // else if (request.type == "MOVE") {
-    //   m = await dbcnx.getCurrentMatchByPlayerID(u.id);
-    //   let index = m.id;
-    //   if (m) {
-    //     if (m.P1_Id == u.id) {
-    //       m.p1UPkey = request.keys.ArrowUp;
-    //       m.p1Downkey = request.keys.ArrowDown;
-    //     }
-    //     else if (m.P2_Id == u.id) {
-    //       m.p2UPkey = request.keys.ArrowUp;
-    //       m.p2Downkey = request.keys.ArrowDown;
-    //     }
-    //     else if (m.P3_Id == u.id) {
-    //       m.p3UPkey = request.keys.ArrowUp;
-    //       m.p3Downkey = request.keys.ArrowDown;
-    //     }
-    //     else if (m.P4_Id == u.id) {
-    //       m.p4UPkey = request.keys.ArrowUp;
-    //       m.p4Downkey = request.keys.ArrowDown;
-    //     }
-    //     await dbcnx.updateMatch(m);
-    //   }
-    //   else
-    //     console.log("match not found ", u.id);
-    // }
+    else if (request.type == "MOVE") {
+      let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
+      // if (m) {
+      // console.log("m ====== >>> ", m);
+      // console.log("request.id ====== >>> ", request.id);
+      // console.log("matches ====== >>> ", matches);
+      // console.log("matches[m.id] ====== >>> ", matches.get(m.id));
+      if (matches.get(m.id).P1_Id == request.id) {
+        matches.get(m.id).p1UPkey = request.keys.ArrowUp;
+        matches.get(m.id).p1Downkey = request.keys.ArrowDown;
+      }
+      else if (matches.get(m.id).P2_Id == request.id) {
+        matches.get(m.id).p2UPkey = request.keys.ArrowUp;
+        matches.get(m.id).p2Downkey = request.keys.ArrowDown;
+      }
+      else if (matches.get(m.id).P3_Id && matches.get(m.id).P3_Id == request.id) {
+        matches.get(m.id).p3UPkey = request.keys.ArrowUp;
+        matches.get(m.id).p3Downkey = request.keys.ArrowDown;
+      }
+      else if (matches.get(m.id).P4_Id && matches.get(m.id).P4_Id == request.id) {
+        matches.get(m.id).p4UPkey = request.keys.ArrowUp;
+        matches.get(m.id).p4Downkey = request.keys.ArrowDown;
+      }
+      // console.log("request.keys ====== >>> ", request.keys);
+      // console.log("matches.get(m.id) ====== >>> ", matches.get(m.id));
+      // }
+      // else
+      //   console.log("match not found ", request.id, m);
+    }
 
     // let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
     // console.log("getCurrentMatchByPlayerID Successfully");
@@ -614,14 +635,18 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     // }
   });
 
-  // const interval = setInterval(() => {
-  //   if (clients.size == 0)
-  //     return;
-  //   // tick();
-  //   // connection.send(JSON.stringify(gameState));
-  // }, 1000 / TICK_RATE);
+  const interval = setInterval(() => {
+    if (clients.size == 0)
+      return;
+    for (const [id, match] of matches) {
+      tick(match);
+      // console.log(match);
+      connection.send(JSON.stringify(match));
+    }
+  }, 1000 / TICK_RATE);
+
   connection.on("close", () => {
-    // clients.delete(connection);
+    // get the match if finished delete it from matches
     for (const [email, client] of clients) {
       if (client == connection) {
         console.log("close old :", email);
@@ -629,7 +654,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         break;
       }
     }
-    // clearInterval(interval);
+    clearInterval(interval);
     console.log("Client disconnected. Total clients:", clients.size);
   });
 });

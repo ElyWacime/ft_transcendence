@@ -55,7 +55,10 @@ export class GameState {
         this.Ball_dx = 2;
         this.Ball_dy = 2;
         this.ball_radius = 8;
-
+        this.sizePaddle_width = 15;
+        this.sizePaddle_height = 100;
+        this.width = 800;
+        this.height = 600;
         this.Player1_x = 20;
         this.Player1_y = 250;
         this.Player2_x = 765;
@@ -67,7 +70,8 @@ export class GameState {
         this.Winner_Id = null;
         this.score1 = 0;
         this.score2 = 0;
-
+        this.player1Name = "";
+        this.player2Name = "";
 
         this.p1UPkey = false;
         this.p1Downkey = false;
@@ -167,7 +171,7 @@ export class SQLiteDB {
         gameStatus != 'FINISHED'
         ORDER BY CreatedAt DESC
         LIMIT 1;
-        `, [id]);
+        `, [id, id, id, id]);
     }
 
     async getLasttMatchByPlayerID(id) {
@@ -176,7 +180,7 @@ export class SQLiteDB {
         WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) 
         ORDER BY CreatedAt DESC
         LIMIT 1;
-        `, [id]);
+        `, [id, id, id, id]);
     }
     async updateMatch(m) {
         await this.db.run(`
