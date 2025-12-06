@@ -16,6 +16,63 @@ const matches = new Map();
 const PADDLE_SPEED = 8;
 
 await dbcnx.connect();
+// Collision with top/bottom
+// if (m.Ball_y + m.Ball_radius >= m.height) {
+//   m.Ball_dy = -m.Ball_dy;
+//   m.Ball_y = m.height - m.Ball_radius;
+// } else if (m.Ball_y - m.Ball_radius <= 0) {
+//   m.Ball_dy = -m.Ball_dy;
+//   m.Ball_y = m.Ball_radius;
+// }
+
+
+
+// Paddle collisions
+// if (
+//   m.Ball_x - m.Ball_radius <= m.Player1_x + m.sizePaddle_width &&
+//   m.Ball_x - m.Ball_radius >= m.Player1_x &&
+//   m.Ball_y + m.Ball_radius >= m.Player1_y &&
+//   m.Ball_y - m.Ball_radius <= m.Player1_y + m.sizePaddle_height &&
+//   m.Ball_dx < 0
+// ) {
+//   m.Ball_x = m.Player1_x + m.sizePaddle_width + m.Ball_radius;
+//   m.Ball_dx = -m.Ball_dx;
+// }
+
+// if (
+//   m.Ball_x + m.Ball_radius >= m.Player2_x &&
+//   m.Ball_x + m.Ball_radius <= m.Player2_x + m.sizePaddle_width &&
+//   m.Ball_y + m.Ball_radius >= m.Player2_y &&
+//   m.Ball_y - m.Ball_radius <= m.Player2_y + m.sizePaddle_height &&
+//   m.Ball_dx > 0
+// ) {
+//   m.Ball_x = m.Player2_x - m.Ball_radius;
+//   m.Ball_dx = -m.Ball_dx;
+// }
+
+// if (m.P3_Id &&
+//   m.Ball_x - m.Ball_radius <= m.Player3_x + m.sizePaddle_width &&
+//   m.Ball_x - m.Ball_radius >= m.Player3_x &&
+//   m.Ball_y + m.Ball_radius >= m.Player3_y &&
+//   m.Ball_y - m.Ball_radius <= m.Player3_y + m.sizePaddle_height &&
+//   m.Ball_dx < 0
+// ) {
+//   m.Ball_x = m.Player3_x + m.sizePaddle_width + m.Ball_radius;
+//   m.Ball_dx = -m.Ball_dx;
+// }
+
+// if (m.P4_Id &&
+//   m.Ball_x + m.Ball_radius >= m.Player4_x &&
+//   m.Ball_x + m.Ball_radius <= m.Player4_x + m.sizePaddle_width &&
+//   m.Ball_y + m.Ball_radius >= m.Player4_y &&
+//   m.Ball_y - m.Ball_radius <= m.Player4_y + m.sizePaddle_height &&
+//   m.Ball_dx > 0
+// ) {
+//   m.Ball_x = m.Player4_x - m.Ball_radius;
+//   m.Ball_dx = -m.Ball_dx;
+// }
+
+let max_Speed = 8;
 
 function tick(m) {
   if (m.gameStatus !== "PLAYING") return;
@@ -85,7 +142,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     const request = JSON.parse(msg);
     if (clients.has(request.email)) {
       try {
+        // console.log("try : ", request.email);
         if (clients.get(request.email) != connection) {
+          // console.log("close : ", request.email);
           clients.get(request.email).close();
         }
       }
