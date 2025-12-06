@@ -85,9 +85,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     const request = JSON.parse(msg);
     if (clients.has(request.email)) {
       try {
-        // console.log("try : ", request.email);
         if (clients.get(request.email) != connection) {
-          // console.log("close : ", request.email);
           clients.get(request.email).close();
         }
       }

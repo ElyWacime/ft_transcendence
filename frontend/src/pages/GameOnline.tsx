@@ -20,10 +20,7 @@ const GameOnline = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const email = localStorage.getItem("email");
   const { player1Name, player2Name, mode } = location.state as GameOnlineProps;
-  // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
-  // const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
-  // const player2 = location.state?.player2 || { alias: "Player 2" };
 
   const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
 
@@ -37,8 +34,6 @@ const GameOnline = () => {
       id: localStorage.getItem("email")
     }));
   };
-
-  let interval = null;
 
   useEffect(() => {
     if (!ws) return;

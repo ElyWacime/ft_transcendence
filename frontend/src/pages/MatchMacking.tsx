@@ -15,7 +15,7 @@ const MatchMacking = () => {
     const mode = searchParams.get("mode"); // "4"
     const email = localStorage.getItem("email");
     const [features, setFeatures] = useState(() => {
-        // Initial state based on mode and email
+
         return [
             {
                 icon: Users,
@@ -44,22 +44,8 @@ const MatchMacking = () => {
         ];
     });
 
-    // const SubscribeToGame = () => {
-    //     ws.send(JSON.stringify({
-    //         type: "REGISTER",
-    //         email: email,
-    //         tournement: false,
-    //         keys,
-    //         mode: mode,
-    //         id: localStorage.getItem("email")
-    //     }));
-    // };
     useEffect(() => {
         if (!ws || !isReady) return;
-
-        console.log("MOUNT >>>>>");
-
-        // 1. Register on mount
         ws.send(JSON.stringify({
             type: "REGISTER",
             email,
@@ -69,7 +55,6 @@ const MatchMacking = () => {
             id: email,
         }));
 
-        // 2. Handle messages
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
 
@@ -94,13 +79,8 @@ const MatchMacking = () => {
                 });
             }
         };
-
         ws.addEventListener("message", handleMessage);
-
-        // 3. Cleanup on unmount
         return () => {
-            console.log("UNMOUNT >>>>>");
-
             if (ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                     type: "DELETE",
@@ -111,76 +91,10 @@ const MatchMacking = () => {
                     id: email,
                 }));
             }
-
             ws.removeEventListener("message", handleMessage);
-
-            // Close after sending DELETE
             ws.close();
         };
     }, [ws, isReady]);
-
-    // useEffect(() => {
-    //     if (!ws)
-    //         return;
-    //     SubscribeToGame();
-    //     return () => {
-    //         ws.close();
-    //     };
-    // }, [isReady, ws]);
-
-    // useEffect(() => {
-    //     console.log("MOUNT >>>>> ");
-    //     return () => {
-    //         console.log("UNMOUNT >>>>> ");
-    //         if (ws)
-    //             ws.send(JSON.stringify({
-    //                 type: "DELETE",
-    //                 email: email,
-    //                 tournement: false,
-    //                 keys,
-    //                 mode: mode,
-    //                 id: localStorage.getItem("email")
-    //             }));
-
-    //     };
-    // }, []);
-
-    // useEffect(() => {
-    //     if (!ws) return;
-    //     const handleMessage = (event: MessageEvent) => {
-    //         const data = JSON.parse(event.data);
-    //         let vs = data.player2Name;
-    //         if (vs == email)
-    //             vs = data.player1Name;
-    //         setFeatures((prev) =>
-    //             prev.map((f) =>
-    //                 f.title === "Player 2" ? { ...f, title: vs || "Player 2" } : f
-    //             )
-    //         );
-    //         if (data.count_players == mode)
-    //             navigate("/game-online", {
-    //                 state: {
-    //                     player1Name: data.player1Name,
-    //                     player2Name: data.player2Name,
-    //                     mode: mode
-    //                 }
-    //             });
-    //     };
-    //     ws.addEventListener("message", handleMessage);
-    //     return () => {
-    //         console.log("Return >>>>> ");
-    //         if (ws)
-    //             ws.send(JSON.stringify({
-    //                 type: "DELETE2",
-    //                 email: email,
-    //                 tournement: false,
-    //                 keys,
-    //                 mode: mode,
-    //                 id: localStorage.getItem("email")
-    //             }));
-    //         ws.removeEventListener("message", handleMessage);
-    //     };
-    // }, [ws]);
 
     return (
         <>
