@@ -92,6 +92,7 @@ fastify.get('/', async (request, reply) => {
 });
 
 let game = new GameState();
+const matches = new Map();
 // let gameState = {
 //   ball: { x: 400, y: 300, dx: 2, dy: 2, radius: 8 },
 //   paddle1: { x: 20, y: 250 },
@@ -113,21 +114,12 @@ let game = new GameState();
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
   connection.on("message", async (msg) => {
-
     const request = JSON.parse(msg);
-
-    let u = await dbcnx.getUserByEmail(request.email);
-    if (!u)
-      u = new Users();
-    let m = await dbcnx.getMatchById(request.email);
-    if (!m)
-      m = new Match();
-    console.log("Client connected : ", request.email);
     if (clients.has(request.email)) {
       try {
-        console.log("try : ", request.email);
+        // console.log("try : ", request.email);
         if (clients.get(request.email) != connection) {
-          console.log("close : ", request.email);
+          // console.log("close : ", request.email);
           clients.get(request.email).close();
         }
       }
@@ -139,205 +131,430 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     clients.set(request.email, connection);
     console.log("Total clients : ", clients.size);
     console.log("request.type === ", request.type);
-    u.id = request.id; //to add in localstorage
-    u.email = request.email;
-    u.User_name = request.email;
-    u.isOnline = true;
-    u.Auto_Match = true;
+
     if (request.type == "REGISTER") {
-      try {
-        await dbcnx.createUsers(u);
-        // console.log("createUsers Successfully");
-      }
-      catch (e) {
-        console.log("Error : createUsers", e);
-        console.log(u);
-      }
-      try {
-        m = await dbcnx.getMatchPlayable(u.id, request.mode);
-        // console.log("getMatchPlayable Successfully");
-      }
-      catch (e) {
-        console.log("Error : getMatchPlayable ", e);
-        console.log(u, request.mode);
-        // return;
-      }
+      let u = new Users();
+      u.id = request.id; //to add in localstorage
+      u.email = request.email;
+      u.User_name = request.email;
+      u.isOnline = true;
+      u.Auto_Match = true;
+      await dbcnx.createUsers(u);
+      // console.log("createUsers Successfully");
+      let m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+      // console.log("getMatchPlayerCanJoin Successfully");
       if (!m) {
         m = new Match();
         m.P1_Id = u.id;
-        m.count_players = 1;
         if (!request.tournement) {
-          try {
-            await dbcnx.createMatch_not(m);
-            // console.log("createMatch Successfully");
-          }
-          catch (e) {
-            console.log("Error : createMatch_not ", e);
-            console.log(m);
-          }
+          m.id = await dbcnx.createMatch_not(request.id);
+          // console.log("createMatch_not Successfully");
         }
         else {
-          try {
-            await dbcnx.createMatch(m);
-            // console.log("createMatch Successfully");
-          }
-          catch (e) { console.log("Error : createMatch ", e); console.log(m); }
+          // m.T_Id = GET_TORNAMENTID_FROMDB
+          m.id = await dbcnx.createMatch(m);
+          // console.log("createMatch Successfully");
         }
       }
-
       else {
         if (request.mode == 2) {
           m.P2_Id = u.id;
           m.count_players = 2;
         }
         else {
-          if (m.P2_Id != request.id && m.P2_Id == 0) {
+          if (m.P2_Id == null) {
             m.P2_Id = u.id;
             m.count_players = 2;
           }
-          else if (m.P3_Id != request.id && m.P3_Id == 0) {
+          else if (m.P3_Id == null) {
             m.P3_Id = u.id;
             m.count_players = 3;
           }
-          else if (m.P4_Id != request.id && m.P4_Id == 0) {
+          else if (m.P4_Id == null) {
             m.P4_Id = u.id;
             m.count_players = 4;
           }
+          await dbcnx.updateMatch(m);
         }
         if (m.count_players == m.mode) {
-          {
-            m.gameStatus = "PLAYING";
-            // m.result = "PENDING";
+          m.gameStatus = "PLAYING";
+          let ngame = new GameState();
+          ngame.id_Match = m.id;
+          ngame.P1_Id = m.P1_Id;
+          ngame.P2_Id = m.P2_Id;
+          ngame.P3_Id = m.P3_Id;
+          ngame.P4_Id = m.P4_Id;
+          ngame.gameStatus = m.gameStatus;
+          ngame.T_Id = m.T_Id;
+          ngame.count_players = m.count_players;
+          ngame.mode = m.mode;
+          matches.set(m.id, ngame);
+          await dbcnx.updateMatch(m);
+          for (const [email, client] of clients) {
+            console.log("client.send(JSON.stringify(game));  ===>", email);
+            client.send(JSON.stringify(ngame));
           }
         }
-        try {
-          await dbcnx.updateMatch(m);
-          // console.log("1updateMatch Successfully");
-        }
-        catch (e) {
-          console.log("1Error : updateMatch ", e);
-          console.log(m);
-          // return;
-        }
-      }
 
-    }
-    else if (request.type == "RESET") {
-      m.Ball_x = 400;
-      m.Ball_y = 300;
-      m.Player1_x = 20;
-      m.Player3_x = 60;
-      m.Player4_x = 725;
-      m.Player2_x = 765;
-      m.Player1_y = 250;
-      m.Player2_y = 250;
-      m.Player3_y = 250;
-      m.Player4_y = 250;
-      m.score_player1 = 0;
-      m.score_player2 = 0;
-      // this.p1UPkey = false;
-      // this.p1Downkey = false;
-      // this.p2UPkey = false;
-      // this.p2Downkey = false;
-      // this.p3UPkey = false;
-      // this.p3Downkey = false;
-      // this.p4UPkey = false;
-      // this.p4Downkey = false;
-      m.gameStatus = "PLAYING";
-      try {
-        await dbcnx.updateMatch(m);
-        // console.log("2updateMatch Successfully");
-      }
-      catch (e) {
-        console.log("2Error : updateMatch ", e);
-        console.log(m);
-        return;
+        // console.log("1updateMatch Successfully");
       }
     }
-    else if (request.type == "FINISHED") {
-      if (m.score_player1 >= m.score_player2)
-        m.Winner_Id = m.P1_Id;
-      else
-        m.Winner_Id = m.P2_Id;
-      m.gameStatus = "FINISHED";
-      try {
-        await dbcnx.updateMatch(m);
-        // console.log("3updateMatch Successfully");
-      }
-      catch (e) {
-        console.log("3Error : updateMatch ", e);
-        return;
-      }
-    }
-    else if (request.type == "MOVE") {
-      try {
-        m = await dbcnx.getMatchByPlayerID(u.id);
-        // console.log("4getMatchById Successfully");
-      }
-      catch (e) {
-        console.log("4Error : getMatchById ", e);
-        console.log(u.id);
-      }
-      // console.log("m ------------- >>>>>> ", m);
-      if (m) {
-        if (m.P1_Id == u.id) {
-          m.p1UPkey = request.keys.ArrowUp;
-          m.p1Downkey = request.keys.ArrowDown;
-        }
-        else if (m.P2_Id == u.id) {
-          m.p2UPkey = request.keys.ArrowUp;
-          m.p2Downkey = request.keys.ArrowDown;
-        }
-        else if (m.P3_Id == u.id) {
-          m.p3UPkey = request.keys.ArrowUp;
-          m.p3Downkey = request.keys.ArrowDown;
-        }
-        else if (m.P4_Id == u.id) {
-          m.p4UPkey = request.keys.ArrowUp;
-          m.p4Downkey = request.keys.ArrowDown;
-        }
-        try {
-          await dbcnx.updateMatch(m);
-          // console.log("5updateMatch Successfully");
-        }
-        catch (e) {
-          console.log("5Error : updateMatch ", e);
-          console.log(m);
-        }
+    // else if (request.type == "RESET") {
+    //   let m = new Match();
+    //   let prev = await dbcnx.getLasttMatchByPlayerID(request.id);
+    //   let ngame = matches[prev[0].id];
+    //   matches.delete(prev[0].id);
+    //   m.id = await dbcnx.createMatch_not(request.id);
+    //   prev[0].id = m.id;
+    //   prev[0].CreatedAt = m.CreatedAt;
+    //   prev[0].score_player1 = 0;
+    //   prev[0].score_player2 = 0;
+    //   prev[0].Winner_Id = null;
+    //   prev[0].gameStatus = 'PLAYING';
+    //   await dbcnx.updateMatch(prev[0]);
+    //   // let m = await dbcnx.getLasttMatchByPlayerID(request.id);
+    //   ngame.gameStatus = 'PLAYING';
+    //   ngame.id_Match = m.id;
+    //   ngame.Ball_x = 400;
+    //   ngame.Ball_y = 300;
+    //   ngame.Ball_dx = 2;
+    //   ngame.Ball_dy = 2;
+    //   ngame.Player1_x = 20;
+    //   ngame.Player3_x = 60;
+    //   ngame.Player4_x = 725;
+    //   ngame.Player2_x = 765;
+    //   ngame.Player1_y = 250;
+    //   ngame.Player2_y = 250;
+    //   ngame.Player3_y = 250;
+    //   ngame.Player4_y = 250;
+    //   ngame.score_player1 = 0;
+    //   ngame.score_player2 = 0;
+    //   ngame.p1UPkey = false;
+    //   ngame.p1Downkey = false;
+    //   ngame.p2UPkey = false;
+    //   ngame.p2Downkey = false;
+    //   ngame.p3UPkey = false;
+    //   ngame.p3Downkey = false;
+    //   ngame.p4UPkey = false;
+    //   ngame.p4Downkey = false;
 
-        // console.log("game  === ", game);
-      }
-      else
-        console.log("match not found ");
-    }
+    // }
+    // else if (request.type == "FINISHED") {
+    //   m = await dbcnx.getCurrentMatchByPlayerID(u.id);
+    //   if (m.score_player1 >= m.score_player2)
+    //     m.Winner_Id = m.P1_Id;
+    //   else
+    //     m.Winner_Id = m.P2_Id;
+    //   m.gameStatus = "FINISHED";
+    //   await dbcnx.updateMatch(m);
+    //   // console.log("3updateMatch Successfully");
+    // }
+    // else if (request.type == "MOVE") {
+    //   m = await dbcnx.getCurrentMatchByPlayerID(u.id);
+    //   let index = m.id;
+    //   if (m) {
+    //     if (m.P1_Id == u.id) {
+    //       m.p1UPkey = request.keys.ArrowUp;
+    //       m.p1Downkey = request.keys.ArrowDown;
+    //     }
+    //     else if (m.P2_Id == u.id) {
+    //       m.p2UPkey = request.keys.ArrowUp;
+    //       m.p2Downkey = request.keys.ArrowDown;
+    //     }
+    //     else if (m.P3_Id == u.id) {
+    //       m.p3UPkey = request.keys.ArrowUp;
+    //       m.p3Downkey = request.keys.ArrowDown;
+    //     }
+    //     else if (m.P4_Id == u.id) {
+    //       m.p4UPkey = request.keys.ArrowUp;
+    //       m.p4Downkey = request.keys.ArrowDown;
+    //     }
+    //     await dbcnx.updateMatch(m);
+    //   }
+    //   else
+    //     console.log("match not found ", u.id);
+    // }
 
-    if (m) {
-      game.id_Match = m.id;
-      game.P1_Id = m.P1_Id;
-      game.P2_Id = m.P2_Id;
-      game.P3_Id = m.P3_Id;
-      game.P4_Id = m.P4_Id;
-      game.gameStatus = m.gameStatus;
-      game.T_Id = m.T_Id;
-      game.count_players = m.count_players;
-      game.mode = m.mode;
-    }
-    else
-      console.log("game undefiend ");
-    if (clients.size == 2) {
-      // console.log("if (clients.size == 2)   === ");
-      if (game.gameStatus != "PLAYING")
-        game.gameStatus = "PLAYING";
-      // for (const client of clients) {
-      //   client.send(JSON.stringify(gameState));
-      // }
-      for (const [email, client] of clients) {
-        {
-          // console.log("client.send(JSON.stringify(game));  ===>", email);
-          client.send(JSON.stringify(game));
-        }
-      }
-    }
+    // let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
+    // console.log("getCurrentMatchByPlayerID Successfully");
+    // console.log("m ==== ", m);
+    // if (m && matches[m.id]) {
+    //   matches[m.id].id_Match = m.id;
+    //   matches[m.id].P1_Id = m.P1_Id;
+    //   matches[m.id].P2_Id = m.P2_Id;
+    //   matches[m.id].P3_Id = m.P3_Id;
+    //   matches[m.id].P4_Id = m.P4_Id;
+    //   matches[m.id].gameStatus = m.gameStatus;
+    //   matches[m.id].T_Id = m.T_Id;
+    //   matches[m.id].count_players = m.count_players;
+    //   matches[m.id].mode = m.mode;
+    //   if (matches[m.id].count_players == matches[m.id].mode) {
+    //     if (matches[m.id].gameStatus != "PLAYING")
+    //       matches[m.id].gameStatus = "PLAYING";
+    //     for (const [email, client] of clients) {
+    //       {
+    //         console.log("client.send(JSON.stringify(game));  ===>", email);
+    //         client.send(JSON.stringify(game));
+    //       }
+    //     }
+    //   }
+    // }
+    // else
+    //   console.log("game undefiend ", request.id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ----------------------------------
+    // const request = JSON.parse(msg);
+
+    // let u = await dbcnx.getUserByEmail(request.email);
+    // if (!u)
+    //   u = new Users();
+    // let m = await dbcnx.getCurrentMatchByPlayerID(request.email);
+    // if (!m)
+    //   m = new Match();
+    // // console.log("Client connected : ", request.email);
+    // if (clients.has(request.email)) {
+    //   try {
+    //     // console.log("try : ", request.email);
+    //     if (clients.get(request.email) != connection) {
+    //       // console.log("close : ", request.email);
+    //       clients.get(request.email).close();
+    //     }
+    //   }
+    //   catch (e) {
+    //     console.log("error: ", request.email, e);
+
+    //   }
+    // }
+    // clients.set(request.email, connection);
+    // console.log("Total clients : ", clients.size);
+    // console.log("request.type === ", request.type);
+    // u.id = request.id; //to add in localstorage
+    // u.email = request.email;
+    // u.User_name = request.email;
+    // u.isOnline = true;
+    // u.Auto_Match = true;
+    // if (request.type == "REGISTER") {
+    //   try {
+    //     await dbcnx.createUsers(u);
+    //     // console.log("createUsers Successfully");
+    //   }
+    //   catch (e) {
+    //     console.log("Error : createUsers", e);
+    //     console.log(u);
+    //   }
+    //   try {
+    //     m = await dbcnx.getMatchPlayerCanJoin(u.id, request.mode);
+    //     // console.log("getMatchPlayable Successfully");
+    //   }
+    //   catch (e) {
+    //     console.log("Error : getMatchPlayerCanJoin ", e);
+    //     console.log(u, request.mode);
+    //     // return;
+    //   }
+    //   if (!m) {
+    //     m = new Match();
+    //     m.P1_Id = u.id;
+    //     m.count_players = 1;
+    //     if (!request.tournement) {
+    //       try {
+    //         await dbcnx.createMatch_not(m);
+    //         // console.log("createMatch Successfully");
+    //       }
+    //       catch (e) {
+    //         console.log("Error : createMatch_not ", e);
+    //         console.log(m);
+    //       }
+    //     }
+    //     else {
+    //       try {
+    //         // m.T_Id = GET_TORNAMENTID_FROMDB
+    //         await dbcnx.createMatch(m);
+    //         // console.log("createMatch Successfully");
+    //       }
+    //       catch (e) { console.log("Error : createMatch ", e); console.log(m); }
+    //     }
+    //   }
+    //   else {
+    //     if (request.mode == 2) {
+    //       m.P2_Id = u.id;
+    //       m.count_players = 2;
+    //     }
+    //     else {
+    //       if (m.P2_Id == null) {
+    //         m.P2_Id = u.id;
+    //         m.count_players = 2;
+    //       }
+    //       else if (m.P3_Id == null) {
+    //         m.P3_Id = u.id;
+    //         m.count_players = 3;
+    //       }
+    //       else if (m.P4_Id == null) {
+    //         m.P4_Id = u.id;
+    //         m.count_players = 4;
+    //       }
+    //     }
+    //     if (m.count_players == m.mode) {
+    //       {
+    //         m.gameStatus = "PLAYING";
+    //         // m.result = "PENDING";
+    //       }
+    //     }
+    //     try {
+    //       await dbcnx.updateMatch(m);
+    //       // console.log("1updateMatch Successfully");
+    //     }
+    //     catch (e) {
+    //       console.log("1Error : updateMatch ", e);
+    //       console.log(m);
+    //       // return;
+    //     }
+    //   }
+
+    // }
+    // else if (request.type == "RESET") {
+    //   m.Ball_x = 400;
+    //   m.Ball_y = 300;
+    //   m.Player1_x = 20;
+    //   m.Player3_x = 60;
+    //   m.Player4_x = 725;
+    //   m.Player2_x = 765;
+    //   m.Player1_y = 250;
+    //   m.Player2_y = 250;
+    //   m.Player3_y = 250;
+    //   m.Player4_y = 250;
+    //   m.score_player1 = 0;
+    //   m.score_player2 = 0;
+    //   // this.p1UPkey = false;
+    //   // this.p1Downkey = false;
+    //   // this.p2UPkey = false;
+    //   // this.p2Downkey = false;
+    //   // this.p3UPkey = false;
+    //   // this.p3Downkey = false;
+    //   // this.p4UPkey = false;
+    //   // this.p4Downkey = false;
+    //   m.gameStatus = "PLAYING";
+    //   try {
+    //     await dbcnx.updateMatch(m);
+    //     // console.log("2updateMatch Successfully");
+    //   }
+    //   catch (e) {
+    //     console.log("2Error : updateMatch ", e);
+    //     console.log(m);
+    //     return;
+    //   }
+    // }
+    // else if (request.type == "FINISHED") {
+    //   try { m = await dbcnx.getCurrentMatchByPlayerID(u.id); }
+    //   catch (e) { console.log("Error :", e, u.id) }
+    //   if (m.score_player1 >= m.score_player2)
+    //     m.Winner_Id = m.P1_Id;
+    //   else
+    //     m.Winner_Id = m.P2_Id;
+    //   m.gameStatus = "FINISHED";
+    //   try {
+    //     await dbcnx.updateMatch(m);
+    //     // console.log("3updateMatch Successfully");
+    //   }
+    //   catch (e) {
+    //     console.log("3Error : updateMatch ", e);
+    //     return;
+    //   }
+    // }
+    // else if (request.type == "MOVE") {
+    //   try { m = await dbcnx.getCurrentMatchByPlayerID(u.id); }
+    //   catch (e) { console.log("Error :", e, u.id) }
+    //   // console.log("4getMatchById Successfully");
+    //   // }
+    //   // catch (e) {
+    //   //   console.log("4Error : getMatchById ", e);
+    //   //   console.log(u.id);
+    //   // }
+    //   // console.log("m ------------- >>>>>> ", m);
+    //   if (m) {
+    //     if (m.P1_Id == u.id) {
+    //       m.p1UPkey = request.keys.ArrowUp;
+    //       m.p1Downkey = request.keys.ArrowDown;
+    //     }
+    //     else if (m.P2_Id == u.id) {
+    //       m.p2UPkey = request.keys.ArrowUp;
+    //       m.p2Downkey = request.keys.ArrowDown;
+    //     }
+    //     else if (m.P3_Id == u.id) {
+    //       m.p3UPkey = request.keys.ArrowUp;
+    //       m.p3Downkey = request.keys.ArrowDown;
+    //     }
+    //     else if (m.P4_Id == u.id) {
+    //       m.p4UPkey = request.keys.ArrowUp;
+    //       m.p4Downkey = request.keys.ArrowDown;
+    //     }
+    //     try {
+    //       await dbcnx.updateMatch(m);
+    //       // console.log("5updateMatch Successfully");
+    //     }
+    //     catch (e) {
+    //       console.log("5Error : updateMatch ", e);
+    //       console.log(m);
+    //     }
+
+    //     // console.log("game  === ", game);
+    //   }
+    //   else
+    //     console.log("match not found ", u.id);
+    // }
+    // await dbcnx.updateMatch(m);
+    // try { m = await dbcnx.getCurrentMatchByPlayerID(u.id); }
+    // catch (e) { console.log("Error :", e, u.id) }
+    // if (m) {
+    //   game.id_Match = m.id;
+    //   game.P1_Id = m.P1_Id;
+    //   game.P2_Id = m.P2_Id;
+    //   game.P3_Id = m.P3_Id;
+    //   game.P4_Id = m.P4_Id;
+    //   game.gameStatus = m.gameStatus;
+    //   game.T_Id = m.T_Id;
+    //   game.count_players = m.count_players;
+    //   game.mode = m.mode;
+    // }
+    // else
+    //   console.log("game undefiend ", u.id);
+    // if (game.count_players == game.mode) {
+    //   // console.log("if (clients.size == 2)   === ");
+    //   if (game.gameStatus != "PLAYING")
+    //     game.gameStatus = "PLAYING";
+    //   // for (const client of clients) {
+    //   //   client.send(JSON.stringify(gameState));
+    //   // }
+    //   for (const [email, client] of clients) {
+    //     {
+    //       console.log("client.send(JSON.stringify(game));  ===>", email);
+    //       client.send(JSON.stringify(game));
+    //     }
+    //   }
+    // }
+
+
+
+
+    // *********************************
     // // "insert into match values ()"
     // if (request.type == "register") {
     //   if (request.email == email1 && gameState.player1Name == "") {

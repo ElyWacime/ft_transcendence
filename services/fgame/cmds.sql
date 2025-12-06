@@ -1,5 +1,9 @@
 .headers ON;
 .mode column;
+
+SELECT * FROM Match;
+SELECT * FROM Tournament;
+SELECT * FROM Participate_Tournament;
 SELECT * FROM Match;
 INSERT INTO Users(email, User_name, User_password) VALUES ('1s@s.s','1sss','sss');
 INSERT INTO Users(email, User_name, User_password) VALUES ('2qs@s.s','2qsss','qsss');

@@ -45,7 +45,7 @@ export class GameState {
         this.P2_Id = null;
         this.P3_Id = null;
         this.P4_Id = null;
-        this.gameStatus = "WAITING";
+        this.gameStatus = "PENDING";
         this.T_Id = null;
         this.count_players = 1;
         this.mode = 2;
@@ -83,7 +83,7 @@ export class GameState {
 export class Match {
     constructor() {
         this.id = 0;
-        this.P1_Id = 0;
+        this.P1_Id = null;
         this.P2_Id = null;
         this.P3_Id = null;
         this.P4_Id = null;
@@ -92,7 +92,7 @@ export class Match {
         this.mode = 2;
         this.count_players = 1;
         this.CreatedAt = new Date();
-        this.gameStatus = "WAITING";
+        this.gameStatus = "PENDING";
         this.Winner_Id = null;
         this.T_Id = null;
     }
@@ -142,8 +142,8 @@ export class SQLiteDB {
         const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id) VALUES (?, ?)`, [m.P1_Id, m.T_Id]);
         return result.lastID;
     }
-    async createMatch_not(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id) VALUES (?)`, [m.P1_Id]);
+    async createMatch_not(P1_Id) {
+        const result = await this.db.run(`INSERT INTO Match (P1_Id) VALUES (?)`, [P1_Id]);
         return result.lastID;
     }
     async getMatches() {
@@ -152,28 +152,32 @@ export class SQLiteDB {
     async getMatchById(id) {
         return this.db.get(`SELECT * FROM Match WHERE id = ?`, [id]);
     }
-    async getMatchPlayable(id, mode) {
+    async getMatchPlayerCanJoin(mode) {
         return this.db.get(`SELECT * FROM Match   
                             WHERE mode = ? and   
                             count_players <  mode   and 
-                            gameStatus = 'PENDING' and  
-                            (P1_Id != ?) and 
-                            (P2_Id != ? or P2_Id IS NULL) and 
-                            (P3_Id != ? or P3_Id IS NULL)  and 
-                            (P4_Id != ? or P4_Id IS NULL) 
-                            LIMIT 1;`, [mode, id, id, id, id]);
+                            gameStatus = 'PENDING'  
+                            LIMIT 1;`, [mode]);
     }
 
-    async getMatchByPlayerID(id) {
+    async getCurrentMatchByPlayerID(id) {
         return this.db.get(`SELECT *
         FROM Match
         WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
-        gameStatus = 'PLAYING' OR gameStatus = 'PENDING'
+        gameStatus != 'FINISHED'
         ORDER BY CreatedAt DESC
         LIMIT 1;
         `, [id]);
     }
 
+    async getLasttMatchByPlayerID(id) {
+        return this.db.get(`SELECT *
+        FROM Match
+        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) 
+        ORDER BY CreatedAt DESC
+        LIMIT 1;
+        `, [id]);
+    }
     async updateMatch(m) {
         await this.db.run(`
             UPDATE Match SET
