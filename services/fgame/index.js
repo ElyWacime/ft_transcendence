@@ -104,62 +104,67 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       u.isOnline = true;
       u.Auto_Match = true;
       await dbcnx.createUsers(u);
-      let m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+      let m = await dbcnx.getOngoingMatchByPlayerID(request.id, request.mode);
       if (!m) {
-        m = new Match();
-        m.P1_Id = u.id;
-        m.player1Name = u.User_name;
-        if (!request.tournement)
-          m.id = await dbcnx.createMatch_not(request.id);
-        else {
-          // m.T_Id = GET_TORNAMENTID_FROMDB
-          m.id = await dbcnx.createMatch(m);
-        }
-      }
-      else {
-        if (request.mode == 2) {
-          m.P2_Id = u.id;
-          m.player2Name = u.User_name;
-          m.count_players = 2;
+        m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+        if (!m) {
+          m = new Match();
+          m.P1_Id = u.id;
+          m.player1Name = u.User_name;
+          if (!request.tournement)
+            m.id = await dbcnx.createMatch_not(request.id);
+          else {
+            // m.T_Id = GET_TORNAMENTID_FROMDB
+            m.id = await dbcnx.createMatch(m);
+          }
         }
         else {
-          if (m.P2_Id == null) {
+          if (request.mode == 2) {
             m.P2_Id = u.id;
             m.player2Name = u.User_name;
             m.count_players = 2;
           }
-          else if (m.P3_Id == null) {
-            m.P3_Id = u.id;
-            m.player3Name = u.User_name;
-            m.count_players = 3;
+          else {
+            if (m.P2_Id == null) {
+              m.P2_Id = u.id;
+              m.player2Name = u.User_name;
+              m.count_players = 2;
+            }
+            else if (m.P3_Id == null) {
+              m.P3_Id = u.id;
+              m.player3Name = u.User_name;
+              m.count_players = 3;
+            }
+            else if (m.P4_Id == null) {
+              m.P4_Id = u.id;
+              m.player4Name = u.User_name;
+              m.count_players = 4;
+            }
+            await dbcnx.updateMatch(m);
           }
-          else if (m.P4_Id == null) {
-            m.P4_Id = u.id;
-            m.player4Name = u.User_name;
-            m.count_players = 4;
+          if (m.count_players == m.mode) {
+            m.gameStatus = "PLAYING";
+            let ngame = new GameState();
+            ngame.id_Match = m.id;
+            ngame.P1_Id = m.P1_Id;
+            ngame.P2_Id = m.P2_Id;
+            ngame.P3_Id = m.P3_Id;
+            ngame.P4_Id = m.P4_Id;
+            ngame.player1Name = m.P1_Id;
+            ngame.player2Name = m.P2_Id;
+            ngame.player3Name = m.P3_Id;
+            ngame.player4Name = m.P4_Id;
+            ngame.gameStatus = m.gameStatus;
+            ngame.T_Id = m.T_Id;
+            ngame.count_players = m.count_players;
+            ngame.mode = m.mode;
+            matches.set(m.id, ngame);
+            await dbcnx.updateMatch(m);
           }
-          await dbcnx.updateMatch(m);
-        }
-        if (m.count_players == m.mode) {
-          m.gameStatus = "PLAYING";
-          let ngame = new GameState();
-          ngame.id_Match = m.id;
-          ngame.P1_Id = m.P1_Id;
-          ngame.P2_Id = m.P2_Id;
-          ngame.P3_Id = m.P3_Id;
-          ngame.P4_Id = m.P4_Id;
-          ngame.player1Name = m.P1_Id;
-          ngame.player2Name = m.P2_Id;
-          ngame.player3Name = m.P3_Id;
-          ngame.player4Name = m.P4_Id;
-          ngame.gameStatus = m.gameStatus;
-          ngame.T_Id = m.T_Id;
-          ngame.count_players = m.count_players;
-          ngame.mode = m.mode;
-          matches.set(m.id, ngame);
-          await dbcnx.updateMatch(m);
         }
       }
+      else
+        console.log("Player in Match ", request.id);
     }
     else if (request.type == "MOVE") {
       let m = await dbcnx.getCurrentMatchByPlayerID(request.id);

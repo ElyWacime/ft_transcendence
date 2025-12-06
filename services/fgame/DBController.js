@@ -174,6 +174,16 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
+    async getOngoingMatchByPlayerID(id, mode) {
+        return this.db.get(`SELECT *
+        FROM Match
+        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
+        gameStatus != 'FINISHED' and 
+        mode = ?
+        ORDER BY CreatedAt DESC
+        LIMIT 1;
+        `, [id, id, id, id, mode]);
+    }
 
     async getLasttMatchByPlayerID(id) {
         return this.db.get(`SELECT *

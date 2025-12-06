@@ -38,6 +38,8 @@ const GameOnline = () => {
     }));
   };
 
+  let interval = null;
+
   useEffect(() => {
     if (!ws) return;
     const handleMessage = (event: MessageEvent) => {
@@ -45,7 +47,7 @@ const GameOnline = () => {
       if (data.gameStatus == "FINISHED") {
         // ws.close();
         endGame();
-        // console.log("Match FINISHED try to navigate>>>>>>>");
+        console.log("Match FINISHED try to navigate>>>>>>>");
         navigate("/");
       }
     };
