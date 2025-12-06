@@ -87,7 +87,7 @@ function tick(m) {
     resetBall(1, m);
   }
   if (m.score2 == 5 || m.score1 == 5)
-    m.gameStatus = "finished";
+    m.gameStatus = "FINISHED";
 }
 
 function resetBall(direction = 1, m) {
@@ -208,6 +208,26 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         // console.log("1updateMatch Successfully");
       }
     }
+    else if (request.type == "MOVE") {
+      let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
+      let match = matches.get(m.id);
+      if (match.P1_Id == request.id) {
+        match.p1UPkey = request.keys.ArrowUp;
+        match.p1Downkey = request.keys.ArrowDown;
+      }
+      else if (match.P2_Id == request.id) {
+        match.p2UPkey = request.keys.ArrowUp;
+        match.p2Downkey = request.keys.ArrowDown;
+      }
+      else if (match.P3_Id && match.P3_Id == request.id) {
+        match.p3UPkey = request.keys.ArrowUp;
+        match.p3Downkey = request.keys.ArrowDown;
+      }
+      else if (match.P4_Id && match.P4_Id == request.id) {
+        match.p4UPkey = request.keys.ArrowUp;
+        match.p4Downkey = request.keys.ArrowDown;
+      }
+    }
     // else if (request.type == "RESET") {
     //   let m = new Match();
     //   let prev = await dbcnx.getLasttMatchByPlayerID(request.id);
@@ -248,35 +268,18 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     //   ngame.p4Downkey = false;
 
     // }
-    // else if (request.type == "FINISHED") {
-    //   m = await dbcnx.getCurrentMatchByPlayerID(u.id);
-    //   if (m.score_player1 >= m.score_player2)
-    //     m.Winner_Id = m.P1_Id;
-    //   else
-    //     m.Winner_Id = m.P2_Id;
-    //   m.gameStatus = "FINISHED";
-    //   await dbcnx.updateMatch(m);
-    //   // console.log("3updateMatch Successfully");
-    // }
-    else if (request.type == "MOVE") {
-      let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
-      if (matches.get(m.id).P1_Id == request.id) {
-        matches.get(m.id).p1UPkey = request.keys.ArrowUp;
-        matches.get(m.id).p1Downkey = request.keys.ArrowDown;
-      }
-      else if (matches.get(m.id).P2_Id == request.id) {
-        matches.get(m.id).p2UPkey = request.keys.ArrowUp;
-        matches.get(m.id).p2Downkey = request.keys.ArrowDown;
-      }
-      else if (matches.get(m.id).P3_Id && matches.get(m.id).P3_Id == request.id) {
-        matches.get(m.id).p3UPkey = request.keys.ArrowUp;
-        matches.get(m.id).p3Downkey = request.keys.ArrowDown;
-      }
-      else if (matches.get(m.id).P4_Id && matches.get(m.id).P4_Id == request.id) {
-        matches.get(m.id).p4UPkey = request.keys.ArrowUp;
-        matches.get(m.id).p4Downkey = request.keys.ArrowDown;
-      }
+    else if (request.type == "FINISHED") {
+      m = await dbcnx.getCurrentMatchByPlayerID(request.id);
+      if (m.score_player1 >= m.score_player2)
+        m.Winner_Id = m.P1_Id;
+      else
+        m.Winner_Id = m.P2_Id;
+      m.gameStatus = "FINISHED";
+      await dbcnx.updateMatch(m);
+      matches.delete(m.id);
+      // console.log("3updateMatch Successfully");
     }
+
 
     // let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
     // console.log("getCurrentMatchByPlayerID Successfully");
@@ -616,14 +619,27 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     //   }
     // }
   });
+  function sendtoplayer(id, data) {
+    if (id) {
+      let socket = (clients.get(id));
+      if (socket && socket.readyState === 1)
+        socket.send(data);
+    }
+  }
 
   const interval = setInterval(() => {
     if (clients.size == 0)
       return;
     for (const [id, match] of matches) {
       tick(match);
-      // console.log(match);
-      connection.send(JSON.stringify(match));
+      // if (match.gameStatus != 'FINISHED')
+      {
+        let data = JSON.stringify(match);
+        sendtoplayer(match.P1_Id, data);
+        sendtoplayer(match.P2_Id, data);
+        sendtoplayer(match.P3_Id, data);
+        sendtoplayer(match.P4_Id, data);
+      }
     }
   }, 1000 / TICK_RATE);
 

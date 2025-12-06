@@ -353,7 +353,7 @@ export const PongCanvasOnline = ({
               Start Game
             </Button>
           )} */}
-                    {gameState.gameStatus == 'finished' && < Button onClick={resettGame} className="px-2 py-1 text-sm border border-border flex items-center">
+                    {gameState.gameStatus == 'FINISHED' && < Button onClick={resettGame} className="px-2 py-1 text-sm border border-border flex items-center">
                         <RotateCcw className="w-4 h-4 mr-2" />
                         Reset
                     </Button>

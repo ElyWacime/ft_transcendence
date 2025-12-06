@@ -247,7 +247,7 @@ export const PongCanvas = ({
     }
     // Check game end
     if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
-      newState.gameStatus = 'finished';
+      newState.gameStatus = 'FINISHED';
       if (onGameEnd) {
         onGameEnd(newState.score.player1, newState.score.player2);
         lastTimeRef.current = null;
