@@ -95,6 +95,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         console.log("error: ", request.email, e);
       }
     }
+    console.log("request.type ==== ", request.type);
     clients.set(request.email, connection);
     if (request.type == "REGISTER") {
       let u = new Users();
@@ -200,6 +201,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       else
         console.log("getFinishedMatchByPlayerID not Found");
     }
+    else if (request.type == "DELETE") {
+      await dbcnx.deletePendingMatchByPlayerID(request.id);
+    }
   });
   function sendtoplayer(id, data) {
     if (id) {
@@ -225,7 +229,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     // get the match if finished delete it from matches else leave it 
     for (const [email, client] of clients) {
       if (client == connection) {
-        console.log("close old :", email);
+        // console.log("close old :", email);
         clients.delete(email);
         break;
       }

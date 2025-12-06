@@ -174,6 +174,12 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
+    async deletePendingMatchByPlayerID(id) {
+        return this.db.get(`DELETE
+        FROM Match
+        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
+        gameStatus = 'PENDING';`, [id, id, id, id]);
+    }
     async getOngoingMatchByPlayerID(id, mode) {
         return this.db.get(`SELECT *
         FROM Match
