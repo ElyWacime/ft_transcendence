@@ -10,7 +10,7 @@ import { exit } from "process";
 
 
 let dbcnx = new SQLiteDB();
-const TICK_RATE = 10;
+const TICK_RATE = 60;
 const clients = new Map();
 const matches = new Map();
 const PADDLE_SPEED = 8;
@@ -43,19 +43,17 @@ function tick(m) {
   if (m.gameStatus !== "PLAYING") return;
   m.Ball_x += m.Ball_dx;
   m.Ball_y += m.Ball_dy;
-  if (m.Ball_y - m.Ball_radius <= 0 || m.Ball_y + m.Ball_radius >= m.height)
-  {
+  if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
     m.Ball_dy *= -1;
-    m.Ball_y = Math.max(m.Ball_radius, Math.min(m.height - m.Ball_radius, m.Ball_y));
+    m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
   }
-  if (m.Ball_x - m.Ball_radius <= m.Player1_x + m.sizePaddle_width)
-  {
+  if (m.Ball_x - m.ball_radius <= m.Player1_x + m.sizePaddle_width) {
     if (m.Ball_y >= m.Player1_y && m.Ball_y <= m.Player1_y + m.sizePaddle_height) {
       m.Ball_dx = Math.abs(m.Ball_dx);
       m.Ball_dx *= 1.05;
     }
   }
-  if (m.Ball_x + m.Ball_radius >= m.Player2_x) {
+  if (m.Ball_x + m.ball_radius >= m.Player2_x) {
     if (m.Ball_y >= m.Player2_y && m.Ball_y <= m.Player2_y + m.sizePaddle_height) {
       m.Ball_dx = -Math.abs(m.Ball_dx);
       m.Ball_dx *= 1.05;
@@ -138,12 +136,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
       catch (e) {
         console.log("error: ", request.email, e);
-
       }
     }
     clients.set(request.email, connection);
-    console.log("Total clients : ", clients.size);
-    console.log("request.type === ", request.type);
+    // console.log("Total clients : ", clients.size);
+    // console.log("request.type === ", request.type);
 
     if (request.type == "REGISTER") {
       let u = new Users();
@@ -206,11 +203,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           ngame.mode = m.mode;
           matches.set(m.id, ngame);
           await dbcnx.updateMatch(m);
-          for (const [email, client] of clients) {
-            // console.log("client.send(JSON.stringify(game));  ===>", email);
-            // console.log("ngame.Player1_x, ngame.Player1_y  ===>", ngame.Player1_x, ngame.Player1_y);
-            client.send(JSON.stringify(ngame));
-          }
         }
 
         // console.log("1updateMatch Successfully");
@@ -268,11 +260,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     // }
     else if (request.type == "MOVE") {
       let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
-      // if (m) {
-      // console.log("m ====== >>> ", m);
-      // console.log("request.id ====== >>> ", request.id);
-      // console.log("matches ====== >>> ", matches);
-      // console.log("matches[m.id] ====== >>> ", matches.get(m.id));
       if (matches.get(m.id).P1_Id == request.id) {
         matches.get(m.id).p1UPkey = request.keys.ArrowUp;
         matches.get(m.id).p1Downkey = request.keys.ArrowDown;
@@ -289,11 +276,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         matches.get(m.id).p4UPkey = request.keys.ArrowUp;
         matches.get(m.id).p4Downkey = request.keys.ArrowDown;
       }
-      // console.log("request.keys ====== >>> ", request.keys);
-      // console.log("matches.get(m.id) ====== >>> ", matches.get(m.id));
-      // }
-      // else
-      //   console.log("match not found ", request.id, m);
     }
 
     // let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
