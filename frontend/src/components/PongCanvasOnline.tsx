@@ -157,7 +157,7 @@ export const PongCanvasOnline = ({
 
     // *******
     useEffect(() => {
-        if (gameState.gameStatus === "playing") {
+        if (gameState.gameStatus === "PLAYING") {
             animationRef.current = requestAnimationFrame(gameLoop);
         } else if (animationRef.current) {
             cancelAnimationFrame(animationRef.current);
@@ -173,8 +173,8 @@ export const PongCanvasOnline = ({
             const target = e.target as HTMLElement | null;
             if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
 
-            // While playing, prevent ArrowUp/ArrowDown from scrolling the page
-            if (gameState.gameStatus === 'playing' && (e.code === 'ArrowUp' || e.code === 'ArrowDown')) {
+            // While PLAYING, prevent ArrowUp/ArrowDown from scrolling the page
+            if (gameState.gameStatus === 'PLAYING' && (e.code === 'ArrowUp' || e.code === 'ArrowDown')) {
                 e.preventDefault();
             }
 
@@ -206,7 +206,7 @@ export const PongCanvasOnline = ({
             vss = data.player1Name;
             if (data.player1Name == Me)
                 vss = data.player2Name;
-            console.log("Server says ===>>>>", data);
+            // console.log("Server says ===>>>>", data);
             setGameState((prev) => ({
                 ...prev,
                 count: data.count,

@@ -141,7 +141,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     clients.set(request.email, connection);
     // console.log("Total clients : ", clients.size);
     // console.log("request.type === ", request.type);
-
     if (request.type == "REGISTER") {
       let u = new Users();
       u.id = request.id; //to add in localstorage
@@ -228,6 +227,20 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         match.p4Downkey = request.keys.ArrowDown;
       }
     }
+    else if (request.type == "FINISHED") {
+      let m = await dbcnx.getFinishedMatchByPlayerID(request.id);
+      if (m) {
+        if (m.score_player1 >= m.score_player2)
+          m.Winner_Id = m.P1_Id;
+        else
+          m.Winner_Id = m.P2_Id;
+        m.gameStatus = "FINISHED";
+        await dbcnx.updateMatch(m);
+        matches.delete(m.id);
+      }
+      else
+        console.log("getFinishedMatchByPlayerID not Found");
+    }
     // else if (request.type == "RESET") {
     //   let m = new Match();
     //   let prev = await dbcnx.getLasttMatchByPlayerID(request.id);
@@ -268,19 +281,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     //   ngame.p4Downkey = false;
 
     // }
-    else if (request.type == "FINISHED") {
-      m = await dbcnx.getCurrentMatchByPlayerID(request.id);
-      if (m.score_player1 >= m.score_player2)
-        m.Winner_Id = m.P1_Id;
-      else
-        m.Winner_Id = m.P2_Id;
-      m.gameStatus = "FINISHED";
-      await dbcnx.updateMatch(m);
-      matches.delete(m.id);
-      // console.log("3updateMatch Successfully");
-    }
-
-
     // let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
     // console.log("getCurrentMatchByPlayerID Successfully");
     // console.log("m ==== ", m);

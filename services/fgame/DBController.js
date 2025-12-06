@@ -182,6 +182,14 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
+    async getFinishedMatchByPlayerID(id) {
+        return this.db.get(`SELECT *
+        FROM Match
+        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)
+        ORDER BY CreatedAt DESC
+        LIMIT 1;
+        `, [id, id, id, id]);
+    }
     async updateMatch(m) {
         await this.db.run(`
             UPDATE Match SET
