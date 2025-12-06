@@ -92,8 +92,8 @@ export class Match {
         this.P2_Id = null;
         this.P3_Id = null;
         this.P4_Id = null;
-        this.score_player1 = 0;
-        this.score_player2 = 0;
+        this.score1 = 0;
+        this.score2 = 0;
         this.mode = 2;
         this.count_players = 1;
         this.CreatedAt = new Date();
@@ -112,6 +112,8 @@ export class SQLiteDB {
         this.db = await open({ filename: "database.sqlite", driver: sqlite3.Database, });
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
+        // ⬇️ Log every SQL statement executed
+        this.db.on("trace", (sql) => console.log("[SQL]", sql));
         console.log("Database connected and table created!");
     }
 
@@ -164,6 +166,33 @@ export class SQLiteDB {
                             gameStatus = 'PENDING'  
                             LIMIT 1;`, [mode]);
     }
+    async deletePendingMatchByPlayerID(id) {
+        await this.db.get(`UPDATE
+        Match 
+        SET P1_Id = NULL , count_players = count_players - 1
+        WHERE (P1_Id = ?)
+        AND 
+        gameStatus = 'PENDING';`, [id]);
+        await this.db.get(`UPDATE
+        Match 
+        SET P2_Id = NULL , count_players = count_players - 1
+        WHERE P2_Id = ?
+        AND 
+        gameStatus = 'PENDING';`, [id]);
+        await this.db.get(`UPDATE
+        Match 
+        SET P3_Id = NULL, count_players = count_players - 1
+        WHERE P3_Id = ?
+        AND 
+        gameStatus = 'PENDING';`, [id]);
+        await this.db.get(`UPDATE
+        Match 
+        SET P4_Id = NULL, count_players = count_players - 1
+        WHERE P4_Id = ?
+        AND 
+        gameStatus = 'PENDING';`, [id]);
+        return await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
+    }
 
     async getCurrentMatchByPlayerID(id) {
         return this.db.get(`SELECT *
@@ -173,12 +202,6 @@ export class SQLiteDB {
         ORDER BY CreatedAt DESC
         LIMIT 1;
         `, [id, id, id, id]);
-    }
-    async deletePendingMatchByPlayerID(id) {
-        return this.db.get(`DELETE
-        FROM Match
-        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
-        gameStatus = 'PENDING';`, [id, id, id, id]);
     }
     async getOngoingMatchByPlayerID(id, mode) {
         return this.db.get(`SELECT *
@@ -211,13 +234,13 @@ export class SQLiteDB {
         await this.db.run(`
             UPDATE Match SET
                 P1_Id=?, P2_Id=?, P3_Id=?, P4_Id=?,
-                score_player1=?, score_player2=?,
+                score1=?, score2=?,
                 gameStatus=?, Winner_Id=?, T_Id=?, 
                 count_players=?
             WHERE id = ?
         `,
             [m.P1_Id, m.P2_Id, m.P3_Id, m.P4_Id,
-            m.score_player1, m.score_player2,
+            m.score1, m.score2,
             m.gameStatus, m.Winner_Id, m.T_Id,
             m.count_players,
             m.id]

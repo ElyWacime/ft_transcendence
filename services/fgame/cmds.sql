@@ -56,16 +56,16 @@ SELECT * FROM Match;
 SELECT * FROM Tournament;
 SELECT * FROM Participate_Tournament;
 
-UPDATE Match SET  score_player1=5, score_player2=1,  gameStatus='FINISHED', Winner_Id=1, count_players = 2,result = 'WIN'
+UPDATE Match SET  score1=5, score2=1,  gameStatus='FINISHED', Winner_Id=1, count_players = 2,result = 'WIN'
 WHERE id = 1;
 
-UPDATE Match SET  score_player1=4, score_player2=5,  gameStatus='FINISHED', Winner_Id=4, count_players = 2,result = 'WIN'
+UPDATE Match SET  score1=4, score2=5,  gameStatus='FINISHED', Winner_Id=4, count_players = 2,result = 'WIN'
 WHERE id = 2;
 
-UPDATE Match SET  score_player1=5, score_player2=3,  gameStatus='FINISHED', Winner_Id=5, count_players = 2,result = 'WIN'
+UPDATE Match SET  score1=5, score2=3,  gameStatus='FINISHED', Winner_Id=5, count_players = 2,result = 'WIN'
 WHERE id = 3;
 
-UPDATE Match SET  score_player1=0, score_player2=5,  gameStatus='FINISHED', Winner_Id=8, count_players = 2,result = 'WIN'
+UPDATE Match SET  score1=0, score2=5,  gameStatus='FINISHED', Winner_Id=8, count_players = 2,result = 'WIN'
 WHERE id = 4;
 
 
@@ -73,10 +73,10 @@ INSERT INTO Match (P1_Id, P2_Id, T_Id) VALUES (1,4,1);
 INSERT INTO Match (P1_Id, P2_Id, T_Id) VALUES (5,8,1);
 
 
-UPDATE Match SET  score_player1=5, score_player2=3,  gameStatus='FINISHED', Winner_Id=1, count_players = 2,result = 'WIN'
+UPDATE Match SET  score1=5, score2=3,  gameStatus='FINISHED', Winner_Id=1, count_players = 2,result = 'WIN'
 WHERE id = 5;
 
-UPDATE Match SET  score_player1=5, score_player2=1,  gameStatus='FINISHED', Winner_Id=8, count_players = 2,result = 'WIN'
+UPDATE Match SET  score1=5, score2=1,  gameStatus='FINISHED', Winner_Id=8, count_players = 2,result = 'WIN'
 WHERE id = 6;
 
 
@@ -86,7 +86,7 @@ SELECT * FROM Participate_Tournament;
 
 INSERT INTO Match (P1_Id, P2_Id, T_Id) VALUES (1,8,1);
 
-UPDATE Match SET  score_player1=5, score_player2=0,  gameStatus='FINISHED', Winner_Id=1, count_players = 2,result = 'WIN'
+UPDATE Match SET  score1=5, score2=0,  gameStatus='FINISHED', Winner_Id=1, count_players = 2,result = 'WIN'
 WHERE id = 7;
 
 ------------------------
@@ -115,7 +115,7 @@ LIMIT 1;
 SELECT * FROM Match  WHERE (P1_Id = 3 OR P2_Id = 3 OR P3_Id = 3 OR P4_Id = 3) and  result = 'PENDING'  ORDER BY CreatedAt DESC LIMIT 1;
 
 
-UPDATE Match SET  P1_Id=1, P2_Id=2,P3_Id=3, P4_Id=4,  score_player1=0, score_player2=0, gameStatus = 'PENDING', Winner_Id = NULL, T_Id = NULL, count_players = 4,result = 'PENDING'
+UPDATE Match SET  P1_Id=1, P2_Id=2,P3_Id=3, P4_Id=4,  score1=0, score2=0, gameStatus = 'PENDING', Winner_Id = NULL, T_Id = NULL, count_players = 4,result = 'PENDING'
 WHERE id = 12;
 
 DELETE FROM Match WHERE id = 11;

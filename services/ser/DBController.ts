@@ -28,8 +28,8 @@ export interface Match {
     Player1_y: number;
     Player2_x: number;
     Player2_y: number;
-    score_player1: number;
-    score_player2: number;
+    score1: number;
+    score2: number;
     CreatedAt: Date;
     result: string;
     Winner_Id: number;
@@ -108,12 +108,12 @@ export class SQLiteDB {
             `INSERT INTO Match (
                 P1_Id, P2_Id, Ball_x, Ball_y,
                 Player1_x, Player1_y, Player2_x, Player2_y,
-                score_player1, score_player2,
+                score1, score2,
                 CreatedAt, result, Winner_Id, tournamentId, chrono
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             m.P1_Id, m.P2_Id, m.Ball_x, m.Ball_y,
             m.Player1_x, m.Player1_y, m.Player2_x, m.Player2_y,
-            m.score_player1, m.score_player2,
+            m.score1, m.score2,
             m.CreatedAt.toISOString(), m.result, m.Winner_Id,
             m.tournamentId, m.chrono
         );
@@ -134,12 +134,12 @@ export class SQLiteDB {
             `UPDATE Match SET
                 P1_Id=?, P2_Id=?, Ball_x=?, Ball_y=?,
                 Player1_x=?, Player1_y=?, Player2_x=?, Player2_y=?,
-                score_player1=?, score_player2=?,
+                score1=?, score2=?,
                 CreatedAt=?, result=?, Winner_Id=?, tournamentId=?, chrono=?
              WHERE id = ?`,
             m.P1_Id, m.P2_Id, m.Ball_x, m.Ball_y,
             m.Player1_x, m.Player1_y, m.Player2_x, m.Player2_y,
-            m.score_player1, m.score_player2,
+            m.score1, m.score2,
             m.CreatedAt.toISOString(), m.result, m.Winner_Id,
             m.tournamentId, m.chrono,
             id

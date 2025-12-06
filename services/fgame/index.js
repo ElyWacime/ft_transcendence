@@ -245,9 +245,15 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
     }
     else if (request.type == "FINISHED") {
-      let m = await dbcnx.getFinishedMatchByPlayerID(request.id);
+      let m = await dbcnx.getLasttMatchByPlayerID(request.id);
       if (m) {
-        if (m.score_player1 >= m.score_player2)
+        let tmp = matches.get(m.id);
+        // console.log("tmp === ", tmp);
+        if (tmp) {
+          m.score1 = tmp.score1;
+          m.score2 = tmp.score2;
+        }
+        if (m.score1 >= m.score2)
           m.Winner_Id = m.P1_Id;
         else
           m.Winner_Id = m.P2_Id;
