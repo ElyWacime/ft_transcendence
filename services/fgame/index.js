@@ -171,12 +171,14 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       u.Auto_Match = true;
       await dbcnx.createUsers(u);
       console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
-      let m = await dbcnx.getOngoingMatchByPlayerID(request.id, request.mode);
+      let m = await dbcnx.getOngoingMatchByPlayerID(request.id);
+      // let m = await dbcnx.getOngoingMatchByPlayerID(request.id, request.mode);
       if (!m) {
+        console.log("\n\n>>>>>Player is not in Match ", request.id);
         console.log("\n\n>>>>>getMatchPlayerCanJoin: ");
         m = await dbcnx.getMatchPlayerCanJoin(request.mode);
         if (!m) {
-          console.log("\n\n\t\t>>>>> Not Found: ");
+          console.log("\n\n\t\t>>>>> Can't JOIN Need To Create: ");
           m = new Match();
           m.P1_Id = u.id;
           m.player1Name = u.User_name;
@@ -186,14 +188,13 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             m.id = await dbcnx.createMatch_not(m);
           }
           else {
-
             console.log("\n\n>>>>>createMatch: ");
             // m.T_Id = GET_TORNAMENTID_FROMDB
             m.id = await dbcnx.createMatch(m);
           }
         }
         else {
-          console.log("\n\n\t\t>>>>> Found: ");
+          console.log("\n\n\t\t>>>>> Can JOIN: ");
           if (request.mode == 2) {
             m.P2_Id = u.id;
             m.player2Name = u.User_name;
@@ -307,6 +308,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     else if (request.type == "DELETE") {
       console.log("\n\n>>>>>deletePendingMatchByPlayerID: ");
       await dbcnx.deletePendingMatchByPlayerID(request.id);
+      // await dbcnx.deleteOngoingMatchByPlayerID(request.id);
     }
   });
 
