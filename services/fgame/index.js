@@ -10,7 +10,7 @@ import { exit } from "process";
 
 
 let dbcnx = new SQLiteDB();
-const TICK_RATE = 60;
+const TICK_RATE = 10;
 const clients = new Map();
 const matches = new Map();
 const PADDLE_SPEED = 8;
@@ -279,31 +279,42 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     }
     else if (request.type == "MOVE") {
       let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
-      let match = matches.get(m.id);
-      if (match.P1_Id == request.id) {
-        match.p1UPkey = request.keys.ArrowUp;
-        match.p1Downkey = request.keys.ArrowDown;
-        // console.log("\n\n>>>>>Move: ", request.id);
-        // console.log(match.P1_Id, match.p1UPkey, match.p1Downkey);
+      if (m) {
+        let match = matches.get(m.id);
+        if (match.P1_Id == request.id) {
+          match.p1UPkey = request.keys.ArrowUp;
+          match.p1Downkey = request.keys.ArrowDown;
+          // console.log("\n\n>>>>>Move: ", request.id);
+          // console.log(match.P1_Id, match.p1UPkey, match.p1Downkey);
+        }
+        else if (match.P2_Id == request.id) {
+          match.p2UPkey = request.keys.ArrowUp;
+          match.p2Downkey = request.keys.ArrowDown;
+          // console.log("\n\n>>>>>Move: ", request.id);
+          // console.log(match.P2_Id, match.p2UPkey, match.p2Downkey);
+        }
+        else if (match.P3_Id && match.P3_Id == request.id) {
+          match.p3UPkey = request.keys.ArrowUp;
+          match.p3Downkey = request.keys.ArrowDown;
+          // console.log("\n\n>>>>>Move: ", request.id);
+          // console.log(match.P3_Id, match.p3UPkey, match.p3Downkey);
+        }
+        else if (match.P4_Id && match.P4_Id == request.id) {
+          match.p4UPkey = request.keys.ArrowUp;
+          match.p4Downkey = request.keys.ArrowDown;
+          // console.log("\n\n>>>>>Move: ", request.id);
+          // console.log(match.P4_Id, match.p4UPkey, match.p4Downkey);
+        }
       }
-      else if (match.P2_Id == request.id) {
-        match.p2UPkey = request.keys.ArrowUp;
-        match.p2Downkey = request.keys.ArrowDown;
-        // console.log("\n\n>>>>>Move: ", request.id);
-        // console.log(match.P2_Id, match.p2UPkey, match.p2Downkey);
+      else {
+        m = await dbcnx.getLasttMatchByPlayerID(request.id);
+        let data = JSON.stringify(m);
+        sendtoplayer(m.P1_Id, data);
+        sendtoplayer(m.P2_Id, data);
+        sendtoplayer(m.P3_Id, data);
+        sendtoplayer(m.P4_Id, data);
       }
-      else if (match.P3_Id && match.P3_Id == request.id) {
-        match.p3UPkey = request.keys.ArrowUp;
-        match.p3Downkey = request.keys.ArrowDown;
-        // console.log("\n\n>>>>>Move: ", request.id);
-        // console.log(match.P3_Id, match.p3UPkey, match.p3Downkey);
-      }
-      else if (match.P4_Id && match.P4_Id == request.id) {
-        match.p4UPkey = request.keys.ArrowUp;
-        match.p4Downkey = request.keys.ArrowDown;
-        // console.log("\n\n>>>>>Move: ", request.id);
-        // console.log(match.P4_Id, match.p4UPkey, match.p4Downkey);
-      }
+
     }
     else if (request.type == "FINISHED") {
       // console.log("\n\n>>>>>getLasttMatchByPlayerID: ");
