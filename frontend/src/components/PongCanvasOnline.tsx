@@ -13,10 +13,6 @@ function usePongWebSocket(ws, mode, email, setGameState) {
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
-
-            let vs = data.player1Name;
-            if (vs === email) vs = data.player2Name;
-
             setGameState((prev) => ({
                 ...prev,
                 ball: {
@@ -32,12 +28,12 @@ function usePongWebSocket(ws, mode, email, setGameState) {
                 paddle4: { x: data.Player4_x, y: data.Player4_y },
                 score: { player1: data.score1, player2: data.score2 },
                 gameStatus: data.gameStatus,
-                player2Name: vs,
+                player1Name: data.player1Name,
+                player2Name: data.player2Name,
             }));
         };
 
         ws.addEventListener("message", handleMessage);
-
         // start game automatically
         ws.send(JSON.stringify({
             type: "START",
@@ -118,7 +114,7 @@ function usePongRenderer(canvasRef, gameState) {
         ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
         ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
 
-        if (gameState.Mode === 4) {
+        if (gameState.Mode == 4) {
             ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
             ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
         }
@@ -166,7 +162,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, ws, mode }) => {
         Mode: mode,
         gameStatus: "PENDING",
     });
-
+    console.log("MODE === ", gameState.Mode);
     usePongWebSocket(ws, mode, email, setGameState);
     usePongControls(ws, mode, email);
     usePongRenderer(canvasRef, gameState);

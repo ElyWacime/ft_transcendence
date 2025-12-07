@@ -90,6 +90,7 @@ function tick(m) {
     m.Ball_dy *= -1;
     m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
   }
+
   if (m.Ball_x - m.ball_radius <= m.Player1_x + m.sizePaddle_width) {
     if (m.Ball_y >= m.Player1_y && m.Ball_y <= m.Player1_y + m.sizePaddle_height) {
       m.Ball_dx = Math.abs(m.Ball_dx);
@@ -102,6 +103,20 @@ function tick(m) {
       m.Ball_dx *= 1.05;
     }
   }
+
+  if (m.P3_Id && m.Ball_x - m.ball_radius <= m.Player3_x + m.sizePaddle_width) {
+    if (m.Ball_y >= m.Player3_y && m.Ball_y <= m.Player3_y + m.sizePaddle_height) {
+      m.Ball_dx = Math.abs(m.Ball_dx);
+      m.Ball_dx *= 1.05;
+    }
+  }
+  if (m.P4_Id && m.Ball_x + m.ball_radius >= m.Player4_x) {
+    if (m.Ball_y >= m.Player4_y && m.Ball_y <= m.Player4_y + m.sizePaddle_height) {
+      m.Ball_dx = -Math.abs(m.Ball_dx);
+      m.Ball_dx *= 1.05;
+    }
+  }
+
   if (m.p1UPkey)
     m.Player1_y = Math.max(0, m.Player1_y - PADDLE_SPEED);
   else if (m.p1Downkey)
@@ -112,15 +127,15 @@ function tick(m) {
     m.Player2_y = Math.min(m.height - m.sizePaddle_height, m.Player2_y + PADDLE_SPEED);
   if (m.P3_Id) {
     if (m.p3UPkey)
-      m.player3_y = Math.max(0, m.player3_y - PADDLE_SPEED);
+      m.Player3_y = Math.max(0, m.Player3_y - PADDLE_SPEED);
     else if (m.p3Downkey)
-      m.player3_y = Math.min(m.height - m.sizePaddle_height, m.player3_y + PADDLE_SPEED);
+      m.Player3_y = Math.min(m.height - m.sizePaddle_height, m.Player3_y + PADDLE_SPEED);
   }
   if (m.P4_Id) {
     if (m.p4UPkey)
-      m.player4_y = Math.max(0, m.player4_y - PADDLE_SPEED);
+      m.Player4_y = Math.max(0, m.Player4_y - PADDLE_SPEED);
     else if (m.p4Downkey)
-      m.player4_y = Math.min(m.height - m.sizePaddle_height, m.player4_y + PADDLE_SPEED);
+      m.Player4_y = Math.min(m.height - m.sizePaddle_height, m.Player4_y + PADDLE_SPEED);
   }
   if (m.Ball_x < 0) {
     m.score2 += 1;
@@ -145,7 +160,6 @@ fastify.get('/', async (request, reply) => {
 });
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
-
   connection.on("message", async (msg) => {
     const request = JSON.parse(msg);
     if (clients.has(request.email)) {
@@ -157,7 +171,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         }
       }
       catch (e) {
-        console.log("\n\n>>>>>error: ", request.email, e);
+        // console.log("\n\n>>>>>error: ", request.email, e);
       }
     }
     // console.log("\n\n>>>>>request.type ==== ", request.type);
@@ -170,31 +184,31 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       u.isOnline = true;
       u.Auto_Match = true;
       await dbcnx.createUsers(u);
-      console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
+      // console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
       let m = await dbcnx.getOngoingMatchByPlayerID(request.id);
       // let m = await dbcnx.getOngoingMatchByPlayerID(request.id, request.mode);
       if (!m) {
-        console.log("\n\n>>>>>Player is not in Match ", request.id);
-        console.log("\n\n>>>>>getMatchPlayerCanJoin: ");
+        // console.log("\n\n>>>>>Player is not in Match ", request.id);
+        // console.log("\n\n>>>>>getMatchPlayerCanJoin: ");
         m = await dbcnx.getMatchPlayerCanJoin(request.mode);
         if (!m) {
-          console.log("\n\n\t\t>>>>> Can't JOIN Need To Create: ");
+          // console.log("\n\n\t\t>>>>> Can't JOIN Need To Create: ");
           m = new Match();
           m.P1_Id = u.id;
           m.player1Name = u.User_name;
           m.mode = request.mode;
           if (!request.tournement) {
-            console.log("\n\n>>>>>createMatch_not: ");
+            // console.log("\n\n>>>>>createMatch_not: ");
             m.id = await dbcnx.createMatch_not(m);
           }
           else {
-            console.log("\n\n>>>>>createMatch: ");
+            // console.log("\n\n>>>>>createMatch: ");
             // m.T_Id = GET_TORNAMENTID_FROMDB
             m.id = await dbcnx.createMatch(m);
           }
         }
         else {
-          console.log("\n\n\t\t>>>>> Can JOIN: ");
+          // console.log("\n\n\t\t>>>>> Can JOIN: ");
           if (request.mode == 2) {
             m.P2_Id = u.id;
             m.player2Name = u.User_name;
@@ -216,7 +230,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m.player4Name = u.User_name;
               m.count_players = m.count_players + 1;
             }
-            console.log("\n\n>>>>>updateMatch: ");
+            // console.log("\n\n>>>>>updateMatch: ");
             await dbcnx.updateMatch(m);
           }
           if (m.count_players == m.mode) {
@@ -236,7 +250,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             ngame.count_players = m.count_players;
             ngame.mode = m.mode;
             matches.set(m.id, ngame);
-            console.log("\n\n>>>>>updateMatch: ");
+            // console.log("\n\n>>>>>updateMatch: ");
             await dbcnx.updateMatch(m);
           }
         }
@@ -260,8 +274,8 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         sendtoplayer(ngame.P3_Id, data);
         sendtoplayer(ngame.P4_Id, data);
       }
-      else
-        console.log("\n\n>>>>>Player in Match ", request.id);
+      // else
+      // console.log("\n\n>>>>>Player in Match ", request.id);
     }
     else if (request.type == "MOVE") {
       let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
@@ -269,22 +283,30 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       if (match.P1_Id == request.id) {
         match.p1UPkey = request.keys.ArrowUp;
         match.p1Downkey = request.keys.ArrowDown;
+        // console.log("\n\n>>>>>Move: ", request.id);
+        // console.log(match.P1_Id, match.p1UPkey, match.p1Downkey);
       }
       else if (match.P2_Id == request.id) {
         match.p2UPkey = request.keys.ArrowUp;
         match.p2Downkey = request.keys.ArrowDown;
+        // console.log("\n\n>>>>>Move: ", request.id);
+        // console.log(match.P2_Id, match.p2UPkey, match.p2Downkey);
       }
       else if (match.P3_Id && match.P3_Id == request.id) {
         match.p3UPkey = request.keys.ArrowUp;
         match.p3Downkey = request.keys.ArrowDown;
+        // console.log("\n\n>>>>>Move: ", request.id);
+        // console.log(match.P3_Id, match.p3UPkey, match.p3Downkey);
       }
       else if (match.P4_Id && match.P4_Id == request.id) {
         match.p4UPkey = request.keys.ArrowUp;
         match.p4Downkey = request.keys.ArrowDown;
+        // console.log("\n\n>>>>>Move: ", request.id);
+        // console.log(match.P4_Id, match.p4UPkey, match.p4Downkey);
       }
     }
     else if (request.type == "FINISHED") {
-      console.log("\n\n>>>>>getLasttMatchByPlayerID: ");
+      // console.log("\n\n>>>>>getLasttMatchByPlayerID: ");
       let m = await dbcnx.getLasttMatchByPlayerID(request.id);
       if (m) {
         let tmp = matches.get(m.id);
@@ -298,15 +320,15 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         else
           m.Winner_Id = m.P2_Id;
         m.gameStatus = "FINISHED";
-        console.log("\n\n>>>>>updateMatch: ");
+        // console.log("\n\n>>>>>updateMatch: ");
         await dbcnx.updateMatch(m);
         matches.delete(m.id);
       }
-      else
-        console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
+      // else
+      //  console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
     }
     else if (request.type == "DELETE") {
-      console.log("\n\n>>>>>deletePendingMatchByPlayerID: ");
+      // console.log("\n\n>>>>>deletePendingMatchByPlayerID: ");
       await dbcnx.deletePendingMatchByPlayerID(request.id);
       // await dbcnx.deleteOngoingMatchByPlayerID(request.id);
     }
@@ -335,7 +357,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
     }
     clearInterval(interval);
-    console.log("\n\n>>>>>Client disconnected. Total clients:", clients.size);
+    // console.log("\n\n>>>>>Client disconnected. Total clients:", clients.size);
   });
 });
 

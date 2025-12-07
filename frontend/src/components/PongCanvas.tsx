@@ -121,11 +121,6 @@ export const PongCanvas = ({
     ctx.fillStyle = "hsl(217 91% 60%)";
     ctx.fillRect(state.paddle1.x, state.paddle1.y, state.paddle1.width, state.paddle1.height);
     ctx.fillRect(state.paddle2.x, state.paddle2.y, state.paddle2.width, state.paddle2.height);
-    if (false) {
-      // If you implement 4-player mode, draw paddle3/paddle4 similarly
-      ctx.fillRect(state.paddle3.x, state.paddle3.y, state.paddle3.width, state.paddle3.height);
-      ctx.fillRect(state.paddle4.x, state.paddle4.y, state.paddle4.width, state.paddle4.height);
-    }
 
     // Ball
     ctx.beginPath();
