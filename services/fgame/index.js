@@ -74,6 +74,14 @@ await dbcnx.connect();
 
 let max_Speed = 8;
 
+function sendtoplayer(id, data) {
+  if (id) {
+    let socket = (clients.get(id));
+    if (socket && socket.readyState === 1)
+      socket.send(data);
+  }
+}
+
 function tick(m) {
   if (m.gameStatus !== "PLAYING") return;
   m.Ball_x += m.Ball_dx;
@@ -142,17 +150,17 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     const request = JSON.parse(msg);
     if (clients.has(request.email)) {
       try {
-        // console.log("try : ", request.email);
+        // console.log("\n\n>>>>>try : ", request.email);
         if (clients.get(request.email) != connection) {
-          // console.log("close : ", request.email);
+          // console.log("\n\n>>>>>close : ", request.email);
           clients.get(request.email).close();
         }
       }
       catch (e) {
-        console.log("error: ", request.email, e);
+        console.log("\n\n>>>>>error: ", request.email, e);
       }
     }
-    console.log("request.type ==== ", request.type);
+    // console.log("\n\n>>>>>request.type ==== ", request.type);
     clients.set(request.email, connection);
     if (request.type == "REGISTER") {
       let u = new Users();
@@ -162,42 +170,52 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       u.isOnline = true;
       u.Auto_Match = true;
       await dbcnx.createUsers(u);
+      console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
       let m = await dbcnx.getOngoingMatchByPlayerID(request.id, request.mode);
       if (!m) {
+        console.log("\n\n>>>>>getMatchPlayerCanJoin: ");
         m = await dbcnx.getMatchPlayerCanJoin(request.mode);
         if (!m) {
+          console.log("\n\n\t\t>>>>> Not Found: ");
           m = new Match();
           m.P1_Id = u.id;
           m.player1Name = u.User_name;
-          if (!request.tournement)
-            m.id = await dbcnx.createMatch_not(request.id);
+          m.mode = request.mode;
+          if (!request.tournement) {
+            console.log("\n\n>>>>>createMatch_not: ");
+            m.id = await dbcnx.createMatch_not(m);
+          }
           else {
+
+            console.log("\n\n>>>>>createMatch: ");
             // m.T_Id = GET_TORNAMENTID_FROMDB
             m.id = await dbcnx.createMatch(m);
           }
         }
         else {
+          console.log("\n\n\t\t>>>>> Found: ");
           if (request.mode == 2) {
             m.P2_Id = u.id;
             m.player2Name = u.User_name;
-            m.count_players = 2;
+            m.count_players = m.count_players + 1;
           }
           else {
             if (m.P2_Id == null) {
               m.P2_Id = u.id;
               m.player2Name = u.User_name;
-              m.count_players = 2;
+              m.count_players = m.count_players + 1;
             }
             else if (m.P3_Id == null) {
               m.P3_Id = u.id;
               m.player3Name = u.User_name;
-              m.count_players = 3;
+              m.count_players = m.count_players + 1;
             }
             else if (m.P4_Id == null) {
               m.P4_Id = u.id;
               m.player4Name = u.User_name;
-              m.count_players = 4;
+              m.count_players = m.count_players + 1;
             }
+            console.log("\n\n>>>>>updateMatch: ");
             await dbcnx.updateMatch(m);
           }
           if (m.count_players == m.mode) {
@@ -217,12 +235,32 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             ngame.count_players = m.count_players;
             ngame.mode = m.mode;
             matches.set(m.id, ngame);
+            console.log("\n\n>>>>>updateMatch: ");
             await dbcnx.updateMatch(m);
           }
         }
+        let ngame = new GameState();
+        ngame.id_Match = m.id;
+        ngame.P1_Id = m.P1_Id;
+        ngame.P2_Id = m.P2_Id;
+        ngame.P3_Id = m.P3_Id;
+        ngame.P4_Id = m.P4_Id;
+        ngame.player1Name = m.P1_Id;
+        ngame.player2Name = m.P2_Id;
+        ngame.player3Name = m.P3_Id;
+        ngame.player4Name = m.P4_Id;
+        ngame.gameStatus = m.gameStatus;
+        ngame.T_Id = m.T_Id;
+        ngame.count_players = m.count_players;
+        ngame.mode = m.mode;
+        let data = JSON.stringify(ngame);
+        sendtoplayer(ngame.P1_Id, data);
+        sendtoplayer(ngame.P2_Id, data);
+        sendtoplayer(ngame.P3_Id, data);
+        sendtoplayer(ngame.P4_Id, data);
       }
       else
-        console.log("Player in Match ", request.id);
+        console.log("\n\n>>>>>Player in Match ", request.id);
     }
     else if (request.type == "MOVE") {
       let m = await dbcnx.getCurrentMatchByPlayerID(request.id);
@@ -245,10 +283,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
     }
     else if (request.type == "FINISHED") {
+      console.log("\n\n>>>>>getLasttMatchByPlayerID: ");
       let m = await dbcnx.getLasttMatchByPlayerID(request.id);
       if (m) {
         let tmp = matches.get(m.id);
-        // console.log("tmp === ", tmp);
+        // console.log("\n\n>>>>>tmp === ", tmp);
         if (tmp) {
           m.score1 = tmp.score1;
           m.score2 = tmp.score2;
@@ -258,23 +297,19 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         else
           m.Winner_Id = m.P2_Id;
         m.gameStatus = "FINISHED";
+        console.log("\n\n>>>>>updateMatch: ");
         await dbcnx.updateMatch(m);
         matches.delete(m.id);
       }
       else
-        console.log("getFinishedMatchByPlayerID not Found");
+        console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
     }
     else if (request.type == "DELETE") {
+      console.log("\n\n>>>>>deletePendingMatchByPlayerID: ");
       await dbcnx.deletePendingMatchByPlayerID(request.id);
     }
   });
-  function sendtoplayer(id, data) {
-    if (id) {
-      let socket = (clients.get(id));
-      if (socket && socket.readyState === 1)
-        socket.send(data);
-    }
-  }
+
   const interval = setInterval(() => {
     if (clients.size == 0)
       return;
@@ -292,13 +327,13 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     // get the match if finished delete it from matches else leave it 
     for (const [email, client] of clients) {
       if (client == connection) {
-        // console.log("close old :", email);
+        // console.log("\n\n>>>>>close old :", email);
         clients.delete(email);
         break;
       }
     }
     clearInterval(interval);
-    console.log("Client disconnected. Total clients:", clients.size);
+    console.log("\n\n>>>>>Client disconnected. Total clients:", clients.size);
   });
 });
 

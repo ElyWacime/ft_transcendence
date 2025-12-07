@@ -112,7 +112,7 @@ export class SQLiteDB {
         this.db = await open({ filename: "database.sqlite", driver: sqlite3.Database, });
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
-        // ⬇️ Log every SQL statement executed
+        //  Log every SQL statement executed
         this.db.on("trace", (sql) => console.log("[SQL]", sql));
         console.log("Database connected and table created!");
     }
@@ -146,11 +146,11 @@ export class SQLiteDB {
     // Match CRUD
     // -------------------------------
     async createMatch(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id) VALUES (?, ?)`, [m.P1_Id, m.T_Id]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode) VALUES (?, ?, ?)`, [m.P1_Id, m.T_Id, m.mode]);
         return result.lastID;
     }
-    async createMatch_not(P1_Id) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id) VALUES (?)`, [P1_Id]);
+    async createMatch_not(m) {
+        const result = await this.db.run(`INSERT INTO Match (P1_Id, mode) VALUES (?, ?)`, [m.P1_Id, m.mode]);
         return result.lastID;
     }
     async getMatches() {
@@ -160,6 +160,7 @@ export class SQLiteDB {
         return this.db.get(`SELECT * FROM Match WHERE id = ?`, [id]);
     }
     async getMatchPlayerCanJoin(mode) {
+        console.log("*****************   CALLED    ******************");
         return this.db.get(`SELECT * FROM Match   
                             WHERE mode = ? and   
                             count_players <  mode   and 
@@ -225,7 +226,8 @@ export class SQLiteDB {
     async getFinishedMatchByPlayerID(id) {
         return this.db.get(`SELECT *
         FROM Match
-        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)
+        WHERE  gameStatus = 'FINISHED' and 
+        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)
         ORDER BY CreatedAt DESC
         LIMIT 1;
         `, [id, id, id, id]);
