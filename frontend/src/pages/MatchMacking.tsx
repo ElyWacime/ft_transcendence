@@ -15,7 +15,6 @@ const MatchMacking = () => {
     const mode = searchParams.get("mode"); // "4"
     const email = localStorage.getItem("email");
     const [features, setFeatures] = useState(() => {
-
         return [
             {
                 icon: Users,
@@ -43,7 +42,6 @@ const MatchMacking = () => {
                 : []),
         ];
     });
-
     useEffect(() => {
         if (!ws || !isReady) return;
         ws.send(JSON.stringify({
@@ -57,18 +55,34 @@ const MatchMacking = () => {
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
-
-            let vs = data.player2Name;
-            if (vs === email) vs = data.player1Name;
-
-            setFeatures(prev =>
-                prev.map(f =>
-                    f.title === "Player 2"
-                        ? { ...f, title: vs || "Player 2" }
-                        : f
-                )
-            );
-
+            setFeatures(() => {
+                return [
+                    {
+                        icon: Users,
+                        title: data.player1Name || "Player1",
+                        description: mode === "4" ? "Team A" : "Player 1",
+                    },
+                    {
+                        icon: Users,
+                        title: data.player2Name || "Player2",
+                        description: mode === "4" ? "Team B" : "Player 2",
+                    },
+                    ...(mode === "4"
+                        ? [
+                            {
+                                icon: Users,
+                                title: data.player3Name || "Player3",
+                                description: "Team A",
+                            },
+                            {
+                                icon: Users,
+                                title: data.player4Name || "Player4",
+                                description: "Team B",
+                            },
+                        ]
+                        : []),
+                ];
+            });
             if (data.count_players == mode) {
                 navigate("/game-online", {
                     state: {
