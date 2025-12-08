@@ -156,89 +156,14 @@ function playercoli(m, x, y, id) {
   }
 }
 
-
-// function playercoli(m, x, y, id) {
-//   if (!id) return;
-
-//   const ballLeft   = m.Ball_x - m.ball_radius;
-//   const ballRight  = m.Ball_x + m.ball_radius;
-//   const ballTop    = m.Ball_y - m.ball_radius;
-//   const ballBottom = m.Ball_y + m.ball_radius;
-
-//   const padLeft   = x;
-//   const padRight  = x + m.sizePaddle_width;
-//   const padTop    = y;
-//   const padBottom = y + m.sizePaddle_height;
-
-//   const isLeftPaddle = x < m.width / 2;
-
-//   // ===================================
-//   // FRONT FACE COLLISION (WITH NUDGE)
-//   // ===================================
-//   if (isLeftPaddle) {
-//     // LEFT PADDLE → right side collision
-//     if (
-//       ballLeft <= padRight &&
-//       padRight <= ballRight &&
-//       m.Ball_y >= padTop &&
-//       m.Ball_y <= padBottom
-//     ) {
-//       m.Ball_dx = Math.abs(m.Ball_dx) * 1.05;
-//       m.Ball_x = padRight + m.ball_radius;
-//       return;
-//     }
-
-//   } else {
-//     if (
-//       padLeft <= ballRight &&
-//       ballLeft <= padLeft &&
-//       m.Ball_y >= padTop &&
-//       m.Ball_y <= padBottom
-//     ) {
-//       m.Ball_dx = -Math.abs(m.Ball_dx) * 1.05;
-//       m.Ball_x = padLeft - m.ball_radius;
-//       return;
-//     }
-//   }
-
-//   // ===================================
-//   // TOP EDGE COLLISION (WITH NUDGE)
-//   // ===================================
-//   if (
-//     padTop <= ballBottom &&
-//     ballTop < padTop &&
-//     m.Ball_x >= padLeft &&
-//     m.Ball_x <= padRight
-//   ) {
-//     m.Ball_dy = -Math.abs(m.Ball_dy);
-//     m.Ball_y = padTop - m.ball_radius;
-//     return;
-//   }
-//   // ===================================
-//   // BOTTOM EDGE COLLISION (WITH NUDGE)
-//   // ===================================
-//   if (
-//     ballTop <= padBottom &&
-//     padBottom < ballBottom &&
-//     m.Ball_x >= padLeft &&
-//     m.Ball_x <= padRight
-//   ) {
-//     m.Ball_dy = Math.abs(m.Ball_dy);
-//     m.Ball_y = padBottom + m.ball_radius;
-//     return;
-//   }
-// }
-
-
 function moveplayer(m,y,up,down,id)
 {
-  if (!id) return;
+  if (!id) return null;
   if (up)
     y = Math.max(0, y - PADDLE_SPEED);
   else if (down)
     y = Math.min(m.height - m.sizePaddle_height, y + PADDLE_SPEED);
   return y;
-  
 }
 
 function tick(m) {
