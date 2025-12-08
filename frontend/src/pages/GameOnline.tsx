@@ -11,6 +11,8 @@ import { useWebSocket } from "../hooks/useWebSocket";
 interface GameOnlineProps {
   player1Name: string;
   player2Name: string;
+  player3Name: string;
+  player4Name: string;
   mode: number;
 }
 
@@ -19,7 +21,7 @@ const GameOnline = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const email = localStorage.getItem("email");
-  const { player1Name, player2Name, mode } = location.state as GameOnlineProps;
+  const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
   const match = location.state?.match as Match | undefined;
 
   const { ws, send, isReady } = useWebSocket("ws://10.12.7.4:3000/ws");
@@ -122,6 +124,8 @@ const GameOnline = () => {
             <PongCanvasOnline
               player1Name={player1Name}
               player2Name={player2Name}
+              player3Name={player3Name}
+              player4Name={player4Name}
               ws={ws}
               mode={mode}
             // onGameEnd={(result) => send({ type: "gameEnd", result })}

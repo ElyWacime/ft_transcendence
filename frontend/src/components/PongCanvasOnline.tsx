@@ -30,6 +30,8 @@ function usePongWebSocket(ws, mode, email, setGameState) {
                 gameStatus: data.gameStatus,
                 player1Name: data.player1Name,
                 player2Name: data.player2Name,
+                player3Name: data.player3Name || "",
+                player4Name: data.player4Name || ""
             }));
         };
 
@@ -110,12 +112,30 @@ function usePongRenderer(canvasRef, gameState) {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = 'hsl(217 91% 60%)';
+        if (gameState.player1Name == localStorage.getItem("email"))
+            ctx.fillStyle = 'hsl(0 50% 80%)';
+        else
+            ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+
+        if (gameState.player2Name == localStorage.getItem("email"))
+            ctx.fillStyle = 'hsl(60 50% 80%)';
+        else
+            ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
 
         if (gameState.Mode == 4) {
+     
+            if (gameState.player3Name == localStorage.getItem("email"))
+                ctx.fillStyle = 'hsl(120 50% 80%)';
+            else
+                ctx.fillStyle = "hsl(217 91% 60%)";
             ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+
+            if (gameState.player4Name == localStorage.getItem("email"))
+                ctx.fillStyle = 'hsl(300 50% 80%)';
+            else
+                ctx.fillStyle = "hsl(217 91% 60%)";
             ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
         }
 
@@ -147,7 +167,7 @@ function usePongRenderer(canvasRef, gameState) {
     }, [loop]);
 }
 
-export const PongCanvasOnline = ({ player1Name, player2Name, ws, mode }) => {
+export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode }) => {
     const email = localStorage.getItem("email");
     const canvasRef = useRef(null);
 
@@ -160,6 +180,10 @@ export const PongCanvasOnline = ({ player1Name, player2Name, ws, mode }) => {
         score: { player1: 0, player2: 0 },
         sizePaddle: { width: 15, height: 100 },
         Mode: mode,
+        player1Name:  "",
+        player2Name:  "",
+        player3Name:  "",
+        player4Name:  "",
         gameStatus: "PENDING",
     });
     console.log("MODE === ", gameState.Mode);
@@ -175,7 +199,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, ws, mode }) => {
                 {/* Player 1 Card */}
                 <Card className="bg-gradient-secondary border-border">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-center text-lg">{player1Name}</CardTitle>
+                        <CardTitle className="text-center text-lg">{player1Name} {mode == 4 ? " // ":"" }   { player3Name}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-center">
                         <div className="text-3xl font-game font-bold text-primary">
@@ -205,7 +229,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, ws, mode }) => {
                 {/* Player 2 Card */}
                 <Card className="bg-gradient-secondary border-border">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-center text-lg">{player2Name}</CardTitle>
+                        <CardTitle className="text-center text-lg">{player2Name }{mode == 4 ? " // ":"" }  { player4Name}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-center">
                         <div className="text-3xl font-game font-bold text-primary">

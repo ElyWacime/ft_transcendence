@@ -88,6 +88,8 @@ const MatchMacking = () => {
                     state: {
                         player1Name: data.player1Name,
                         player2Name: data.player2Name,
+                        player3Name: data.player3Name,
+                        player4Name: data.player4Name,
                         mode,
                     },
                 });

@@ -144,7 +144,7 @@ function tick(m) {
     m.score1 += 1;
     resetBall(1, m);
   }
-  if (m.score2 == 5 || m.score1 == 5)
+  if (m.score2 == 500 || m.score1 == 500)
     m.gameStatus = "FINISHED";
 }
 
