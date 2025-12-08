@@ -167,7 +167,7 @@ export const api = new TournamentAPI();
 
 // ---------------- USER AUTH API ---------------- //
 class UserAPI {
-  private baseUrl = "http://localhost/api/users";
+  private baseUrl = "http://10.12.7.4/api/users";
 
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {

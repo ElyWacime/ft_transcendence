@@ -11,8 +11,8 @@ const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 // --- CORS ---
 app.register(cors, {
   origin: [
-    "http://localhost",
-    "http://localhost:8080",
+    "http://10.12.7.4",
+    "http://10.12.7.4:8080",
     "http://127.0.0.1:8080",
     "http://frontend:8080",
     "http://0.0.0.0",

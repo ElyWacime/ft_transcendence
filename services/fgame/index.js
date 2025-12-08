@@ -10,7 +10,7 @@ import { exit } from "process";
 
 
 let dbcnx = new SQLiteDB();
-const TICK_RATE = 10;
+const TICK_RATE = 60;
 const clients = new Map();
 const matches = new Map();
 const PADDLE_SPEED = 8;
@@ -79,7 +79,7 @@ function sendtoplayer(id, data) {
     let socket = (clients.get(id));
     if (socket && socket.readyState === 1)
       socket.send(data);
-  }
+    }
 }
 
 function tick(m) {
@@ -178,12 +178,15 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     clients.set(request.email, connection);
     if (request.type == "REGISTER") {
       let u = new Users();
-      u.id = request.id; //to add in localstorage
-      u.email = request.email;
-      u.User_name = request.email;
+      u.id = request.id || "EMAIL@EMAIL.E"; //to add in localstorage
+      u.email = request.email || "EMAIL@EMAIL.E";
+      u.User_name = request.email || "EMAIL@EMAIL.E";
       u.isOnline = true;
       u.Auto_Match = true;
+      // console.log("BUser  ===== ", u,request);
       await dbcnx.createUsers(u);
+      u = await dbcnx.getUserById(u.email);
+      // console.log("AUser  ===== ", v);
       // console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
       let m = await dbcnx.getOngoingMatchByPlayerID(request.id);
       // let m = await dbcnx.getOngoingMatchByPlayerID(request.id, request.mode);

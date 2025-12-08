@@ -1,4 +1,3 @@
-
 services:
   # ---------- FRONTEND ----------
   frontend:
@@ -34,7 +33,7 @@ services:
       - JWT_REFRESH_SECRET=superrefreshkey
       - PORT=8000
       - NODE_ENV=development
-      - COOKIE_DOMAIN=localhost
+      - COOKIE_DOMAIN=10.12.7.4
     command: npm run dev
     networks:
       - transcendence
@@ -105,4 +104,3 @@ services:
 networks:
   transcendence:
     driver: bridge
-

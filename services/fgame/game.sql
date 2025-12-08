@@ -5,13 +5,13 @@ CREATE TABLE IF NOT EXISTS Users (
     id TEXT PRIMARY KEY,
     -- id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE,
-    User_name TEXT NOT NULL UNIQUE,
-    User_password TEXT NOT NULL,
-    loggedIn INTEGER NOT NULL DEFAULT 0,
-    Auto_Match INTEGER NOT NULL DEFAULT 0,
-    isOnline INTEGER NOT NULL DEFAULT 0,
+    User_name TEXT  UNIQUE,
+    User_password TEXT ,
+    loggedIn INTEGER  DEFAULT 0,
+    Auto_Match INTEGER  DEFAULT 0,
+    isOnline INTEGER  DEFAULT 0,
     avatar TEXT DEFAULT 'https://www.gravatar.com/avatar/',
-    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    CreatedAt DATETIME  DEFAULT CURRENT_TIMESTAMP
     -- UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

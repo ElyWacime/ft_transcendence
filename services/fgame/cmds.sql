@@ -1,5 +1,5 @@
-.headers ON;
-.mode column;
+.headers ON
+.mode column
 
 SELECT * FROM Match;
 SELECT * FROM Tournament;

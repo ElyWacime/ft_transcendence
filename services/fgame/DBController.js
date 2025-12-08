@@ -4,14 +4,14 @@ import sqlite3 from "sqlite3";
 
 export class Users {
     constructor() {
-        this.id = "";
-        this.email = "";
-        this.User_name = "";
+        this.id = "email@email.email";
+        this.email = "email@email.email";
+        this.User_name = "User_name";
         this.User_password = "qwerty";
-        this.loggedIn = 0;
-        this.Auto_Match = 0;
-        this.isOnline = 0;
-        this.avatar = "";
+        this.loggedIn = true;
+        this.Auto_Match = true;
+        this.isOnline = true;
+        this.avatar = 'https://www.gravatar.com/avatar/';
         this.CreatedAt = new Date();
         // this.UpdatedAt = new Date();
     }

@@ -15,7 +15,7 @@
   //       useEffect(() => {
   //         if (wsRef.current == null) {
   //           console.log("WebSocket is created");
-  //           wsRef.current = new WebSocket("ws://localhost:3000/ws");
+  //           wsRef.current = new WebSocket("ws://10.12.7.4:3000/ws");
   //         }
       
   //         wsRef.current.onopen = () => {

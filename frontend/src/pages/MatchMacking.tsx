@@ -7,7 +7,7 @@ import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState } from "react";
 
 const MatchMacking = () => {
-    const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
+    const { ws, send, isReady } = useWebSocket("ws://10.12.7.4:3000/ws");
     let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
