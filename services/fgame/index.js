@@ -110,48 +110,37 @@ function playercoli(m, x, y, id) {
 
   if (isLeftPaddle) {
  
-    if (
-      ballLeft <= padRight &&      
-      padRight <= ballRight &&     
-      m.Ball_y >= padTop &&
-      m.Ball_y <= padBottom
+    if (ballLeft <= padRight && padRight <= ballRight &&     
+      padTop <= m.Ball_y && m.Ball_y <= padBottom
     ) {
-      m.Ball_dx = Math.abs(m.Ball_dx); 
+      m.Ball_dx =-(m.Ball_dx); 
       m.Ball_dx *= 1.05;
       return;
     }
 
-  } else {
-    if (
-      padLeft <= ballRight &&   
-      ballLeft <= padLeft &&      
-      m.Ball_y >= padTop &&
-      m.Ball_y <= padBottom
+  }
+  else
+  {
+    if (ballLeft <= padLeft && padLeft <= ballRight &&      
+      padTop <= m.Ball_y  && m.Ball_y <= padBottom
     ) {
-      m.Ball_dx = -Math.abs(m.Ball_dx); 
+      m.Ball_dx = -(m.Ball_dx); 
       m.Ball_dx *= 1.05;
       return;
     }
   }
 
-  if (
-    padTop <= ballBottom &&     
-    ballTop < padTop &&           
-    m.Ball_x >= padLeft &&
-    m.Ball_x <= padRight
+  if (ballTop < padTop && padTop <= ballBottom &&          
+    padLeft <= m.Ball_x && m.Ball_x <= padRight
   ) {
-    m.Ball_dy = -Math.abs(m.Ball_dy);
+    m.Ball_dy = -(m.Ball_dy);
     return;
   }
 
-
-  if (
-    ballTop <= padBottom &&      
-    padBottom < ballBottom &&     
-    m.Ball_x >= padLeft &&
-    m.Ball_x <= padRight
+  if (ballTop <= padBottom && padBottom < ballBottom &&     
+    padLeft <= m.Ball_x  && m.Ball_x <= padRight
   ) {
-    m.Ball_dy = Math.abs(m.Ball_dy);
+    m.Ball_dy =-(m.Ball_dy);
     return;
   }
 }
