@@ -24,7 +24,7 @@ const GameOnline = () => {
   const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
   const match = location.state?.match as Match | undefined;
 
-  const { ws, send, isReady } = useWebSocket("ws://localhost:3000/ws");
+  const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
 
   const endGame = () => {
     ws.send(JSON.stringify({
