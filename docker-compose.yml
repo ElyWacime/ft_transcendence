@@ -33,7 +33,7 @@ services:
       - JWT_REFRESH_SECRET=superrefreshkey
       - PORT=8000
       - NODE_ENV=development
-      - COOKIE_DOMAIN=10.12.7.4
+      - COOKIE_DOMAIN=localhost
     command: npm run dev
     networks:
       - transcendence
