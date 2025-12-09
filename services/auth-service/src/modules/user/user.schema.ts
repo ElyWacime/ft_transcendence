@@ -17,7 +17,6 @@ export const createUserResponseSchema = z.object({
   name: z.string(),
 });
 
-// same for login route
 export const loginSchema = z.object({
   email: z
     .string({

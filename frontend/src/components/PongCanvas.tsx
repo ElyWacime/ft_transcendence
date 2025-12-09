@@ -1,196 +1,114 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Pause, Play, RotateCcw } from "lucide-react";
 
 interface PongCanvasProps {
   player1Name?: string;
   player2Name?: string;
+  player3Name?: string;
+  player4Name?: string;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
 }
 
-interface GameState {
-  ball: {
-    x: number;
-    y: number;
-    dx: number;
-    dy: number;
-    radius: number;
-  };
-  paddle1: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  paddle2: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  score: {
-    player1: number;
-    player2: number;
-  };
-  gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
+interface Paddle {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
-export const PongCanvas = ({ 
-  player1Name = "Player 1", 
-  player2Name = "Player 2", 
+interface Ball {
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  radius: number;
+}
+
+interface GameState {
+  ball: Ball;
+  paddle1: Paddle;
+  paddle2: Paddle;
+  paddle3: Paddle;
+  paddle4: Paddle;
+  score: { player1: number; player2: number };
+  gameStatus: "waiting" | "playing" | "paused" | "FINISHED";
+}
+
+const BALL_SPEED = 5;
+const paddleSpeed = 10;
+const accelerateSpeed = 1.002;
+const max_Speed = 25;
+const angle = Math.PI / 8;
+
+export const PongCanvas = ({
+  player1Name = localStorage.getItem("email") || "Player 1",
+  player2Name = "Player 2",
+  player3Name = "Player 3",
+  player4Name = "Player 4",
   onGameEnd,
-  maxScore = 11 
+  maxScore = 5,
 }: PongCanvasProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animationRef = useRef<number>(0);
   const keysPressed = useRef<Set<string>>(new Set());
-  
+  const lastTimeRef = useRef<number | null>(null);
+
   const [gameState, setGameState] = useState<GameState>({
     ball: {
       x: 400,
       y: 300,
-      dx: 2,
-      dy: 1,
-      radius: 8
+      dx: BALL_SPEED * Math.cos(angle),
+      dy: BALL_SPEED * Math.sin(angle),
+      radius: 8,
     },
-    paddle1: {
-      x: 20,
-      y: 250,
-      width: 15,
-      height: 100
-    },
-    paddle2: {
-      x: 765,
-      y: 250,
-      width: 15,
-      height: 100
-    },
-    score: {
-      player1: 0,
-      player2: 0
-    },
-    gameStatus: 'waiting'
+    paddle1: { x: 20, y: 250, width: 15, height: 100 },
+    paddle2: { x: 765, y: 250, width: 15, height: 100 },
+    paddle3: { x: 60, y: 250, width: 15, height: 100 },
+    paddle4: { x: 725, y: 250, width: 15, height: 100 },
+    score: { player1: 0, player2: 0 },
+    gameStatus: "waiting",
   });
 
+  const createBall = useCallback(
+    (dirx: number = 1) => ({
+      x: 400,
+      y: 300,
+      dx: dirx * BALL_SPEED * Math.cos(angle),
+      dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED * Math.sin(angle),
+      radius: 8,
+    }),
+    []
+  );
+
   const resetGame = useCallback(() => {
-    setGameState(prev => ({
+    lastTimeRef.current = null;
+    setGameState((prev) => ({
       ...prev,
-      ball: {
-        x: 400,
-        y: 300,
-        dx: Math.random() > 0.5 ? 2 : -2,
-        dy: (Math.random() - 0.5) * 3,
-        radius: 8
-      },
+      ball: createBall(1),
       paddle1: { ...prev.paddle1, y: 250 },
       paddle2: { ...prev.paddle2, y: 250 },
+      paddle3: { ...prev.paddle3, y: 250 },
+      paddle4: { ...prev.paddle4, y: 250 },
       score: { player1: 0, player2: 0 },
-      gameStatus: 'waiting'
+      gameStatus: "waiting",
     }));
-  }, []);
+  }, [createBall]);
 
-  const resetBall = useCallback(() => {
-    setGameState(prev => ({
-      ...prev,
-      ball: {
-        x: 400,
-        y: 300,
-        dx: Math.random() > 0.5 ? 2 : -2,
-        dy: (Math.random() - 0.5) * 3,
-        radius: 8
-      }
-    }));
-  }, []);
-
-  const updateGame = useCallback(() => {
-    setGameState(prev => {
-      if (prev.gameStatus !== 'playing') return prev;
-
-      const newState = { ...prev };
-      const canvas = canvasRef.current;
-      if (!canvas) return prev;
-
-      // Move paddles based on keys
-      const paddleSpeed = 7;
-      if (keysPressed.current.has('KeyW') && newState.paddle1.y > 0) {
-        newState.paddle1.y -= paddleSpeed;
-      }
-      if (keysPressed.current.has('KeyS') && newState.paddle1.y < canvas.height - newState.paddle1.height) {
-        newState.paddle1.y += paddleSpeed;
-      }
-      if (keysPressed.current.has('ArrowUp') && newState.paddle2.y > 0) {
-        newState.paddle2.y -= paddleSpeed;
-      }
-      if (keysPressed.current.has('ArrowDown') && newState.paddle2.y < canvas.height - newState.paddle2.height) {
-        newState.paddle2.y += paddleSpeed;
-      }
-
-      // Move ball
-      newState.ball.x += newState.ball.dx;
-      newState.ball.y += newState.ball.dy;
-
-      // Ball collision with top/bottom walls
-      if (newState.ball.y <= newState.ball.radius || newState.ball.y >= canvas.height - newState.ball.radius) {
-        newState.ball.dy = -newState.ball.dy;
-      }
-
-      // Ball collision with paddles
-      const ball = newState.ball;
-      const p1 = newState.paddle1;
-      const p2 = newState.paddle2;
-
-      // Left paddle collision
-      if (ball.x - ball.radius <= p1.x + p1.width &&
-          ball.y >= p1.y &&
-          ball.y <= p1.y + p1.height &&
-          ball.dx < 0) {
-        ball.dx = -ball.dx;
-        ball.dy += (ball.y - (p1.y + p1.height / 2)) * 0.1; // Add spin
-      }
-
-      // Right paddle collision
-      if (ball.x + ball.radius >= p2.x &&
-          ball.y >= p2.y &&
-          ball.y <= p2.y + p2.height &&
-          ball.dx > 0) {
-        ball.dx = -ball.dx;
-        ball.dy += (ball.y - (p2.y + p2.height / 2)) * 0.1; // Add spin
-      }
-
-      // Scoring
-      if (ball.x < 0) {
-        newState.score.player2++;
-        resetBall();
-      } else if (ball.x > canvas.width) {
-        newState.score.player1++;
-        resetBall();
-      }
-
-      // Check for game end
-      if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
-        newState.gameStatus = 'finished';
-        if (onGameEnd) {
-          onGameEnd(newState.score.player1, newState.score.player2);
-        }
-      }
-
-      return newState;
-    });
-  }, [maxScore, onGameEnd, resetBall]);
-
-  const draw = useCallback(() => {
+  const draw = useCallback((state: GameState) => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    // Clear canvas
-    ctx.fillStyle = 'hsl(222 47% 4%)';
+    // Clear
+    ctx.fillStyle = "hsl(222 47% 4%)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw center line
-    ctx.strokeStyle = 'hsl(222 47% 12%)';
+    // Center line
+    ctx.strokeStyle = "hsl(222 47% 12%)";
     ctx.lineWidth = 2;
     ctx.setLineDash([10, 10]);
     ctx.beginPath();
@@ -199,88 +117,181 @@ export const PongCanvas = ({
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw paddles
-    ctx.fillStyle = 'hsl(217 91% 60%)';
-    ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
-    ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
+    // Paddles
+    ctx.fillStyle = "hsl(217 91% 60%)";
+    ctx.fillRect(state.paddle1.x, state.paddle1.y, state.paddle1.width, state.paddle1.height);
+    ctx.fillRect(state.paddle2.x, state.paddle2.y, state.paddle2.width, state.paddle2.height);
 
-    // Draw ball
+    // Ball
     ctx.beginPath();
-    ctx.arc(gameState.ball.x, gameState.ball.y, gameState.ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'hsl(217 91% 60%)';
+    ctx.arc(state.ball.x, state.ball.y, state.ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "hsl(217 91% 60%)";
     ctx.fill();
 
-    // Add glow effect to ball
-    ctx.shadowColor = 'hsl(217 91% 60%)';
+    ctx.shadowColor = "hsl(217 91% 60%)";
     ctx.shadowBlur = 20;
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Draw scores
-    ctx.fillStyle = 'hsl(210 40% 98%)';
-    ctx.font = '48px "JetBrains Mono", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
-    ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
-  }, [gameState]);
+    // Scores
+    ctx.fillStyle = "hsl(210 40% 98%)";
+    ctx.font = '48px "JetBrains Mono"';
+    ctx.textAlign = "center";
+    ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
+    ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
+  }, []);
 
-  const gameLoop = useCallback(() => {
-    updateGame();
-    draw();
-    animationRef.current = requestAnimationFrame(gameLoop);
-  }, [updateGame, draw]);
+  const updateGame = useCallback(
+    (delta: number) => {
+      setGameState((prev) => {
+        if (prev.gameStatus !== "playing") return prev;
+        const newState = { ...JSON.parse(JSON.stringify(prev)) } as GameState;
+        const canvas = canvasRef.current;
+        if (!canvas) return prev;
+
+        // Paddle 1 (W/S)
+        if (keysPressed.current.has("KeyW") && newState.paddle1.y > 0)
+          newState.paddle1.y -= paddleSpeed * delta;
+        if (keysPressed.current.has("KeyS") && newState.paddle1.y < canvas.height - newState.paddle1.height)
+          newState.paddle1.y += paddleSpeed * delta;
+
+        // Paddle 2 (Up/Down)
+        if (keysPressed.current.has("ArrowUp") && newState.paddle2.y > 0)
+          newState.paddle2.y -= paddleSpeed * delta;
+        if (keysPressed.current.has("ArrowDown") && newState.paddle2.y < canvas.height - newState.paddle2.height)
+          newState.paddle2.y += paddleSpeed * delta;
+
+        // Ball movement
+        newState.ball.x += newState.ball.dx * delta;
+        newState.ball.y += newState.ball.dy * delta;
+
+   
+
+        // Collision with top/bottom
+        if (newState.ball.y + newState.ball.radius >= canvas.height) {
+          newState.ball.dy = -newState.ball.dy;
+          newState.ball.y = canvas.height - newState.ball.radius;
+        } else if (newState.ball.y - newState.ball.radius <= 0) {
+          newState.ball.dy = -newState.ball.dy;
+          newState.ball.y = newState.ball.radius;
+        }
+
+        // Paddle collisions (simple 2-player)
+        const ball = newState.ball;
+        const p1 = newState.paddle1;
+        const p2 = newState.paddle2;
+
+        if (
+          ball.x - ball.radius <= p1.x + p1.width &&
+          ball.x - ball.radius >= p1.x &&
+          ball.y + ball.radius >= p1.y &&
+          ball.y - ball.radius <= p1.y + p1.height &&
+          ball.dx < 0
+        ) {
+          ball.x = p1.x + p1.width + ball.radius;
+          ball.dx = -ball.dx;
+               // Accelerate
+            if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
+              newState.ball.dx *= accelerateSpeed;
+              newState.ball.dy *= accelerateSpeed;
+             }
+        }
+
+        if (
+          ball.x + ball.radius >= p2.x &&
+          ball.x + ball.radius <= p2.x + p2.width &&
+          ball.y + ball.radius >= p2.y &&
+          ball.y - ball.radius <= p2.y + p2.height &&
+          ball.dx > 0
+        ) {
+          ball.x = p2.x - ball.radius;
+          ball.dx = -ball.dx;
+               // Accelerate
+            if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
+              newState.ball.dx *= accelerateSpeed;
+              newState.ball.dy *= accelerateSpeed;
+        }
+        }
+
+        // Scoring
+        if (ball.x < 0) {
+          newState.score.player2++;
+          newState.ball = createBall(-1);
+        } else if (ball.x > canvas.width) {
+          newState.score.player1++;
+          newState.ball = createBall(1);
+        }
+
+        // Check end
+        if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
+          newState.gameStatus = "FINISHED";
+          onGameEnd?.(newState.score.player1, newState.score.player2);
+        }
+
+        return newState;
+      });
+    },
+    [createBall, maxScore, onGameEnd]
+  );
+
 
   useEffect(() => {
-    if (gameState.gameStatus === 'playing') {
-      gameLoop();
-    } else if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+    // Keyboard event handlers
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLElement) {
+        const tag = e.target.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+      }
+      if (["KeyW", "KeyS", "ArrowUp", "ArrowDown"].includes(e.code)) {
+        keysPressed.current.add(e.code);
+        // prevent default scroll behavior for arrows
+        if (gameState.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
+          e.preventDefault();
       }
     };
-  }, [gameState.gameStatus, gameLoop]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      keysPressed.current.add(e.code);
-    };
-
     const handleKeyUp = (e: KeyboardEvent) => {
       keysPressed.current.delete(e.code);
     };
+    window.addEventListener("keydown", handleKeyDown, { passive: false });
+    window.addEventListener("keyup", handleKeyUp);
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    // Game / render loop
+    const loop = (time: number) => {
+      const last = lastTimeRef.current;
+      const delta = last !== null ? (time - last) / 16.67 : 1;
+      lastTimeRef.current = time;
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      updateGame(delta);
+      draw(gameState);
+
+      animationRef.current = requestAnimationFrame(loop);
     };
-  }, []);
+    animationRef.current = requestAnimationFrame(loop);
 
-  useEffect(() => {
-    draw();
-  }, [draw]);
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      cancelAnimationFrame(animationRef.current);
+    };
+  }, [gameState, updateGame, draw]);
 
   const startGame = () => {
-    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+    lastTimeRef.current = null;
+    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
   const pauseGame = () => {
-    setGameState(prev => ({ ...prev, gameStatus: 'paused' }));
+    setGameState((prev) => ({ ...prev, gameStatus: "paused" }));
   };
 
   const resumeGame = () => {
-    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+    lastTimeRef.current = null;
+    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
   return (
     <div className="space-y-6">
-      {/* Game Info */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-secondary border-border">
           <CardHeader className="pb-2">
@@ -290,34 +301,32 @@ export const PongCanvas = ({
             <div className="text-3xl font-game font-bold text-primary">
               {gameState.score.player1}
             </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              W/S Keys
-            </div>
+            <div className="text-sm text-muted-foreground mt-2">W/S Keys</div>
           </CardContent>
         </Card>
 
         <div className="flex items-center justify-center">
           <div className="space-y-2">
-            {gameState.gameStatus === 'waiting' && (
+            {gameState.gameStatus === "waiting" && (
               <Button onClick={startGame} className="bg-gradient-primary">
                 <Play className="w-4 h-4 mr-2" />
                 Start Game
               </Button>
             )}
-            {gameState.gameStatus === 'playing' && (
-              <Button onClick={pauseGame} variant="outline">
+            {gameState.gameStatus === "playing" && (
+              <Button onClick={pauseGame} className="border border-border">
                 <Pause className="w-4 h-4 mr-2" />
                 Pause
               </Button>
             )}
-            {gameState.gameStatus === 'paused' && (
+            {gameState.gameStatus === "paused" && (
               <Button onClick={resumeGame} className="bg-gradient-primary">
                 <Play className="w-4 h-4 mr-2" />
                 Resume
               </Button>
             )}
             <div className="flex space-x-2">
-              <Button onClick={resetGame} variant="outline" size="sm">
+              <Button onClick={resetGame} className="px-2 py-1 text-sm border border-border">
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Reset
               </Button>
@@ -333,56 +342,20 @@ export const PongCanvas = ({
             <div className="text-3xl font-game font-bold text-primary">
               {gameState.score.player2}
             </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              Arrow Keys
-            </div>
+            <div className="text-sm text-muted-foreground mt-2">Arrow Keys</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Game Canvas */}
       <div className="flex justify-center">
-        <div className="relative">
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={600}
-            className="border border-border rounded-lg bg-card shadow-card"
-          />
-          {gameState.gameStatus === 'finished' && (
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
-              <Card className="bg-gradient-secondary border-border text-center">
-                <CardHeader>
-                  <CardTitle className="font-game text-2xl glow-text">Game Over!</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-lg">
-                    {gameState.score.player1 > gameState.score.player2 ? player1Name : player2Name} Wins!
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Final Score: {gameState.score.player1} - {gameState.score.player2}
-                  </div>
-                  <Button onClick={resetGame} className="bg-gradient-primary">
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Play Again
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          tabIndex={0}
+          className="border border-border rounded-lg bg-card shadow-card"
+        />
       </div>
-
-      {/* Controls Help */}
-      <Card className="bg-gradient-secondary border-border">
-        <CardContent className="pt-6">
-          <div className="text-center text-sm text-muted-foreground">
-            <p><strong>{player1Name}:</strong> Use W/S keys to move paddle up/down</p>
-            <p><strong>{player2Name}:</strong> Use Arrow Up/Down keys to move paddle up/down</p>
-            <p>First to {maxScore} points wins!</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

@@ -44,10 +44,7 @@ export async function login(
   reply: FastifyReply,
 ) {
   const { email, password } = req.body;
-  /*
-   MAKE SURE TO VALIDATE (according to you needs) user data
-   before performing the db query
-  */
+
   const user = await prisma.user.findUnique({ where: { email: email } });
   const isMatch = user && (await bcrypt.compare(password, user.password));
   if (!user || !isMatch) {
@@ -90,6 +87,9 @@ export async function logout(
   reply: FastifyReply,
 ) {
   const { email } = req.body;
+  console.log("\n\n\n\n\n\n\n\n\n");
+  console.log("Logout body received:", req.body);
+  console.log("\n\n\n\n\n\n\n\n\n");
   await prisma.user.update({
     where: { email },
     data: { loggedIn: false },

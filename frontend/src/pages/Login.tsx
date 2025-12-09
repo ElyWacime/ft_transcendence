@@ -1,18 +1,38 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { api, userApi } from "@/lib/api"; // assumes you have an api wrapper like in your Game page
-import { Trophy } from "lucide-react";
+import { userApi } from "@/lib/api";
+import { Trophy, Github } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); 
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 👇 Handle ?token=... redirect from GitHub OAuth
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+
+      // 👇 instantly update auth context
+      login(token, "github_user");
+
+      toast.success("Successfully logged in with GitHub!");
+      navigate("/tournament", { replace: true });
+    }
+  }, [navigate, login]);
+
+
+  // 👇 Standard login form
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -21,7 +41,6 @@ const Login = () => {
       const res = await userApi.login(email, password);
       if (res.accessToken) {
         login(res.accessToken, email);
-
         toast.success("Welcome back!");
         navigate("/tournament");
       } else {
@@ -33,6 +52,11 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 👇 GitHub OAuth redirect
+  const handleGitHubLogin = () => {
+    window.location.href = "http://10.12.7.4/api/users/auth/github";
   };
 
   return (
@@ -88,6 +112,24 @@ const Login = () => {
         >
           {loading ? "Logging in..." : "Login"}
         </Button>
+
+        {/* Divider */}
+        <div className="flex items-center my-4">
+          <div className="flex-grow h-px bg-border" />
+          <span className="px-2 text-sm text-muted-foreground">or</span>
+          <div className="flex-grow h-px bg-border" />
+        </div>
+
+        {/* GitHub OAuth Button */}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2 font-semibold text-lg"
+          onClick={handleGitHubLogin}
+        >
+          <Github className="w-5 h-5" />
+          Continue with GitHub
+        </Button>
       </form>
 
       {/* Footer */}
@@ -105,3 +147,4 @@ const Login = () => {
 };
 
 export default Login;
+

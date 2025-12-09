@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
+import { useEffect } from "react";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -10,25 +11,33 @@ const Home = () => {
     {
       icon: Trophy,
       title: "Tournament Mode",
-      description: "Compete in elimination tournaments with dynamic brackets"
+      description: "Compete in elimination tournaments with dynamic brackets",
+      page: "/tournament"
     },
     {
       icon: Users,
-      title: "Multiplayer Ready",
-      description: "Play with friends on the same keyboard or online"
+      title: "1 vs 1",
+      description: "Play with a friend on the same keyboard",
+      page: "/game"
     },
     {
       icon: Gamepad2,
-      title: "Classic Pong",
-      description: "Retro gameplay with modern, responsive controls"
+      title: "1 vs 1 Online",
+      description: "Play with players online",
+      page: "/loading?mode=2"
+    },
+    {
+      icon: Gamepad2,
+      title: "2 vs 2 Online",
+      description: "Team up and play against another team",
+      page: "/loading?mode=4"
     },
     {
       icon: Zap,
-      title: "Real-time Chat",
-      description: "Communicate with opponents during matches"
+      title: "1 vs AI",
+      description: "Outsmart this AI "
     }
   ];
-
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
@@ -40,12 +49,12 @@ const Home = () => {
             <span className="text-primary"> ARENA</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            The ultimate retro gaming tournament experience. 
+            The ultimate retro gaming tournament experience.
             Compete, dominate, and become the Pong champion!
           </p>
           <Button
             size="lg"
-            onClick={() => navigate("/tournament")}
+            onClick={() => { navigate("/tournament") }}
             className="bg-gradient-primary hover:scale-105 transition-transform duration-300 animate-pulse-glow text-lg px-8 py-4 font-game"
           >
             <Trophy className="w-6 h-6 mr-2" />
@@ -62,7 +71,7 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card
+              <Card onClick={() => { navigate(feature.page) }}
                 key={index}
                 className="p-6 bg-gradient-secondary border-border hover:border-primary transition-all duration-300 hover:shadow-glow group"
               >
@@ -87,7 +96,7 @@ const Home = () => {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigate("/tournament")}
+              onClick={() => { navigate("/tournament") }}
               className="font-medium"
             >
               <Users className="w-5 h-5 mr-2" />
@@ -96,7 +105,7 @@ const Home = () => {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigate("/game")}
+              onClick={() => { navigate("/game") }}
               className="font-medium"
             >
               <Gamepad2 className="w-5 h-5 mr-2" />

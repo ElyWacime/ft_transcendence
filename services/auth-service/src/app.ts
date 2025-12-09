@@ -4,16 +4,18 @@ import fjwt, { FastifyJWT } from "@fastify/jwt";
 import fCookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
+import { oauthRoutes } from "./modules/user/oauth.route";
 
 const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 
 // --- CORS ---
 app.register(cors, {
   origin: [
-    "http://localhost",
-    "http://localhost:8080",
+    "http://10.12.7.4",
+    "http://10.12.7.4:8080",
     "http://127.0.0.1:8080",
     "http://frontend:8080",
+    "http://0.0.0.0",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -55,7 +57,12 @@ app.decorate(
 app.get("/healthcheck", async () => ({ message: "Success" }));
 
 // --- Routes ---
-// ✅ No prefix here — NGINX handles `/api/users/`
+//  No prefix here — NGINX handles `/api/users/`
+
+// --- OAuth routes ---
+app.register(oauthRoutes, { prefix: "/auth" });
+
+// --- User routes ---
 app.register(userRoutes);
 
 // --- Graceful shutdown ---

@@ -11,10 +11,10 @@ const Game = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  
+
   // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
-  const player1 = location.state?.player1 || { alias: "Player 1" };
+  const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
   const player2 = location.state?.player2 || { alias: "Player 2" };
 
   const handleGameEnd = async (player1Score: number, player2Score: number) => {
@@ -22,14 +22,14 @@ const Game = () => {
       if (match) {
         // Update match result in tournament
         await api.updateMatchResult(match.id, player1Score, player2Score);
-        
+
         const winner = player1Score > player2Score ? player1.alias : player2.alias;
-        
+
         // Send system message
         await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
-        
+
         toast.success(`${winner} wins the match!`);
-        
+
         // Navigate to result page
         setTimeout(() => {
           navigate("/result", {
@@ -64,7 +64,7 @@ const Game = () => {
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
           </Button>
-          
+
           <div className="text-center">
             <h1 className="text-2xl md:text-4xl font-game font-bold glow-text flex items-center justify-center space-x-2">
               {match && <Trophy className="w-8 h-8 text-primary" />}
@@ -76,7 +76,7 @@ const Game = () => {
               </p>
             )}
           </div>
-          
+
           <div className="w-20"> {/* Spacer for balance */}
           </div>
         </div>
@@ -87,7 +87,7 @@ const Game = () => {
             player1Name={player1.alias}
             player2Name={player2.alias}
             onGameEnd={handleGameEnd}
-            maxScore={11}
+            maxScore={5}
           />
         </div>
 
