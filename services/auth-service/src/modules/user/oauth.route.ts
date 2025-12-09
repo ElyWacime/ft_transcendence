@@ -104,7 +104,7 @@ export async function oauthRoutes(app: FastifyInstance) {
     // );
 
     // Redirect to frontend with token
-    const redirectUrl = new URL("http://localhost/login");
+    const redirectUrl = new URL(`http://${process.env.COOKIE_DOMAIN}/login`);
     redirectUrl.searchParams.set("token", token);
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());
