@@ -16,64 +16,7 @@ const matches = new Map();
 const PADDLE_SPEED = 8;
 
 await dbcnx.connect();
-// Collision with top/bottom
-// if (m.Ball_y + m.Ball_radius >= m.height) {
-//   m.Ball_dy = -m.Ball_dy;
-//   m.Ball_y = m.height - m.Ball_radius;
-// } else if (m.Ball_y - m.Ball_radius <= 0) {
-//   m.Ball_dy = -m.Ball_dy;
-//   m.Ball_y = m.Ball_radius;
-// }
-
-
-
-// Paddle collisions
-// if (
-//   m.Ball_x - m.Ball_radius <= m.Player1_x + m.sizePaddle_width &&
-//   m.Ball_x - m.Ball_radius >= m.Player1_x &&
-//   m.Ball_y + m.Ball_radius >= m.Player1_y &&
-//   m.Ball_y - m.Ball_radius <= m.Player1_y + m.sizePaddle_height &&
-//   m.Ball_dx < 0
-// ) {
-//   m.Ball_x = m.Player1_x + m.sizePaddle_width + m.Ball_radius;
-//   m.Ball_dx = -m.Ball_dx;
-// }
-
-// if (
-//   m.Ball_x + m.Ball_radius >= m.Player2_x &&
-//   m.Ball_x + m.Ball_radius <= m.Player2_x + m.sizePaddle_width &&
-//   m.Ball_y + m.Ball_radius >= m.Player2_y &&
-//   m.Ball_y - m.Ball_radius <= m.Player2_y + m.sizePaddle_height &&
-//   m.Ball_dx > 0
-// ) {
-//   m.Ball_x = m.Player2_x - m.Ball_radius;
-//   m.Ball_dx = -m.Ball_dx;
-// }
-
-// if (m.P3_Id &&
-//   m.Ball_x - m.Ball_radius <= m.Player3_x + m.sizePaddle_width &&
-//   m.Ball_x - m.Ball_radius >= m.Player3_x &&
-//   m.Ball_y + m.Ball_radius >= m.Player3_y &&
-//   m.Ball_y - m.Ball_radius <= m.Player3_y + m.sizePaddle_height &&
-//   m.Ball_dx < 0
-// ) {
-//   m.Ball_x = m.Player3_x + m.sizePaddle_width + m.Ball_radius;
-//   m.Ball_dx = -m.Ball_dx;
-// }
-
-// if (m.P4_Id &&
-//   m.Ball_x + m.Ball_radius >= m.Player4_x &&
-//   m.Ball_x + m.Ball_radius <= m.Player4_x + m.sizePaddle_width &&
-//   m.Ball_y + m.Ball_radius >= m.Player4_y &&
-//   m.Ball_y - m.Ball_radius <= m.Player4_y + m.sizePaddle_height &&
-//   m.Ball_dx > 0
-// ) {
-//   m.Ball_x = m.Player4_x - m.Ball_radius;
-//   m.Ball_dx = -m.Ball_dx;
-// }
-
 let max_Speed = 8;
-
 function sendtoplayer(id, data) {
   if (id) {
     let socket = (clients.get(id));
@@ -81,69 +24,6 @@ function sendtoplayer(id, data) {
       socket.send(data);
     }
 }
-// function playercoli(m,x,y,id)
-// {
-//   if (!id) return;
-//   if (m.Ball_x - m.ball_radius <= x + m.sizePaddle_width) {
-//     if (m.Ball_y >= y && m.Ball_y <= y + m.sizePaddle_height) {
-//       m.Ball_dx = -(m.Ball_dx);
-//       m.Ball_dx *= 1.05;
-//     }
-//   }
-// }
-
-// function playercoli(m, x, y, id) {
-//   if (!id) return;
-
-//   const ballLeft   = m.Ball_x - m.ball_radius;
-//   const ballRight  = m.Ball_x + m.ball_radius;
-//   const ballTop    = m.Ball_y - m.ball_radius;
-//   const ballBottom = m.Ball_y + m.ball_radius;
-
-//   const padLeft   = x;
-//   const padRight  = x + m.sizePaddle_width;
-//   const padTop    = y;
-//   const padBottom = y + m.sizePaddle_height;
-
-//   const isLeftPaddle = x < m.width / 2;
-
-
-//   if (isLeftPaddle) {
- 
-//     if (ballLeft <= padRight && padRight <= ballRight &&     
-//       padTop <= m.Ball_y && m.Ball_y <= padBottom
-//     ) {
-//       m.Ball_dx =-(m.Ball_dx); 
-//       m.Ball_dx *= 1.05;
-//       return;
-//     }
-
-//   }
-//   else
-//   {
-//     if (ballLeft <= padLeft && padLeft <= ballRight &&      
-//       padTop <= m.Ball_y  && m.Ball_y <= padBottom
-//     ) {
-//       m.Ball_dx = -(m.Ball_dx); 
-//       m.Ball_dx *= 1.05;
-//       return;
-//     }
-//   }
-
-//   if (ballTop < padTop && padTop <= ballBottom &&          
-//     padLeft <= m.Ball_x && m.Ball_x <= padRight
-//   ) {
-//     m.Ball_dy = -(m.Ball_dy);
-//     return;
-//   }
-
-//   if (ballTop <= padBottom && padBottom < ballBottom &&     
-//     padLeft <= m.Ball_x  && m.Ball_x <= padRight
-//   ) {
-//     m.Ball_dy =-(m.Ball_dy);
-//     return;
-//   }
-// }
 
 function moveplayer(m,y,up,down,id)
 {
@@ -192,36 +72,7 @@ function playercoli(m,x,y,id, n)
     }
     }
   }
-
 }
-
-// function tick(m) {
-//   if (m.gameStatus !== "PLAYING") return;
-
-//   m.Player1_y = moveplayer(m, m.Player1_y, m.p1UPkey, m.p1Downkey, m.P1_Id);
-//   m.Player2_y = moveplayer(m, m.Player2_y, m.p2UPkey, m.p2Downkey, m.P2_Id);
-//   m.Player3_y = moveplayer(m, m.Player3_y, m.p3UPkey, m.p3Downkey, m.P3_Id);
-//   m.Player4_y = moveplayer(m, m.Player4_y, m.p4UPkey, m.p4Downkey, m.P4_Id);
-//   m.Ball_x += m.Ball_dx;
-//   m.Ball_y += m.Ball_dy;
-//   if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
-//     m.Ball_dy *= -1
-//     m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
-//   }
-//   playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id);
-//   playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id);
-//   playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id);
-//   playercoli(m, m.Player4_x, m.Player4_y, m.P4_Id);
-//   if (m.Ball_x < 0) {
-//     m.score2 += 1;
-//     resetBall(-1, m);
-//   } else if (m.Ball_x > m.width) {
-//     m.score1 += 1;
-//     resetBall(1, m);
-//   }
-//   if (m.score2 == 5 || m.score1 == 5)
-//     m.gameStatus = "FINISHED";
-// }
 
 function tick(m) {
   if (m.gameStatus !== "PLAYING") return;
@@ -232,32 +83,12 @@ function tick(m) {
   m.Player4_y = moveplayer(m, m.Player4_y, m.p4UPkey, m.p4Downkey, m.P4_Id);
   m.Ball_x += m.Ball_dx;
   m.Ball_y += m.Ball_dy;
+
   if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
     m.Ball_dy *= -1;
     m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
   }
 
-  // if (m.Ball_x - m.ball_radius <= m.Player1_x + m.sizePaddle_width) {
-  //   if (m.Ball_y >= m.Player1_y && m.Ball_y <= m.Player1_y + m.sizePaddle_height) {
-  //     m.Ball_dx *= -1.05;
-  //   }
-  // }
-  // if (m.Ball_x + m.ball_radius >= m.Player2_x) {
-  //   if (m.Ball_y >= m.Player2_y && m.Ball_y <= m.Player2_y + m.sizePaddle_height) {
-  //     m.Ball_dx  *= -1.05;
-  //   }
-  // }
-
-  // if (m.P3_Id && m.Ball_x - m.ball_radius <= m.Player3_x + m.sizePaddle_width) {
-  //   if (m.Ball_y >= m.Player3_y && m.Ball_y <= m.Player3_y + m.sizePaddle_height) {
-  //     m.Ball_dx *= -1.05;
-  //   }
-  // }
-  // if (m.P4_Id && m.Ball_x + m.ball_radius >= m.Player4_x) {
-  //   if (m.Ball_y >= m.Player4_y && m.Ball_y <= m.Player4_y + m.sizePaddle_height) {
-  //     m.Ball_dx  *= -1.05;
-  //   }
-  // }
   playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id,1);
   playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id,1);
   playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id,0);
@@ -270,7 +101,7 @@ function tick(m) {
     m.score1 += 1;
     resetBall(1, m);
   }
-  if (m.score2 == 500 || m.score1 == 500)
+  if (m.score2 == 5 || m.score1 == 5)
     m.gameStatus = "FINISHED";
 }
 
