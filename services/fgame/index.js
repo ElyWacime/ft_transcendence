@@ -92,58 +92,58 @@ function sendtoplayer(id, data) {
 //   }
 // }
 
-function playercoli(m, x, y, id) {
-  if (!id) return;
+// function playercoli(m, x, y, id) {
+//   if (!id) return;
 
-  const ballLeft   = m.Ball_x - m.ball_radius;
-  const ballRight  = m.Ball_x + m.ball_radius;
-  const ballTop    = m.Ball_y - m.ball_radius;
-  const ballBottom = m.Ball_y + m.ball_radius;
+//   const ballLeft   = m.Ball_x - m.ball_radius;
+//   const ballRight  = m.Ball_x + m.ball_radius;
+//   const ballTop    = m.Ball_y - m.ball_radius;
+//   const ballBottom = m.Ball_y + m.ball_radius;
 
-  const padLeft   = x;
-  const padRight  = x + m.sizePaddle_width;
-  const padTop    = y;
-  const padBottom = y + m.sizePaddle_height;
+//   const padLeft   = x;
+//   const padRight  = x + m.sizePaddle_width;
+//   const padTop    = y;
+//   const padBottom = y + m.sizePaddle_height;
 
-  const isLeftPaddle = x < m.width / 2;
+//   const isLeftPaddle = x < m.width / 2;
 
 
-  if (isLeftPaddle) {
+//   if (isLeftPaddle) {
  
-    if (ballLeft <= padRight && padRight <= ballRight &&     
-      padTop <= m.Ball_y && m.Ball_y <= padBottom
-    ) {
-      m.Ball_dx =-(m.Ball_dx); 
-      m.Ball_dx *= 1.05;
-      return;
-    }
+//     if (ballLeft <= padRight && padRight <= ballRight &&     
+//       padTop <= m.Ball_y && m.Ball_y <= padBottom
+//     ) {
+//       m.Ball_dx =-(m.Ball_dx); 
+//       m.Ball_dx *= 1.05;
+//       return;
+//     }
 
-  }
-  else
-  {
-    if (ballLeft <= padLeft && padLeft <= ballRight &&      
-      padTop <= m.Ball_y  && m.Ball_y <= padBottom
-    ) {
-      m.Ball_dx = -(m.Ball_dx); 
-      m.Ball_dx *= 1.05;
-      return;
-    }
-  }
+//   }
+//   else
+//   {
+//     if (ballLeft <= padLeft && padLeft <= ballRight &&      
+//       padTop <= m.Ball_y  && m.Ball_y <= padBottom
+//     ) {
+//       m.Ball_dx = -(m.Ball_dx); 
+//       m.Ball_dx *= 1.05;
+//       return;
+//     }
+//   }
 
-  if (ballTop < padTop && padTop <= ballBottom &&          
-    padLeft <= m.Ball_x && m.Ball_x <= padRight
-  ) {
-    m.Ball_dy = -(m.Ball_dy);
-    return;
-  }
+//   if (ballTop < padTop && padTop <= ballBottom &&          
+//     padLeft <= m.Ball_x && m.Ball_x <= padRight
+//   ) {
+//     m.Ball_dy = -(m.Ball_dy);
+//     return;
+//   }
 
-  if (ballTop <= padBottom && padBottom < ballBottom &&     
-    padLeft <= m.Ball_x  && m.Ball_x <= padRight
-  ) {
-    m.Ball_dy =-(m.Ball_dy);
-    return;
-  }
-}
+//   if (ballTop <= padBottom && padBottom < ballBottom &&     
+//     padLeft <= m.Ball_x  && m.Ball_x <= padRight
+//   ) {
+//     m.Ball_dy =-(m.Ball_dy);
+//     return;
+//   }
+// }
 
 function moveplayer(m,y,up,down,id)
 {
@@ -155,6 +155,74 @@ function moveplayer(m,y,up,down,id)
   return y;
 }
 
+function playercoli(m,x,y,id, n)
+{
+  if (!id) return;
+  if (n == 1)
+  {
+    if (
+      m.Ball_x - m.ball_radius <= x + m.sizePaddle_width &&
+      m.Ball_x - m.ball_radius >= x &&
+      m.Ball_y + m.ball_radius >= y &&
+      m.Ball_y - m.ball_radius <= y + m.sizePaddle_height &&
+      m.Ball_dx < 0
+    ) {
+         m.Ball_x = x + m.sizePaddle_width + m.ball_radius;
+         m.Ball_dx *= -1;
+         if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < max_Speed * max_Speed) {
+           m.Ball_dx *= 1.05;
+           m.Ball_dy *= 1.05;
+           }
+    }
+  }
+  else if (n == 0)
+  {
+    if (
+      m.Ball_x + m.ball_radius >= x &&
+      m.Ball_x + m.ball_radius <= x + m.sizePaddle_width &&
+      m.Ball_y + m.ball_radius >= y &&
+      m.Ball_y - m.ball_radius <= y + m.sizePaddle_height &&
+      m.Ball_dx > 0
+    ){
+         m.Ball_x = x - m.ball_radius;
+         m.Ball_dx = -m.Ball_dx;
+         if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < max_Speed * max_Speed) {
+           m.Ball_dx *= 1.05;
+           m.Ball_dy *= 1.05;
+    }
+    }
+  }
+
+}
+
+// function tick(m) {
+//   if (m.gameStatus !== "PLAYING") return;
+
+//   m.Player1_y = moveplayer(m, m.Player1_y, m.p1UPkey, m.p1Downkey, m.P1_Id);
+//   m.Player2_y = moveplayer(m, m.Player2_y, m.p2UPkey, m.p2Downkey, m.P2_Id);
+//   m.Player3_y = moveplayer(m, m.Player3_y, m.p3UPkey, m.p3Downkey, m.P3_Id);
+//   m.Player4_y = moveplayer(m, m.Player4_y, m.p4UPkey, m.p4Downkey, m.P4_Id);
+//   m.Ball_x += m.Ball_dx;
+//   m.Ball_y += m.Ball_dy;
+//   if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
+//     m.Ball_dy *= -1
+//     m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
+//   }
+//   playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id);
+//   playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id);
+//   playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id);
+//   playercoli(m, m.Player4_x, m.Player4_y, m.P4_Id);
+//   if (m.Ball_x < 0) {
+//     m.score2 += 1;
+//     resetBall(-1, m);
+//   } else if (m.Ball_x > m.width) {
+//     m.score1 += 1;
+//     resetBall(1, m);
+//   }
+//   if (m.score2 == 5 || m.score1 == 5)
+//     m.gameStatus = "FINISHED";
+// }
+
 function tick(m) {
   if (m.gameStatus !== "PLAYING") return;
 
@@ -165,13 +233,36 @@ function tick(m) {
   m.Ball_x += m.Ball_dx;
   m.Ball_y += m.Ball_dy;
   if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
-    m.Ball_dy *= -1
+    m.Ball_dy *= -1;
     m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
   }
-  playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id);
-  playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id);
-  playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id);
-  playercoli(m, m.Player4_x, m.Player4_y, m.P4_Id);
+
+  // if (m.Ball_x - m.ball_radius <= m.Player1_x + m.sizePaddle_width) {
+  //   if (m.Ball_y >= m.Player1_y && m.Ball_y <= m.Player1_y + m.sizePaddle_height) {
+  //     m.Ball_dx *= -1.05;
+  //   }
+  // }
+  // if (m.Ball_x + m.ball_radius >= m.Player2_x) {
+  //   if (m.Ball_y >= m.Player2_y && m.Ball_y <= m.Player2_y + m.sizePaddle_height) {
+  //     m.Ball_dx  *= -1.05;
+  //   }
+  // }
+
+  // if (m.P3_Id && m.Ball_x - m.ball_radius <= m.Player3_x + m.sizePaddle_width) {
+  //   if (m.Ball_y >= m.Player3_y && m.Ball_y <= m.Player3_y + m.sizePaddle_height) {
+  //     m.Ball_dx *= -1.05;
+  //   }
+  // }
+  // if (m.P4_Id && m.Ball_x + m.ball_radius >= m.Player4_x) {
+  //   if (m.Ball_y >= m.Player4_y && m.Ball_y <= m.Player4_y + m.sizePaddle_height) {
+  //     m.Ball_dx  *= -1.05;
+  //   }
+  // }
+  playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id,1);
+  playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id,1);
+  playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id,0);
+  playercoli(m, m.Player4_x, m.Player4_y, m.P4_Id,0);
+
   if (m.Ball_x < 0) {
     m.score2 += 1;
     resetBall(-1, m);
@@ -179,9 +270,76 @@ function tick(m) {
     m.score1 += 1;
     resetBall(1, m);
   }
-  if (m.score2 == 5 || m.score1 == 5)
+  if (m.score2 == 500 || m.score1 == 500)
     m.gameStatus = "FINISHED";
 }
+
+
+// function tick(m) {
+//   if (m.gameStatus !== "PLAYING") return;
+//   m.Ball_x += m.Ball_dx;
+//   m.Ball_y += m.Ball_dy;
+//   if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
+//     m.Ball_dy *= -1;
+//     m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
+//   }
+
+//   if (m.Ball_x - m.ball_radius <= m.Player1_x + m.sizePaddle_width) {
+//     if (m.Ball_y >= m.Player1_y && m.Ball_y <= m.Player1_y + m.sizePaddle_height) {
+//       m.Ball_dx = Math.abs(m.Ball_dx);
+//       m.Ball_dx *= 1.05;
+//     }
+//   }
+//   if (m.Ball_x + m.ball_radius >= m.Player2_x) {
+//     if (m.Ball_y >= m.Player2_y && m.Ball_y <= m.Player2_y + m.sizePaddle_height) {
+//       m.Ball_dx = -Math.abs(m.Ball_dx);
+//       m.Ball_dx *= 1.05;
+//     }
+//   }
+
+//   if (m.P3_Id && m.Ball_x - m.ball_radius <= m.Player3_x + m.sizePaddle_width) {
+//     if (m.Ball_y >= m.Player3_y && m.Ball_y <= m.Player3_y + m.sizePaddle_height) {
+//       m.Ball_dx = Math.abs(m.Ball_dx);
+//       m.Ball_dx *= 1.05;
+//     }
+//   }
+//   if (m.P4_Id && m.Ball_x + m.ball_radius >= m.Player4_x) {
+//     if (m.Ball_y >= m.Player4_y && m.Ball_y <= m.Player4_y + m.sizePaddle_height) {
+//       m.Ball_dx = -Math.abs(m.Ball_dx);
+//       m.Ball_dx *= 1.05;
+//     }
+//   }
+
+//   if (m.p1UPkey)
+//     m.Player1_y = Math.max(0, m.Player1_y - PADDLE_SPEED);
+//   else if (m.p1Downkey)
+//     m.Player1_y = Math.min(m.height - m.sizePaddle_height, m.Player1_y + PADDLE_SPEED);
+//   if (m.p2UPkey)
+//     m.Player2_y = Math.max(0, m.Player2_y - PADDLE_SPEED);
+//   else if (m.p2Downkey)
+//     m.Player2_y = Math.min(m.height - m.sizePaddle_height, m.Player2_y + PADDLE_SPEED);
+//   if (m.P3_Id) {
+//     if (m.p3UPkey)
+//       m.Player3_y = Math.max(0, m.Player3_y - PADDLE_SPEED);
+//     else if (m.p3Downkey)
+//       m.Player3_y = Math.min(m.height - m.sizePaddle_height, m.Player3_y + PADDLE_SPEED);
+//   }
+//   if (m.P4_Id) {
+//     if (m.p4UPkey)
+//       m.Player4_y = Math.max(0, m.Player4_y - PADDLE_SPEED);
+//     else if (m.p4Downkey)
+//       m.Player4_y = Math.min(m.height - m.sizePaddle_height, m.Player4_y + PADDLE_SPEED);
+//   }
+//   if (m.Ball_x < 0) {
+//     m.score2 += 1;
+//     resetBall(-1, m);
+//   } else if (m.Ball_x > m.width) {
+//     m.score1 += 1;
+//     resetBall(1, m);
+//   }
+//   if (m.score2 == 500 || m.score1 == 500)
+//     m.gameStatus = "FINISHED";
+// }
 
 function resetBall(direction = 1, m) {
   m.Ball_x = m.width / 2;

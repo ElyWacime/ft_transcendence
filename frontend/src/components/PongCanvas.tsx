@@ -165,11 +165,7 @@ export const PongCanvas = ({
         newState.ball.x += newState.ball.dx * delta;
         newState.ball.y += newState.ball.dy * delta;
 
-        // Accelerate
-        if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
-          newState.ball.dx *= accelerateSpeed;
-          newState.ball.dy *= accelerateSpeed;
-        }
+   
 
         // Collision with top/bottom
         if (newState.ball.y + newState.ball.radius >= canvas.height) {
@@ -194,6 +190,11 @@ export const PongCanvas = ({
         ) {
           ball.x = p1.x + p1.width + ball.radius;
           ball.dx = -ball.dx;
+               // Accelerate
+            if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
+              newState.ball.dx *= accelerateSpeed;
+              newState.ball.dy *= accelerateSpeed;
+             }
         }
 
         if (
@@ -205,6 +206,11 @@ export const PongCanvas = ({
         ) {
           ball.x = p2.x - ball.radius;
           ball.dx = -ball.dx;
+               // Accelerate
+            if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
+              newState.ball.dx *= accelerateSpeed;
+              newState.ball.dy *= accelerateSpeed;
+        }
         }
 
         // Scoring
