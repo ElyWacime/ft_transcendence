@@ -1,7 +1,7 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut } from "lucide-react";
+import { Home, Trophy, Gamepad2, LogIn, LogOut, Bot } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -20,6 +20,8 @@ export const Navigation = () => {
     { path: "/", label: "Home", icon: Home },
     { path: "/tournament", label: "Tournament", icon: Trophy },
     { path: "/game", label: "Game", icon: Gamepad2 },
+    { path: "/game-ai", label: "VS AI", icon: Bot },
+    { path: "/game-online", label: "Game Online", icon: Gamepad2 },
   ];
 
   // Add either Login or Logout depending on auth state

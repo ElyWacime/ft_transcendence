@@ -1,12 +1,17 @@
-
 FROM node:20-slim
 
 WORKDIR /app
 
-COPY package*.json ./
+# Install openssl for Prisma
 RUN apt-get update -y && apt-get install -y openssl
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
+# Copy rest of the application
 COPY . .
 RUN mkdir -p /app/prisma/db
 

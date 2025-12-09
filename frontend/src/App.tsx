@@ -8,6 +8,8 @@ import { Navigation } from "@/components/ui/navigation";
 import Home from "./pages/Home";
 import Tournament from "./pages/Tournament";
 import Game from "./pages/Game";
+import GameAI from "./pages/GameAI";
+import GameOnline from "./pages/GameOnline";
 import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -37,6 +39,8 @@ const App = () => (
                 }
               />
               <Route path="/game" element={<Game />} />
+              <Route path="/game-online" element={<GameOnline />} />
+              <Route path="/game-ai" element={<GameAI />} />
               <Route path="/result" element={<Result />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
