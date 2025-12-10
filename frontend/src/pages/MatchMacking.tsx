@@ -18,7 +18,7 @@ const MatchMacking = () => {
         return [
             {
                 icon: Users,
-                title: email,
+                title: "Player 1",
                 description: mode === "4" ? "Team A" : "Player 1",
             },
             {
@@ -56,6 +56,7 @@ const MatchMacking = () => {
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
+            console.log(data);
             setFeatures(() => {
                 return [
                     {
