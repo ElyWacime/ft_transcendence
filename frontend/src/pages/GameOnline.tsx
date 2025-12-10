@@ -28,6 +28,7 @@ const GameOnline = () => {
 
   const endGame = () => {
     ws.send(JSON.stringify({
+      token:localStorage.getItem("token"),
       type: "FINISHED",
       email: email,
       tournement: false,

@@ -36,7 +36,15 @@ export async function createUser(
     return reply.code(500).send(e);
   }
 }
-
+// Add this at the top of your auth server files if missing
+// declare global {
+//   interface Console {
+//     log(message?: any, ...optionalParams: any[]): void;
+//     error(message?: any, ...optionalParams: any[]): void;
+//     // Add other console methods as needed
+//   }
+//   var console: Console;
+// }
 export async function login(
   req: FastifyRequest<{
     Body: LoginUserInput;
@@ -62,7 +70,18 @@ export async function login(
     email: user.email,
     name: user.name,
   };
-  const token = req.jwt.sign(payload);
+    // DEBUG: What secret is actually being used?
+    // console.log("🔐 AUTH SERVER DEBUG:");
+    // console.log("   JWT_ACCESS_SECRET from env:", process.env.JWT_ACCESS_SECRET);
+    // console.log("   Secret length:", process.env.JWT_ACCESS_SECRET?.length);
+    // console.log("   Secret char codes:", 
+      // Array.from(process.env.JWT_ACCESS_SECRET || '').map(c => c.charCodeAt(0)));
+    
+    const token = req.jwt.sign(payload);
+    
+    // console.log("   Token created (first 50):", token.substring(0, 50) + "...");
+    // console.log("   Token length:", token.length);
+  // const token = req.jwt.sign(payload);
   reply.setCookie("access_token", token, {
     path: "/",
     httpOnly: true,

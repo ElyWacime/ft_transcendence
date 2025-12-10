@@ -74,7 +74,7 @@ services:
     build:
       context: ./services/fgame
       dockerfile: Dockerfile
-    container_name: pong-game
+    # container_name: pong-game
     environment:
       - JWT_ACCESS_SECRET=supersecretkey
       - JWT_REFRESH_SECRET=superrefreshkey

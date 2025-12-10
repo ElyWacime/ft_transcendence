@@ -45,6 +45,7 @@ const MatchMacking = () => {
     useEffect(() => {
         if (!ws || !isReady) return;
         ws.send(JSON.stringify({
+            token:localStorage.getItem("token"),
             type: "REGISTER",
             email,
             tournement: false,
@@ -99,6 +100,7 @@ const MatchMacking = () => {
         return () => {
             if (ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({
+                    token:localStorage.getItem("token"),
                     type: "DELETE",
                     email,
                     tournement: false,
