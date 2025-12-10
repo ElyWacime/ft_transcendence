@@ -166,8 +166,9 @@ class TournamentAPI {
 export const api = new TournamentAPI();
 
 // ---------------- USER AUTH API ---------------- //
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
-  private baseUrl = "http://10.12.7.4/api/users";
+  private baseUrl = `${API_URL}/api/users`;
 
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {

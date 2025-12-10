@@ -56,7 +56,9 @@ const Login = () => {
 
   // 👇 GitHub OAuth redirect
   const handleGitHubLogin = () => {
-    window.location.href = "http://10.12.7.4/api/users/auth/github";
+    // window.location.href = "http://10.12.7.4/api/users/auth/github";
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/users/auth/github`;
+  
   };
 
   return (
