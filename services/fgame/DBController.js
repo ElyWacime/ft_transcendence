@@ -304,13 +304,10 @@ export class SQLiteDB {
     // -------------------------------
 
     async createUsers(t) {
-        let result = await this.db.get(`SELECT * FROM Users WHERE email = ?`, t.email);
-        if (!result) {
-            result = await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar)
-            VALUES (?,?, ?, ?, ?, ?, ?, ?)`, [t.email, t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar]);
-            return result.lastID;
-        }
-        return result.id;
+        let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
+        if (!a)
+            return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar)
+            VALUES (?,?, ?, ?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar]);
     }
     async getUserss() {
         return this.db.all(`SELECT * FROM Users`);

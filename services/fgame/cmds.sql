@@ -2,6 +2,7 @@
 .mode column
 
 SELECT * FROM Match;
+SELECT * FROM Users;
 SELECT * FROM Tournament;
 SELECT * FROM Participate_Tournament;
 

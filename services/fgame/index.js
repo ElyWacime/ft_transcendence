@@ -113,25 +113,10 @@ function resetBall(direction = 1, m) {
   m.Ball_dy = 2;
 }
 
-// fastify.register(fjwt, { 
-//   secret: process.env.JWT_ACCESS_SECRET,
-//   sign: {
-//     algorithm: 'HS256',
-//     expiresIn: '1d',
-//     iss: 'pong-game-auth',
-//     aud: 'pong-game-server'
-//   },
-//   verify: {
-//     algorithms: ['HS256'],
-//     issuer: 'pong-game-auth',
-//     audience: 'pong-game-server'
-//   }
-// });
 
-// NEW (simplified to match auth server):
+
 fastify.register(fjwt, { 
   secret: process.env.JWT_ACCESS_SECRET
-  // NO extra options - matches auth server
 });
 
 // --- THIS HOOK IS CRITICAL ---
@@ -162,29 +147,31 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
-          if (clients.has(email)) {
+          console.log(id, email, name);
+          if (clients.has(id)) {
             try {
               // console.log("\n\n>>>>>try : ", email);
-              if (clients.get(email) != connection) {
+              if (clients.get(id) != connection) {
                 // console.log("\n\n>>>>>close : ", email);
-                clients.get(email).close();
+                clients.get(id).close();
               }
             }
             catch (e) {
               // console.log("\n\n>>>>>error: ", email, e);
             }
           }
-          clients.set(email, connection);
+          clients.set(id, connection);
           if (request.type == "REGISTER") {
             let u = new Users();
-            u.id = id || "EMAIL@EMAIL.E"; //to add in localstorage
-            u.email = email || "EMAIL@EMAIL.E";
-            u.User_name = name || "EMAIL@EMAIL.E";
+            u.id = id; //to add in localstorage
+            u.email = email;
+            u.User_name = name;
             u.isOnline = true;
             u.Auto_Match = true;
-            // console.log("BUser  ===== ", u,request);
+            // console.log("BUser  ===== ", u);
             await dbcnx.createUsers(u);
-            u = await dbcnx.getUserById(u.email);
+            u = await dbcnx.getUserById(u.id);
+            // console.log("getUserById  ===== ", u);
             // console.log("AUser  ===== ", v);
             // console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
             let m = await dbcnx.getOngoingMatchByPlayerID(id);
@@ -206,6 +193,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                 else {
                   // console.log("\n\n>>>>>createMatch: ");
                   // m.T_Id = GET_TORNAMENTID_FROMDB
+
+                  console.log("\n\n>>>05550000>>updateMatch: ",m);
+
                   m.id = await dbcnx.createMatch(m);
                 }
               }
@@ -232,7 +222,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                     m.player4Name = u.User_name;
                     m.count_players = m.count_players + 1;
                   }
-                  // console.log("\n\n>>>>>updateMatch: ");
+                  console.log("\n\n>>>00000>>updateMatch: ",m);
                   await dbcnx.updateMatch(m);
                 }
                 if (m.count_players == m.mode) {
@@ -253,6 +243,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.mode = m.mode;
                   matches.set(m.id, ngame);
                   // console.log("\n\n>>>>>updateMatch: ");
+                  console.log("\n\n>>>111100000>>updateMatch: ",m);
                   await dbcnx.updateMatch(m);
                 }
               }
@@ -320,7 +311,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               else
                 console.log("getLasttMatchByPlayerID NOT FOUND",id);
             }
-      
           }
           else if (request.type == "FINISHED") {
             // console.log("\n\n>>>>>getLasttMatchByPlayerID: ");
@@ -373,10 +363,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
   connection.on("close", () => {
     // get the match if finished delete it from matches else leave it 
-    for (const [email, client] of clients) {
+    for (const [id, client] of clients) {
       if (client == connection) {
-        // console.log("\n\n>>>>>close old :", email);
-        clients.delete(email);
+        // console.log("\n\n>>>>>close old :", id);
+        clients.delete(id);
         break;
       }
     }
