@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     allowedHosts: [
       "frontend", // container name inside Docker network
-      "10.12.7.4",
+      "localhost",
       "127.0.0.1",
     ],
     watch: {

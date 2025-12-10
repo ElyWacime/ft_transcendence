@@ -33,7 +33,7 @@ services:
       - JWT_REFRESH_SECRET=superrefreshkey
       - PORT=8000
       - NODE_ENV=development
-      - COOKIE_DOMAIN=10.12.7.4
+      - COOKIE_DOMAIN=localhost
     command: npm run dev
     networks:
       - transcendence
@@ -75,6 +75,9 @@ services:
       context: ./services/fgame
       dockerfile: Dockerfile
     container_name: pong-game
+    environment:
+      - JWT_ACCESS_SECRET=supersecretkey
+      - JWT_REFRESH_SECRET=superrefreshkey
     ports:
       - "3000:3000"
     command: npm start
@@ -84,23 +87,6 @@ services:
       - gateway
     networks:
       - transcendence
-  # pong-server:
-  #   build:
-  #     context: ./services/game
-  #     dockerfile: Dockerfile
-  #   container_name: game-pong
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - frontend
-  #     - auth-service
-  #     - gateway
-  #   networks:
-  #     - transcendence
-  #   volumes:
-  #     - .:/app
-  #     - /app/node_modules
-  #   command: npm start
 networks:
   transcendence:
     driver: bridge

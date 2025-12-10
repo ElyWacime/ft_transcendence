@@ -66,7 +66,7 @@ export async function login(
   reply.setCookie("access_token", token, {
     path: "/",
     httpOnly: true,
-    secure: true,
+    secure: false,
   });
   return { accessToken: token };
 }
