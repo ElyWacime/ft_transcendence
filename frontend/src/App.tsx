@@ -38,7 +38,14 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              <Route path="/loading" element={<MatchMacking />} />
+                            <Route
+                path="/loading"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <MatchMacking />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/game" element={<Game />} />
               <Route path="/game-online" element={<GameOnline />} />
               <Route path="/result" element={<Result />} />
