@@ -31,10 +31,9 @@ services:
       - DATABASE_URL=file:/app/prisma/db/data.db
       - JWT_ACCESS_SECRET=supersecretkey
       - JWT_REFRESH_SECRET=superrefreshkey
-      - COOKIE_SECRET=superrefreshkey
       - PORT=8000
       - NODE_ENV=development
-      - COOKIE_DOMAIN=localhost
+      - COOKIE_DOMAIN=10.12.7.4
     command: npm run dev
     networks:
       - transcendence

@@ -1,6 +1,3 @@
-
-0#..
-
 +4456666+ Logs
 logs
 *.log
@@ -30,4 +27,3 @@ dist-ssr
 
 *.pem
 .env
-/src/generated/prisma

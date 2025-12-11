@@ -24,7 +24,7 @@ const GameOnline = () => {
   const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
   const match = location.state?.match as Match | undefined;
 
-  const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+  const { ws, send, isReady } = useWebSocket("ws://10.12.7.4:3000/ws");
 
   const endGame = () => {
     ws.send(JSON.stringify({
@@ -33,7 +33,7 @@ const GameOnline = () => {
       tournement: false,
       keys: { ArrowUp: false, ArrowDown: false },
       mode: mode,
-      id: localStorage.getItem("email"),
+      id: localStorage.getItem("email")
     }));
   };
 
