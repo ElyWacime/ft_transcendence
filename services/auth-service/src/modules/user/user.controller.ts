@@ -62,6 +62,7 @@ export async function login(
     email: user.email,
     name: user.name,
   };
+  
   const token = req.jwt.sign(payload);
   reply.setCookie("access_token", token, {
     path: "/",

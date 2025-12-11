@@ -51,12 +51,6 @@ export async function oauthRoutes(app: FastifyInstance) {
     });
     const user = await userRes.json();
 
-    console.log("\n\n\n\n\n\n\n\n");
-
-    console.log(user);
-    
-    console.log("\n\n\n\n\n\n\n\n");
-
     // Fetch user’s email (GitHub may not include it in /user)
     let email = user.email;
     if (!email) {
@@ -74,9 +68,6 @@ export async function oauthRoutes(app: FastifyInstance) {
         .send({ error: "Email not found in GitHub account" });
     }
 
-    console.log(email);
-    console.log("\n\n\n\n\n\n\n\n");
-
     // Upsert user in Prisma
     const dbUser = await prisma.user.upsert({
       where: { email },
@@ -92,32 +83,19 @@ export async function oauthRoutes(app: FastifyInstance) {
       },
     });
 
-    const payload = {
-    id: dbUser.id,
-    email: dbUser.email,
-    name: dbUser.name,
-    };
-
-    const token = req.jwt.sign(payload);
-    reply.setCookie("access_token", token, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-    });
-
     // Generate JWT
-    // const jwtToken = jwt.sign(
-    //   { id: dbUser.id, username: dbUser.name },
-    //   process.env.JWT_ACCESS_SECRET || "supersecretkey",
-    //   { expiresIn: "10h" },
-    // );
+    const jwtToken = jwt.sign(
+      { id: dbUser.id, username: dbUser.name, email: dbUser.email },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: "10h" },
+    );
 
     // Redirect to frontend with token
-    const redirectUrl = new URL(`http://${process.env.COOKIE_DOMAIN}/login`);
-    redirectUrl.searchParams.set("token", token);
+    const redirectUrl = new URL("http://10.12.7.4/login");
+    redirectUrl.searchParams.set("token", jwtToken);
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());
 
-    //reply.redirect(`http://localhost/login?token=${jwtToken}`);
+    //reply.redirect(`http://10.12.7.4/login?token=${jwtToken}`);
   });
 }
