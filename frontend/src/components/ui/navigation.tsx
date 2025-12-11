@@ -1,7 +1,7 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut } from "lucide-react";
+import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -10,19 +10,18 @@ export const Navigation = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout(); // calls backend + clears token
+    await logout();
     toast.success("Logged out successfully!");
     navigate("/login");
   };
 
-  // Regular pages (no Login/Logout yet)
   const baseNavItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/tournament", label: "Tournament", icon: Trophy },
-    { path: "/game", label: "Game", icon: Gamepad2 }
+    { path: "/game", label: "Game", icon: Gamepad2 },
+    { path: "/profile", label: "Profile", icon: User},
   ];
 
-  // Add either Login or Logout depending on auth state
   const navItems = isLoggedIn
     ? [
       ...baseNavItems,

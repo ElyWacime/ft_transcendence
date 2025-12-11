@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateUserInput, LoginUserInput } from "./user.schema";
+import { CreateUserInput, LoginUserInput, UpdateEmail } from "./user.schema";
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
 
@@ -70,6 +70,57 @@ export async function login(
     secure: false,
   });
   return { accessToken: token };
+}
+
+export async function update_email(
+  req: FastifyRequest<UpdateEmail>,
+  reply: FastifyReply,
+) {
+  const { currentEmail, newEmail, password } = req.body;
+
+  const user = await prisma.user.findUnique({ 
+    where: { email: currentEmail } 
+  });
+  
+  if (!user) {
+    return reply.code(404).send({ message: "User not found" });
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return reply.code(401).send({ message: "Invalid password" });
+  }
+
+  const emailExists = await prisma.user.findUnique({
+    where: { email: newEmail }
+  });
+  
+  if (emailExists) {
+    return reply.code(409).send({ message: "Email already in use" });
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { email: currentEmail },
+    data: { email: newEmail },
+  });
+
+  const token = req.jwt.sign({
+    id: updatedUser.id,
+    email: updatedUser.email,
+    name: updatedUser.name,
+  });
+
+  reply.setCookie("access_token", token, {
+    path: "/",
+    httpOnly: true,
+    secure: false,
+  });
+
+  return {
+    success: true,
+    message: "Email updated successfully",
+    accessToken: token,
+  };
 }
 
 export async function getUsers(req: FastifyRequest, reply: FastifyReply) {

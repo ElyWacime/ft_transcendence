@@ -28,6 +28,7 @@ export const loginSchema = z.object({
 });
 
 export type LoginUserInput = z.infer<typeof loginSchema>;
+export type UpdateEmail = z.infer<typeof loginSchema>;
 export const loginResponseSchema = z.object({
   accessToken: z.string(),
 });

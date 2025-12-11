@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createUser, login, logout } from "./user.controller";
+import { createUser, login, logout, update_email } from "./user.controller";
 import { FastifyInstance } from "fastify";
 
 export async function userRoutes(app: FastifyInstance) {
@@ -69,7 +69,10 @@ export async function userRoutes(app: FastifyInstance) {
     handler: logout,
   });
 
-  app.post("/validate-token", {
+  // ---- UPDATE EMAIL ----
+  app.put('/api/profile/email', update_email);
+
+  app.post("/validate_token", {
     schema: {
       body: {
         type: "object",

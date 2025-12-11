@@ -16,6 +16,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,14 @@ const App = () => (
                 element={
                   <ProtectedRoute children={undefined}>
                     <Tournament />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
