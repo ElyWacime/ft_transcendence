@@ -49,7 +49,6 @@ export class GameState {
         this.T_Id = null;
         this.count_players = 1;
         this.mode = 2;
-
         this.Ball_x = 400;
         this.Ball_y = 300;
         this.Ball_dx = 2;
@@ -70,10 +69,10 @@ export class GameState {
         this.Winner_Id = null;
         this.score1 = 0;
         this.score2 = 0;
-        this.player1Name = "";
-        this.player2Name = "";
-        this.player3Name = "";
-        this.player4Name = "";
+        this.player1Name = null;
+        this.player2Name = null;
+        this.player3Name = null;
+        this.player4Name = null;
         this.p1UPkey = false;
         this.p1Downkey = false;
         this.p2UPkey = false;
@@ -100,6 +99,10 @@ export class Match {
         this.gameStatus = "PENDING";
         this.Winner_Id = null;
         this.T_Id = null;
+        this.player1Name = null;
+        this.player2Name = null;
+        this.player3Name = null;
+        this.player4Name = null;
     }
 }
 
@@ -302,13 +305,36 @@ export class SQLiteDB {
     // -------------------------------
     // Users CRUD
     // -------------------------------
+    
+    async updateUsers(u) {
+        await this.db.run(`UPDATE Users 
+             SET 
+             email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
+             WHERE id = ?`, [u.email, u.User_name, u.User_password, u.loggedIn, u.Auto_Match, u.isOnline, u.avatar, u.id]);
+    }
+    
 
     async createUsers(t) {
-        let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
-        if (!a)
-            return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar)
-            VALUES (?,?, ?, ?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar]);
+        // let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
+        // update based on id only.
+        let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? `, [t.id]);
+        if (a)
+            return await this.db.run(`UPDATE Users 
+            SET 
+            email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
+            WHERE id = ?`, [t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.id]);
+        else
+            return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
+            VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1 , t.avatar]);
     }
+
+    // async createUsers(t) {
+    //     let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
+    //     // let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
+    //     if (!a)
+    //         return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar)
+    //         VALUES (?,?, ?, ?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar]);
+    // }
     async getUserss() {
         return this.db.all(`SELECT * FROM Users`);
     }
@@ -329,7 +355,6 @@ export class SQLiteDB {
     }
 
 
-
     async UserCountMatches(id) {
         await this.db.run(`SELECT count(*) as Played  FROM  Match 
         Where (P1_Id = ?  OR P2_Id = ?  OR P3_Id = ?  OR P4_Id = ?);`, [id,id,id,id]);
@@ -339,11 +364,14 @@ export class SQLiteDB {
         await this.db.run(`SELECT count(*) as Winned  FROM  Match 
         Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
     }
-    
 
     async UserCountTournWins(id) {
         await this.db.run(`SELECT count(*) as Winned  FROM  Match 
         Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
+    }
+
+    async UserCountTournParticipation(id) {
+        await this.db.run(`SELECT count(*) as Participate  FROM  Participate_Tournament   Where P_Id = ?;`,[id]);
     }
     
 

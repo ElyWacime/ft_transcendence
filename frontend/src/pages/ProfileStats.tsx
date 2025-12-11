@@ -7,7 +7,8 @@ import { userApi } from "@/lib/api";
 import { Trophy, Github } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-const EditProfile = () => {
+
+const Stats = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
@@ -107,5 +108,5 @@ const EditProfile = () => {
   );
 };
 
-export default EditProfile;
+export default Stats;
 

@@ -71,7 +71,7 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card onClick={() => { navigate(feature.page) }}
+              <Card  onClick={() => { navigate(feature.page) }}
                 key={index}
                 className="p-6 bg-gradient-secondary border-border hover:border-primary transition-all duration-300 hover:shadow-glow group"
               >
