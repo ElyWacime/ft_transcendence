@@ -23,7 +23,7 @@ app.register(cors, {
 });
 
 // --- JWT ---
-app.register(fjwt, { secret: "supersecretcode-CHANGE_THIS-USE_ENV_FILE" });
+app.register(fjwt, { secret: process.env.JWT_ACCESS_SECRET });
 app.addHook("preHandler", (req, _res, next) => {
   req.jwt = app.jwt;
   next();
@@ -31,7 +31,7 @@ app.addHook("preHandler", (req, _res, next) => {
 
 // --- Cookies ---
 app.register(fCookie, {
-  secret: "some-secret-key",
+  secret: process.env.COOKIE_SECRET,
   hook: "preHandler",
 });
 

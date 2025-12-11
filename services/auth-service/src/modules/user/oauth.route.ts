@@ -51,6 +51,12 @@ export async function oauthRoutes(app: FastifyInstance) {
     });
     const user = await userRes.json();
 
+    console.log("\n\n\n\n\n\n\n\n");
+
+    console.log(user);
+    
+    console.log("\n\n\n\n\n\n\n\n");
+
     // Fetch user’s email (GitHub may not include it in /user)
     let email = user.email;
     if (!email) {
@@ -68,16 +74,19 @@ export async function oauthRoutes(app: FastifyInstance) {
         .send({ error: "Email not found in GitHub account" });
     }
 
+    console.log(email);
+    console.log("\n\n\n\n\n\n\n\n");
+
     // Upsert user in Prisma
     const dbUser = await prisma.user.upsert({
       where: { email },
       update: {
         loggedIn: true,
-        name: user.name || user.login,
+        name: user.login || user.name,
       },
       create: {
         email,
-        name: user.name || user.login,
+        name: user.login || user.name,
         password: "",
         loggedIn: true,
       },
@@ -96,11 +105,11 @@ export async function oauthRoutes(app: FastifyInstance) {
       secure: false,
     });
 
-    // // Generate JWT
+    // Generate JWT
     // const jwtToken = jwt.sign(
     //   { id: dbUser.id, username: dbUser.name },
-    //   process.env.JWT_ACCESS_SECRET || "supersecretcode-CHANGE_THIS",
-    //   { expiresIn: "1h" },
+    //   process.env.JWT_ACCESS_SECRET || "supersecretkey",
+    //   { expiresIn: "10h" },
     // );
 
     // Redirect to frontend with token

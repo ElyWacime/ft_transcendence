@@ -69,5 +69,32 @@ export async function userRoutes(app: FastifyInstance) {
     handler: logout,
   });
 
+  app.post("/validate-token", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["token"],
+        properties: {
+          token: { type: "string" }
+        }
+      }
+    }
+  }, async (req, reply) => {
+    const { token } = req.body;
+    
+    try {
+      const decoded = req.jwt.verify(token);
+      return reply.send({
+        valid: true,
+        user: decoded, 
+      });
+    } catch (err) {
+      return reply.status(401).send({
+        valid: false,
+        error: "Invalid or expired token"
+      });
+    }
+  });
+
   //app.post("/logout", { preHandler: [app.authenticate] }, logout);
 }

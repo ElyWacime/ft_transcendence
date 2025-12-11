@@ -33,7 +33,7 @@ const GameOnline = () => {
       tournement: false,
       keys: { ArrowUp: false, ArrowDown: false },
       mode: mode,
-      id: localStorage.getItem("email")
+      id: localStorage.getItem("email"),
     }));
   };
 
