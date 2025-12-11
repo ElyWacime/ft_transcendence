@@ -20,14 +20,6 @@ model User {
   name String?
   password String
   loggedIn Boolean @default(false)
-  // isOnline   Boolean          @default(false)
-  // avatar     String?          @default("https://www.gravatar.com/avatar/")
-  //
-  // friends    User[]           @relation("UserFriends")
-  // friendOf   User[]           @relation("UserFriends")
-  //
-  // sentRequests     FriendRequest[] @relation("SentRequests")
-  // receivedRequests FriendRequest[] @relation("ReceivedRequests")
 }
 
 // model FriendRequest {

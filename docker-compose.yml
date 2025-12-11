@@ -61,7 +61,6 @@ services:
     depends_on:
       - frontend
       - auth-service
-      # - tournament-service
     ports:
       - "80:80"
     volumes:

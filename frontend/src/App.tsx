@@ -8,6 +8,7 @@ import { Navigation } from "@/components/ui/navigation";
 import Home from "./pages/Home";
 import Tournament from "./pages/Tournament";
 import Game from "./pages/Game";
+import GameAI from "./pages/GameAI";
 import GameOnline from "./pages/GameOnline";
 import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
@@ -15,7 +16,6 @@ import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Register from "./pages/Register";
-import MatchMacking from "./pages/MatchMacking";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +25,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider children={undefined}>
+        <AuthProvider>
           <div className="min-h-screen bg-background">
             <Navigation />
             <Routes>
@@ -33,14 +33,14 @@ const App = () => (
               <Route
                 path="/tournament"
                 element={
-                  <ProtectedRoute children={undefined}>
+                  <ProtectedRoute>
                     <Tournament />
                   </ProtectedRoute>
                 }
               />
-              <Route path="/loading" element={<MatchMacking />} />
               <Route path="/game" element={<Game />} />
               <Route path="/game-online" element={<GameOnline />} />
+              <Route path="/game-ai" element={<GameAI />} />
               <Route path="/result" element={<Result />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />

@@ -6,93 +6,57 @@ import { Chat } from "@/components/Chat";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { Match, api } from "@/lib/api";
 import { toast } from "sonner";
-import { useState, useRef, useEffect } from "react";
-import { useWebSocket } from "../hooks/useWebSocket";
-interface GameOnlineProps {
-  player1Name: string;
-  player2Name: string;
-  player3Name: string;
-  player4Name: string;
-  mode: number;
-}
+import { useState } from "react";
 
 const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const email = localStorage.getItem("email");
-  const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
+
+  // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
+  const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
+  const player2 = location.state?.player2 || { alias: "Player 2" };
 
-  const { ws, send, isReady } = useWebSocket("ws://10.12.7.4:3000/ws");
+  const handleGameEnd = async (player1Score: number, player2Score: number) => {
+    try {
+      if (match) {
+        // Update match result in tournament
+        await api.updateMatchResult(match.id, player1Score, player2Score);
 
-  const endGame = () => {
-    ws.send(JSON.stringify({
-      type: "FINISHED",
-      email: email,
-      tournement: false,
-      keys: { ArrowUp: false, ArrowDown: false },
-      mode: mode,
-      id: localStorage.getItem("email")
-    }));
-  };
+        const winner = player1Score > player2Score ? player1.alias : player2.alias;
 
-  useEffect(() => {
-    if (!ws) return;
-    const handleMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      if (data.gameStatus == "FINISHED") {
-        // ws.close();
-        endGame();
-        console.log("Match FINISHED try to navigate>>>>>>>");
-        navigate("/");
+        // Send system message
+        await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
+
+        toast.success(`${winner} wins the match!`);
+
+        // Navigate to result page
+        setTimeout(() => {
+          navigate("/result", {
+            state: {
+              match,
+              winner: player1Score > player2Score ? player1 : player2,
+              finalScore: { player1: player1Score, player2: player2Score }
+            }
+          });
+        }, 2000);
+      } else {
+        // Quick game - no tournament
+        const winner = player1Score > player2Score ? player1.alias : player2.alias;
+        toast.success(`${winner} wins!`);
       }
-    };
-    ws.addEventListener("message", handleMessage);
-    return () => {
-      ws.removeEventListener("message", handleMessage);
-    };
-  }, [ws]);
-
-  // const handleGameEnd = async (player1Score: number, player2Score: number) => {
-  //   try {
-  //     if (match) {
-  //       // Update match result in tournament
-  //       await api.updateMatchResult(match.id, player1Score, player2Score);
-
-  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
-
-  //       // Send system message
-  //       await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
-
-  //       toast.success(`${winner} wins the match!`);
-
-  //       // Navigate to result page
-  //       setTimeout(() => {
-  //         navigate("/result", {
-  //           state: {
-  //             match,
-  //             winner: player1Score > player2Score ? player1 : player2,
-  //             finalScore: { player1: player1Score, player2: player2Score }
-  //           }
-  //         });
-  //       }, 2000);
-  //     } else {
-  //       // Quick game - no tournament
-  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
-  //       toast.success(`${winner} wins!`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to update match result:", error);
-  //     toast.error("Failed to save match result");
-  //   }
-  // };
+    } catch (error) {
+      console.error("Failed to update match result:", error);
+      toast.error("Failed to save match result");
+    }
+  };
 
   return (
     <div className="min-h-screen pt-16 pb-8">
       <div className="container mx-auto px-4 space-y-6">
-        {/* { } */}
-        {/* <div className="flex items-center justify-between">
+        {/* Game Header */}
+        <div className="flex items-center justify-between">
           <Button
             onClick={() => navigate(-1)}
             variant="outline"
@@ -114,26 +78,19 @@ const GameOnline = () => {
             )}
           </div>
 
-          <div className="w-20"> { }
+          <div className="w-20"> {/* Spacer for balance */}
           </div>
-        </div> */}
+        </div>
 
         {/* Game Canvas */}
-        {<div className="max-w-6xl mx-auto">
-          {isReady && (
-            <PongCanvasOnline
-              player1Name={player1Name}
-              player2Name={player2Name}
-              player3Name={player3Name}
-              player4Name={player4Name}
-              ws={ws}
-              mode={mode}
-            // onGameEnd={(result) => send({ type: "gameEnd", result })}
-            // maxScore={5}
-            />
-          )}
-        </div>}
-
+        <div className="max-w-6xl mx-auto">
+          <PongCanvasOnline
+            player1Name={player1.alias}
+            player2Name={player2.alias}
+            onGameEnd={handleGameEnd}
+            maxScore={5}
+          />
+        </div>
 
         {/* Match Info */}
         {match && (

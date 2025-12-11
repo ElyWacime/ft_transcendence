@@ -88,7 +88,6 @@ const Tournament = () => {
       toast.error("Failed to start tournament");
     }
   };
-
   const handleStartMatch = async (match: Match) => {
     try {
       // Send system message
