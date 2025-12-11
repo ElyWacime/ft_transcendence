@@ -40,10 +40,10 @@ function usePongWebSocket(ws, mode, email, setGameState) {
         ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
-            email,
             mode,
             tournement: false,
-            keys: {},
+            keys: { ArrowUp: false, ArrowDown: false },
+            email,
             id: email
         }));
 
@@ -104,7 +104,6 @@ function usePongRenderer(canvasRef, gameState) {
 
         ctx.fillStyle = 'hsl(222 47% 4%)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         ctx.strokeStyle = 'hsl(222 47% 12%)';
         ctx.lineWidth = 2;
         ctx.setLineDash([10, 10]);
@@ -114,13 +113,14 @@ function usePongRenderer(canvasRef, gameState) {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        if (gameState.player1Name == localStorage.getItem("email"))
+        let player_id = localStorage.getItem("id") || "Not Found";
+        if (gameState.P1_Id == player_id)
             ctx.fillStyle = 'hsl(0 50% 80%)';
         else
             ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
 
-        if (gameState.player2Name == localStorage.getItem("email"))
+        if (gameState.P2_Id == player_id)
             ctx.fillStyle = 'hsl(60 50% 80%)';
         else
             ctx.fillStyle = "hsl(217 91% 60%)";
@@ -128,13 +128,13 @@ function usePongRenderer(canvasRef, gameState) {
 
         if (gameState.Mode == 4) {
      
-            if (gameState.player3Name == localStorage.getItem("email"))
+            if (gameState.P3_Id == player_id)
                 ctx.fillStyle = 'hsl(120 50% 80%)';
             else
                 ctx.fillStyle = "hsl(217 91% 60%)";
             ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
 
-            if (gameState.player4Name == localStorage.getItem("email"))
+            if (gameState.P4_Id == player_id)
                 ctx.fillStyle = 'hsl(300 50% 80%)';
             else
                 ctx.fillStyle = "hsl(217 91% 60%)";
@@ -201,7 +201,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 {/* Player 1 Card */}
                 <Card className="bg-gradient-secondary border-border">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-center text-lg">{player1Name} {mode == 4 ? " // ":"" }   { player3Name}</CardTitle>
+                        <CardTitle className="text-center text-lg"> {player1Name} {mode == 4 ? " // ":"" }   { player3Name}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-center">
                         <div className="text-3xl font-game font-bold text-primary">
