@@ -91,7 +91,7 @@ export async function oauthRoutes(app: FastifyInstance) {
     );
 
     // Redirect to frontend with token
-    const redirectUrl = new URL("http://10.30.238.84/login");
+    const redirectUrl = new URL(`http://${process.env.DOMAIN}/login`);
     redirectUrl.searchParams.set("token", jwtToken);
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());

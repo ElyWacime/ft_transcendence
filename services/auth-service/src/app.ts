@@ -11,8 +11,8 @@ const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 // --- CORS ---
 app.register(cors, {
   origin: [
-    `http://${process.env.COOKIE_DOMAIN}`,
-    `http://${process.env.COOKIE_DOMAIN}:8080`,
+    `http://${process.env.DOMAIN}`,
+    `http://${process.env.DOMAIN}:8080`,
     "http://127.0.0.1:8080",
     "http://frontend:8080",
     "http://0.0.0.0",
