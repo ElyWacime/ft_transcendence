@@ -327,4 +327,24 @@ export class SQLiteDB {
     async deleteUsers(id) {
         await this.db.run(`DELETE FROM Users WHERE id = ?`, [id]);
     }
+
+
+
+    async UserCountMatches(id) {
+        await this.db.run(`SELECT count(*) as Played  FROM  Match 
+        Where (P1_Id = ?  OR P2_Id = ?  OR P3_Id = ?  OR P4_Id = ?);`, [id,id,id,id]);
+    }
+
+    async UserCountWins(id) {
+        await this.db.run(`SELECT count(*) as Winned  FROM  Match 
+        Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
+    }
+    
+
+    async UserCountTournWins(id) {
+        await this.db.run(`SELECT count(*) as Winned  FROM  Match 
+        Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
+    }
+    
+
 }

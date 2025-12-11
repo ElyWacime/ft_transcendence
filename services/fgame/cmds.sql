@@ -124,3 +124,26 @@ DELETE FROM Match WHERE id = 11;
 
 
 -----
+
+
+-----
+
+
+SELECT * FROM Match ;
+
+
+
+INSERT INTO Match (P1_Id, P2_Id) VALUES (8,1);
+
+UPDATE Match SET  score1=5, score2=1,  gameStatus='FINISHED', Winner_Id=8, count_players = 2
+WHERE id = 8;
+
+
+SELECT count(*) as Played  FROM  Match 
+Where (P1_Id = 8  OR P2_Id = 8  OR P3_Id = 8  OR P4_Id = 8);
+
+
+SELECT count(*) as Played  FROM  Match 
+Where (((P1_Id = 8  OR P3_Id = 8) and score1 >= score2 ) OR ((P2_Id = 8  OR P4_Id = 8)and score2 >= score1))  and gameStatus = 'FINISHED';
+
+

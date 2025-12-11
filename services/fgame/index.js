@@ -222,7 +222,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                     m.player4Name = u.User_name;
                     m.count_players = m.count_players + 1;
                   }
-                  console.log("\n\n>>>00000>>updateMatch: ",m);
+                  // console.log("\n\n>>>00000>>updateMatch: ",m);
                   await dbcnx.updateMatch(m);
                 }
                 if (m.count_players == m.mode) {
@@ -243,7 +243,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.mode = m.mode;
                   matches.set(m.id, ngame);
                   // console.log("\n\n>>>>>updateMatch: ");
-                  console.log("\n\n>>>111100000>>updateMatch: ",m);
+                  // console.log("\n\n>>>111100000>>updateMatch: ",ngame);
                   await dbcnx.updateMatch(m);
                 }
               }

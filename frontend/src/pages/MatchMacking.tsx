@@ -44,6 +44,7 @@ const MatchMacking = () => {
     });
     useEffect(() => {
         if (!ws || !isReady) return;
+        
         ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
@@ -61,24 +62,24 @@ const MatchMacking = () => {
                 return [
                     {
                         icon: Users,
-                        title: data.player1Name || "Player1",
+                        title: data.player1Name || "Player10",
                         description: mode === "4" ? "Team A" : "Player 1",
                     },
                     {
                         icon: Users,
-                        title: data.player2Name || "Player2",
+                        title: data.player2Name || "Player20",
                         description: mode === "4" ? "Team B" : "Player 2",
                     },
                     ...(mode === "4"
                         ? [
                             {
                                 icon: Users,
-                                title: data.player3Name || "Player3",
+                                title: data.player3Name || "Player30",
                                 description: "Team A",
                             },
                             {
                                 icon: Users,
-                                title: data.player4Name || "Player4",
+                                title: data.player4Name || "Player40",
                                 description: "Team B",
                             },
                         ]
