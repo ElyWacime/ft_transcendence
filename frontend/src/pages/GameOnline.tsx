@@ -1,0 +1,159 @@
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { PongCanvasOnline } from "@/components/PongCanvasOnline";
+import { PongCanvas } from "@/components/PongCanvas";
+import { Chat } from "@/components/Chat";
+import { ArrowLeft, Trophy } from "lucide-react";
+import { Match, api } from "@/lib/api";
+import { toast } from "sonner";
+import { useState, useRef, useEffect } from "react";
+import { useWebSocket } from "../hooks/useWebSocket";
+interface GameOnlineProps {
+  player1Name: string;
+  player2Name: string;
+  player3Name: string;
+  player4Name: string;
+  mode: number;
+}
+
+const GameOnline = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const email = localStorage.getItem("email");
+  const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
+  const match = location.state?.match as Match | undefined;
+
+  const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+
+  const endGame = () => {
+    ws.send(JSON.stringify({
+      token:localStorage.getItem("token"),
+      type: "FINISHED",
+      email: email,
+      tournement: false,
+      keys: { ArrowUp: false, ArrowDown: false },
+      mode: mode,
+      id: localStorage.getItem("email")
+    }));
+  };
+
+  useEffect(() => {
+    if (!ws) return;
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      if (data.gameStatus == "FINISHED") {
+        // ws.close();
+        endGame();
+        console.log("Match FINISHED try to navigate>>>>>>>");
+        navigate("/");
+      }
+    };
+    ws.addEventListener("message", handleMessage);
+    return () => {
+      ws.removeEventListener("message", handleMessage);
+    };
+  }, [ws]);
+
+  // const handleGameEnd = async (player1Score: number, player2Score: number) => {
+  //   try {
+  //     if (match) {
+  //       // Update match result in tournament
+  //       await api.updateMatchResult(match.id, player1Score, player2Score);
+
+  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
+
+  //       // Send system message
+  //       await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
+
+  //       toast.success(`${winner} wins the match!`);
+
+  //       // Navigate to result page
+  //       setTimeout(() => {
+  //         navigate("/result", {
+  //           state: {
+  //             match,
+  //             winner: player1Score > player2Score ? player1 : player2,
+  //             finalScore: { player1: player1Score, player2: player2Score }
+  //           }
+  //         });
+  //       }, 2000);
+  //     } else {
+  //       // Quick game - no tournament
+  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
+  //       toast.success(`${winner} wins!`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to update match result:", error);
+  //     toast.error("Failed to save match result");
+  //   }
+  // };
+
+  return (
+    <div className="min-h-screen pt-16 pb-8">
+      <div className="container mx-auto px-4 space-y-6">
+        {/* { } */}
+        {/* <div className="flex items-center justify-between">
+          <Button
+            onClick={() => navigate(-1)}
+            variant="outline"
+            className="flex items-center space-x-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </Button>
+
+          <div className="text-center">
+            <h1 className="text-2xl md:text-4xl font-game font-bold glow-text flex items-center justify-center space-x-2">
+              {match && <Trophy className="w-8 h-8 text-primary" />}
+              <span>{match ? "TOURNAMENT MATCH" : "QUICK GAME"}</span>
+            </h1>
+            {match && (
+              <p className="text-muted-foreground mt-2">
+                Round {match.round} • Match {match.id.split('-')[1]}
+              </p>
+            )}
+          </div>
+
+          <div className="w-20"> { }
+          </div>
+        </div> */}
+
+        {/* Game Canvas */}
+        {<div className="max-w-6xl mx-auto">
+          {isReady && (
+            <PongCanvasOnline
+              player1Name={player1Name}
+              player2Name={player2Name}
+              player3Name={player3Name}
+              player4Name={player4Name}
+              ws={ws}
+              mode={mode}
+            // onGameEnd={(result) => send({ type: "gameEnd", result })}
+            // maxScore={5}
+            />
+          )}
+        </div>}
+
+
+        {/* Match Info */}
+        {match && (
+          <div className="max-w-2xl mx-auto text-center bg-gradient-secondary p-4 rounded-lg border border-border">
+            <h3 className="font-semibold mb-2">Tournament Match</h3>
+            <p className="text-sm text-muted-foreground">
+              This match is part of the tournament bracket. The winner will advance to the next round.
+            </p>
+          </div>
+        )}
+
+        {/* Chat Component */}
+        <Chat
+          isOpen={isChatOpen}
+          onToggle={() => setIsChatOpen(!isChatOpen)}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default GameOnline;
