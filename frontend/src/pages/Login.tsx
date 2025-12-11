@@ -56,7 +56,7 @@ const Login = () => {
 
   // 👇 GitHub OAuth redirect
   const handleGitHubLogin = () => {
-    window.location.href = "http://10.12.7.4/api/users/auth/github";
+    window.location.href = "http://10.30.238.84/api/users/auth/github";
   };
 
   return (
