@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateUserInput, LoginUserInput, UpdateEmail } from "./user.schema";
+import { CreateUserInput, LoginUserInput, UpdateEmail, UpdateEmailInput } from "./user.schema";
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
 
@@ -74,19 +74,19 @@ export async function login(
 
 export async function update_email(
   req: FastifyRequest<{
-    Body: UpdateEmail;
+    Body: UpdateEmailInput;
   }>,
   reply: FastifyReply,
 ) {
-  const { currentEmail, newEmail, password } = req.body;
+  const { email, new_email, password } = req.body;
 
   console.log("\n\n\n\n\n\n\n\n\n");
   console.log("INSIDE UPDATE EMAIL");
-  console.log(currentEmail, newEmail, password);
+  console.log(email, new_email, password);
   console.log("\n\n\n\n\n\n\n\n\n");
 
   const user = await prisma.user.findUnique({ 
-    where: { email: currentEmail } 
+    where: { email: email } 
   });
   
   if (!user) {
@@ -99,7 +99,7 @@ export async function update_email(
   }
 
   const emailExists = await prisma.user.findUnique({
-    where: { email: newEmail }
+    where: { email: new_email }
   });
   
   if (emailExists) {
@@ -107,8 +107,8 @@ export async function update_email(
   }
 
   const updatedUser = await prisma.user.update({
-    where: { email: currentEmail },
-    data: { email: newEmail },
+    where: { email: email },
+    data: { email: new_email },
   });
 
   const token = req.jwt.sign({
@@ -146,13 +146,14 @@ export async function logout(
   reply: FastifyReply,
 ) {
   const { email } = req.body;
-  console.log("\n\n\n\n\n\n\n\n\n");
+  console.log(`\n\n\n\n\n\n\n\n\n`);
   console.log("Logout body received:", req.body);
-  console.log("\n\n\n\n\n\n\n\n\n");
-  await prisma.user.update({
+  console.log(`\n\n\n\n\n\n\n\n\n`);
+  const user = await prisma.user.update({
     where: { email },
     data: { loggedIn: false },
   });
+  console.log("grep this: ", user.email, user.name);
   reply.clearCookie("access_token");
   return reply.send({ message: "Logout successful" });
 }

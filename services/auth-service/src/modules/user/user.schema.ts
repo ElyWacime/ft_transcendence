@@ -28,23 +28,13 @@ export const loginSchema = z.object({
 });
 
 export const updateEmailSchema = z.object({
-  email: z
-    .string({
-      required_error: "Email is required",
-      invalid_type_error: "Email must be a string",
-    })
-    .email(),
-  newEmail: z
-    .string({
-      required_error: "New email is required",
-      invalid_type_error: "New email must be a string",
-    })
-    .email(),
+  email: z.string().email(),
+  new_email: z.string().email(),
   password: z.string().min(6),
 });
 
 export type LoginUserInput = z.infer<typeof loginSchema>;
-export type UpdateEmail = z.infer<typeof updateEmailSchema>;
+export type UpdateEmailInput = z.infer<typeof updateEmailSchema>;
 export const loginResponseSchema = z.object({
   accessToken: z.string(),
 });

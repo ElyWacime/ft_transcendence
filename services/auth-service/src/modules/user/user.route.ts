@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify";
 import { createUser, login, logout, update_email } from "./user.controller";
-import { FastifyInstance } from "fastify";
 
 export async function userRoutes(app: FastifyInstance) {
   app.get("/", { preHandler: [app.authenticate] }, async () => {
@@ -69,31 +68,31 @@ export async function userRoutes(app: FastifyInstance) {
     handler: logout,
   });
 
-  // // ---- UPDATE EMAIL ----
-  // app.POST("/update_email", {
-  //   schema: {
-  //     body: {
-  //       type: "object",
-  //       required: ["email", "new_email", "passwrod"],
-  //       properties: {
-  //         email: { type: "string", format: "email" },
-  //         new_email: { type: "string", format: "email" },
-  //         password: { type: "string", minLength: 6 },
-  //       },
-  //     },
-  //     response: {
-  //       201: {
-  //         type: "object",
-  //         properties: {
-  //           id: { type: "string" },
-  //           email: { type: "string" },
-  //           name: { type: "string" },
-  //         },
-  //       },
-  //     },
-  //   },
-  //   handler: update_email,
-  // });
+  // ---- UPDATE EMAIL ----
+  app.put("/update_email", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["email", "new_email", "password"],
+        properties: {
+          email: { type: "string", format: "email" },
+          new_email: { type: "string", format: "email" },
+          password: { type: "string", minLength: 6 },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            email: { type: "string" },
+            name: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: update_email,
+  });
 
   app.post("/validate_token", {
     schema: {
