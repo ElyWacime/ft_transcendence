@@ -1,7 +1,7 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut } from "lucide-react";
+import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut ,  Bot} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ export const Navigation = () => {
   const baseNavItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/tournament", label: "Tournament", icon: Trophy },
+    { path: "/game-ai", label: "VS AI", icon: Bot },
     { path: "/game", label: "Game", icon: Gamepad2 },
   ];
 

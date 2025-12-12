@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import Home from "./pages/Home";
 import Tournament from "./pages/Tournament";
+import GameAI from "./pages/GameAI";
 import Game from "./pages/Game";
 import GameOnline from "./pages/GameOnline";
 import Result from "./pages/Result";
@@ -58,6 +59,7 @@ const App = () => (
               
               <Route path="/game" element={<Game />} />
               <Route path="/game-online" element={<GameOnline />} />
+              <Route path="/game-ai" element={<GameAI />} />
               <Route path="/result" element={<Result />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
+import { AIOpponent, AIAction, AIGameState, Difficulty } from "@/lib/ai/AIOpponent";
 
 interface PongCanvasProps {
   player1Name?: string;
@@ -10,6 +11,8 @@ interface PongCanvasProps {
   player4Name?: string;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
+  enableAI?: boolean;
+  aiDifficulty?: Difficulty;
 }
 
 interface Paddle {
@@ -42,19 +45,28 @@ const paddleSpeed = 10;
 const accelerateSpeed = 1.002;
 const max_Speed = 25;
 const angle = Math.PI / 8;
+const aiSpeedMultipliers: Record<Difficulty, number> = {
+  [Difficulty.EASY]: 1,
+  [Difficulty.MEDIUM]: 1,
+  [Difficulty.HARD]: 1,
+};
 
 export const PongCanvas = ({
+  enableAI = false,
+  aiDifficulty = Difficulty.MEDIUM,
+  player2Name = enableAI ? "AI Opponent" : "Player 2",
   player1Name = localStorage.getItem("email") || "Player 1",
-  player2Name = "Player 2",
   player3Name = "Player 3",
   player4Name = "Player 4",
   onGameEnd,
   maxScore = 5,
 }: PongCanvasProps) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number>(0);
   const keysPressed = useRef<Set<string>>(new Set());
   const lastTimeRef = useRef<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameStateRef = useRef<GameState | null>(null);
+  const aiRef = useRef<AIOpponent | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
     ball: {
@@ -141,6 +153,34 @@ export const PongCanvas = ({
     ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, []);
 
+  // ADDED FROM SECOND FILE: AI state mapping
+  const mapGameStateToAI = useCallback(
+    (state: GameState, canvasHeight: number): AIGameState => ({
+      ball: {
+        x: state.ball.x,
+        y: state.ball.y,
+        velocityX: state.ball.dx,
+        velocityY: state.ball.dy,
+        radius: state.ball.radius
+      },
+      aiPaddle: {
+        x: state.paddle2.x,
+        y: state.paddle2.y,
+        width: state.paddle2.width,
+        height: state.paddle2.height
+      },
+      playerPaddle: {
+        x: state.paddle1.x,
+        y: state.paddle1.y,
+        width: state.paddle1.width,
+        height: state.paddle1.height
+      },
+      gameHeight: canvasHeight
+    }),
+    []
+  );
+
+  // MODIFIED updateGame to include AI from second file
   const updateGame = useCallback(
     (delta: number) => {
       setGameState((prev) => {
@@ -149,25 +189,54 @@ export const PongCanvas = ({
         const canvas = canvasRef.current;
         if (!canvas) return prev;
 
-        // Paddle 1 (W/S)
+        // Get AI action if enabled
+        let aiAction: AIAction | null = null;
+        if (enableAI && aiRef.current) {
+          aiAction = aiRef.current.update(mapGameStateToAI(newState, canvas.height));
+        }
+
+        // Paddle 1 (W/S) - unchanged
         if (keysPressed.current.has("KeyW") && newState.paddle1.y > 0)
           newState.paddle1.y -= paddleSpeed * delta;
         if (keysPressed.current.has("KeyS") && newState.paddle1.y < canvas.height - newState.paddle1.height)
           newState.paddle1.y += paddleSpeed * delta;
 
-        // Paddle 2 (Up/Down)
-        if (keysPressed.current.has("ArrowUp") && newState.paddle2.y > 0)
-          newState.paddle2.y -= paddleSpeed * delta;
-        if (keysPressed.current.has("ArrowDown") && newState.paddle2.y < canvas.height - newState.paddle2.height)
-          newState.paddle2.y += paddleSpeed * delta;
+        // MODIFIED: Paddle 2 (AI or Human) from second file
+        if (!enableAI) {
+          // Human player 2 (Arrow keys)
+          if (keysPressed.current.has("ArrowUp") && newState.paddle2.y > 0)
+            newState.paddle2.y -= paddleSpeed * delta;
+          if (keysPressed.current.has("ArrowDown") && newState.paddle2.y < canvas.height - newState.paddle2.height)
+            newState.paddle2.y += paddleSpeed * delta;
+        } else if (aiAction && aiRef.current) {
+          // AI movement from second file
+          const aiSpeed = paddleSpeed * delta * aiSpeedMultipliers[aiDifficulty];
+          const ballApproaching = newState.ball.dx > 0;
+          
+          if (ballApproaching) {
+            if (aiAction.moveUp && newState.paddle2.y > 0) {
+              newState.paddle2.y = Math.max(0, newState.paddle2.y - aiSpeed);
+            }
+            if (aiAction.moveDown && newState.paddle2.y < canvas.height - newState.paddle2.height) {
+              newState.paddle2.y = Math.min(canvas.height - newState.paddle2.height, newState.paddle2.y + aiSpeed);
+            }
+          } else {
+            // Return to center when ball is moving away
+            const centerY = canvas.height / 2 - newState.paddle2.height / 2;
+            const diff = centerY - newState.paddle2.y;
+            if (Math.abs(diff) > 5) {
+              const passiveSpeed = aiSpeed * 0.4;
+              newState.paddle2.y += Math.sign(diff) * passiveSpeed;
+              newState.paddle2.y = Math.max(0, Math.min(canvas.height - newState.paddle2.height, newState.paddle2.y));
+            }
+          }
+        }
 
-        // Ball movement
+        // Ball movement - unchanged
         newState.ball.x += newState.ball.dx * delta;
         newState.ball.y += newState.ball.dy * delta;
 
-   
-
-        // Collision with top/bottom
+        // Collision with top/bottom - unchanged
         if (newState.ball.y + newState.ball.radius >= canvas.height) {
           newState.ball.dy = -newState.ball.dy;
           newState.ball.y = canvas.height - newState.ball.radius;
@@ -176,7 +245,7 @@ export const PongCanvas = ({
           newState.ball.y = newState.ball.radius;
         }
 
-        // Paddle collisions (simple 2-player)
+        // Paddle collisions (simple 2-player) - unchanged
         const ball = newState.ball;
         const p1 = newState.paddle1;
         const p2 = newState.paddle2;
@@ -190,11 +259,11 @@ export const PongCanvas = ({
         ) {
           ball.x = p1.x + p1.width + ball.radius;
           ball.dx = -ball.dx;
-               // Accelerate
-            if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
-              newState.ball.dx *= accelerateSpeed;
-              newState.ball.dy *= accelerateSpeed;
-             }
+          // Accelerate
+          if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
+            newState.ball.dx *= accelerateSpeed;
+            newState.ball.dy *= accelerateSpeed;
+          }
         }
 
         if (
@@ -206,14 +275,14 @@ export const PongCanvas = ({
         ) {
           ball.x = p2.x - ball.radius;
           ball.dx = -ball.dx;
-               // Accelerate
-            if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
-              newState.ball.dx *= accelerateSpeed;
-              newState.ball.dy *= accelerateSpeed;
-        }
+          // Accelerate
+          if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
+            newState.ball.dx *= accelerateSpeed;
+            newState.ball.dy *= accelerateSpeed;
+          }
         }
 
-        // Scoring
+        // Scoring - unchanged
         if (ball.x < 0) {
           newState.score.player2++;
           newState.ball = createBall(-1);
@@ -222,21 +291,26 @@ export const PongCanvas = ({
           newState.ball = createBall(1);
         }
 
-        // Check end
+        // Check end - unchanged
         if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
           newState.gameStatus = "FINISHED";
           onGameEnd?.(newState.score.player1, newState.score.player2);
         }
 
+        // ADDED: Update ref
+        gameStateRef.current = newState;
         return newState;
       });
     },
-    [createBall, maxScore, onGameEnd]
+    [createBall, maxScore, onGameEnd, enableAI, aiDifficulty, mapGameStateToAI]
   );
 
-
+  // MODIFIED useEffect to add AI initialization and proper cleanup
   useEffect(() => {
-    // Keyboard event handlers
+    // ADDED: Initialize AI
+    aiRef.current = enableAI ? new AIOpponent(aiDifficulty) : null;
+
+    // Keyboard event handlers - unchanged
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLElement) {
         const tag = e.target.tagName;
@@ -249,13 +323,15 @@ export const PongCanvas = ({
           e.preventDefault();
       }
     };
+
     const handleKeyUp = (e: KeyboardEvent) => {
       keysPressed.current.delete(e.code);
     };
+
     window.addEventListener("keydown", handleKeyDown, { passive: false });
     window.addEventListener("keyup", handleKeyUp);
 
-    // Game / render loop
+    // Game / render loop - unchanged
     const loop = (time: number) => {
       const last = lastTimeRef.current;
       const delta = last !== null ? (time - last) / 16.67 : 1;
@@ -268,13 +344,17 @@ export const PongCanvas = ({
     };
     animationRef.current = requestAnimationFrame(loop);
 
-    // Cleanup on unmount
+    // Cleanup on unmount - MODIFIED to clean up AI
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       cancelAnimationFrame(animationRef.current);
+      // ADDED: Clean up AI instance
+      if (aiRef.current) {
+        aiRef.current.cleanup?.();
+      }
     };
-  }, [gameState, updateGame, draw]);
+  }, [enableAI, aiDifficulty, gameState, updateGame, draw]);
 
   const startGame = () => {
     lastTimeRef.current = null;
@@ -289,6 +369,10 @@ export const PongCanvas = ({
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
+
+  // ADDED: Friendly difficulty display
+  const friendlyDifficulty = aiDifficulty.charAt(0) + aiDifficulty.slice(1).toLowerCase();
+  const opponentControlHint = enableAI ? `AI • ${friendlyDifficulty}` : 'Arrow Keys';
 
   return (
     <div className="space-y-6">
@@ -342,7 +426,10 @@ export const PongCanvas = ({
             <div className="text-3xl font-game font-bold text-primary">
               {gameState.score.player2}
             </div>
-            <div className="text-sm text-muted-foreground mt-2">Arrow Keys</div>
+            {/* CHANGED: Show AI difficulty or Arrow Keys */}
+            <div className="text-sm text-muted-foreground mt-2">
+              {opponentControlHint}
+            </div>
           </CardContent>
         </Card>
       </div>
