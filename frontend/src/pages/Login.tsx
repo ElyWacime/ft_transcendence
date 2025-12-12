@@ -44,7 +44,7 @@ const Login = () => {
       if (res.accessToken) {
         login(res.accessToken, email);
         toast.success("Welcome back!");
-        navigate("/home");
+        navigate("/");
       } else {
         toast.error(res.message || "Login failed");
       }
