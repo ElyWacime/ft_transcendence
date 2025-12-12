@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PongCanvas } from "@/components/PongCanvas";
+import { PongCanvas } from "@/components/PongCanvas_ai";
 import { Chat } from "@/components/Chat";
 import { ArrowLeft, Bot, Gauge } from "lucide-react";
 import { Difficulty } from "@/lib/ai/AIOpponent";

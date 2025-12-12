@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PongCanvas } from "@/components/PongCanvas";
+import { PongCanvas } from "@/components/PongCanvas_ai";
 import { Chat } from "@/components/Chat";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { Match, api } from "@/lib/api";
