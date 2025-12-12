@@ -70,7 +70,7 @@ export async function userRoutes(app: FastifyInstance) {
   });
 
   // ---- UPDATE EMAIL ----
-  app.put('/api/profile/email', update_email);
+  app.put('/update_email', update_email);
 
   app.post("/validate_token", {
     schema: {

@@ -203,6 +203,16 @@ class UserAPI {
     return await res.json();
   }
 
+  async update_email(email: string, new_email: string, password: string) {
+    const res = await fetch(`${this.baseUrl}/register`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, new_email, password }),
+    });
+
+    return await res.json();
+  }
+
   async me() {
     const token = localStorage.getItem("token");
     const res = await fetch(`${this.baseUrl}/me`, {
