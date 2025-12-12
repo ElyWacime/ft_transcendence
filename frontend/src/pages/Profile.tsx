@@ -13,7 +13,7 @@ const Profile = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleProfile = async (e: React.FormEvent) => {
+  const updateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -48,23 +48,9 @@ const Profile = () => {
 
       {/* Profile Card */}
       <form
-        onSubmit={handleProfile}
+        onSubmit={updateEmail}
         className="w-full max-w-sm bg-background/60 backdrop-blur-sm border border-border rounded-lg p-6 shadow-xl space-y-4"
       >
-        <div className="text-left">
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
-            Name
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
-            placeholder="Player name"
-          />
-        </div>
-
         <div className="text-left">
           <label className="block text-sm font-medium text-muted-foreground mb-1">
             Email
@@ -73,6 +59,20 @@ const Profile = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            placeholder="Player name"
+          />
+        </div>
+
+        <div className="text-left">
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            New Email
+          </label>
+          <input
+            type="email"
+            value={new_email}
+            onChange={(e) => setNewEmail(e.target.value)}
             required
             className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
             placeholder="you@example.com"
@@ -98,7 +98,7 @@ const Profile = () => {
           className="w-full mt-4 font-semibold text-lg"
           disabled={loading}
         >
-          {loading ? "Profileing..." : "Sign Up"}
+          {loading ? "Profileing..." : "Update Email"}
         </Button>
       </form>
 

@@ -69,8 +69,31 @@ export async function userRoutes(app: FastifyInstance) {
     handler: logout,
   });
 
-  // ---- UPDATE EMAIL ----
-  app.put('/update_email', update_email);
+  // // ---- UPDATE EMAIL ----
+  // app.POST("/update_email", {
+  //   schema: {
+  //     body: {
+  //       type: "object",
+  //       required: ["email", "new_email", "passwrod"],
+  //       properties: {
+  //         email: { type: "string", format: "email" },
+  //         new_email: { type: "string", format: "email" },
+  //         password: { type: "string", minLength: 6 },
+  //       },
+  //     },
+  //     response: {
+  //       201: {
+  //         type: "object",
+  //         properties: {
+  //           id: { type: "string" },
+  //           email: { type: "string" },
+  //           name: { type: "string" },
+  //         },
+  //       },
+  //     },
+  //   },
+  //   handler: update_email,
+  // });
 
   app.post("/validate_token", {
     schema: {

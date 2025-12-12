@@ -73,10 +73,17 @@ export async function login(
 }
 
 export async function update_email(
-  req: FastifyRequest<UpdateEmail>,
+  req: FastifyRequest<{
+    Body: UpdateEmail;
+  }>,
   reply: FastifyReply,
 ) {
   const { currentEmail, newEmail, password } = req.body;
+
+  console.log("\n\n\n\n\n\n\n\n\n");
+  console.log("INSIDE UPDATE EMAIL");
+  console.log(currentEmail, newEmail, password);
+  console.log("\n\n\n\n\n\n\n\n\n");
 
   const user = await prisma.user.findUnique({ 
     where: { email: currentEmail } 

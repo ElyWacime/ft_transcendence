@@ -204,8 +204,9 @@ class UserAPI {
   }
 
   async update_email(email: string, new_email: string, password: string) {
-    const res = await fetch(`${this.baseUrl}/register`, {
-      method: "PUT",
+    console.log("#################", email, new_email, password, "#################");
+    const res = await fetch(`${this.baseUrl}/update_email`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, new_email, password }),
     });
