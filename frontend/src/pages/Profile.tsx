@@ -19,9 +19,9 @@ const Profile = () => {
 
     try {
       const res = await userApi.update_email(email, new_email, password);
-      if (res.id) {
+      if (res.success) {
         toast.success("Email updated successfuly!");
-        navigate("/Profile");
+        navigate("/profile");
       } else {
         toast.error(res.message || "Email update failed.");
       }

@@ -84,9 +84,9 @@ export async function userRoutes(app: FastifyInstance) {
         200: {
           type: "object",
           properties: {
-            id: { type: "string" },
-            email: { type: "string" },
-            name: { type: "string" },
+            success: { type: "boolean" },
+            message: { type: "string" },
+            accessToken: { type: "string" },
           },
         },
       },

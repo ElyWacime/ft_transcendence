@@ -80,10 +80,18 @@ export async function update_email(
 ) {
   const { email, new_email, password } = req.body;
 
-  console.log("\n\n\n\n\n\n\n\n\n");
-  console.log("INSIDE UPDATE EMAIL");
-  console.log(email, new_email, password);
-  console.log("\n\n\n\n\n\n\n\n\n");
+  const cookieToken = req.cookies.access_token;
+
+  try {
+    const decoded = req.jwt.verify(cookieToken);
+    console.log("Decoded token:", decoded);
+     
+  } catch (error) {
+    console.error("Invalid token:", error);
+    return reply.code(401).send({ 
+      message: "Invalid or expired token" 
+    });
+  }
 
   const user = await prisma.user.findUnique({ 
     where: { email: email } 
