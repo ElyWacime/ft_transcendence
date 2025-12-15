@@ -28,7 +28,6 @@ export const loginSchema = z.object({
 });
 
 export const updateEmailSchema = z.object({
-  email: z.string().email(),
   new_email: z.string().email(),
   password: z.string().min(6),
 });

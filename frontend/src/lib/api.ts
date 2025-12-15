@@ -204,12 +204,11 @@ class UserAPI {
     return await res.json();
   }
 
-  async update_email(email: string, new_email: string, password: string) {
-    console.log("#################", email, new_email, password, "#################");
+  async update_email(new_email: string, password: string) {
     const res = await fetch(`${this.baseUrl}/update_email`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, new_email, password }),
+      body: JSON.stringify({ new_email, password }),
       credentials: 'include',
     });
 

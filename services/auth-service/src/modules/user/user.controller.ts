@@ -78,7 +78,7 @@ export async function update_email(
   }>,
   reply: FastifyReply,
 ) {
-  const { email, new_email, password } = req.body;
+  const { new_email, password } = req.body;
 
   const cookieToken = req.cookies.access_token;
 
@@ -86,6 +86,7 @@ export async function update_email(
     const decoded = req.jwt.verify(cookieToken);
     console.log("Decoded token:", decoded);
     const decoded_email = decoded.email;
+    console.log("decoded email: ", decoded_email);
     const user = await prisma.user.findUnique({ 
       where: { email: decoded_email } 
     });
@@ -108,7 +109,7 @@ export async function update_email(
     }
   
     const updatedUser = await prisma.user.update({
-      where: { email: email },
+      where: { email: decoded_email },
       data: { email: new_email },
     });
   
@@ -131,12 +132,11 @@ export async function update_email(
     };
      
   } catch (error) {
-    console.error("Invalid token:", error);
+    console.error(error);
     return reply.code(401).send({ 
-      message: "Invalid or expired token" 
+      message: error,
     });
   }
-
 }
 
 export async function getUsers(req: FastifyRequest, reply: FastifyReply) {

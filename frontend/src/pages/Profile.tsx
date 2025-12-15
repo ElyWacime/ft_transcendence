@@ -18,7 +18,7 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      const res = await userApi.update_email(email, new_email, password);
+      const res = await userApi.update_email(new_email, password);
       if (res.success) {
         toast.success("Email updated successfuly!");
         navigate("/profile");
@@ -51,7 +51,7 @@ const Profile = () => {
         onSubmit={updateEmail}
         className="w-full max-w-sm bg-background/60 backdrop-blur-sm border border-border rounded-lg p-6 shadow-xl space-y-4"
       >
-        <div className="text-left">
+        {/* <div className="text-left">
           <label className="block text-sm font-medium text-muted-foreground mb-1">
             Email
           </label>
@@ -63,7 +63,7 @@ const Profile = () => {
             className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
             placeholder="Player name"
           />
-        </div>
+        </div> */}
 
         <div className="text-left">
           <label className="block text-sm font-medium text-muted-foreground mb-1">

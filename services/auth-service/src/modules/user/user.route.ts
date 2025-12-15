@@ -73,9 +73,8 @@ export async function userRoutes(app: FastifyInstance) {
     schema: {
       body: {
         type: "object",
-        required: ["email", "new_email", "password"],
+        required: ["new_email", "password"],
         properties: {
-          email: { type: "string", format: "email" },
           new_email: { type: "string", format: "email" },
           password: { type: "string", minLength: 6 },
         },
