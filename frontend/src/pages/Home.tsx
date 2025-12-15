@@ -54,7 +54,7 @@ const Home = () => {
           </p>
           <Button
             size="lg"
-            onClick={() => { navigate("/tournament") }}
+            onClick={() => {navigate("/tournament") }}
             className="bg-gradient-primary hover:scale-105 transition-transform duration-300 animate-pulse-glow text-lg px-8 py-4 font-game"
           >
             <Trophy className="w-6 h-6 mr-2" />
@@ -71,7 +71,7 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card  onClick={() => { navigate(feature.page) }}
+              <Card  onClick={() => { console.log(feature, index);  navigate(feature.page) }}
                 key={index}
                 className="p-6 bg-gradient-secondary border-border hover:border-primary transition-all duration-300 hover:shadow-glow group"
               >
