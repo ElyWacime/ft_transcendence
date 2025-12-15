@@ -32,8 +32,14 @@ export const updateEmailSchema = z.object({
   password: z.string().min(6),
 });
 
+export const updatePassSchema = z.object({
+  new_email: z.string().email(),
+  password: z.string().min(6),
+});
+
 export type LoginUserInput = z.infer<typeof loginSchema>;
 export type UpdateEmailInput = z.infer<typeof updateEmailSchema>;
+export type UpdatePassInput = z.infer<typeof updatePassSchema>;
 export const loginResponseSchema = z.object({
   accessToken: z.string(),
 });

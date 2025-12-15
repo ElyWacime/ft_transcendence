@@ -190,7 +190,6 @@ class UserAPI {
   }
 
   async logout(email: string) {
-    console.log("###############", email, "################");
     const token = localStorage.getItem("token");
     const res = await fetch(`${this.baseUrl}/logout`, {
       method: "POST",
@@ -210,6 +209,25 @@ class UserAPI {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_email, password }),
       credentials: 'include',
+    });
+
+    return await res.json();
+  }
+
+  async update_password(current_password: string, new_password: string) {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${this.baseUrl}/update_password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        current_password,
+        new_password,
+      }),
+      credentials: "include",
     });
 
     return await res.json();

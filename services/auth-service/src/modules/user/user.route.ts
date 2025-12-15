@@ -1,12 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { createUser, login, logout, update_email } from "./user.controller";
+import { createUser, login, logout, update_email, update_password } from "./user.controller";
 
 export async function userRoutes(app: FastifyInstance) {
   app.get("/", { preHandler: [app.authenticate] }, async () => {
     return { message: "ok" };
   });
 
-  // --- REGISTER ---
   app.post("/register", {
     schema: {
       body: {
@@ -32,7 +31,6 @@ export async function userRoutes(app: FastifyInstance) {
     handler: createUser,
   });
 
-  // --- LOGIN ---
   app.post("/login", {
     schema: {
       body: {
@@ -68,7 +66,6 @@ export async function userRoutes(app: FastifyInstance) {
     handler: logout,
   });
 
-  // ---- UPDATE EMAIL ----
   app.put("/update_email", {
     schema: {
       body: {
@@ -91,6 +88,31 @@ export async function userRoutes(app: FastifyInstance) {
       },
     },
     handler: update_email,
+  });
+
+  app.put("/update_password", {
+    preHandler: app.authenticate,
+    schema: {
+      body: {
+        type: "object",
+        required: ["current_password", "new_password"],
+        properties: {
+          current_password: { type: "string", minLength: 6 },
+          new_password: { type: "string", minLength: 6 },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" },
+            accessToken: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: update_password,
   });
 
   app.post("/validate_token", {

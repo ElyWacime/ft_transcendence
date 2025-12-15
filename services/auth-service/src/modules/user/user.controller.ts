@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateUserInput, LoginUserInput, UpdateEmailInput } from "./user.schema";
+import { CreateUserInput, LoginUserInput, UpdateEmailInput, UpdatePassInput } from "./user.schema";
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
 
@@ -68,6 +68,7 @@ export async function login(
     path: "/",
     httpOnly: true,
     secure: false,
+    sameSite: "lax",
   });
   return { accessToken: token };
 }
@@ -84,9 +85,7 @@ export async function update_email(
 
   try {
     const decoded = req.jwt.verify(cookieToken);
-    console.log("Decoded token:", decoded);
     const decoded_email = decoded.email;
-    console.log("decoded email: ", decoded_email);
     const user = await prisma.user.findUnique({ 
       where: { email: decoded_email } 
     });
@@ -123,6 +122,7 @@ export async function update_email(
       path: "/",
       httpOnly: true,
       secure: false,
+      sameSite: "lax",
     });
   
     return {
@@ -138,6 +138,108 @@ export async function update_email(
     });
   }
 }
+
+export async function update_password(
+  req: FastifyRequest<{
+    Body: UpdatePassInput;
+  }>,
+  reply: FastifyReply,
+) {
+  try {
+    const userToken = req.user as {
+      id: string;
+      email: string;
+    };
+
+    const { current_password, new_password } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email: userToken.email },
+    });
+
+    if (!user) {
+      return reply.code(404).send({ message: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      current_password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      return reply.code(401).send({ message: "Invalid password" });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+
+    await prisma.user.update({
+      where: { email: userToken.email },
+      data: { password: hashedPassword },
+    });
+
+    reply.clearCookie("access_token");
+
+    return reply.send({
+      success: true,
+      message: "Password updated successfully. Please log in again.",
+    });
+  } catch (err) {
+    console.error(err);
+    return reply.code(500).send({
+      message: "Internal server error",
+    });
+  }
+}
+
+// export async function update_password(
+//   req: FastifyRequest<{
+//     Body: UpdatePassInput;
+//   }>,
+//   reply: FastifyReply,
+// ) {
+//   const { current_password, new_password } = req.body;
+
+//   const cookieToken = req.cookies.access_token;
+
+//   try {
+//     const decoded = req.jwt.verify(cookieToken);
+//     const decoded_email = decoded.email;
+
+//     const user = await prisma.user.findUnique({
+//       where: { email: decoded_email },
+//     });
+
+//     if (!user) {
+//       return reply.code(404).send({ message: "User not found" });
+//     }
+
+//     const isPasswordValid = await bcrypt.compare(
+//       current_password,
+//       user.password,
+//     );
+//     if (!isPasswordValid) {
+//       return reply.code(401).send({ message: "Invalid password" });
+//     }
+
+//     const hashedPassword = await bcrypt.hash(new_password, 10);
+
+//     await prisma.user.update({
+//       where: { email: decoded_email },
+//       data: { password: hashedPassword },
+//     });
+
+//     return {
+//       success: true,
+//       message: "Password updated successfully",
+//     };
+//   } catch (error) {
+//     console.error(error);
+//     return reply.code(401).send({
+//       message: error,
+//     });
+//   }
+// }
+
 
 export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
   const users = await prisma.user.findMany({

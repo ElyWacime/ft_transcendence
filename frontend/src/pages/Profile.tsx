@@ -8,22 +8,51 @@ import { Trophy } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
   const [new_email, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [pass, setPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confNewPass, setConfNewPass] = useState("");
+
   const updateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (newPass !== confNewPass) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    
     setLoading(true);
-
     try {
       const res = await userApi.update_email(new_email, password);
       if (res.success) {
         toast.success("Email updated successfuly!");
+        localStorage.setItem("email", new_email);
         navigate("/profile");
       } else {
         toast.error(res.message || "Email update failed.");
+      }
+    } catch (err) {
+      toast.error("Server error, please try again later");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await userApi.update_password(pass, newPass);
+      if (res.success) {
+        toast.success("Password updated successfully!");
+        navigate("/profile");
+      } else {
+        toast.error(res.message || "Password update failed.");
       }
     } catch (err) {
       toast.error("Server error, please try again later");
@@ -87,6 +116,61 @@ const Profile = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full mt-4 font-semibold text-lg"
+          disabled={loading}
+        >
+          {loading ? "Profileing..." : "Update Email"}
+        </Button>
+      </form>
+
+      <form
+        onSubmit={updatePassword}
+        className="w-full max-w-sm bg-background/60 backdrop-blur-sm border border-border rounded-lg p-6 shadow-xl space-y-4"
+      >
+        <div className="text-left">
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Old password
+          </label>
+          <input
+            type="password"
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            // required
+            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div className="text-left">
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            New Password
+          </label>
+          <input
+            type="password"
+            value={newPass}
+            onChange={(e) => setNewPass(e.target.value)}
+            required
+            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div className="text-left">
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Confirm new password
+          </label>
+          <input
+            type="password"
+            value={confNewPass}
+            onChange={(e) => setConfNewPass(e.target.value)}
             required
             className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
             placeholder="••••••••"
