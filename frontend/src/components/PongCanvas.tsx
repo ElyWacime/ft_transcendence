@@ -82,6 +82,7 @@ export const PongCanvas = ({
     paddle4: { x: 725, y: 250, width: 15, height: 100 },
     score: { player1: 0, player2: 0 },
     gameStatus: "waiting",
+
   });
 
   const createBall = useCallback(
@@ -112,13 +113,18 @@ export const PongCanvas = ({
   const draw = useCallback((state: GameState) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Clear
     ctx.fillStyle = "hsl(222 47% 4%)";
+    // Clear
+    ctx.fillStyle = "hsl(222 47% 4%)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Center line
+    ctx.strokeStyle = "hsl(222 47% 12%)";
     // Center line
     ctx.strokeStyle = "hsl(222 47% 12%)";
     ctx.lineWidth = 2;
@@ -134,6 +140,7 @@ export const PongCanvas = ({
     ctx.fillRect(state.paddle1.x, state.paddle1.y, state.paddle1.width, state.paddle1.height);
     ctx.fillRect(state.paddle2.x, state.paddle2.y, state.paddle2.width, state.paddle2.height);
 
+    // Ball
     // Ball
     ctx.beginPath();
     ctx.arc(state.ball.x, state.ball.y, state.ball.radius, 0, Math.PI * 2);
@@ -322,8 +329,17 @@ export const PongCanvas = ({
         if (gameState.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
           e.preventDefault();
       }
+      if (e.target instanceof HTMLElement) {
+        const tag = e.target.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+      }
+      if (["KeyW", "KeyS", "ArrowUp", "ArrowDown"].includes(e.code)) {
+        keysPressed.current.add(e.code);
+        // prevent default scroll behavior for arrows
+        if (gameState.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
+          e.preventDefault();
+      }
     };
-
     const handleKeyUp = (e: KeyboardEvent) => {
       keysPressed.current.delete(e.code);
     };
@@ -359,13 +375,18 @@ export const PongCanvas = ({
   const startGame = () => {
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
+    lastTimeRef.current = null;
+    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
   const pauseGame = () => {
     setGameState((prev) => ({ ...prev, gameStatus: "paused" }));
+    setGameState((prev) => ({ ...prev, gameStatus: "paused" }));
   };
 
   const resumeGame = () => {
+    lastTimeRef.current = null;
+    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
@@ -385,6 +406,7 @@ export const PongCanvas = ({
             <div className="text-3xl font-game font-bold text-primary">
               {gameState.score.player1}
             </div>
+            <div className="text-sm text-muted-foreground mt-2">W/S Keys</div>
             <div className="text-sm text-muted-foreground mt-2">W/S Keys</div>
           </CardContent>
         </Card>

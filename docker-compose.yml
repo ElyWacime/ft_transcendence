@@ -28,33 +28,12 @@ services:
       - /app/node_modules
       - ./services/auth-service/prisma/db:/app/prisma/db
     environment:
-      - DATABASE_URL=file:/app/prisma/db/data.db
-      - JWT_ACCESS_SECRET=supersecretkey
-      - JWT_REFRESH_SECRET=superrefreshkey
       - PORT=8000
       - NODE_ENV=development
-      - COOKIE_DOMAIN=localhost
     command: npm run dev
     networks:
       - transcendence
 
-  # ---------- TOURNAMENT SERVICE ----------
-  # tournament-service:
-  #   build:
-  #     context: ./services/tournament-service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8001:8001"
-  #   volumes:
-  #     - ./services/tournament-service:/app
-  #     - /app/node_modules
-  #   environment:
-  #     - PORT=8001
-  #     - NODE_ENV=development
-  #   command: npm run dev
-  #   networks:
-  #     - transcendence
-  #
   # ---------- GATEWAY (NGINX) ----------
   gateway:
     image: nginx:stable-alpine

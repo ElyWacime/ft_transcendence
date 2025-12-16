@@ -19,13 +19,15 @@ const Login = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-  
-    if (token) {
+    const email = params.get("email");
+
+    if (token && email) {
       localStorage.setItem("token", token);
-  
+      localStorage.setItem("email", email);
+
       // 👇 instantly update auth context
-      login(token, "github_user");
-  
+      login(token, email);
+
       toast.success("Successfully logged in with GitHub!");
       navigate("/tournament", { replace: true });
     }
@@ -42,7 +44,7 @@ const Login = () => {
       if (res.accessToken) {
         login(res.accessToken, email);
         toast.success("Welcome back!");
-        navigate("/tournament");
+        navigate("/");
       } else {
         toast.error(res.message || "Login failed");
       }
@@ -56,7 +58,7 @@ const Login = () => {
 
   // 👇 GitHub OAuth redirect
   const handleGitHubLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/api/users/auth/github`;
+    window.location.href = `${window.location.origin}/api/users/auth/github`;
   };
 
   return (

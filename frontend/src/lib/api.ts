@@ -168,7 +168,7 @@ export const api = new TournamentAPI();
 // ---------------- USER AUTH API ---------------- //
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
-  private baseUrl = `${API_URL}/api/users`;
+  private baseUrl = "http://10.30.238.84/api/users";
 
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
@@ -199,6 +199,36 @@ class UserAPI {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ email }),
+    });
+
+    return await res.json();
+  }
+
+  async update_email(new_email: string, password: string) {
+    const res = await fetch(`${this.baseUrl}/update_email`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_email, password }),
+      credentials: 'include',
+    });
+
+    return await res.json();
+  }
+
+  async update_password(current_password: string, new_password: string) {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${this.baseUrl}/update_password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        current_password,
+        new_password,
+      }),
+      credentials: "include",
     });
 
     return await res.json();

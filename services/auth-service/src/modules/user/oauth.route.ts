@@ -73,42 +73,29 @@ export async function oauthRoutes(app: FastifyInstance) {
       where: { email },
       update: {
         loggedIn: true,
-        name: user.name || user.login,
+        name: user.login || user.name,
       },
       create: {
         email,
-        name: user.name || user.login,
+        name: user.login || user.name,
         password: "",
         loggedIn: true,
       },
     });
 
-    const payload = {
-    id: dbUser.id,
-    email: dbUser.email,
-    name: dbUser.name,
-    };
-
-    const token = req.jwt.sign(payload);
-    reply.setCookie("access_token", token, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-    });
-
-    // // Generate JWT
-    // const jwtToken = jwt.sign(
-    //   { id: dbUser.id, username: dbUser.name },
-    //   process.env.JWT_ACCESS_SECRET || "supersecretcode-CHANGE_THIS",
-    //   { expiresIn: "1h" },
-    // );
+    // Generate JWT
+    const jwtToken = jwt.sign(
+      { id: dbUser.id, username: dbUser.name, email: dbUser.email },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: "10h" },
+    );
 
     // Redirect to frontend with token
-    const redirectUrl = new URL(`http://${process.env.COOKIE_DOMAIN}/login`);
-    redirectUrl.searchParams.set("token", token);
+    const redirectUrl = new URL(`http://${process.env.DOMAIN}/login`);
+    redirectUrl.searchParams.set("token", jwtToken);
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());
 
-    //reply.redirect(`http://localhost/login?token=${jwtToken}`);
+    //reply.redirect(`http://10.12.7.4/login?token=${jwtToken}`);
   });
 }

@@ -11,8 +11,8 @@ const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 // --- CORS ---
 app.register(cors, {
   origin: [
-    `http://${process.env.COOKIE_DOMAIN}`,
-    `http://${process.env.COOKIE_DOMAIN}:8080`,
+    `http://${process.env.DOMAIN}`,
+    `http://${process.env.DOMAIN}:8080`,
     "http://127.0.0.1:8080",
     "http://frontend:8080",
     "http://0.0.0.0",
@@ -23,7 +23,7 @@ app.register(cors, {
 });
 
 // --- JWT ---
-app.register(fjwt, {secret: process.env.JWT_ACCESS_SECRET || "supersecretkey"  });
+app.register(fjwt, { secret: process.env.JWT_ACCESS_SECRET });
 app.addHook("preHandler", (req, _res, next) => {
   req.jwt = app.jwt;
   next();
@@ -31,7 +31,7 @@ app.addHook("preHandler", (req, _res, next) => {
 
 // --- Cookies ---
 app.register(fCookie, {
-  secret: process.env.JWT_ACCESS_SECRET || "supersecretkey", 
+  secret: process.env.COOKIE_SECRET,
   hook: "preHandler",
 });
 
