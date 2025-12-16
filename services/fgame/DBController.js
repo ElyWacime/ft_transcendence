@@ -331,3 +331,7 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Users WHERE id = ?`, [id]);
     }
 }
+
+
+
+
