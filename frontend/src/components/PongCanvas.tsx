@@ -407,7 +407,6 @@ export const PongCanvas = ({
               {gameState.score.player1}
             </div>
             <div className="text-sm text-muted-foreground mt-2">W/S Keys</div>
-            <div className="text-sm text-muted-foreground mt-2">W/S Keys</div>
           </CardContent>
         </Card>
 
