@@ -24,4 +24,7 @@ model User {
   Auto_Match Boolean   @default(false)
   avatar     String?   @default("https://www.avatar.com/avatar")
   CreatedAt  DateTime  @default(now())
+
+  image_name String? @default("No image")
+  image Bytes?
 }

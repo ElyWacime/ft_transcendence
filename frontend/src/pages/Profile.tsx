@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Trophy } from "lucide-react";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -62,6 +64,83 @@ const Profile = () => {
     }
   };
 
+  const updateImage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('image_id') as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+    
+    if (!file) {
+      toast.error("Please select an image file");
+      return;
+    }
+    
+    // Check file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please select a valid image file (JPEG, PNG, GIF, or WebP)");
+      return;
+    }
+    
+    // Check file size
+    const maxSize = 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("Image size should be less than 2MB");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const reader = new FileReader();
+      
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          if (reader.result) {
+            // Get base64 string (remove data:image/...;base64, prefix)
+            const base64String = (reader.result as string).split(',')[1];
+            resolve(base64String);
+          } else {
+            reject(new Error("Failed to read file"));
+          }
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      
+      // Prepare data to send - matches backend schema
+      const imageData = {
+        image: base64Image,     // Base64 string (required)
+        image_name: file.name,  // Original filename (required)
+        // Optional fields if you want to store them
+        file_type: file.type,
+        file_size: file.size
+      };
+      
+      // This should now work with the corrected API method
+      const res = await userApi.update_image(imageData);
+      
+      if (res.success) {
+        toast.success("Profile image updated successfully!");
+        
+        if (res.avatar_url) {
+          localStorage.setItem('avatar_url', res.avatar_url);
+        }
+        
+        navigate("/profile");
+      } else {
+        toast.error(res.message || "Image update failed.");
+      }
+    } catch (err) {
+      toast.error("Failed to process image. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    }
+  };
+  
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-secondary text-center px-4">
       {/* Header */}
@@ -182,20 +261,28 @@ const Profile = () => {
           className="w-full mt-4 font-semibold text-lg"
           disabled={loading}
         >
-          {loading ? "Profileing..." : "Update Email"}
+          {loading ? "Profileing..." : "Update Password"}
         </Button>
       </form>
+      
+      <form
+        onSubmit={updateImage}
+        className="w-full max-w-sm bg-background/60 backdrop-blur-sm border border-border rounded-lg p-6 shadow-xl space-y-4"
+      >
+        <Avatar>
+          <AvatarImage src="../../public/avatar.jpg" />
+        </Avatar>
 
-      {/* Footer */}
-      <p className="text-muted-foreground mt-6 text-sm">
-        Already have an account?{" "}
-        <button
-          className="text-primary hover:underline"
-          onClick={() => navigate("/login")}
+        <input type="file" id="image_id"/>
+        
+        <Button
+          type="submit"
+          className="w-full mt-4 font-semibold text-lg"
+          disabled={loading}
         >
-          Log in
-        </button>
-      </p>
+          {loading ? "Profileing..." : "Update Image"}
+        </Button>
+      </form>
     </div>
   );
 };
