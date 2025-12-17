@@ -162,6 +162,102 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           }
           clients.set(id, connection);
           if (request.type == "REGISTER") {
+
+            
+
+
+
+               // ------0 // step 1
+
+            const isTournament = request.tournament === true;
+            const user = await dbcnx.getUserById(id);
+            if (!user) {
+              sendtoplayer(id, JSON.stringify({
+                type: "ERROR",
+                message: "User does not exist"
+              }));
+              return;
+            }
+            if (isTournament) {
+            const ongoingMatch = await dbcnx.getOngoingMatchByPlayerID(id);
+            if (ongoingMatch) {
+              sendtoplayer(id, JSON.stringify({
+                type: "ERROR",
+                message: "You are already in a match"
+              }));
+              return;
+            }
+            const alreadyInTournament = await dbcnx.db.get(
+            `SELECT 1 FROM Participate_Tournament WHERE P_Id = ?`,
+            [id]
+          );
+
+          if (alreadyInTournament) {
+            sendtoplayer(id, JSON.stringify({
+              type: "ERROR",
+              message: "You are already in a tournament"
+            }));
+            return;
+          }
+
+          }
+         // ------0
+
+
+            // -----0
+
+          let tournamentId = null;
+
+          if (isTournament) {
+            // 1️⃣ Find open tournament
+            let tournament = await dbcnx.db.get(`
+              SELECT * FROM Tournament
+              WHERE result = 'PENDING'
+              AND count_players < max_players
+              ORDER BY CreatedAt ASC
+              LIMIT 1
+            `);
+
+            //  Create tournament if none
+            if (!tournament) {
+              tournamentId = await dbcnx.createTournament({
+                Label: "Pong Tournament",
+                result: "PENDING"
+              });
+            } else {
+              tournamentId = tournament.id;
+            }
+
+            // Insert participation
+            await dbcnx.db.run(`
+              INSERT INTO Participate_Tournament (P_Id, T_Id)
+              VALUES (?, ?)
+            `, [id, tournamentId]);
+
+            //  Update tournament player count
+            await dbcnx.db.run(`
+              UPDATE Tournament
+              SET count_players = count_players + 1
+              WHERE id = ?
+            `, [tournamentId]);
+
+            // 5 Inform player
+            sendtoplayer(id, JSON.stringify({
+              type: "TOURNAMENT_JOINED",
+              tournamentId
+            }));
+          }
+
+
+
+
+            // -----0
+
+
+
+
+
+
             let u = new Users();
             u.id = id; //to add in localstorage
             u.email = email;
