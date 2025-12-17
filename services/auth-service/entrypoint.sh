@@ -5,4 +5,4 @@ npx prisma generate
 
 npx prisma db push
 
-exec npm run dev
+npm run dev
