@@ -7,3 +7,9 @@ rm:
 re: rm up
 git:
 	sudo git add . && sudo git commit -m "FUpdts" && sudo git push
+
+auth:
+	@echo "Completely rebuilding auth container from scratch..."
+	docker-compose down -v auth-service
+	docker-compose build --no-cache auth-service
+	docker-compose up -d auth-service

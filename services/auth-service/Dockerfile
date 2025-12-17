@@ -9,12 +9,14 @@ RUN apt-get update -y && \
 COPY package*.json ./
 RUN npm install
 
-COPY . .
-RUN mkdir -p /app/prisma/db
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY prisma ./prisma
 
 RUN npx prisma generate
 
-CMD ["entrypoint"]
+COPY . .
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+

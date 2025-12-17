@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { createUser, login, logout, update_email, update_password } from "./user.controller";
+import prisma from "../../utils/prisma";
 
 export async function userRoutes(app: FastifyInstance) {
   app.get("/", { preHandler: [app.authenticate] }, async () => {
@@ -130,9 +131,15 @@ export async function userRoutes(app: FastifyInstance) {
     
     try {
       const decoded = req.jwt.verify(token);
+      const current_user = await prisma.user.findUnique({
+      where: { id: decoded.id }
+    });
+    
       return reply.send({
         valid: true,
-        user: decoded, 
+        user_name: current_user.name,
+        user_id: current_user.id,
+        user_email: current_user.email,
       });
     } catch (err) {
       return reply.status(401).send({
@@ -141,6 +148,4 @@ export async function userRoutes(app: FastifyInstance) {
       });
     }
   });
-
-  //app.post("/logout", { preHandler: [app.authenticate] }, logout);
 }
