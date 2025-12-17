@@ -18,6 +18,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
 import Profile from "./pages/Profile";
+import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,14 @@ const App = () => (
                 element={
                   <ProtectedRoute children={undefined}>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/:id?"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Dashboard_ayoub />
                   </ProtectedRoute>
                 }
               />
