@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
 import Profile from "./pages/Profile";
@@ -62,8 +63,16 @@ const App = () => (
               <Route path="/game-online" element={<GameOnline />} />
               <Route path="/game-ai" element={<GameAI />} />
               <Route path="/result" element={<Result />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+                <Route path="/login" element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                } />
+                <Route path="/register" element={
+                  <PublicRoute>
+                    <Register />
+                  </PublicRoute>
+                } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

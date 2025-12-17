@@ -242,6 +242,70 @@ class UserAPI {
 
     return await res.json();
   }
+  async update_image(imageData: { 
+    image: string;       // Base64 string (without data: prefix)
+    image_name: string;  // File name
+    file_type?: string;  // Optional
+    file_size?: number;  // Optional
+  }) {
+    const token = localStorage.getItem("token");
+    
+    const res = await fetch(`${this.baseUrl}/update_image`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",  // Important: JSON not FormData
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        image: imageData.image,
+        image_name: imageData.image_name,
+        // Optionally include other fields if your backend accepts them
+        ...(imageData.file_type && { file_type: imageData.file_type }),
+        ...(imageData.file_size && { file_size: imageData.file_size }),
+      }),
+      credentials: 'include',
+    });
+
+    return await res.json();
+  }
+
+  // async update_image_alternative(image: File, description?: string) {
+  //   const token = localStorage.getItem("token");
+    
+  //   const formData = new FormData();
+  //   formData.append('image', image);
+    
+  //   if (description) {
+  //     formData.append('description', description);
+  //   }
+    
+  //   const res = await fetch(`${this.baseUrl}/update_image`, {
+  //     method: "PUT",
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     body: formData,
+  //     credentials: 'include',
+  //   });
+
+  //   return await res.json();
+  // }
+
+  // async update_image_json(imageData: { image: string; type?: string }) {
+  //   const token = localStorage.getItem("token");
+    
+  //   const res = await fetch(`${this.baseUrl}/update_image`, {
+  //     method: "PUT",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     body: JSON.stringify(imageData),
+  //     credentials: 'include',
+  //   });
+
+  //   return await res.json();
+  // }
 }
 
 export const userApi = new UserAPI();
