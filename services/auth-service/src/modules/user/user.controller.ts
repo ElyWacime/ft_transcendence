@@ -191,56 +191,6 @@ export async function update_password(
   }
 }
 
-// export async function update_password(
-//   req: FastifyRequest<{
-//     Body: UpdatePassInput;
-//   }>,
-//   reply: FastifyReply,
-// ) {
-//   const { current_password, new_password } = req.body;
-
-//   const cookieToken = req.cookies.access_token;
-
-//   try {
-//     const decoded = req.jwt.verify(cookieToken);
-//     const decoded_email = decoded.email;
-
-//     const user = await prisma.user.findUnique({
-//       where: { email: decoded_email },
-//     });
-
-//     if (!user) {
-//       return reply.code(404).send({ message: "User not found" });
-//     }
-
-//     const isPasswordValid = await bcrypt.compare(
-//       current_password,
-//       user.password,
-//     );
-//     if (!isPasswordValid) {
-//       return reply.code(401).send({ message: "Invalid password" });
-//     }
-
-//     const hashedPassword = await bcrypt.hash(new_password, 10);
-
-//     await prisma.user.update({
-//       where: { email: decoded_email },
-//       data: { password: hashedPassword },
-//     });
-
-//     return {
-//       success: true,
-//       message: "Password updated successfully",
-//     };
-//   } catch (error) {
-//     console.error(error);
-//     return reply.code(401).send({
-//       message: error,
-//     });
-//   }
-// }
-
-
 export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
   const users = await prisma.user.findMany({
     select: {
@@ -264,3 +214,67 @@ export async function logout(
   reply.clearCookie("access_token");
   return reply.send({ message: "Logout successful" });
 }
+
+
+interface UpdateImageBody {
+  image: string; // base64 string
+  image_name: string;
+}
+
+export const update_image = async (
+  req: FastifyRequest<{ Body: UpdateImageBody }>,
+  reply: FastifyReply
+) => {
+  const { image, image_name } = req.body;
+  
+  try {
+    const userId = (req.user as any)?.id;
+    
+    if (!userId) {
+      return reply.status(401).send({ 
+        success: false, 
+        message: "Unauthorized" 
+      });
+    }
+    
+    const imageBuffer = Buffer.from(image, 'base64');
+    
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        image: imageBuffer,
+        image_name: image_name
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true
+      }
+    });
+    
+    const avatarUrl = `data:image/png;base64,${image}`;
+    
+    return reply.send({
+      success: true,
+      message: "Image updated successfully",
+      avatar_url: avatarUrl,
+      user: updatedUser
+    });
+    
+  } catch (err) {
+    console.error(err);
+
+    if (err.code === 'P2025') {
+      return reply.status(404).send({
+        success: false,
+        message: "User not found"
+      });
+    }
+    
+    return reply.status(500).send({
+      success: false,
+      message: "Failed to update image"
+    });
+  }
+};
