@@ -114,7 +114,6 @@ function resetBall(direction = 1, m) {
 }
 
 
-
 fastify.register(fjwt, { 
   secret: process.env.JWT_ACCESS_SECRET
 });
@@ -163,10 +162,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           clients.set(id, connection);
           if (request.type == "REGISTER") {
 
-            
-
-
-
                // ------0 // step 1
 
             const isTournament = request.tournament === true;
@@ -179,37 +174,37 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               return;
             }
             if (isTournament) {
-            const ongoingMatch = await dbcnx.getOngoingMatchByPlayerID(id);
-            if (ongoingMatch) {
+              const ongoingMatch = await dbcnx.getOngoingMatchByPlayerID(id);
+              if (ongoingMatch) {
+                sendtoplayer(id, JSON.stringify({
+                  type: "ERROR",
+                  message: "You are already in a match"
+                }));
+                return;
+              }
+              const alreadyInTournament = await dbcnx.db.get(
+              `SELECT 1 FROM Participate_Tournament WHERE P_Id = ?`,
+              [id]
+            );
+
+            if (alreadyInTournament) {
               sendtoplayer(id, JSON.stringify({
                 type: "ERROR",
-                message: "You are already in a match"
+                message: "You are already in a tournament"
               }));
               return;
             }
-            const alreadyInTournament = await dbcnx.db.get(
-            `SELECT 1 FROM Participate_Tournament WHERE P_Id = ?`,
-            [id]
-          );
-
-          if (alreadyInTournament) {
-            sendtoplayer(id, JSON.stringify({
-              type: "ERROR",
-              message: "You are already in a tournament"
-            }));
-            return;
-          }
 
           }
-         // ------0
+         // ------0step 1 end
 
 
-            // -----0
+            // -----0 step 2
 
           let tournamentId = null;
 
           if (isTournament) {
-            // 1️⃣ Find open tournament
+            // Find open tournament ..
             let tournament = await dbcnx.db.get(`
               SELECT * FROM Tournament
               WHERE result = 'PENDING'
@@ -217,6 +212,16 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               ORDER BY CreatedAt ASC
               LIMIT 1
             `);
+
+            // 0
+            if (tournament && tournament.result !== 'PENDING') {
+            sendtoplayer(id, JSON.stringify({
+              type: "ERROR",
+              message: "Tournament already started"
+            }));
+            return;
+          }
+          // 0
 
             //  Create tournament if none
             if (!tournament) {
@@ -246,12 +251,83 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               type: "TOURNAMENT_JOINED",
               tournamentId
             }));
+
+
+
+
+
+          // ------0 step 3
+
+            const currentTournament = await dbcnx.db.get(`
+              SELECT * FROM Tournament
+              WHERE id = ?
+            `, [tournamentId]);
+
+            if (!currentTournament) return;
+
+            if (currentTournament.result !== 'PENDING') {
+              return;
+            }
+
+            const participants = await dbcnx.db.all(`
+              SELECT P_Id
+              FROM Participate_Tournament
+              WHERE T_Id = ?
+              ORDER BY CreatedAt ASC
+            `, [tournamentId]);
+
+            const count = participants.length;
+
+            if (![2, 4, 8].includes(count)) {
+              return; // wait for more players
+            }
+
+            // LOCK tournament
+            await dbcnx.db.run(`
+              UPDATE Tournament
+              SET result = 'LOCKED'
+              WHERE id = ?
+            `, [tournamentId]);
+
+            // Create matches
+            for (let i = 0; i < count; i += 2) {
+              const m = new Match();
+              m.P1_Id = participants[i].P_Id;
+              m.P2_Id = participants[i + 1].P_Id;
+              m.mode = 2;
+              m.count_players = 2;
+              m.gameStatus = "PENDING";
+              m.T_Id = tournamentId;
+
+              await dbcnx.createMatch(m);
+            }
+
+            // Notify players
+            for (const p of participants) {
+              sendtoplayer(p.P_Id, JSON.stringify({
+                type: "TOURNAMENT_LOCKED",
+                tournamentId
+              }));
+            }
+
+            return; // ⛔ stop normal matchmaking
+
+
+
+
+
+
+          // ------0 step 3
+
+
+
+
           }
 
 
 
 
-            // -----0
+            // -----step 2 end
 
 
 
@@ -397,6 +473,46 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             // else
             // console.log("\n\n>>>>>Player in Match ", id);
           }
+          // -----0
+
+
+          else if (request.type === "READY") {
+            const m = await dbcnx.getCurrentMatchByPlayerID(id);
+            if (!m) return;
+
+            const game = matches.get(m.id);
+            if (!game) return;
+
+            if (game.P1_Id === id) game.ready_p1 = true;
+            if (game.P2_Id === id) game.ready_p2 = true;
+
+            // Notify both players
+            const payload = JSON.stringify({
+              type: "READY_STATUS",
+              ready_p1: game.ready_p1,
+              ready_p2: game.ready_p2
+            });
+
+            sendtoplayer(game.P1_Id, payload);
+            sendtoplayer(game.P2_Id, payload);
+
+            // Start match ONLY when both ready
+            if (game.ready_p1 && game.ready_p2) {
+              game.gameStatus = "PLAYING";
+
+              await dbcnx.db.run(`
+                UPDATE Match
+                SET gameStatus = 'PLAYING'
+                WHERE id = ?
+              `, [m.id]);
+            }
+          }
+
+          //----0 end
+
+
+
+
           else if (request.type == "MOVE") {
             let m = await dbcnx.getCurrentMatchByPlayerID(id);
             if (m) {
@@ -469,11 +585,263 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m.gameStatus = "FINISHED";
               // console.log("\n\n>>>>>updateMatch: ");
               await dbcnx.updateMatch(m);
+
+
+
+
+          // -----0 part 4
+          // the line bellow was else if ,, but erro making it an if statment.
+             if (!m.T_Id) {
+              matches.delete(m.id);
+            return;
+          }
+
+          // dttect match end ..
+          // ---00
+          if (m.T_Id) {
+  // 1️⃣ Get all finished matches in this tournament
+            const finished = await dbcnx.db.all(`
+              SELECT Winner_Id
+              FROM Match
+              WHERE T_Id = ?
+              AND gameStatus = 'FINISHED'
+              ORDER BY id ASC
+            `, [m.T_Id]);
+
+            // 2️⃣ If odd number of winners, wait
+            if (finished.length % 2 !== 0) return;
+
+            // 3️⃣ Check if next round already created
+            const existingNextRound = await dbcnx.db.get(`
+              SELECT id FROM Match
+              WHERE T_Id = ?
+              AND gameStatus = 'PENDING'
+            `, [m.T_Id]);
+
+            if (existingNextRound) return;
+
+            // 4️⃣ Create next round matches
+            for (let i = 0; i < finished.length; i += 2) {
+              const next = new Match();
+              next.P1_Id = finished[i].Winner_Id;
+              next.P2_Id = finished[i + 1].Winner_Id;
+              next.mode = 2;
+              next.count_players = 2;
+              next.gameStatus = "PENDING";
+              next.T_Id = m.T_Id;
+
+              await dbcnx.createMatch(next);
+            }
+
+            // 5️⃣ Tournament finished condition
+            if (finished.length === 1) {
+              await dbcnx.db.run(`
+                UPDATE Tournament
+                SET result = 'FINISHED',
+                    Winner_Id = ?
+                WHERE id = ?
+              `, [finished[0].Winner_Id, m.T_Id]);
+
+              sendtoplayer(finished[0].Winner_Id, JSON.stringify({
+                type: "TOURNAMENT_WINNER",
+                tournamentId: m.T_Id
+              }));
+            }
+          }
+
+          //---00end
+
+
+
+
+
+            const tournamentId = m.T_Id;
+
+            // Are there unfinished matches in this tournament?
+            const remaining = await dbcnx.db.get(`
+              SELECT COUNT(*) as count
+              FROM Match
+              WHERE T_Id = ?
+              AND gameStatus != 'FINISHED'
+            `, [tournamentId]);
+
+            if (remaining.count > 0) {
+              matches.delete(m.id);
+              return; // wait for others
+            }
+
+
+            const winners = await dbcnx.db.all(`
+              SELECT Winner_Id
+              FROM Match
+              WHERE T_Id = ?
+              AND gameStatus = 'FINISHED'
+            `, [tournamentId]);
+
+            if (winners.length === 1) {
+              // 🏆 TOURNAMENT FINISHED
+              await dbcnx.db.run(`
+                UPDATE Tournament
+                SET result = 'FINISHED'
+                WHERE id = ?
+              `, [tournamentId]);
+
+              sendtoplayer(winners[0].Winner_Id, JSON.stringify({
+                type: "TOURNAMENT_WINNER",
+                tournamentId
+              }));
+
+              matches.delete(m.id);
+              return;
+            }
+
+            // Create next round matches
+            for (let i = 0; i < winners.length; i += 2) {
+              const next = new Match();
+              next.P1_Id = winners[i].Winner_Id;
+              next.P2_Id = winners[i + 1].Winner_Id;
+              next.mode = 2;
+              next.count_players = 2;
+              next.gameStatus = "PENDING";
+              next.T_Id = tournamentId;
+
+              await dbcnx.createMatch(next);
+            }
+
+            await dbcnx.db.run(`
+            DELETE FROM Match
+            WHERE T_Id = ?
+            AND gameStatus = 'FINISHED'
+          `, [tournamentId]);
+
+
+
+        // -----0 part 4 end
+
+
+
+
+
               matches.delete(m.id);
             }
             // else
             //  console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
           }
+
+
+
+          // -----0
+          if (request.type === "SEARCH_USER") {
+              const { query } = request;
+
+              const users = await dbcnx.db.all(`
+                SELECT id, User_name
+                FROM Users
+                WHERE User_name LIKE ?
+                LIMIT 10
+              `, [`%${query}%`]);
+
+              sendtoplayer(id, JSON.stringify({
+                type: "SEARCH_RESULT",
+                users
+              }));
+              }   
+
+
+
+
+          if (request.type === "INVITE_PLAYER") {
+          const { targetId, tournamentId } = request;
+
+          sendtoplayer(targetId, JSON.stringify({
+            type: "TOURNAMENT_INVITE",
+            from: id,
+            tournamentId
+          }));
+        }
+
+
+          if (request.type === "INVITE_ACCEPT") {
+            const { tournamentId } = request;
+
+            await dbcnx.db.run(`
+              INSERT INTO Participate_Tournament (P_Id, T_Id)
+              VALUES (?, ?)
+            `, [id, tournamentId]);
+
+            sendtoplayer(id, JSON.stringify({
+              type: "INVITE_ACCEPTED",
+              tournamentId
+            }));
+          }
+
+          if (request.type === "INVITE_REJECT") {
+            sendtoplayer(id, JSON.stringify({
+              type: "INVITE_REJECTED"
+            }));
+          }
+          // ---0
+
+
+
+
+          if (request.type === "SEND_TOURNAMENT_INVITE") {
+            const { toUserId, tournamentId } = request;
+
+            // safety checks
+            if (!clients.has(toUserId)) return;
+
+            await dbcnx.createInvite(id, toUserId, tournamentId);
+
+            sendtoplayer(toUserId, JSON.stringify({
+              type: "TOURNAMENT_INVITE",
+              from: {
+                id,
+                name
+              },
+              tournamentId
+            }));
+          }
+          if (request.type === "RESPOND_TOURNAMENT_INVITE") {
+          const { inviteId, accept } = request;
+
+          if (accept) {
+            await dbcnx.updateInviteStatus(inviteId, "ACCEPTED");
+
+            sendtoplayer(id, JSON.stringify({
+              type: "INVITE_ACCEPTED"
+            }));
+
+            // auto join tournament
+            connection.send(JSON.stringify({
+              type: "REGISTER",
+              tournament: true,
+              mode: 2
+            }));
+          } else {
+            await dbcnx.updateInviteStatus(inviteId, "DECLINED");
+          }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           else if (request.type == "DELETE") {
             // console.log("\n\n>>>>>deletePendingMatchByPlayerID: ");
             await dbcnx.deletePendingMatchByPlayerID(id);

@@ -81,6 +81,10 @@ export class GameState {
         this.p3Downkey = false;
         this.p4UPkey = false;
         this.p4Downkey = false;
+
+        // --0
+        this.ready_p1 = false;
+        this.ready_p2 = false;
     }
 }
 
@@ -105,6 +109,8 @@ export class Match {
         this.player4Name = null;
     }
 }
+
+
 
 export class SQLiteDB {
 
@@ -374,5 +380,27 @@ export class SQLiteDB {
         await this.db.run(`SELECT count(*) as Participate  FROM  Participate_Tournament   Where P_Id = ?;`,[id]);
     }
     
+
+    async createInvite(from, to, tournamentId) {
+    return this.db.run(`
+        INSERT INTO Tournament_Invite (from_user, to_user, tournament_id)
+        VALUES (?, ?, ?)
+    `, [from, to, tournamentId]);
+    }
+
+    async getPendingInvites(userId) {
+    return this.db.all(`
+        SELECT * FROM Tournament_Invite
+        WHERE to_user = ? AND status = 'PENDING'
+    `, [userId]);
+    }
+
+    async updateInviteStatus(id, status) {
+    return this.db.run(`
+        UPDATE Tournament_Invite SET status = ?
+        WHERE id = ?
+    `, [status, id]);
+    }
+
 
 }

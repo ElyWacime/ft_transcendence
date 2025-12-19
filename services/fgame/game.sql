@@ -85,6 +85,25 @@ CREATE TABLE IF NOT EXISTS Messages (
     FOREIGN KEY (Receiver) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+
+
+
+
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS Tournament_Invite (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  from_user TEXT NOT NULL,
+  to_user TEXT NOT NULL,
+  tournament_id INTEGER NOT NULL,
+  status TEXT DEFAULT 'PENDING',
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- -- INDEXES
 -- CREATE INDEX IF NOT EXISTS idx_friendrequest_sender ON FriendRequest(senderId);
 -- CREATE INDEX IF NOT EXISTS idx_friendrequest_receiver ON FriendRequest(receiverId);
