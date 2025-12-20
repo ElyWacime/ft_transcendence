@@ -54,7 +54,6 @@ const Game = () => {
   return (
     <div className="game-page">
       <div className="game-container">
-        {/* Game Header */}
         <div className="game-header">
           <Button
             onClick={() => navigate(-1)}
@@ -64,7 +63,6 @@ const Game = () => {
             <ArrowLeft className="back-icon" />
             <span>Back</span>
           </Button>
-  
           <div className="game-title-container">
             <h1 className="game-title glow-text">
               {match && <Trophy className="trophy-icon" />}
@@ -80,7 +78,6 @@ const Game = () => {
           <div className="header-spacer"></div>
         </div>
   
-        {/* Game Canvas */}
         <div className="game-canvas-container">
           <PongCanvas
             player1Name={player1.alias}
@@ -89,22 +86,7 @@ const Game = () => {
             maxScore={5}
           />
         </div>
-  
-        {/* Match Info */}
-        {match && (
-          <div className="match-info-card">
-            <h3 className="match-info-title">Tournament Match</h3>
-            <p className="match-info-description">
-              This match is part of the tournament bracket. The winner will advance to the next round.
-            </p>
-          </div>
-        )}
-  
-        {/* Chat Component */}
-        <Chat
-          isOpen={isChatOpen}
-          onToggle={() => setIsChatOpen(!isChatOpen)}
-        />
+
       </div>
     </div>
   );

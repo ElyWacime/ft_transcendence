@@ -396,72 +396,71 @@ export const PongCanvas = ({
   const opponentControlHint = enableAI ? `AI • ${friendlyDifficulty}` : 'Arrow Keys';
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-secondary border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{player1Name}</CardTitle>
+    <div className="pong-game-interface">
+      <div className="player-controls-grid">
+        <Card className="player-card player1-card">
+          <CardHeader className="player-card-header">
+            <CardTitle className="player-card-title">{player1Name}</CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <div className="text-3xl font-game font-bold text-primary">
+          <CardContent className="player-card-content">
+            <div className="player-score player1-score">
               {gameState.score.player1}
             </div>
-            <div className="text-sm text-muted-foreground mt-2">W/S Keys</div>
+            <div className="player-control-hint">W/S Keys</div>
           </CardContent>
         </Card>
-
-        <div className="flex items-center justify-center">
-          <div className="space-y-2">
+  
+        <div className="game-controls-center">
+          <div className="game-controls-buttons">
             {gameState.gameStatus === "waiting" && (
-              <Button onClick={startGame} className="bg-gradient-primary">
-                <Play className="w-4 h-4 mr-2" />
+              <Button onClick={startGame} className="game-control-button start-button">
+                <Play className="button-icon" />
                 Start Game
               </Button>
             )}
             {gameState.gameStatus === "playing" && (
-              <Button onClick={pauseGame} className="border border-border">
-                <Pause className="w-4 h-4 mr-2" />
+              <Button onClick={pauseGame} className="game-control-button pause-button">
+                <Pause className="button-icon" />
                 Pause
               </Button>
             )}
             {gameState.gameStatus === "paused" && (
-              <Button onClick={resumeGame} className="bg-gradient-primary">
-                <Play className="w-4 h-4 mr-2" />
+              <Button onClick={resumeGame} className="game-control-button resume-button">
+                <Play className="button-icon" />
                 Resume
               </Button>
             )}
-            <div className="flex space-x-2">
-              <Button onClick={resetGame} className="px-2 py-1 text-sm border border-border">
-                <RotateCcw className="w-4 h-4 mr-2" />
+            <div className="additional-controls">
+              <Button onClick={resetGame} className="reset-button-small">
+                <RotateCcw className="button-icon" />
                 Reset
               </Button>
             </div>
           </div>
         </div>
-
-        <Card className="bg-gradient-secondary border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{player2Name}</CardTitle>
+  
+        <Card className="player-card player2-card">
+          <CardHeader className="player-card-header">
+            <CardTitle className="player-card-title">{player2Name}</CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <div className="text-3xl font-game font-bold text-primary">
+          <CardContent className="player-card-content">
+            <div className="player-score player2-score">
               {gameState.score.player2}
             </div>
-            {/* CHANGED: Show AI difficulty or Arrow Keys */}
-            <div className="text-sm text-muted-foreground mt-2">
+            <div className="player-control-hint">
               {opponentControlHint}
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <div className="flex justify-center">
+  
+      <div className="game-canvas-container">
         <canvas
           ref={canvasRef}
           width={800}
           height={600}
           tabIndex={0}
-          className="border border-border rounded-lg bg-card shadow-card"
+          className="game-canvas"
         />
       </div>
     </div>
