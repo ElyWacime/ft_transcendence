@@ -13,7 +13,6 @@ function getUserIdFromToken(): string | null {
     const token = localStorage.getItem("token");
     if (!token) return null;
     
-    // Decode JWT token (base64 decode the payload)
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
@@ -57,6 +56,10 @@ const Dashboard_ayoub = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [avatarKey, setAvatarKey] = useState(Date.now());
+  const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
+? dashboardData?.user.avatar
+: `${dashboardData?.user.avatar || "https://www.gravatar.com/avatar/"}?t=${avatarKey}`;
 
   useEffect(() => {
     // If no ID in URL and user is not logged in, redirect to login
@@ -64,6 +67,7 @@ const Dashboard_ayoub = () => {
       navigate("/login");
       return;
     }
+
 
     const fetchDashboardData = async () => {
       try {
@@ -81,11 +85,18 @@ const Dashboard_ayoub = () => {
 
         console.log("Fetching dashboard for user ID:", userId);
         const data = await playerDashboardApi_ayoub.getPlayerDashboard(userId);
+        
+        // Check if avatar was recently updated in localStorage
+        const localAvatar = localStorage.getItem("avatar_url");
+        if (localAvatar && data.user) {
+          data.user.avatar = localAvatar;
+        }
+        
         setDashboardData(data);
+        setAvatarKey(Date.now()); // Force avatar refresh
       } catch (err: any) {
         console.error("Failed to fetch dashboard:", err);
         console.error("Error details:", err.message);
-        // Check if it's a 404 (user not found) or other error
         if (err.message.includes("Not Found") || err.message.includes("404")) {
           setError(`User not found. User ID: ${userId}. Please make sure you're logged in with a valid account.`);
         } else {
@@ -99,6 +110,25 @@ const Dashboard_ayoub = () => {
 
     fetchDashboardData();
   }, [id, isLoggedIn, navigate]);
+
+  // Listen for avatar updates
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'avatar_url' && dashboardData) {
+        setDashboardData({
+          ...dashboardData,
+          user: {
+            ...dashboardData.user,
+            avatar: e.newValue || dashboardData.user.avatar
+          }
+        });
+        setAvatarKey(Date.now());
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [dashboardData]);
 
   if (loading) {
     return (
@@ -138,10 +168,12 @@ const Dashboard_ayoub = () => {
           {/* User Profile Card */}
           <Card className="p-6 bg-background/60 backdrop-blur-sm border border-border">
             <div className="flex flex-col items-center text-center space-y-4">
-              <Avatar className="w-24 h-24">
-                <AvatarImage src={user.avatar || "https://www.gravatar.com/avatar/"} />
-                <AvatarFallback>{user.User_name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
-              </Avatar>
+                <Avatar key={avatarKey} className="w-24 h-24">
+              <AvatarImage src={avatarSrc} />
+              <AvatarFallback>
+                {user.User_name?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
               <div>
                 <h2 className="text-2xl font-bold">{user.User_name || "Player"}</h2>
                 <p className="text-muted-foreground text-sm">{user.email}</p>
@@ -282,4 +314,3 @@ const Dashboard_ayoub = () => {
 };
 
 export default Dashboard_ayoub;
-
