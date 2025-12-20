@@ -42,60 +42,51 @@ export const Navigation = () => {
       },
     ];
 
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Gamepad2 className="w-5 h-5 text-primary-foreground" />
+    return (
+      <nav className="main-nav">
+        <div className="nav-container">
+          <div className="nav-content">
+            {/* Logo */}
+            <div className="nav-logo">
+              <div className="logo-icon">
+                <Gamepad2 className="logo-icon-svg" />
+              </div>
+              <span className="logo-text">
+                PONG ARENA
+              </span>
             </div>
-            <span className="font-game text-xl font-bold glow-text">
-              PONG ARENA
-            </span>
-          </div>
-
-          {/* Links */}
-          <div className="flex items-center space-x-6">
-            {navItems.map((item) =>
-              item.onClick ? (
-                // If item has onClick (Logout)
-                <button
-                  key={item.label}
-                  onClick={item.onClick}
-                  className={cn(
-                    "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300",
-                    "hover:bg-secondary hover:text-secondary-foreground text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              ) : (
-                // Regular NavLink (Home, Tournament, Login)
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300",
-                      "hover:bg-secondary hover:text-secondary-foreground",
-                      isActive
-                        ? "bg-primary text-primary-foreground glow-blue"
-                        : "text-muted-foreground hover:text-foreground"
-                    )
-                  }
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="font-medium">{item.label}</span>
-                </NavLink>
-              )
-            )}
+    
+            {/* Links */}
+            <div className="nav-links">
+              {navItems.map((item) =>
+                item.onClick ? (
+                  // If item has onClick (Logout)
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    className="nav-button logout-button"
+                  >
+                    <item.icon className="nav-icon" />
+                    <span className="nav-label">{item.label}</span>
+                  </button>
+                ) : (
+                  // Regular NavLink (Home, Tournament, Login)
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`
+                    }
+                  >
+                    <item.icon className="nav-icon" />
+                    <span className="nav-label">{item.label}</span>
+                  </NavLink>
+                )
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
-  );
+      </nav>
+    );
 };
 
