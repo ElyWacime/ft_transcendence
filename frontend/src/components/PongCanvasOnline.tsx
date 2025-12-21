@@ -188,7 +188,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         player4Name:  player4Name,
         gameStatus: "PENDING",
     });
-    console.log("MODE === ", player1Name, player2Name, player3Name, player4Name);
+    // console.log("MODE === ", player1Name, player2Name, player3Name, player4Name);
     usePongWebSocket(ws, mode, email, setGameState);
     usePongControls(ws, mode, email);
     usePongRenderer(canvasRef, gameState);

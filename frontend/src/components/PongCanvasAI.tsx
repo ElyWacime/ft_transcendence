@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
-
+import { AIOpponent, AIAction, AIGameState, Difficulty } from "@/lib/ai/AIOpponent";
 
 interface PongCanvasProps {
   player1Name?: string;
@@ -11,6 +11,8 @@ interface PongCanvasProps {
   player4Name?: string;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
+  enableAI?: boolean;
+  aiDifficulty?: Difficulty;
 }
 
 interface Paddle {
@@ -43,9 +45,16 @@ const paddleSpeed = 10;
 const accelerateSpeed = 1.002;
 const max_Speed = 25;
 const angle = Math.PI / 8;
+const aiSpeedMultipliers: Record<Difficulty, number> = {
+  [Difficulty.EASY]: 1,
+  [Difficulty.MEDIUM]: 1,
+  [Difficulty.HARD]: 1,
+};
 
-export const PongCanvas = ({
-  player2Name =  "Player 2",
+export const PongCanvasAI = ({
+  enableAI = false,
+  aiDifficulty = Difficulty.MEDIUM,
+  player2Name = enableAI ? "AI Opponent" : "Player 2",
   player1Name = localStorage.getItem("email") || "Player 1",
   player3Name = "Player 3",
   player4Name = "Player 4",
@@ -57,6 +66,7 @@ export const PongCanvas = ({
   const lastTimeRef = useRef<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameStateRef = useRef<GameState | null>(null);
+  const aiRef = useRef<AIOpponent | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
     ball: {
@@ -187,17 +197,47 @@ export const PongCanvas = ({
         if (!canvas) return prev;
 
         // Get AI action if enabled
+        let aiAction: AIAction | null = null;
+        if (enableAI && aiRef.current) {
+          aiAction = aiRef.current.update(mapGameStateToAI(newState, canvas.height));
+        }
 
         // Paddle 1 (W/S) - unchanged
         if (keysPressed.current.has("KeyW") && newState.paddle1.y > 0)
           newState.paddle1.y -= paddleSpeed * delta;
         if (keysPressed.current.has("KeyS") && newState.paddle1.y < canvas.height - newState.paddle1.height)
           newState.paddle1.y += paddleSpeed * delta;
-        if (keysPressed.current.has("ArrowUp") && newState.paddle2.y > 0)
+
+        // MODIFIED: Paddle 2 (AI or Human) from second file
+        if (!enableAI) {
+          // Human player 2 (Arrow keys)
+          if (keysPressed.current.has("ArrowUp") && newState.paddle2.y > 0)
             newState.paddle2.y -= paddleSpeed * delta;
-        if (keysPressed.current.has("ArrowDown") && newState.paddle2.y < canvas.height - newState.paddle2.height)
-          newState.paddle2.y += paddleSpeed * delta;
-        
+          if (keysPressed.current.has("ArrowDown") && newState.paddle2.y < canvas.height - newState.paddle2.height)
+            newState.paddle2.y += paddleSpeed * delta;
+        } else if (aiAction && aiRef.current) {
+          // AI movement from second file
+          const aiSpeed = paddleSpeed * delta * aiSpeedMultipliers[aiDifficulty];
+          const ballApproaching = newState.ball.dx > 0;
+          
+          if (ballApproaching) {
+            if (aiAction.moveUp && newState.paddle2.y > 0) {
+              newState.paddle2.y = Math.max(0, newState.paddle2.y - aiSpeed);
+            }
+            if (aiAction.moveDown && newState.paddle2.y < canvas.height - newState.paddle2.height) {
+              newState.paddle2.y = Math.min(canvas.height - newState.paddle2.height, newState.paddle2.y + aiSpeed);
+            }
+          } else {
+            // Return to center when ball is moving away
+            const centerY = canvas.height / 2 - newState.paddle2.height / 2;
+            const diff = centerY - newState.paddle2.y;
+            if (Math.abs(diff) > 5) {
+              const passiveSpeed = aiSpeed * 0.4;
+              newState.paddle2.y += Math.sign(diff) * passiveSpeed;
+              newState.paddle2.y = Math.max(0, Math.min(canvas.height - newState.paddle2.height, newState.paddle2.y));
+            }
+          }
+        }
 
         // Ball movement - unchanged
         newState.ball.x += newState.ball.dx * delta;
@@ -269,11 +309,13 @@ export const PongCanvas = ({
         return newState;
       });
     },
-    [createBall, maxScore, onGameEnd]
+    [createBall, maxScore, onGameEnd, enableAI, aiDifficulty, mapGameStateToAI]
   );
 
   // MODIFIED useEffect to add AI initialization and proper cleanup
   useEffect(() => {
+    // ADDED: Initialize AI
+    aiRef.current = enableAI ? new AIOpponent(aiDifficulty) : null;
 
     // Keyboard event handlers - unchanged
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -323,8 +365,12 @@ export const PongCanvas = ({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       cancelAnimationFrame(animationRef.current);
+      // ADDED: Clean up AI instance
+      if (aiRef.current) {
+        aiRef.current.cleanup?.();
+      }
     };
-  }, [gameState, updateGame, draw]);
+  }, [enableAI, aiDifficulty, gameState, updateGame, draw]);
 
   const startGame = () => {
     lastTimeRef.current = null;
@@ -345,6 +391,9 @@ export const PongCanvas = ({
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
+  // ADDED: Friendly difficulty display
+  const friendlyDifficulty = aiDifficulty.charAt(0) + aiDifficulty.slice(1).toLowerCase();
+  const opponentControlHint = enableAI ? `AI • ${friendlyDifficulty}` : 'Arrow Keys';
 
   return (
     <div className="pong-game-interface">
@@ -399,6 +448,7 @@ export const PongCanvas = ({
               {gameState.score.player2}
             </div>
             <div className="player-control-hint">
+              {opponentControlHint}
             </div>
           </CardContent>
         </Card>

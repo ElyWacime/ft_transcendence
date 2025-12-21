@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PongCanvas } from "@/components/PongCanvas";
 import { Chat } from "@/components/Chat";
-import { ArrowLeft, Trophy } from "lucide-react";
+import { ArrowLeft, Trophy,Bot } from "lucide-react";
 import { Match, api } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -63,18 +63,14 @@ const Game = () => {
             <ArrowLeft className="back-icon" />
             <span>Back</span>
           </Button>
-          <div className="game-title-container">
-            <h1 className="game-title glow-text">
-              {match && <Trophy className="trophy-icon" />}
-              <span>{match ? "TOURNAMENT MATCH" : "QUICK GAME"}</span>
+          <div style={{ paddingTop: "3rem" }} className="ai-game-title-container">
+            <h1 className="ai-game-title glow-text">
+              <span>PLAYER VS Freind</span>
             </h1>
-            {match && (
-              <p className="match-info">
-                Round {match.round} • Match {match.id.split('-')[1]}
-              </p>
-            )}
+            <p className="ai-game-subtitle">
+              Challenge your Freind.
+            </p>
           </div>
-  
           <div className="header-spacer"></div>
         </div>
   
