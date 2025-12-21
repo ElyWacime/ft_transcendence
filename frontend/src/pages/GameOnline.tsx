@@ -90,10 +90,29 @@ const GameOnline = () => {
   // };
 
   return (
-    <div className="min-h-screen pt-16 pb-8">
-      <div className="container mx-auto px-4 space-y-6">
-        {<div className="max-w-6xl mx-auto">
-          {isReady && (
+    <div className="game-page">
+      <div className="game-container">
+        <div className="game-header">
+          <Button
+            onClick={() => navigate(-1)}
+            variant="outline"
+            className="back-button"
+          >
+            <ArrowLeft className="back-icon" />
+            <span>Back</span>
+          </Button>
+          <div style={{ paddingTop: "3rem" }} className="ai-game-title-container">
+            <h1 className="ai-game-title glow-text">
+              <span>PLAYER VS Player</span>
+            </h1>
+            <p className="ai-game-subtitle">
+              Challenge Other Players.
+            </p>
+          </div>
+          <div className="header-spacer"></div>
+        </div>
+        <div className="game-canvas-container">
+        {isReady && (
             <PongCanvasOnline
               player1Name={player1Name}
               player2Name={player2Name}
@@ -103,7 +122,8 @@ const GameOnline = () => {
               mode={mode}
             />
           )}
-        </div>}
+        </div>
+
       </div>
     </div>
   );

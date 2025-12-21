@@ -73,7 +73,6 @@ const Game = () => {
           </div>
           <div className="header-spacer"></div>
         </div>
-  
         <div className="game-canvas-container">
           <PongCanvas
             player1Name={player1.alias}
