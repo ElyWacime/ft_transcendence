@@ -2,10 +2,17 @@ import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  // Default import
 import websocket from "@fastify/websocket";
+import cors from "@fastify/cors";
 import jwt from 'jsonwebtoken';
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
+//ayoub//
+await fastify.register(cors, {
+  origin: true,
+  credentials: true
+});
+//ayoub//
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 import { exit } from "process";
 
@@ -419,5 +426,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     // console.log("\n\n>>>>>Client disconnected. Total clients:", clients.size);
   });
 });
+
+///ayoub/
+// Register dashboard routes
+import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
+await registerDashboardRoutes_ayoub(fastify, dbcnx);
+console.log("Dashboard routes registered!");
 
 fastify.listen({ port: 3000, host: "0.0.0.0" });

@@ -42,7 +42,7 @@ interface GameState {
 
 const BALL_SPEED = 5;
 const paddleSpeed = 10;
-const accelerateSpeed = 1.002;
+const accelerateSpeed = 1.2;
 const max_Speed = 25;
 const angle = Math.PI / 8;
 const aiSpeedMultipliers: Record<Difficulty, number> = {

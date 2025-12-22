@@ -373,6 +373,35 @@ export class SQLiteDB {
     async UserCountTournParticipation(id) {
         await this.db.run(`SELECT count(*) as Participate  FROM  Participate_Tournament   Where P_Id = ?;`,[id]);
     }
-    
 
-}
+        ///////////ayoubbb1////////////////////
+        async UserCountWins_ayoub(id) {
+            return await this.db.get(`SELECT count(*) as Winned  FROM  Match 
+            Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
+        }
+        
+        async UserCountTournWins_ayoub(id) {
+            return await this.db.get(`SELECT count(*) as Winned  FROM  Match 
+            Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
+        }
+    
+        async UserCountTournParticipation_ayoub(id) {
+            return await this.db.get(`SELECT count(*) as Participate  FROM  Participate_Tournament   Where P_Id = ?;`,[id]);
+        }
+        
+        async UserCountMatches_ayoub(id) {
+            return await this.db.run(`SELECT count(*) as Played  FROM  Match 
+            Where (P1_Id = ?  OR P2_Id = ?  OR P3_Id = ?  OR P4_Id = ?);`, [id,id,id,id]);
+        }
+    
+    
+        async getLasttMatchByPlayerID_ayoub(id) {
+            return this.db.get(`SELECT *
+            FROM Match
+            WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) 
+            ORDER BY CreatedAt DESC
+            LIMIT 1;
+            `, [id, id, id, id]);
+        }
+    }
+

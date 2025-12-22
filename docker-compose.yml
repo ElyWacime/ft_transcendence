@@ -40,6 +40,7 @@ services:
     depends_on:
       - frontend
       - auth-service
+      - pong-server
       # - tournament-service
     ports:
       - "80:80"
@@ -63,7 +64,6 @@ services:
     depends_on:
       - frontend
       - auth-service
-      - gateway
     networks:
       - transcendence
 networks:

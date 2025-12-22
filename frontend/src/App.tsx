@@ -19,7 +19,11 @@ import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
 import Profile from "./pages/Profile";
-
+import Dashboard_ayoub from "./pages/Dashboard_ayoub";
+import ProfileSettings from "./pages/ProfileSettings_ayoub";
+import ChangeEmail from "./pages/Change_email_page";
+import ChangePassword from "./pages/ChangePassword";
+import ChangePicture from "./pages/change-picture";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -41,11 +45,24 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              <Route
+              {/* <Route
                 path="/profile"
                 element={
                   <ProtectedRoute children={undefined}>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              /> */}
+              <Route path="/profile" element={<ProfileSettings />} />
+              <Route path="/profile/change-email" element={<ChangeEmail />} />
+              <Route path="/profile/change-password" element={<ChangePassword />} />
+              <Route path="/profile/change-picture" element={<ChangePicture />} />
+
+              <Route
+                path="/dashboard/:id?"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Dashboard_ayoub />
                   </ProtectedRoute>
                 }
               />
