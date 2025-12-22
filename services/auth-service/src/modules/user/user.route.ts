@@ -209,6 +209,48 @@ export async function userRoutes(app: FastifyInstance) {
       });
     }
   });
+
+  app.post("/search-this-name", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["token", "name"],
+        properties: {
+          token: { type: "string" },
+          name: { type: "string" },
+        }
+      }
+    }
+  }, async (req, reply) => {
+    const { token } = req.body;
+    
+    try {
+      const decoded = req.jwt.verify(token);
+      if (!decoded) {
+        throw new Error("Invalid token");
+      }
+      const current_user = await prisma.user.findUnique({
+      where: { name: req.body.name }
+      });
+      if (!current_user) {
+        return reply.status(404).send({
+          valid: false,
+          error: "User not found"
+        });
+      }  
+      return reply.send({
+        valid: true,
+        user_name: current_user.name,
+        user_id: current_user.id,
+        user_email: current_user.email,
+      });
+    } catch (err) {
+      return reply.status(401).send({
+        valid: false,
+        error: "Invalid or expired token"
+      });
+    }
+  });
 }
 
       // // In your user controller
