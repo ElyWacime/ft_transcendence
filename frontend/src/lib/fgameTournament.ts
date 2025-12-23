@@ -1,7 +1,15 @@
 import type { Tournament as UITournament, Player, Match } from "./api";
 
-// Default to 3000 to match docker-compose mapping; can override via VITE_FGAME_URL
-const FGAME_URL = import.meta.env.VITE_FGAME_URL || "http://localhost:3000";
+// Compute fgame base URL: prefer VITE_FGAME_URL, else VITE_DOMAIN:3000, else current host:3000
+const FGAME_URL = (() => {
+  const env: any = import.meta.env || {};
+  const explicit = env.VITE_FGAME_URL as string | undefined;
+  if (explicit) return explicit;
+  const domain = env.VITE_DOMAIN as string | undefined;
+  if (domain) return `http://${domain}:3000`;
+  if (typeof window !== 'undefined') return `${window.location.protocol}//${window.location.hostname}:3000`;
+  return 'http://localhost:3000';
+})();
 
 export async function createTournament(label: string, maxPlayers = 8): Promise<number> {
   const res = await fetch(`${FGAME_URL}/api/tournaments`, {
@@ -89,6 +97,7 @@ function mapToUITournament(api: any): UITournament {
 }
 
 export function getWsUrl() {
-  const url = (FGAME_URL.startsWith("http")) ? FGAME_URL.replace(/^http/, "ws") : FGAME_URL;
-  return `${url}/ws`;
+  if (FGAME_URL.startsWith('https://')) return `${FGAME_URL.replace('https://','wss://')}/ws`;
+  if (FGAME_URL.startsWith('http://')) return `${FGAME_URL.replace('http://','ws://')}/ws`;
+  return `${FGAME_URL}/ws`;
 }

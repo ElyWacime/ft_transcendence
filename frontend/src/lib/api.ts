@@ -166,7 +166,14 @@ class TournamentAPI {
 export const api = new TournamentAPI();
 
 // ---------------- USER AUTH API ---------------- //
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_URL = (() => {
+  const configured = (import.meta.env as any).VITE_API_URL as string | undefined;
+  const domain = (import.meta.env as any).VITE_DOMAIN as string | undefined;
+  if (configured) return configured;
+  if (domain) return `http://${domain}`;
+  if (typeof window !== 'undefined') return `${window.location.protocol}//${window.location.host}`;
+  return 'http://127.0.0.1';
+})();
 class UserAPI {
   private baseUrl = `${API_URL}/api/users`;
 
