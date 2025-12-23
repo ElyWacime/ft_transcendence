@@ -7,11 +7,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: true, // Listen on all network interfaces inside Docker
     port: 8080,
-    allowedHosts: [
-      "frontend", // container name inside Docker network
-      "localhost",
-      "127.0.0.1",
-    ],
+    // Allow access via any host/IP (e.g., 10.20.238.84)
+    allowedHosts: true,
     watch: {
       usePolling: true, // ensures hot reload works inside Docker volumes
     },

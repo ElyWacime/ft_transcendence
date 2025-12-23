@@ -60,6 +60,8 @@ services:
       - JWT_REFRESH_SECRET=superrefreshkey
     ports:
       - "3000:3000"
+    volumes:
+      - fgame-data:/app
     command: npm start
     depends_on:
       - frontend
@@ -69,3 +71,6 @@ services:
 networks:
   transcendence:
     driver: bridge
+
+volumes:
+  fgame-data:

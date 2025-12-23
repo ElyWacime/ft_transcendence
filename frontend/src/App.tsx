@@ -24,6 +24,7 @@ import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
+import OnlineTournament from "./pages/OnlineTournament";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -42,6 +43,14 @@ const App = () => (
                 element={
                   <ProtectedRoute children={undefined}>
                     <Tournament />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/online-tournament"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <OnlineTournament />
                   </ProtectedRoute>
                 }
               />

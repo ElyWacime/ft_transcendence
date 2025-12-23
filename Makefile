@@ -13,3 +13,9 @@ auth:
 	docker-compose down -v auth-service
 	docker-compose build --no-cache auth-service
 	docker-compose up -d auth-service
+
+game:
+	@echo "Completely rebuilding game container from scratch..."
+	docker-compose down -v pong-server
+	docker-compose build --no-cache pong-server
+	docker-compose up -d pong-server

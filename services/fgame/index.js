@@ -9,11 +9,14 @@ const fastify = Fastify({ logger: false });
 await fastify.register(websocket);
 //ayoub//
 await fastify.register(cors, {
-  origin: true,
-  credentials: true
+  origin: "*",
+  credentials: false,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 });
 //ayoub//
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
+import { registerTournamentRoutes } from "./tournament_routes.js";
 import { exit } from "process";
 
 let dbcnx = new SQLiteDB();
@@ -186,26 +189,33 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             if (!m) {
               // console.log("\n\n>>>>>Player is not in Match ", id);
               // console.log("\n\n>>>>>getMatchPlayerCanJoin: ");
-              m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+              let tournamentId = request.tournement?.tournamentId || request.tournamentId || null;
+              if (tournamentId) {
+                // Join an open tournament match (created during start)
+                m = await dbcnx.getTournamentOpenMatch(tournamentId);
+                if (!m) {
+                  // No open match yet for tournament
+                  // Fall back to standard matchmaking
+                  m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+                }
+              } else {
+                m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+              }
               if (!m) {
-                // console.log("\n\n\t\t>>>>> Can't JOIN Need To Create: ");
+                // Create a new non-tournament match or a tournament seeded holder
                 m = new Match();
                 m.P1_Id = u.id;
                 let resuser = await dbcnx.getUserById(u.id);
                 m.player1Name = resuser.User_name;
                 m.mode = request.mode;
-                if (!request.tournement) {
-                  // console.log("\n\n>>>>>createMatch_not: ");
+                if (!tournamentId) {
                   m.id = await dbcnx.createMatch_not(m);
-                }
-                else {
-                  // console.log("\n\n>>>>>createMatch: ");
-                  // m.T_Id = GET_TORNAMENTID_FROMDB
-                  console.log("\n\n>>>05550000>>updateMatch: ",m);
+                } else {
+                  m.T_Id = tournamentId;
+                  m.round = 1;
                   m.id = await dbcnx.createMatch(m);
                 }
-              }
-              else {
+              } else {
                 // console.log("\n\n\t\t>>>>> Can JOIN: ");
                 if (request.mode == 2) {
                   m.P2_Id = u.id;
@@ -261,6 +271,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.player4Name = resuser.User_name;
                   ngame.gameStatus = m.gameStatus;
                   ngame.T_Id = m.T_Id;
+                  ngame.round = m.round;
                   ngame.count_players = m.count_players;
                   ngame.mode = m.mode;
                   matches.set(m.id, ngame);
@@ -297,6 +308,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               
               ngame.gameStatus = m.gameStatus;
               ngame.T_Id = m.T_Id;
+              ngame.round = m.round;
               ngame.count_players = m.count_players;
               ngame.mode = m.mode;
               let data = JSON.stringify(ngame);
@@ -380,6 +392,16 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m.gameStatus = "FINISHED";
               // console.log("\n\n>>>>>updateMatch: ");
               await dbcnx.updateMatch(m);
+              // Tournament progression if applicable
+              if (m.T_Id) {
+                try {
+                  const { TournamentService } = await import("./TournamentService.js");
+                  const ts = new TournamentService(dbcnx);
+                  await ts.advanceIfReady(m.T_Id);
+                } catch (e) {
+                  console.error("Tournament advance error:", e);
+                }
+              }
               matches.delete(m.id);
             }
             // else
@@ -433,4 +455,9 @@ import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
 console.log("Dashboard routes registered!");
 
-fastify.listen({ port: 3000, host: "0.0.0.0" });
+// Register tournament routes
+await registerTournamentRoutes(fastify, dbcnx);
+console.log("Tournament routes registered!");
+
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+fastify.listen({ port: PORT, host: "0.0.0.0" });

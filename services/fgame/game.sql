@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS Match (
     score2 INTEGER NOT NULL DEFAULT 0,
     mode INTEGER NOT NULL DEFAULT 2,
     count_players INTEGER DEFAULT 1,
+    round INTEGER NOT NULL DEFAULT 1,
     CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     gameStatus TEXT DEFAULT 'PENDING' CHECK(gameStatus IN ('PENDING','PLAYING','FINISHED')),
     -- result TEXT  DEFAULT 'PENDING',  
@@ -122,4 +123,9 @@ CREATE TABLE IF NOT EXISTS Messages (
 --     SET result = 'FINISHED', Winner_Id = NEW.Winner_Id
 --     WHERE NEW.T_Id IS NOT NULL AND  id = NEW.T_Id   AND (SELECT COUNT(*) FROM Match WHERE T_Id = NEW.T_Id AND gameStatus = 'FINISHED') = 7;
 -- END;
+
+-- Helpful indexes for tournament queries
+CREATE INDEX IF NOT EXISTS idx_match_tournament ON Match(T_Id);
+-- Note: the (T_Id, round) index is created programmatically after ensuring
+-- the 'round' column exists, to avoid startup errors on legacy databases.
 

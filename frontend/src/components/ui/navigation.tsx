@@ -18,6 +18,7 @@ export const Navigation = () => {
   const baseNavItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/tournament", label: "Tournament", icon: Trophy },
+    { path: "/online-tournament", label: "Online", icon: Trophy },
     { path: "/game-ai", label: "VS AI", icon: Bot },
     { path: "/game", label: "Game", icon: Gamepad2 },
     { path: "/profile", label: "Profile", icon: User},

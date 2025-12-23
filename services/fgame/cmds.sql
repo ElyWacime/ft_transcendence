@@ -1,4 +1,4 @@
-.headers ON
+.headers on
 .mode column
 
 SELECT * FROM Match;

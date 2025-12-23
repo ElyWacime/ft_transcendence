@@ -223,7 +223,6 @@ export async function userRoutes(app: FastifyInstance) {
     }
   }, async (req, reply) => {
     const { token } = req.body;
-    m
     try {
       const decoded = req.jwt.verify(token);
       if (!decoded) {
