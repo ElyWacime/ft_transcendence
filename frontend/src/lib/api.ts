@@ -15,6 +15,10 @@ export interface Match {
   score2: number;
   status: "pending" | "playing" | "completed";
   round: number;
+  apiMatchId?: number;
+  p1Ready?: number;
+  p2Ready?: number;
+  stage?: string;
 }
 
 export interface Tournament {

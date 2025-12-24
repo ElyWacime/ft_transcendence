@@ -1,12 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TournamentBracket } from "@/components/TournamentBracket";
 import { api as mockApi, Tournament as UITournament, Match } from "@/lib/api";
-import { createTournament, joinTournament, startTournament, getTournamentStatus, getWsUrl } from "@/lib/fgameTournament";
+import { createTournament, joinTournament, startTournament, getTournamentStatus, getWsUrl, setPlayerReady } from "@/lib/fgameTournament";
 import { useAuth } from "@/context/AuthContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
+
+// Helper to get user ID from JWT token
+function getUserIdFromToken(): string | null {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const decoded = JSON.parse(jsonPayload);
+    return decoded.id || null;
+  } catch (error) {
+    return null;
+  }
+}
 
 export default function OnlineTournament() {
   const { isLoggedIn } = useAuth();
@@ -15,10 +36,42 @@ export default function OnlineTournament() {
   const [tournament, setTournament] = useState<UITournament | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autoStarted, setAutoStarted] = useState(false);
 
   const token = useMemo(() => localStorage.getItem("token") || undefined, []);
+  const currentUserId = useMemo(() => getUserIdFromToken(), []);
   const wsUrl = getWsUrl();
   const { send, isReady } = useWebSocket(wsUrl);
+
+  // Auto-refresh tournament every 2 seconds
+  useEffect(() => {
+    if (!tournamentId) return;
+    
+    const interval = setInterval(async () => {
+      try {
+        const t = await getTournamentStatus(tournamentId);
+        setTournament(t);
+
+        // Auto-start game if both players are ready
+        if (!autoStarted && t.matches) {
+          for (const match of t.matches) {
+            if (match.status === 'pending' && (match.p1Ready ?? 0) === 1 && (match.p2Ready ?? 0) === 1) {
+              // Both ready, trigger game
+              if (token && isReady) {
+                setAutoStarted(true);
+                send({ type: "REGISTER", token, mode: 2, tournamentId, matchId: match.apiMatchId });
+                break;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Auto-refresh error:", err);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [tournamentId, token, isReady, autoStarted]);
 
   useEffect(() => {
     if (tournamentId !== null) {
@@ -66,12 +119,23 @@ export default function OnlineTournament() {
     }
   }
 
+  async function handleReady(match: Match) {
+    if (!tournamentId || !token || !match.apiMatchId) return;
+    try {
+      const result = await setPlayerReady(tournamentId, match.apiMatchId, token);
+      console.log("Ready result:", result);
+      await refresh();
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }
+
   function onStartMatch(match: Match) {
     if (!tournamentId || !token) return;
     if (!isReady) {
       console.log("WS not ready yet");
     }
-    send({ type: "REGISTER", token, mode: 2, tournamentId });
+    send({ type: "REGISTER", token, mode: 2, tournamentId, matchId: match.apiMatchId });
   }
 
   return (
@@ -93,7 +157,7 @@ export default function OnlineTournament() {
             <div className="flex items-end space-x-2">
               <Button onClick={handleCreate} className="bg-gradient-primary">Create</Button>
               <Button onClick={handleJoin} disabled={!isLoggedIn || !tournamentId} className="bg-gradient-primary">Join</Button>
-              <Button onClick={handleStart} disabled={!tournamentId} className="bg-gradient-primary">Start</Button>
+              <Button onClick={handleStart} disabled={!tournamentId || tournament?.status !== 'setup'} className="bg-gradient-primary">Start</Button>
               <Button variant="secondary" onClick={refresh} disabled={!tournamentId}>Refresh</Button>
             </div>
           </div>
@@ -103,7 +167,12 @@ export default function OnlineTournament() {
       </Card>
 
       {tournament && (
-        <TournamentBracket tournament={tournament} onStartMatch={onStartMatch} />
+        <TournamentBracket 
+          tournament={tournament} 
+          onStartMatch={onStartMatch}
+          onReady={handleReady}
+          currentUserId={currentUserId || undefined}
+        />
       )}
     </div>
   );

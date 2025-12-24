@@ -51,10 +51,21 @@ export class TournamentService {
   async start(tId) {
     const t = await this.db.getTournamentById(tId);
     if (!t) throw new Error("Tournament not found");
+    
+    // Prevent re-starting already started tournaments
+    if (t.result === 'PLAYING' || t.result === 'FINISHED') {
+      throw new Error("Tournament already started");
+    }
+    
     const participants = await this.db.getParticipantsByTournamentId(tId);
-    if (participants.length < 2) throw new Error("Need at least 2 players");
+    
+    // Validate: must have 2, 4, 6, or 8 players (power of 2)
+    const validCounts = [2, 4, 6, 8];
+    if (!validCounts.includes(participants.length)) {
+      throw new Error(`Tournament requires 2, 4, 6, or 8 players. Currently ${participants.length} participants.`);
+    }
 
-    const bracketSize = Math.min(t.max_players || 8, nextPowerOfTwo(participants.length));
+    const bracketSize = Math.min(t.max_players || 8, participants.length);
     const seeds = participants.slice(0, bracketSize).map(p => p.id);
 
     // Round 1 pairings
@@ -155,6 +166,39 @@ export class TournamentService {
     const t = await this.db.getTournamentById(tId);
     const matches = await this.db.getTournamentMatches(tId);
     const participants = await this.db.getParticipantsByTournamentId(tId);
-    return { tournament: t, matches, participants };
+    
+    // Calculate stage names based on total participants and current round
+    const totalRounds = Math.log2(participants.length);
+    const stageNames = {
+      1: participants.length === 2 ? "Final" : "Round 1",
+      2: "Semi-Final",
+      3: "Quarter-Final"
+    };
+    
+    return { 
+      tournament: t, 
+      matches: matches.map(m => ({ ...m, stage: stageNames[m.round] || `Round ${m.round}` })), 
+      participants,
+      totalRounds
+    };
+  }
+
+  async setPlayerReady(tId, matchId, playerId) {
+    const match = await this.db.getMatchById(matchId);
+    if (!match || match.T_Id !== tId) throw new Error("Match not found in tournament");
+    if (match.gameStatus !== "PENDING") throw new Error("Match not in PENDING state");
+
+    if (match.P1_Id === playerId) {
+      match.P1_Ready = 1;
+    } else if (match.P2_Id === playerId) {
+      match.P2_Ready = 1;
+    } else {
+      throw new Error("Player not in this match");
+    }
+
+    await this.db.db.run(`UPDATE Match SET P1_Ready=?, P2_Ready=? WHERE id=?`, 
+      [match.P1_Ready, match.P2_Ready, matchId]);
+    
+    return { ready: true, bothReady: match.P1_Ready && match.P2_Ready };
   }
 }

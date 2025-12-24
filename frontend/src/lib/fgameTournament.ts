@@ -50,6 +50,18 @@ export async function getTournamentStatus(id: number): Promise<UITournament> {
   return mapToUITournament(json);
 }
 
+export async function setPlayerReady(tId: number, matchId: number, token?: string): Promise<any> {
+  const res = await fetch(`${FGAME_URL}/api/tournaments/${tId}/match/${matchId}/ready`, {
+    method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to mark ready");
+  return data;
+}
+
 function mapToUITournament(api: any): UITournament {
   const t = api.tournament;
   const participants = api.participants || [];
@@ -80,6 +92,10 @@ function mapToUITournament(api: any): UITournament {
       score2: m.score2 ?? 0,
       status,
       round: m.round ?? 1,
+      apiMatchId: m.id,
+      p1Ready: m.P1_Ready ?? 0,
+      p2Ready: m.P2_Ready ?? 0,
+      stage: (m as any).stage || `Round ${m.round}`,
     };
   });
 

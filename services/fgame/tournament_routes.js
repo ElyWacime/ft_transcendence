@@ -63,4 +63,25 @@ export async function registerTournamentRoutes(fastify, db) {
       return reply.code(404).send({ error: e.message });
     }
   });
+
+  fastify.post('/api/tournaments/:id/match/:matchId/ready', async (req, reply) => {
+    try {
+      const { id, matchId } = req.params;
+      let userId;
+      if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+          const token = req.headers.authorization.substring(7);
+          const decoded = fastify.jwt.verify(token);
+          userId = decoded.id;
+        } catch {}
+      }
+      userId = userId || (req.body?.userId);
+      if (!userId) return reply.code(400).send({ error: 'userId required' });
+
+      const res = await service.setPlayerReady(Number(id), Number(matchId), userId);
+      return reply.code(200).send(res);
+    } catch (e) {
+      return reply.code(400).send({ error: e.message });
+    }
+  });
 }

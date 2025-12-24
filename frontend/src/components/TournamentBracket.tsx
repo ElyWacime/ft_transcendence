@@ -1,15 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, Play, CheckCircle, Clock } from "lucide-react";
+import { Trophy, Play, CheckCircle, Clock, Check } from "lucide-react";
 import { Match, Tournament } from "@/lib/api";
+import { useState } from "react";
 
 interface TournamentBracketProps {
   tournament: Tournament;
   onStartMatch: (match: Match) => void;
+  onReady?: (match: Match) => Promise<void>;
+  currentUserId?: string;
 }
 
-export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracketProps) => {
+export const TournamentBracket = ({ tournament, onStartMatch, onReady, currentUserId }: TournamentBracketProps) => {
+  const [readyStates, setReadyStates] = useState<Record<string, boolean>>({});
+  const [loadingReady, setLoadingReady] = useState<Record<string, boolean>>({});
+
   const getMatchStatusIcon = (status: Match['status']) => {
     switch (status) {
       case 'pending':
@@ -40,6 +46,37 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
       rounds.set(match.round, roundMatches);
     });
     return Array.from(rounds.entries()).sort((a, b) => a[0] - b[0]);
+  };
+
+  const handleReady = async (match: Match) => {
+    if (!onReady) return;
+    
+    const key = match.id;
+    setLoadingReady(prev => ({ ...prev, [key]: true }));
+    try {
+      await onReady(match);
+      setReadyStates(prev => ({ ...prev, [key]: true }));
+    } catch (err) {
+      console.error('Failed to mark ready:', err);
+    } finally {
+      setLoadingReady(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const isPlayerInMatch = (match: Match): boolean => {
+    if (!currentUserId) return false;
+    return match.player1.id === currentUserId || match.player2.id === currentUserId;
+  };
+
+  const isPlayerReady = (match: Match): boolean => {
+    if (!currentUserId) return false;
+    if (match.player1.id === currentUserId) return (match.p1Ready ?? 0) === 1;
+    if (match.player2.id === currentUserId) return (match.p2Ready ?? 0) === 1;
+    return false;
+  };
+
+  const bothReady = (match: Match): boolean => {
+    return (match.p1Ready ?? 0) === 1 && (match.p2Ready ?? 0) === 1;
   };
 
   const rounds = groupMatchesByRound();
@@ -86,7 +123,7 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
         {rounds.map(([roundNumber, matches]) => (
           <div key={roundNumber} className="space-y-4">
             <h3 className="text-xl font-game font-bold text-center glow-text">
-              Round {roundNumber}
+              {matches[0]?.stage || `Round ${roundNumber}`}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {matches.map((match) => (
@@ -94,7 +131,7 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
                   key={match.id}
                   className={`bg-gradient-secondary border-border transition-all duration-300 ${
                     match.status === 'playing' ? 'border-primary glow-blue' : ''
-                  }`}
+                  } ${bothReady(match) ? 'border-accent border-2' : ''}`}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -111,26 +148,63 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
                       <div className={`flex items-center justify-between p-2 rounded ${
                         match.winner?.id === match.player1.id ? 'bg-accent/20' : 'bg-card'
                       }`}>
-                        <span className="font-medium">{match.player1.alias}</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">{match.player1.alias}</span>
+                          {match.status === 'pending' && (match.p1Ready ?? 0) === 1 && (
+                            <Check className="w-4 h-4 text-green-500" />
+                          )}
+                        </div>
                         <span className="font-bold text-lg">{match.score1}</span>
                       </div>
                       <div className="text-center text-xs text-muted-foreground">VS</div>
                       <div className={`flex items-center justify-between p-2 rounded ${
                         match.winner?.id === match.player2.id ? 'bg-accent/20' : 'bg-card'
                       }`}>
-                        <span className="font-medium">{match.player2.alias}</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">{match.player2.alias}</span>
+                          {match.status === 'pending' && (match.p2Ready ?? 0) === 1 && (
+                            <Check className="w-4 h-4 text-green-500" />
+                          )}
+                        </div>
                         <span className="font-bold text-lg">{match.score2}</span>
                       </div>
                     </div>
 
+                    {/* Ready Status */}
+                    {match.status === 'pending' && bothReady(match) && (
+                      <Badge className="w-full justify-center bg-green-600 text-white py-1">
+                        Both Players Ready!
+                      </Badge>
+                    )}
+
                     {/* Action Button */}
-                    {match.status === 'pending' && (
+                    {match.status === 'pending' && isPlayerInMatch(match) && !isPlayerReady(match) && (
+                      <Button
+                        onClick={() => handleReady(match)}
+                        disabled={loadingReady[match.id] || false}
+                        className="w-full bg-gradient-primary hover:scale-105 transition-transform"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        {loadingReady[match.id] ? 'Marking Ready...' : 'Ready'}
+                      </Button>
+                    )}
+
+                    {match.status === 'pending' && isPlayerInMatch(match) && isPlayerReady(match) && (
+                      <div className="text-center">
+                        <Badge className="bg-green-600">
+                          <Check className="w-3 h-3 mr-1" />
+                          You are Ready!
+                        </Badge>
+                      </div>
+                    )}
+
+                    {match.status === 'pending' && !isPlayerInMatch(match) && (
                       <Button
                         onClick={() => onStartMatch(match)}
                         className="w-full bg-gradient-primary hover:scale-105 transition-transform"
                       >
                         <Play className="w-4 h-4 mr-2" />
-                        Start Match
+                        Watch
                       </Button>
                     )}
 
