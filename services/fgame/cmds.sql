@@ -6,26 +6,27 @@ SELECT * FROM Users;
 SELECT * FROM Tournament;
 SELECT * FROM Participate_Tournament;
 
-INSERT INTO Users(email, User_name, User_password) VALUES ('1s@s.s','1sss','sss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('2qs@s.s','2qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('3qs@s.s','3qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('4qs@s.s','4qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('5qs@s.s','5qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('6qs@s.s','6qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('7qs@s.s','7qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('8qs@s.s','8qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('9qs@s.s','9qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('10qs@s.s','10qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('11qs@s.s','11qsss','qsss');
-INSERT INTO Users(email, User_name, User_password) VALUES ('12qs@s.s','12qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('1qs@s.s','1qs@s.s','1sss','sss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('2qs@s.s','2qs@s.s','2qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('3qs@s.s','3qs@s.s','3qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('4qs@s.s','4qs@s.s','4qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('5qs@s.s','5qs@s.s','5qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('6qs@s.s','6qs@s.s','6qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('7qs@s.s','7qs@s.s','7qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('8qs@s.s','8qs@s.s','8qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('9qs@s.s','9qs@s.s','9qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('10qs@s.s','10qs@s.s','10qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('11qs@s.s','11qs@s.s','11qsss','qsss');
+INSERT INTO Users(id,email, User_name, User_password) VALUES ('12qs@s.s','12qs@s.s','12qsss','qsss');
 
 SELECT * FROM Users;
 
 UPDATE Users  SET  email = '1@1.q'  WHERE id = 1;
 
-INSERT INTO Tournament DEFAULT VALUES;
+INSERT INTO Tournament  (Creator_Id) VALUES ('1qs@s.s');
+INSERT INTO Tournament  (Creator_Id) VALUES ('2qs@s.s');
 
-INSERT INTO Tournament DEFAULT VALUES;
+-- INSERT INTO Tournament DEFAULT VALUES;
 
 SELECT * FROM Tournament;
 SELECT * FROM Participate_Tournament;

@@ -271,7 +271,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.player4Name = resuser.User_name;
                   ngame.gameStatus = m.gameStatus;
                   ngame.T_Id = m.T_Id;
-                  ngame.round = m.round;
+                  // ngame.round = m.round;
                   ngame.count_players = m.count_players;
                   ngame.mode = m.mode;
                   matches.set(m.id, ngame);
@@ -317,8 +317,46 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               sendtoplayer(ngame.P3_Id, data);
               sendtoplayer(ngame.P4_Id, data);
             }
-            // else
+            else
+            {
+              if (!matches.has(m.id)) 
+                {
+                  let ngame = new GameState();
+                  ngame.id_Match = m.id;
+                  ngame.P1_Id = m.P1_Id;
+                  ngame.P2_Id = m.P2_Id;
+                  ngame.P3_Id = m.P3_Id;
+                  ngame.P4_Id = m.P4_Id;
+                  // ngame.player1Name = m.player1Name;
+                  // ngame.player2Name = m.player2Name;
+                  // ngame.player3Name = m.player3Name;
+                  // ngame.player4Name = m.player4Name;
+                  let resuser = await dbcnx.getUserById(m.P1_Id);
+                  if (resuser)
+                    ngame.player1Name = resuser.User_name;
+                  resuser = await dbcnx.getUserById(m.P2_Id);
+                  if (resuser)
+                    ngame.player2Name = resuser.User_name;
+                  resuser = await dbcnx.getUserById(m.P3_Id);
+                  if (resuser)
+                    ngame.player3Name = resuser.User_name;
+                  resuser = await dbcnx.getUserById(m.P4_Id);
+                  if (resuser)
+                    ngame.player4Name = resuser.User_name;
+                  ngame.gameStatus = m.gameStatus;
+                  ngame.T_Id = m.T_Id;
+                  ngame.round = m.round;
+                  ngame.count_players = m.count_players;
+                  ngame.mode = m.mode;
+                  matches.set(m.id, ngame);
+                  // console.log("\n\n>>>>>updateMatch: ");
+                  // console.log("\n\n>>>111100000>>updateMatch: ",ngame);
+                  await dbcnx.updateMatch(m);
+                }
+              
             // console.log("\n\n>>>>>Player in Match ", id);
+              
+            }
           }
           else if (request.type == "MOVE") {
             let m = await dbcnx.getCurrentMatchByPlayerID(id);
@@ -452,6 +490,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 ///ayoub/
 // Register dashboard routes
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
+import { match } from "assert";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
 console.log("Dashboard routes registered!");
 
