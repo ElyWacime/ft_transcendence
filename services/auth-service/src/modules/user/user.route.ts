@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createUser, login, logout, update_email, update_password } from "./user.controller";
+import { createUser, login, logout, update_email, update_password, update_image} from "./user.controller";
 import prisma from "../../utils/prisma";
 
 export async function userRoutes(app: FastifyInstance) {
@@ -116,6 +116,67 @@ export async function userRoutes(app: FastifyInstance) {
     handler: update_password,
   });
 
+  app.put("/update_image", {
+    preHandler: app.authenticate,
+    schema: {
+      body: {
+        type: "object",
+        required: ["image", "image_name"],
+        properties: {
+          image: { 
+            type: "string",
+          },
+          image_name: { 
+            type: "string",
+            minLength: 1,
+            maxLength: 255
+          }
+        }
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" },
+            avatar_url: { type: "string" },
+            user: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                email: { type: "string" },
+                name: { type: "string" },
+                avatar: { type: "string" }
+              }
+            }
+          }
+        },
+        401: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" }
+          }
+        },
+        404: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" }
+          }
+        },
+        500: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" }
+          }
+        }
+      }
+    },
+    handler: update_image
+  });
+  
   app.post("/validate_token", {
     schema: {
       body: {
@@ -148,4 +209,100 @@ export async function userRoutes(app: FastifyInstance) {
       });
     }
   });
+
+  app.post("/search-this-name", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["token", "name"],
+        properties: {
+          token: { type: "string" },
+          name: { type: "string" },
+        }
+      }
+    }
+  }, async (req, reply) => {
+    const { token } = req.body;
+    m
+    try {
+      const decoded = req.jwt.verify(token);
+      if (!decoded) {
+        throw new Error("Invalid token");
+      }
+      const current_user = await prisma.user.findUnique({
+      where: { name: req.body.name }
+      });
+      if (!current_user) {
+        return reply.status(404).send({
+          valid: false,
+          error: "User not found"
+        });
+      }  
+      return reply.send({
+        valid: true,
+        user_name: current_user.name,
+        user_id: current_user.id,
+        user_email: current_user.email,
+      });
+    } catch (err) {
+      return reply.status(401).send({
+        valid: false,
+        error: "Invalid or expired token"
+      });
+    }
+  });
 }
+
+      // // In your user controller
+      // app.post("/update_image", {
+      //   schema: {
+      //     body: {
+      //       type: "object",
+      //       required: ["image", "image_name"],
+      //       properties: {
+      //         image: { type: "string" }, // base64 string
+      //         image_name: { type: "string" }
+      //       }
+      //     }
+      //   }
+      // }, async (req, reply) => {
+      //   const { image, image_name } = req.body;
+      //   const token = req.headers.authorization?.split(' ')[1];
+        
+      //   if (!token) {
+      //     return reply.status(401).send({ success: false, message: "Unauthorized" });
+      //   }
+        
+      //   try {
+      //     // Verify token
+      //     const decoded = req.jwt.verify(token);
+          
+      //     // Convert base64 to Buffer for Prisma Bytes field
+      //     const imageBuffer = Buffer.from(image, 'base64');
+          
+      //     // Update user in database
+      //     const updatedUser = await prisma.user.update({
+      //       where: { id: decoded.id },
+      //       data: {
+      //         image: imageBuffer,
+      //         image_name: image_name
+      //       }
+      //     });
+          
+      //     // Optional: Generate a URL for the avatar (could be a data URL or stored file path)
+      //     const avatarUrl = `data:image/png;base64,${image}`;
+          
+      //     return reply.send({
+      //       success: true,
+      //       message: "Image updated successfully",
+      //       avatar_url: avatarUrl
+      //     });
+          
+      //   } catch (err) {
+      //     console.error(err);
+      //     return reply.status(500).send({
+      //       success: false,
+      //       message: "Failed to update image"
+      //     });
+      //   }
+      // });
