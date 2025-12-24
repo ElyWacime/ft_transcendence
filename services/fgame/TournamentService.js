@@ -60,7 +60,7 @@ export class TournamentService {
     const participants = await this.db.getParticipantsByTournamentId(tId);
     
     // Validate: must have 2, 4, 6, or 8 players (power of 2)
-    const validCounts = [2, 4, 6, 8];
+    const validCounts = [2, 4];
     if (!validCounts.includes(participants.length)) {
       throw new Error(`Tournament requires 2, 4, 6, or 8 players. Currently ${participants.length} participants.`);
     }
