@@ -33,8 +33,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider children={undefined}>
-          <div className="min-h-screen bg-background">
-            <Navigation />
+          <div className=\"page-wrapper\">\n            <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route

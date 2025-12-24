@@ -1,0 +1,452 @@
+/* ------LOGIN */
+
+/* Login Page Styles */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: var(--gradient-secondary);
+  text-align: center;
+  padding: 0 1rem; /* px-4 */
+  color: hsl(var(--foreground));
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Header */
+.login-header {
+  margin-bottom: 2.5rem; /* mb-10 */
+  max-width: 800px;
+}
+
+.login-title {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 700;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem; /* space-x-3 */
+  flex-wrap: wrap;
+  margin: 0;
+  color: hsl(var(--foreground));
+}
+
+.login-title.glow-text {
+  text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.5),
+               0 0 20px hsl(var(--neon-blue) / 0.3);
+}
+
+.trophy-icon {
+  width: 2rem; /* w-8 */
+  height: 2rem; /* h-8 */
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+}
+
+.login-subtitle {
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.5rem; /* mt-2 */
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.4;
+}
+
+/* Responsive typography */
+@media (min-width: 768px) {
+  .login-title {
+    font-size: 3.75rem; /* md:text-6xl */
+  }
+  
+  .trophy-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .login-subtitle {
+    font-size: 1rem; /* md:text-base */
+  }
+}
+
+/* Login Form */
+.login-form {
+  width: 100%;
+  max-width: 24rem; /* max-w-sm */
+  background-color: hsl(var(--background) / 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px); /* rounded-lg */
+  padding: 1.5rem; /* p-6 */
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* space-y-4 */
+}
+
+/* Form Group */
+.form-group {
+  text-align: left;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.25rem; /* mb-1 */
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem; /* p-3 */
+  border-radius: calc(var(--radius) - 4px); /* rounded-md */
+  background-color: hsl(var(--muted) / 0.2);
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+.form-input::placeholder {
+  color: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* Login Button */
+.login-button {
+  width: 100%;
+  margin-top: 1rem; /* mt-4 */
+  font-weight: 600; /* font-semibold */
+  font-size: 1.125rem; /* text-lg */
+  padding: 0.75rem 1.5rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: hsl(var(--primary) / 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Form Divider */
+.form-divider {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0; /* my-4 */
+}
+
+.divider-line {
+  flex-grow: 1;
+  height: 1px; /* h-px */
+  background-color: hsl(var(--border));
+}
+
+.divider-text {
+  padding: 0 0.5rem; /* px-2 */
+  font-size: 0.875rem; /* text-sm */
+  color: hsl(var(--muted-foreground));
+}
+
+/* GitHub Login Button */
+.github-login-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* gap-2 */
+  font-weight: 600; /* font-semibold */
+  font-size: 1.125rem; /* text-lg */
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.github-login-button:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border-color: hsl(var(--primary));
+  transform: translateY(-2px);
+}
+
+.github-icon {
+  width: 1.25rem; /* w-5 */
+  height: 1.25rem; /* h-5 */
+}
+
+/* Login Footer */
+.login-footer {
+  color: hsl(var(--muted-foreground));
+  margin-top: 1.5rem; /* mt-6 */
+  font-size: 0.875rem; /* text-sm */
+  text-align: center;
+  line-height: 1.5;
+}
+
+.signup-link {
+  background: none;
+  border: none;
+  color: hsl(var(--primary));
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+  color: hsl(var(--primary) / 0.8);
+}
+
+/* Error States */
+.form-input.error {
+  border-color: hsl(var(--destructive));
+  background-color: hsl(var(--destructive) / 0.05);
+}
+
+.form-input.error:focus {
+  border-color: hsl(var(--destructive));
+  box-shadow: 0 0 0 2px hsl(var(--destructive) / 0.2);
+}
+
+.error-message {
+  color: hsl(var(--destructive));
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  text-align: left;
+}
+
+/* Loading Animation */
+.login-button.loading {
+  position: relative;
+  color: transparent;
+}
+
+.login-button.loading::after {
+  content: '';
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  top: 50%;
+  left: 50%;
+  margin-left: -0.625rem;
+  margin-top: -0.625rem;
+  border: 2px solid hsl(var(--primary-foreground) / 0.3);
+  border-top-color: hsl(var(--primary-foreground));
+  border-radius: 50%;
+  animation: button-spinner 0.6s linear infinite;
+}
+
+@keyframes button-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Success States */
+.form-input.success {
+  border-color: hsl(var(--accent));
+  background-color: hsl(var(--accent) / 0.05);
+}
+
+.success-message {
+  color: hsl(var(--accent));
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .login-page {
+    padding: 0 0.75rem;
+    justify-content: flex-start;
+    padding-top: 4rem;
+  }
+  
+  .login-header {
+    margin-bottom: 2rem;
+  }
+  
+  .login-title {
+    font-size: 1.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .trophy-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .login-form {
+    padding: 1.25rem;
+  }
+  
+  .login-button,
+  .github-login-button {
+    font-size: 1rem;
+    padding: 0.625rem 1.25rem;
+  }
+}
+
+/* Tablet Responsiveness */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .login-title {
+    font-size: 3rem;
+  }
+  
+  .login-form {
+    max-width: 28rem;
+    padding: 2rem;
+  }
+}
+
+/* Desktop Enhancements */
+@media (min-width: 1024px) {
+  .login-form {
+    max-width: 28rem;
+    padding: 2rem;
+  }
+  
+  .login-title {
+    font-size: 4rem;
+  }
+  
+  .login-button:hover,
+  .github-login-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Focus States for Accessibility */
+.form-input:focus-visible,
+.login-button:focus-visible,
+.github-login-button:focus-visible,
+.signup-link:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.signup-link:focus-visible {
+  outline-offset: 1px;
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  .login-form {
+    background-color: hsl(var(--background) / 0.7);
+  }
+  
+  .form-input {
+    background-color: hsl(var(--muted) / 0.3);
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .login-form {
+    border-width: 2px;
+  }
+  
+  .form-input,
+  .login-button,
+  .github-login-button {
+    border-width: 2px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .login-button,
+  .github-login-button,
+  .form-input,
+  .signup-link {
+    transition: none;
+    animation: none;
+  }
+  
+  .login-button:hover:not(:disabled),
+  .github-login-button:hover {
+    transform: none;
+  }
+}
+
+/* Password visibility toggle (optional enhancement) */
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: hsl(var(--foreground));
+}
+
+/* Form validation indicators */
+.form-input.valid {
+  border-right-width: 4px;
+  border-right-color: hsl(var(--accent));
+}
+
+.form-input.invalid {
+  border-right-width: 4px;
+  border-right-color: hsl(var(--destructive));
+}
+
+/* Login form shake animation for invalid attempts */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.login-form.shake {
+  animation: shake 0.5s ease-in-out;
+}

@@ -13,11 +13,11 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
   const getMatchStatusIcon = (status: Match['status']) => {
     switch (status) {
       case 'pending':
-        return <Clock className="w-4 h-4" />;
+        return <Clock className="icon-sm" />;
       case 'playing':
-        return <Play className="w-4 h-4 text-primary" />;
+        return <Play className="icon-sm text-primary" />;
       case 'completed':
-        return <CheckCircle className="w-4 h-4 text-accent" />;
+        return <CheckCircle className="icon-sm text-accent" />;
     }
   };
 
@@ -26,9 +26,9 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
       case 'pending':
         return <Badge variant="secondary">Pending</Badge>;
       case 'playing':
-        return <Badge className="bg-primary">Playing</Badge>;
+        return <Badge className="bg-primary-themed">Playing</Badge>;
       case 'completed':
-        return <Badge className="bg-accent">Completed</Badge>;
+        return <Badge className="bg-accent-themed">Completed</Badge>;
     }
   };
 
@@ -47,35 +47,35 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
   return (
     <div className="space-y-6">
       {/* Tournament Header */}
-      <Card className="bg-gradient-secondary border-border">
+      <Card className="bg-gradient-secondary border-default">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 font-game">
-            <Trophy className="w-6 h-6 text-primary" />
+            <Trophy className="icon-md text-primary" />
             <span>{tournament.name}</span>
             {tournament.status === 'completed' && tournament.winner && (
-              <Badge className="bg-accent text-accent-foreground">
+              <Badge className="bg-accent-themed">
                 Winner: {tournament.winner.alias}
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-1 md-grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold text-primary">{tournament.players.length}</p>
-              <p className="text-muted-foreground">Players</p>
+              <p className="text-muted">Players</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-accent">
                 {tournament.matches.filter(m => m.status === 'completed').length}
               </p>
-              <p className="text-muted-foreground">Completed</p>
+              <p className="text-muted">Completed</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-primary">
                 {tournament.matches.filter(m => m.status === 'pending').length}
               </p>
-              <p className="text-muted-foreground">Remaining</p>
+              <p className="text-muted">Remaining</p>
             </div>
           </div>
         </CardContent>
@@ -88,15 +88,15 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
             <h3 className="text-xl font-game font-bold text-center glow-text">
               Round {roundNumber}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-3 gap-4">
               {matches.map((match) => (
                 <Card
                   key={match.id}
-                  className={`bg-gradient-secondary border-border transition-all duration-300 ${
+                  className={`bg-gradient-secondary border-default transition-all duration-300 ${
                     match.status === 'playing' ? 'border-primary glow-blue' : ''
                   }`}
                 >
-                  <CardHeader className="pb-3">
+                  <CardHeader className="padding-bottom-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         {getMatchStatusIcon(match.status)}
@@ -108,15 +108,15 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
                   <CardContent className="space-y-4">
                     {/* Players */}
                     <div className="space-y-2">
-                      <div className={`flex items-center justify-between p-2 rounded ${
-                        match.winner?.id === match.player1.id ? 'bg-accent/20' : 'bg-card'
+                      <div className={`flex items-center justify-between padding-small rounded ${
+                        match.winner?.id === match.player1.id ? 'bg-accent-subtle' : 'bg-card'
                       }`}>
                         <span className="font-medium">{match.player1.alias}</span>
                         <span className="font-bold text-lg">{match.score1}</span>
                       </div>
-                      <div className="text-center text-xs text-muted-foreground">VS</div>
-                      <div className={`flex items-center justify-between p-2 rounded ${
-                        match.winner?.id === match.player2.id ? 'bg-accent/20' : 'bg-card'
+                      <div className="text-center text-xs text-muted">VS</div>
+                      <div className={`flex items-center justify-between padding-small rounded ${
+                        match.winner?.id === match.player2.id ? 'bg-accent-subtle' : 'bg-card'
                       }`}>
                         <span className="font-medium">{match.player2.alias}</span>
                         <span className="font-bold text-lg">{match.score2}</span>
@@ -127,17 +127,17 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
                     {match.status === 'pending' && (
                       <Button
                         onClick={() => onStartMatch(match)}
-                        className="w-full bg-gradient-primary hover:scale-105 transition-transform"
+                        className="full-width bg-gradient-primary scale-hover transition-transform"
                       >
-                        <Play className="w-4 h-4 mr-2" />
+                        <Play className="icon-sm" style={{marginRight: '0.5rem'}} />
                         Start Match
                       </Button>
                     )}
 
                     {match.status === 'completed' && match.winner && (
                       <div className="text-center">
-                        <Badge className="bg-accent">
-                          <Trophy className="w-3 h-3 mr-1" />
+                        <Badge className="bg-accent-themed">
+                          <Trophy className="icon-sm" style={{marginRight: '0.25rem'}} />
                           {match.winner.alias} Wins!
                         </Badge>
                       </div>
@@ -151,7 +151,7 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
       </div>
 
       {/* Player Leaderboard */}
-      <Card className="bg-gradient-secondary border-border">
+      <Card className="bg-gradient-secondary border-default">
         <CardHeader>
           <CardTitle className="font-game">Leaderboard</CardTitle>
         </CardHeader>
@@ -162,18 +162,18 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
               .map((player, index) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3 bg-card rounded-lg"
+                  className="flex items-center justify-between padding-medium bg-card rounded-lg"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                      index === 0 ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground'
+                    <div className={`width-8 height-8 rounded-full flex items-center justify-center font-bold ${
+                      index === 0 ? 'bg-accent-themed' : 'bg-primary-themed'
                     }`}>
                       {index + 1}
                     </div>
                     <span className="font-medium">{player.alias}</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted">
                       {player.wins}W - {player.losses}L
                     </div>
                     <div className="font-bold">{player.score} pts</div>
