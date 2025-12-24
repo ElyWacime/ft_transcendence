@@ -252,7 +252,7 @@
   color: hsl(var(--foreground));
 }
 
-/* Utility Classes */
+/* Utility Classes - Currently Used Only */
 .container {
   width: 100%;
   margin-right: auto;
@@ -333,20 +333,12 @@
   gap: 1rem;
 }
 
-.padding-container {
-  padding: 1rem;
-}
-
 .padding-small {
   padding: 0.5rem;
 }
 
 .padding-medium {
   padding: 0.75rem;
-}
-
-.padding-large {
-  padding: 1.5rem;
 }
 
 .padding-bottom-3 {
