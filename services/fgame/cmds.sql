@@ -1,10 +1,16 @@
 .headers on
 .mode column
 
+SELECT m.id,u1.User_name ,u2.User_name,m.gameStatus,m.score1,m.score2  FROM Match m inner join Users u1 on m.P1_Id = u1.id
+inner join Users u2 on m.P2_Id = u2.id;
+
 SELECT * FROM Match;
 SELECT * FROM Users;
 SELECT * FROM Tournament;
 SELECT * FROM Participate_Tournament;
+DELETE FROM Tournament;
+DELETE FROM Participate_Tournament;
+DELETE FROM Match;
 
 INSERT INTO Users(id,email, User_name, User_password) VALUES ('1qs@s.s','1qs@s.s','1sss','sss');
 INSERT INTO Users(id,email, User_name, User_password) VALUES ('2qs@s.s','2qs@s.s','2qsss','qsss');

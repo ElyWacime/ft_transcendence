@@ -7,7 +7,7 @@ import { api as mockApi, Tournament as UITournament, Match } from "@/lib/api";
 import { createTournament, joinTournament, startTournament, getTournamentStatus, getWsUrl, setPlayerReady } from "@/lib/fgameTournament";
 import { useAuth } from "@/context/AuthContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
-
+// import { useNavigate } from "react-router-dom";
 // Helper to get user ID from JWT token
 function getUserIdFromToken(): string | null {
   try {
@@ -119,10 +119,13 @@ export default function OnlineTournament() {
     }
   }
 
+  // const navigate = useNavigate();
   async function handleReady(match: Match) {
     if (!tournamentId || !token || !match.apiMatchId) return;
     try {
       const result = await setPlayerReady(tournamentId, match.apiMatchId, token);
+    // navigate("/loading");
+
       console.log("Ready result:", result);
       await refresh();
     } catch (e: any) {

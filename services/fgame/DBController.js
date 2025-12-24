@@ -51,8 +51,8 @@ export class GameState {
         this.mode = 2;
         this.Ball_x = 400;
         this.Ball_y = 300;
-        this.Ball_dx = 2;
-        this.Ball_dy = 2;
+        this.Ball_dx = 1;
+        this.Ball_dy = 1;
         this.ball_radius = 8;
         this.sizePaddle_width = 15;
         this.sizePaddle_height = 100;

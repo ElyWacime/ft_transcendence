@@ -20,10 +20,10 @@ import { registerTournamentRoutes } from "./tournament_routes.js";
 import { exit } from "process";
 
 let dbcnx = new SQLiteDB();
-const TICK_RATE = 60;
+const TICK_RATE = 50;
 const clients = new Map();
 const matches = new Map();
-const PADDLE_SPEED = 8;
+const PADDLE_SPEED = 4;
 
 await dbcnx.connect();
 let max_Speed = 8;
