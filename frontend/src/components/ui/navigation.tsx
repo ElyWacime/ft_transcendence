@@ -1,7 +1,7 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut, User ,  Bot} from "lucide-react";
+import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut, User ,  Bot, icons, Icon} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -21,6 +21,7 @@ export const Navigation = () => {
     { path: "/game-ai", label: "VS AI", icon: Bot },
     { path: "/game", label: "Game", icon: Gamepad2 },
     { path: "/profile", label: "Profile", icon: User},
+    { path: "/chat", label: "Chat", icon: MessageSquare }
   ];
 
   const navItems = isLoggedIn
