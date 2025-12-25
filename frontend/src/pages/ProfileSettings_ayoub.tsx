@@ -171,7 +171,7 @@ const ProfileSettings = () => {
                       <p className="text-sm text-muted-foreground mt-1">{searchResult.user_email}</p>
                       <p className="text-xs text-muted-foreground mt-1">ID: {searchResult.user_id}</p>
                     </div>
-                    <Button onClick={() => navigate(`/dashboard/${searchResult.user_id}`)}>
+                    <Button onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
                       View dashboard
                     </Button>
                   </div>

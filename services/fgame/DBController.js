@@ -344,6 +344,9 @@ export class SQLiteDB {
     async getUserByEmail(email) {
         return this.db.get(`SELECT * FROM Users WHERE email =  ?`, [email]);
     }
+    async getUserByName(username) {
+        return this.db.get(`SELECT * FROM Users WHERE User_name = ?`, [username]);
+    }
     async updateUsers(id, u) {
         await this.db.run(`UPDATE Users 
              SET 

@@ -58,7 +58,7 @@ const App = () => (
               <Route path="/profile/change-picture" element={<ChangePicture />} />
 
               <Route
-                path="/dashboard/:id?"
+                path="/dashboard/:identifier?"
                 element={
                   <ProtectedRoute>
                     <Dashboard_ayoub />

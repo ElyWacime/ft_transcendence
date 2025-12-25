@@ -51,7 +51,7 @@ interface DashboardData {
 
 const Dashboard_ayoub = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id?: string }>();
+  const { identifier } = useParams<{ identifier?: string }>();
   const { isLoggedIn } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -62,8 +62,8 @@ const Dashboard_ayoub = () => {
 : `${dashboardData?.user.avatar || "https://www.gravatar.com/avatar/"}?t=${avatarKey}`;
 
   useEffect(() => {
-    // If no ID in URL and user is not logged in, redirect to login
-    if (!id && !isLoggedIn) {
+    // If no identifier in URL and user is not logged in, redirect to login
+    if (!identifier && !isLoggedIn) {
       navigate("/login");
       return;
     }
@@ -71,25 +71,28 @@ const Dashboard_ayoub = () => {
 
     const fetchDashboardData = async () => {
       try {
-        // Use ID from URL if provided, otherwise extract from JWT token
-        let userId = id;
+        // Use identifier from URL if provided, otherwise extract user ID from JWT token
+        let userIdentifier = identifier;
         
-        if (!userId) {
-          userId = getUserIdFromToken();
-          if (!userId) {
-            setError("Unable to get user ID. Please provide an ID in the URL or log in.");
+        if (!userIdentifier) {
+          userIdentifier = getUserIdFromToken();
+          if (!userIdentifier) {
+            setError("Unable to get user ID. Please provide a username/ID in the URL or log in.");
             setLoading(false);
             return;
           }
         }
 
-        console.log("Fetching dashboard for user ID:", userId);
-        const data = await playerDashboardApi_ayoub.getPlayerDashboard(userId);
+        console.log("Fetching dashboard for user:", userIdentifier);
+        const data = await playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier);
         
-        // Check if avatar was recently updated in localStorage
-        const localAvatar = localStorage.getItem("avatar_url");
-        if (localAvatar && data.user) {
-          data.user.avatar = localAvatar;
+        // Only use localStorage avatar if we're viewing our own dashboard
+        const currentUserId = getUserIdFromToken();
+        if (currentUserId === userIdentifier || currentUserId === data.user.id) {
+          const localAvatar = localStorage.getItem("avatar_url");
+          if (localAvatar && data.user) {
+            data.user.avatar = localAvatar;
+          }
         }
         
         setDashboardData(data);
@@ -98,7 +101,7 @@ const Dashboard_ayoub = () => {
         console.error("Failed to fetch dashboard:", err);
         console.error("Error details:", err.message);
         if (err.message.includes("Not Found") || err.message.includes("404")) {
-          setError(`User not found. User ID: ${userId}. Please make sure you're logged in with a valid account.`);
+          setError(`User not found. Identifier: ${userIdentifier}. Please make sure the username or ID is correct.`);
         } else {
           setError(err.message || "Failed to load dashboard data");
         }
@@ -109,7 +112,7 @@ const Dashboard_ayoub = () => {
     };
 
     fetchDashboardData();
-  }, [id, isLoggedIn, navigate]);
+  }, [identifier, isLoggedIn, navigate]);
 
   // Listen for avatar updates
   useEffect(() => {

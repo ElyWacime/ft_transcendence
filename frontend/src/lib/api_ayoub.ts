@@ -4,8 +4,8 @@ class PlayerDashboardAPI_ayoub {
   // The gateway (nginx) will proxy to pong-server:3000
   private baseUrl = "/api";
 
-  async getPlayerDashboard(playerId: string) {
-    const url = `${this.baseUrl}/dashboard/${playerId}`;
+  async getPlayerDashboard(identifier: string) {
+    const url = `${this.baseUrl}/dashboard/${identifier}`;
     
     // Get JWT token from localStorage to send with request
     const token = localStorage.getItem("token");
