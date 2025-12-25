@@ -96,6 +96,6 @@ export async function oauthRoutes(app: FastifyInstance) {
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());
 
-    //reply.redirect(`http://10.12.7.4/login?token=${jwtToken}`);
+    //reply.redirect(`http://127.0.0.1/login?token=${jwtToken}`);
   });
 }

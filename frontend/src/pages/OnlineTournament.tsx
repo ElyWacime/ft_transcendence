@@ -38,10 +38,49 @@ export default function OnlineTournament() {
   const [error, setError] = useState<string | null>(null);
   const [autoStarted, setAutoStarted] = useState(false);
 
+  const [availableTournaments, setAvailableTournaments] = useState<UITournament[]>([]);
+  const [searchingAvailable, setSearchingAvailable] = useState(false);
+
   const token = useMemo(() => localStorage.getItem("token") || undefined, []);
   const currentUserId = useMemo(() => getUserIdFromToken(), []);
   const wsUrl = getWsUrl();
   const { send, isReady } = useWebSocket(wsUrl);
+
+  // Search sequentially from 1 until an id doesn't exist (stop on first missing), max cap to avoid infinite loop
+  const listAvailableTournaments = useCallback(async (opts?: { auto?: boolean }) => {
+    if (searchingAvailable) return;
+    setSearchingAvailable(true);
+    setError(null);
+    const found: UITournament[] = [];
+    try {
+      let id = 1;
+      const MAX_ATTEMPTS = 1000; // safety cap
+      while (id <= MAX_ATTEMPTS) {
+        try {
+          const t = await getTournamentStatus(id);
+          if (!t) {
+            // stop on missing
+            break;
+          }
+          found.push(t);
+          id++;
+        } catch (e) {
+          // stop when an ID is missing / not found
+          break;
+        }
+      }
+    } catch (e: any) {
+      setError(e.message || "Failed to list tournaments");
+    } finally {
+      setAvailableTournaments(found);
+      setSearchingAvailable(false);
+    }
+  }, [searchingAvailable]);
+  
+  // Run a background search once on mount to populate list
+  useEffect(() => {
+    listAvailableTournaments({ auto: true });
+  }, [listAvailableTournaments]);
 
   // Auto-refresh tournament every 2 seconds
   useEffect(() => {
@@ -86,6 +125,7 @@ export default function OnlineTournament() {
       const id = await createTournament(label, 8);
       setTournamentId(id);
       await refresh();
+      await listAvailableTournaments();
     } catch (e: any) {
       setError(e.message);
     } finally { setLoading(false); }
@@ -97,6 +137,7 @@ export default function OnlineTournament() {
     try {
       await joinTournament(tournamentId, token);
       await refresh();
+      await listAvailableTournaments();
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   }
 
@@ -155,12 +196,19 @@ export default function OnlineTournament() {
             </div>
             <div className="space-y-2">
               <label className="text-sm text-muted-foreground">Tournament ID</label>
-              <Input value={tournamentId ?? ""} onChange={(e) => setTournamentId(Number(e.target.value) || null)} placeholder="Enter ID to load" />
+              <Input
+                value={tournamentId ?? ""}
+                onChange={(e) => setTournamentId(e.target.value === "" ? null : Number(e.target.value))}
+                placeholder="Enter ID to load"
+              />
             </div>
             <div className="flex items-end space-x-2">
               <Button onClick={handleCreate} className="bg-gradient-primary">Create</Button>
               <Button onClick={handleJoin} disabled={!isLoggedIn || !tournamentId} className="bg-gradient-primary">Join</Button>
               <Button onClick={handleStart} disabled={!tournamentId || tournament?.status !== 'setup'} className="bg-gradient-primary">Start</Button>
+              <Button variant="secondary" onClick={() => listAvailableTournaments()} disabled={searchingAvailable}>
+                {searchingAvailable ? "Searching..." : "List Available"}
+              </Button>
               <Button variant="secondary" onClick={refresh} disabled={!tournamentId}>Refresh</Button>
             </div>
           </div>
@@ -168,6 +216,48 @@ export default function OnlineTournament() {
           {loading && <div className="text-muted-foreground">Loading...</div>}
         </CardContent>
       </Card>
+
+      {/* Available tournaments list */}
+      <Card className="bg-gradient-secondary border-border">
+        <CardHeader>
+          <CardTitle className="text-sm">Available Tournaments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {searchingAvailable && <div className="text-muted-foreground">Searching for tournaments...</div>}
+          {!searchingAvailable && availableTournaments.length === 0 && <div className="text-muted-foreground">No tournaments found</div>}
+          <div className="space-y-2">
+            {availableTournaments.map((t) => (
+              <div key={t.id} className="flex items-center justify-between p-2 border rounded">
+                <div>
+                  <div className="font-semibold">#{t.id} {t.Label ? `- ${t.Label}` : ""}</div>
+                  <div className="text-sm text-muted-foreground">{t.count_players ?? 0}/{t.max_players ?? 8} players • {t.status ?? "unknown"}</div>
+                </div>
+                <div className="space-x-2">
+                  <Button
+                    onClick={async () => {
+                      setTournamentId(t.id);
+                      setLoading(true);
+                      try {
+                        await joinTournament(t.id, token);
+                        await refresh();
+                        await listAvailableTournaments();
+                      } catch (e: any) {
+                        setError(e.message);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    disabled={!isLoggedIn || (t.max_players && (t.count_players ?? 0) >= t.max_players)}
+                  >
+                    Join
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
 
       {tournament && (
         <TournamentBracket 
