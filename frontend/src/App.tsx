@@ -33,7 +33,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider children={undefined}>
-          <div className=\"page-wrapper\">\n            <Navigation />
+          <div className="page-wrapper">
+            <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route

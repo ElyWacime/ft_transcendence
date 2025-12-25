@@ -22,6 +22,16 @@ export async function createUser(
       message: "User already exists with this email",
     });
   }
+  const name_user = await prisma.user.findUnique({
+    where: {
+      name: name,
+    },
+  });
+  if (name_user) {
+    return reply.code(401).send({
+      message: "User already exists with this name",
+    });
+  }
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await prisma.user.create({

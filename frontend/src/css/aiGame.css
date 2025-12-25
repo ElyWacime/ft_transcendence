@@ -259,43 +259,6 @@
 }
 
 /* AI Opponent Indicator */
-.ai-opponent-indicator {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, 
-    hsl(var(--muted) / 0.3), 
-    hsl(var(--muted) / 0.1)
-  );
-  border-radius: 9999px;
-  border: 1px solid hsl(var(--border) / 0.3);
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-.ai-opponent-indicator::before {
-  content: '';
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: hsl(var(--primary));
-  border-radius: 50%;
-  animation: ai-pulse 2s infinite;
-}
-
-@keyframes ai-pulse {
-  0%, 100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-}
-
 /* Mobile Responsiveness */
 @media (max-width: 767px) {
   .ai-game-page {
@@ -415,29 +378,6 @@
   }
 }
 
-.ai-opponent-active {
-  animation: ai-thinking 3s ease-in-out infinite;
-}
-
-/* Difficulty level indicators in canvas */
-.ai-difficulty-indicator {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: hsl(var(--card) / 0.8);
-  backdrop-filter: blur(10px);
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  border: 1px solid hsl(var(--border));
-  font-size: 0.75rem;
-  font-weight: 500;
-  z-index: 10;
-}
-
-/* Loading state for AI initialization */
 .ai-game-page.loading .ai-game-canvas-container::before {
   content: 'Initializing AI...';
   position: absolute;
@@ -456,43 +396,10 @@
   box-shadow: var(--shadow-card);
 }
 
-/* AI Score Highlight */
-.ai-score {
-  position: relative;
-  display: inline-block;
-}
-
-.ai-score::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent, 
-    hsl(var(--primary)), 
-    transparent
-  );
-  animation: ai-score-glow 2s infinite;
-}
-
-@keyframes ai-score-glow {
-  0%, 100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   .ai-back-button,
-  .ai-difficulty-button,
-  .ai-opponent-indicator::before,
-  .ai-opponent-active,
-  .ai-score::after {
+  .ai-difficulty-button {
     animation: none;
     transition: none;
   }
