@@ -19,11 +19,8 @@ import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
 import Profile from "./pages/Profile";
-import Dashboard_ayoub from "./pages/Dashboard_ayoub";
-import ProfileSettings from "./pages/ProfileSettings_ayoub";
-import ChangeEmail from "./pages/Change_email_page";
-import ChangePassword from "./pages/ChangePassword";
-import ChangePicture from "./pages/change-picture";
+import Chat from "./pages/Chat";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -33,10 +30,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider children={undefined}>
-          <div className="page-wrapper">
+          <div className="min-h-screen bg-background">
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/chat/:id" element={<Chat />} />
               <Route
                 path="/tournament"
                 element={
@@ -45,24 +44,11 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              {/* <Route
+              <Route
                 path="/profile"
                 element={
                   <ProtectedRoute children={undefined}>
                     <Profile />
-                  </ProtectedRoute>
-                }
-              /> */}
-              <Route path="/profile" element={<ProfileSettings />} />
-              <Route path="/profile/change-email" element={<ChangeEmail />} />
-              <Route path="/profile/change-password" element={<ChangePassword />} />
-              <Route path="/profile/change-picture" element={<ChangePicture />} />
-
-              <Route
-                path="/dashboard/:id?"
-                element={
-                  <ProtectedRoute children={undefined}>
-                    <Dashboard_ayoub />
                   </ProtectedRoute>
                 }
               />
