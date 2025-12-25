@@ -5,8 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import React from "react";
 
-
-
 function usePongWebSocket(ws, mode, email, setGameState) {
     useEffect(() => {
         if (!ws) return;
@@ -118,21 +116,21 @@ function usePongRenderer(canvasRef, gameState) {
         ctx.lineTo(canvas.width / 2, canvas.height);
         ctx.stroke();
         ctx.setLineDash([]);
-
-        if (gameState.player1email == localStorage.getItem("email"))
-            ctx.fillStyle = 'hsl(0 50% 80%)';
-        else
-            ctx.fillStyle = "hsl(217 91% 60%)";
+        ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
-
-        if (gameState.player2email == localStorage.getItem("email"))
-            ctx.fillStyle = 'hsl(60 50% 80%)';
-        else
-            ctx.fillStyle = "hsl(217 91% 60%)";
+        ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
-
         if (gameState.Mode == 4) {
-     
+            if (gameState.player1email == localStorage.getItem("email"))
+                ctx.fillStyle = 'hsl(0 50% 80%)';
+            else
+                ctx.fillStyle = "hsl(217 91% 60%)";
+            ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+            if (gameState.player2email == localStorage.getItem("email"))
+                ctx.fillStyle = 'hsl(60 50% 80%)';
+            else
+                ctx.fillStyle = "hsl(217 91% 60%)";
+            ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
             if (gameState.player3email == localStorage.getItem("email"))
                 ctx.fillStyle = 'hsl(120 50% 80%)';
             else

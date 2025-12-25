@@ -8,6 +8,9 @@ import { Match, api } from "@/lib/api";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { useWebSocket } from "../hooks/useWebSocket";
+import Countdown from "@/components/Countdown";
+
+
 interface GameOnlineProps {
   player1Name: string;
   player2Name: string;
@@ -23,6 +26,7 @@ interface GameOnlineProps {
 const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [started, setStarted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const email = localStorage.getItem("email");
   const { player1Name, player2Name,player3Name, player4Name, player1email, player2email,player3email, player4email,mode } = location.state as GameOnlineProps;
@@ -59,40 +63,6 @@ const GameOnline = () => {
     };
   }, [ws]);
 
-  // const handleGameEnd = async (player1Score: number, player2Score: number) => {
-  //   try {
-  //     if (match) {
-  //       // Update match result in tournament
-  //       await api.updateMatchResult(match.id, player1Score, player2Score);
-
-  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
-
-  //       // Send system message
-  //       await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
-
-  //       toast.success(`${winner} wins the match!`);
-
-  //       // Navigate to result page
-  //       setTimeout(() => {
-  //         navigate("/result", {
-  //           state: {
-  //             match,
-  //             winner: player1Score > player2Score ? player1 : player2,
-  //             finalScore: { player1: player1Score, player2: player2Score }
-  //           }
-  //         });
-  //       }, 2000);
-  //     } else {
-  //       // Quick game - no tournament
-  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
-  //       toast.success(`${winner} wins!`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to update match result:", error);
-  //     toast.error("Failed to save match result");
-  //   }
-  // };
-
   return (
     <div className="min-h-screen pt-16 pb-8">
       <div className="container mx-auto px-4 space-y-6">
@@ -124,7 +94,13 @@ const GameOnline = () => {
         </div> */}
 
         {/* Game Canvas */}
-        {<div className="max-w-6xl mx-auto">
+
+
+        <div>
+      {!started ? (
+        <Countdown onFinish={() => setStarted(true)} />
+      ) : (
+        <div className="max-w-6xl mx-auto">
           {isReady && (
             <PongCanvasOnline
               player1Name={player1Name}
@@ -141,7 +117,11 @@ const GameOnline = () => {
             // maxScore={5}
             />
           )}
-        </div>}
+        </div>
+      )}
+        </div>
+        
+       
 
 
         {/* Match Info */}
