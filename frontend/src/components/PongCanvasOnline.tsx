@@ -13,6 +13,7 @@ function usePongWebSocket(ws, mode, email, setGameState) {
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
+            // console.log("MODE === ", localStorage.getItem("email"), data.player1Name, data.player2email, data.player3email, data.player4email);
             setGameState((prev) => ({
                 ...prev,
                 ball: {
@@ -31,7 +32,11 @@ function usePongWebSocket(ws, mode, email, setGameState) {
                 player1Name: data.player1Name,
                 player2Name: data.player2Name,
                 player3Name: data.player3Name || "",
-                player4Name: data.player4Name || ""
+                player4Name: data.player4Name || "",
+                player1email: data.player1email|| "",
+                player2email: data.player2email|| "",
+                player3email: data.player3email|| "",
+                player4email: data.player4email|| ""
             }));
         };
 
@@ -114,13 +119,13 @@ function usePongRenderer(canvasRef, gameState) {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        if (gameState.player1Name == localStorage.getItem("email"))
+        if (gameState.player1email == localStorage.getItem("email"))
             ctx.fillStyle = 'hsl(0 50% 80%)';
         else
             ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
 
-        if (gameState.player2Name == localStorage.getItem("email"))
+        if (gameState.player2email == localStorage.getItem("email"))
             ctx.fillStyle = 'hsl(60 50% 80%)';
         else
             ctx.fillStyle = "hsl(217 91% 60%)";
@@ -128,13 +133,13 @@ function usePongRenderer(canvasRef, gameState) {
 
         if (gameState.Mode == 4) {
      
-            if (gameState.player3Name == localStorage.getItem("email"))
+            if (gameState.player3email == localStorage.getItem("email"))
                 ctx.fillStyle = 'hsl(120 50% 80%)';
             else
                 ctx.fillStyle = "hsl(217 91% 60%)";
             ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
 
-            if (gameState.player4Name == localStorage.getItem("email"))
+            if (gameState.player4email == localStorage.getItem("email"))
                 ctx.fillStyle = 'hsl(300 50% 80%)';
             else
                 ctx.fillStyle = "hsl(217 91% 60%)";
@@ -169,7 +174,7 @@ function usePongRenderer(canvasRef, gameState) {
     }, [loop]);
 }
 
-export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode }) => {
+export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name,player1email, player2email, player3email, player4email, ws, mode }) => {
     const email = localStorage.getItem("email");
     const canvasRef = useRef(null);
 
@@ -182,13 +187,17 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         score: { player1: 0, player2: 0 },
         sizePaddle: { width: 15, height: 100 },
         Mode: mode,
-        player1Name:  player1Name,
-        player2Name:  player2Name,
-        player3Name:  player3Name,
-        player4Name:  player4Name,
+        player1Name,
+        player2Name,
+        player3Name,
+        player4Name,
+        player1email,
+        player2email,
+        player3email,
+        player4email,
         gameStatus: "PENDING",
     });
-    console.log("MODE === ", player1Name, player2Name, player3Name, player4Name);
+
     usePongWebSocket(ws, mode, email, setGameState);
     usePongControls(ws, mode, email);
     usePongRenderer(canvasRef, gameState);

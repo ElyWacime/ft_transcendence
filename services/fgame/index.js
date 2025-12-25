@@ -205,7 +205,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                 // Create a new non-tournament match or a tournament seeded holder
                 m = new Match();
                 m.P1_Id = u.id;
+            
                 let resuser = await dbcnx.getUserById(u.id);
+                
                 m.player1Name = resuser.User_name;
                 m.mode = request.mode;
                 if (!tournamentId) {
@@ -219,26 +221,34 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                 // console.log("\n\n\t\t>>>>> Can JOIN: ");
                 if (request.mode == 2) {
                   m.P2_Id = u.id;
+              
                   let resuser = await dbcnx.getUserById(u.id);
+                  
                   m.player2Name = resuser.User_name;
                   m.count_players = m.count_players + 1;
                 }
                 else {
                   if (m.P2_Id == null) {
                     m.P2_Id = u.id;
+                
                     let resuser = await dbcnx.getUserById(u.id);
+                    
                     m.player2Name = resuser.User_name;
                     m.count_players = m.count_players + 1;
                   }
                   else if (m.P3_Id == null) {
                     m.P3_Id = u.id;
+                
                     let resuser = await dbcnx.getUserById(u.id);
+                    
                     m.player3Name = resuser.User_name;
                     m.count_players = m.count_players + 1;
                   }
                   else if (m.P4_Id == null) {
                     m.P4_Id = u.id;
+                
                     let resuser = await dbcnx.getUserById(u.id);
+                    
                     m.player4Name = resuser.User_name;
                     m.count_players = m.count_players + 1;
                   }
@@ -257,18 +267,38 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   // ngame.player2Name = m.player2Name;
                   // ngame.player3Name = m.player3Name;
                   // ngame.player4Name = m.player4Name;
+              
                   let resuser = await dbcnx.getUserById(m.P1_Id);
+                  console.log("----0----",resuser);
                   if (resuser)
-                  ngame.player1Name = resuser.User_name;
+                  {
+                    ngame.player1Name = resuser.User_name;
+                    ngame.player1email = resuser.email;
+                  }
+          
                   resuser = await dbcnx.getUserById(m.P2_Id);
+                  console.log("----0----",resuser);
                   if (resuser)
-                  ngame.player2Name = resuser.User_name;
+                  {
+                    ngame.player2Name = resuser.User_name;
+                    ngame.player2email = resuser.email;
+                  }
+            
                   resuser = await dbcnx.getUserById(m.P3_Id);
+                  console.log("----0----",resuser);
                   if (resuser)
-                  ngame.player3Name = resuser.User_name;
-                  resuser = await dbcnx.getUserById(m.P4_Id);
-                  if (resuser)
-                  ngame.player4Name = resuser.User_name;
+                  {
+                    ngame.player3Name = resuser.User_name;
+                    ngame.player3email = resuser.email;
+                   }
+          
+                   resuser = await dbcnx.getUserById(m.P4_Id);
+                   console.log("----0----",resuser);
+                   if (resuser)
+                  {
+                    ngame.player4Name = resuser.User_name;
+                    ngame.player4email = resuser.email;
+                  }
                   ngame.gameStatus = m.gameStatus;
                   ngame.T_Id = m.T_Id;
                   // ngame.round = m.round;
@@ -282,30 +312,47 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               }
               let ngame = new GameState();
 
+          
               let resuser = await dbcnx.getUserById(m.P1_Id);
+              console.log("---1-----",resuser);
               if (resuser)
+              {
                 ngame.player1Name = resuser.User_name;
+                ngame.player1email = resuser.email;
+              }
+      
               resuser = await dbcnx.getUserById(m.P2_Id);
+              console.log("---1-----",resuser);
               if (resuser)
+              {
                 ngame.player2Name = resuser.User_name;
+                ngame.player2email = resuser.email;
+              }
+      
               resuser = await dbcnx.getUserById(m.P3_Id);
+              console.log("---1-----",resuser);
               if (resuser)
+              {
                 ngame.player3Name = resuser.User_name;
+                ngame.player3email = resuser.email;
+              }
+      
               resuser = await dbcnx.getUserById(m.P4_Id);
+              console.log("---1-----",resuser);
               if (resuser)
+              {
                 ngame.player4Name = resuser.User_name;
-
+                ngame.player4email = resuser.email;
+              }
               ngame.id_Match = m.id;
               ngame.P1_Id = m.P1_Id;
               ngame.P2_Id = m.P2_Id;
               ngame.P3_Id = m.P3_Id;
               ngame.P4_Id = m.P4_Id;
-
               // ngame.player1Name = m.player1Name;
               // ngame.player2Name = m.player2Name;
               // ngame.player3Name = m.player3Name;
               // ngame.player4Name = m.player4Name;
-              
               ngame.gameStatus = m.gameStatus;
               ngame.T_Id = m.T_Id;
               ngame.round = m.round;
@@ -331,18 +378,38 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   // ngame.player2Name = m.player2Name;
                   // ngame.player3Name = m.player3Name;
                   // ngame.player4Name = m.player4Name;
+              
                   let resuser = await dbcnx.getUserById(m.P1_Id);
+                  console.log("----2----",resuser);
                   if (resuser)
+                  {
                     ngame.player1Name = resuser.User_name;
+                    ngame.player1email = resuser.email;
+                  }
+          
                   resuser = await dbcnx.getUserById(m.P2_Id);
+                  console.log("----2----",resuser);
                   if (resuser)
+                  {
                     ngame.player2Name = resuser.User_name;
-                  resuser = await dbcnx.getUserById(m.P3_Id);
-                  if (resuser)
+                    ngame.player2email = resuser.email;
+                   }
+          
+                   resuser = await dbcnx.getUserById(m.P3_Id);
+                   console.log("----2----",resuser);
+                   if (resuser)
+                  {
                     ngame.player3Name = resuser.User_name;
+                    ngame.player3email = resuser.email;
+                  }
+          
                   resuser = await dbcnx.getUserById(m.P4_Id);
+                  console.log("----2----",resuser);
                   if (resuser)
+                  {
                     ngame.player4Name = resuser.User_name;
+                    ngame.player4email = resuser.email;
+                  }
                   ngame.gameStatus = m.gameStatus;
                   ngame.T_Id = m.T_Id;
                   ngame.round = m.round;
@@ -390,18 +457,38 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             else {
               m = await dbcnx.getLasttMatchByPlayerID(id);
               if (m) {
+               
                 // let resuser = await dbcnx.getUserById(m.P1_Id);
-                // if (resuser)
-                //   m.player1Name = resuser.User_name;
-                // resuser = await dbcnx.getUserById(m.P2_Id);
-                // if (resuser)
-                //   m.player2Name = resuser.User_name;
-                // resuser = await dbcnx.getUserById(m.P3_Id);
-                // if (resuser)
-                //   m.player3Name = resuser.User_name;
-                // resuser = await dbcnx.getUserById(m.P4_Id);
-                // if (resuser)
-                //   m.player4Name = resuser.User_name;
+                console.log("---3-----",resuser);
+                if (resuser)
+                {
+                  m.player1Name = resuser.User_name;
+                  m.player1email = resuser.email;
+                }
+           
+                resuser = await dbcnx.getUserById(m.P2_Id);
+                console.log("---3-----",resuser);
+                if (resuser)
+                {
+                  m.player2Name = resuser.User_name;
+                  m.player2email = resuser.email;
+                }
+           
+                resuser = await dbcnx.getUserById(m.P3_Id);
+                console.log("---3-----",resuser);
+                if (resuser)
+                {
+                  m.player3Name = resuser.User_name;
+                  m.player3email = resuser.email;
+                }
+           
+                resuser = await dbcnx.getUserById(m.P4_Id);
+                console.log("---3-----",resuser);
+                if (resuser)
+                {
+                  m.player4Name = resuser.User_name;  
+                  m.player4email = resuser.email;
+                }
                 let tmp = matches.get(m.id);
                 let data = JSON.stringify(tmp);
                 sendtoplayer(m.P1_Id, data);

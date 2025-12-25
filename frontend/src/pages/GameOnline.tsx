@@ -13,6 +13,10 @@ interface GameOnlineProps {
   player2Name: string;
   player3Name: string;
   player4Name: string;
+  player1email: string;
+  player2email: string;
+  player3email: string;
+  player4email: string;
   mode: number;
 }
 
@@ -21,7 +25,7 @@ const GameOnline = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const email = localStorage.getItem("email");
-  const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
+  const { player1Name, player2Name,player3Name, player4Name, player1email, player2email,player3email, player4email,mode } = location.state as GameOnlineProps;
   const match = location.state?.match as Match | undefined;
 
   const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
@@ -127,6 +131,10 @@ const GameOnline = () => {
               player2Name={player2Name}
               player3Name={player3Name}
               player4Name={player4Name}
+              player1email={player1email}
+              player2email={player2email}
+              player3email={player3email}
+              player4email={player4email}
               ws={ws}
               mode={mode}
             // onGameEnd={(result) => send({ type: "gameEnd", result })}
