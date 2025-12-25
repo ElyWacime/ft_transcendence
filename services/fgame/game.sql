@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS Tournament (
     CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     result TEXT NOT NULL DEFAULT 'PENDING' CHECK(result IN ('PENDING','PLAYING','FINISHED')),
     Winner_Id TEXT DEFAULT NULL,
-    max_players INTEGER DEFAULT 8,
+    max_players INTEGER DEFAULT 4,
     count_players INTEGER DEFAULT 0,
     FOREIGN KEY (Winner_Id) REFERENCES Users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -95,8 +95,8 @@ CREATE TABLE IF NOT EXISTS Messages (
 
 
 
--- -- and count_players < max_players
-CREATE TRIGGER tr_T_Insert
+-- and count_players < max_players
+CREATE TRIGGER IF NOT EXISTS  tr_T_Insert
 AFTER INSERT ON Participate_Tournament
 FOR EACH ROW
 BEGIN
@@ -105,28 +105,27 @@ BEGIN
     WHERE id = NEW.T_Id ;
 END;
 
+CREATE TRIGGER IF NOT EXISTS  tr_T_Delete
+AFTER DELETE ON Participate_Tournament
+FOR EACH ROW
+BEGIN
+    UPDATE Tournament
+    SET count_players = count_players - 1
+    WHERE id = OLD.T_Id;
+END;
 
--- CREATE TRIGGER tr_T_Delete
--- AFTER DELETE ON Participate_Tournament
--- FOR EACH ROW
--- BEGIN
---     UPDATE Tournament
---     SET count_players = count_players - 1
---     WHERE id = OLD.T_Id;
--- END;
 
-
-CREATE TRIGGER tr_Match_Update
+CREATE TRIGGER IF NOT EXISTS tr_Match_Update
 AFTER UPDATE ON Match
 FOR EACH ROW
 BEGIN
     UPDATE Tournament
     SET result = 'FINISHED', Winner_Id = NEW.Winner_Id
-    WHERE NEW.T_Id IS NOT NULL AND  id = NEW.T_Id   AND (SELECT COUNT(*) FROM Match WHERE T_Id = NEW.T_Id AND gameStatus = 'FINISHED') = 7;
+    WHERE NEW.T_Id IS NOT NULL AND  id = NEW.T_Id   AND (SELECT COUNT(*) FROM Match WHERE T_Id = NEW.T_Id AND gameStatus = 'FINISHED') = (max_players - 1);
 END;
 
 -- Helpful indexes for tournament queries
-CREATE INDEX IF NOT EXISTS idx_match_tournament ON Match(T_Id);
+-- CREATE INDEX IF NOT EXISTS idx_match_tournament ON Match(T_Id);
 -- Note: the (T_Id, round) index is created programmatically after ensuring
 -- the 'round' column exists, to avoid startup errors on legacy databases.
 
