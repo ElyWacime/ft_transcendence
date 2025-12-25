@@ -45,18 +45,18 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              {/* <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute children={undefined}>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              /> */}
-              <Route path="/profile" element={<ProfileSettings />} />
               <Route path="/profile/change-email" element={<ChangeEmail />} />
               <Route path="/profile/change-password" element={<ChangePassword />} />
               <Route path="/profile/change-picture" element={<ChangePicture />} />
+
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <ProfileSettings />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route
                 path="/dashboard/:id?"
