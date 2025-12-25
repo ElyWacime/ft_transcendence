@@ -42,8 +42,8 @@ interface GameState {
 
 const BALL_SPEED = 5;
 const paddleSpeed = 10;
-const accelerateSpeed = 1.002;
-const max_Speed = 25;
+const accelerateSpeed = 1.2;
+const max_Speed = 13;
 const angle = Math.PI / 8;
 const aiSpeedMultipliers: Record<Difficulty, number> = {
   [Difficulty.EASY]: 1,
@@ -53,7 +53,7 @@ const aiSpeedMultipliers: Record<Difficulty, number> = {
 
 export const PongCanvasAI = ({
   enableAI = false,
-  aiDifficulty = Difficulty.MEDIUM,
+  aiDifficulty = Difficulty.HARD,
   player2Name = enableAI ? "AI Opponent" : "Player 2",
   player1Name = localStorage.getItem("email") || "Player 1",
   player3Name = "Player 3",
@@ -266,6 +266,8 @@ export const PongCanvasAI = ({
         ) {
           ball.x = p1.x + p1.width + ball.radius;
           ball.dx = -ball.dx;
+          console.log("hereee"+ newState.ball.dx);
+          console.log("hereee"+ newState.ball.dy);
           // Accelerate
           if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
             newState.ball.dx *= accelerateSpeed;
@@ -315,7 +317,7 @@ export const PongCanvasAI = ({
   // MODIFIED useEffect to add AI initialization and proper cleanup
   useEffect(() => {
     // ADDED: Initialize AI
-    aiRef.current = enableAI ? new AIOpponent(aiDifficulty) : null;
+    aiRef.current = enableAI ? new AIOpponent() : null;
 
     // Keyboard event handlers - unchanged
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -394,6 +396,7 @@ export const PongCanvasAI = ({
   // ADDED: Friendly difficulty display
   const friendlyDifficulty = aiDifficulty.charAt(0) + aiDifficulty.slice(1).toLowerCase();
   const opponentControlHint = enableAI ? `AI • ${friendlyDifficulty}` : 'Arrow Keys';
+
 
   return (
     <div className="pong-game-interface">

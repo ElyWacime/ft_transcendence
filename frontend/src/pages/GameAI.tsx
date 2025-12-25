@@ -2,24 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PongCanvasAI } from "@/components/PongCanvasAI";
-import { Chat } from "@/components/Chat";
 import { ArrowLeft, Bot, Gauge } from "lucide-react";
-import { Difficulty } from "@/lib/ai/AIOpponent";
-
-const difficultyOrder = [Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD] as const;
-
-const friendlyDifficulty = (value: Difficulty) => value.charAt(0) + value.slice(1).toLowerCase();
 
 const GameAI = () => {
   const navigate = useNavigate();
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.MEDIUM);
-
-  const handleCycleDifficulty = () => {
-    const index = difficultyOrder.indexOf(difficulty);
-    const nextDifficulty = difficultyOrder[(index + 1) % difficultyOrder.length];
-    setDifficulty(nextDifficulty);
-  };
 
   const playerAlias = localStorage.getItem("email") || "Player 1";
 
@@ -45,11 +31,6 @@ const GameAI = () => {
               Challenge our adaptive AI opponent at different difficulty levels.
             </p>
           </div>
-  
-          <Button onClick={handleCycleDifficulty} className="ai-difficulty-button">
-            <Gauge className="difficulty-icon" />
-            <span>Difficulty: {friendlyDifficulty(difficulty)}</span>
-          </Button>
         </div>
   
         <div className="ai-game-canvas-container">
@@ -57,7 +38,6 @@ const GameAI = () => {
             player1Name={playerAlias}
             player2Name="AI Opponent"
             enableAI
-            aiDifficulty={difficulty}
             maxScore={5}
           />
         </div>

@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,27 +33,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider children={undefined}>
-          <div className=\"page-wrapper\">\n            <Navigation />
+        <AuthProvider>
+          <div className="page-wrapper">
+            <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route
                 path="/tournament"
                 element={
-                  <ProtectedRoute children={undefined}>
+                  <ProtectedRoute>
                     <Tournament />
                   </ProtectedRoute>
                 }
               />
-              {/* <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute children={undefined}>
-                    <Profile />
+
+              <Route path="/profile"
+              element={
+                <ProtectedRoute>
+                    <ProfileSettings />
                   </ProtectedRoute>
-                }
-              /> */}
-              <Route path="/profile" element={<ProfileSettings />} />
+                }/>
               <Route path="/profile/change-email" element={<ChangeEmail />} />
               <Route path="/profile/change-password" element={<ChangePassword />} />
               <Route path="/profile/change-picture" element={<ChangePicture />} />
@@ -60,7 +60,7 @@ const App = () => (
               <Route
                 path="/dashboard/:id?"
                 element={
-                  <ProtectedRoute children={undefined}>
+                  <ProtectedRoute>
                     <Dashboard_ayoub />
                   </ProtectedRoute>
                 }

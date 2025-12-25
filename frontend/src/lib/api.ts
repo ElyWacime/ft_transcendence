@@ -168,7 +168,7 @@ export const api = new TournamentAPI();
 // ---------------- USER AUTH API ---------------- //
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
-  private baseUrl = "http://10.30.238.84/api/users";
+  private baseUrl = `${API_URL}/api/users`;
 
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
@@ -267,6 +267,40 @@ class UserAPI {
     });
 
     return await res.json();
+  }
+
+  async searchByName(name: string) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Not logged in. Please log in first to search for players.");
+    }
+
+    console.log('[searchByName] Token length:', token.length);
+    console.log('[searchByName] Token starts with:', token.substring(0, 20) + '...');
+
+    const res = await fetch(`${this.baseUrl}/search-this-name`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name }),
+      credentials: 'include',
+    });
+
+    console.log('[searchByName] Response status:', res.status);
+    const data = await res.json();
+    
+    if (!res.ok || data.valid === false) {
+      throw new Error(data?.error || "User not found");
+    }
+
+    return data as {
+      valid: true;
+      user_name: string;
+      user_email: string;
+      user_id: string;
+    };
   }
 
   // async update_image_alternative(image: File, description?: string) {
