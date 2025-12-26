@@ -11,7 +11,7 @@ const Home = () => {
       icon: Trophy,
       title: "Tournament Mode",
       description: "Compete in elimination tournaments with dynamic brackets",
-      page: "/tournament",
+      page: "/online-tournament",
     },
     {
       icon: Users,

@@ -25,6 +25,9 @@ import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
 import OnlineTournament from "./pages/OnlineTournament";
+import SocketProvider from "@/context/SocketContext";
+import SocketListener  from "@/components/socketlistener";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -33,7 +36,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider children={undefined}>
+        <SocketProvider> 
+        <SocketListener />
+        <AuthProvider>
           <div className="min-h-screen bg-background">
             <Navigation />
             <Routes>
@@ -93,7 +98,8 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
-        </AuthProvider>
+          </AuthProvider>
+      </SocketProvider> 
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

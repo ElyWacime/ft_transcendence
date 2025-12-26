@@ -157,7 +157,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
-          console.log(id, email, name);
+          // console.log(id, email, name);
           if (clients.has(id)) {
             try {
               // console.log("\n\n>>>>>try : ", email);
@@ -269,7 +269,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   // ngame.player4Name = m.player4Name;
               
                   let resuser = await dbcnx.getUserById(m.P1_Id);
-                  console.log("----0----",resuser);
+                  //console.log("----0----",resuser);
                   if (resuser)
                   {
                     ngame.player1Name = resuser.User_name;
@@ -277,7 +277,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   }
           
                   resuser = await dbcnx.getUserById(m.P2_Id);
-                  console.log("----0----",resuser);
+                  //console.log("----0----",resuser);
                   if (resuser)
                   {
                     ngame.player2Name = resuser.User_name;
@@ -285,7 +285,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   }
             
                   resuser = await dbcnx.getUserById(m.P3_Id);
-                  console.log("----0----",resuser);
+                  //console.log("----0----",resuser);
                   if (resuser)
                   {
                     ngame.player3Name = resuser.User_name;
@@ -293,7 +293,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                    }
           
                    resuser = await dbcnx.getUserById(m.P4_Id);
-                   console.log("----0----",resuser);
+                   //console.log("----0----",resuser);
                    if (resuser)
                   {
                     ngame.player4Name = resuser.User_name;
@@ -314,7 +314,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
           
               let resuser = await dbcnx.getUserById(m.P1_Id);
-              console.log("---1-----",resuser);
+              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player1Name = resuser.User_name;
@@ -322,7 +322,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               }
       
               resuser = await dbcnx.getUserById(m.P2_Id);
-              console.log("---1-----",resuser);
+              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player2Name = resuser.User_name;
@@ -330,7 +330,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               }
       
               resuser = await dbcnx.getUserById(m.P3_Id);
-              console.log("---1-----",resuser);
+              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player3Name = resuser.User_name;
@@ -338,7 +338,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               }
       
               resuser = await dbcnx.getUserById(m.P4_Id);
-              console.log("---1-----",resuser);
+              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player4Name = resuser.User_name;
@@ -380,7 +380,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   // ngame.player4Name = m.player4Name;
               
                   let resuser = await dbcnx.getUserById(m.P1_Id);
-                  console.log("----2----",resuser);
+                  //console.log("----2----",resuser);
                   if (resuser)
                   {
                     ngame.player1Name = resuser.User_name;
@@ -388,7 +388,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   }
           
                   resuser = await dbcnx.getUserById(m.P2_Id);
-                  console.log("----2----",resuser);
+                  //console.log("----2----",resuser);
                   if (resuser)
                   {
                     ngame.player2Name = resuser.User_name;
@@ -396,7 +396,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                    }
           
                    resuser = await dbcnx.getUserById(m.P3_Id);
-                   console.log("----2----",resuser);
+                   //console.log("----2----",resuser);
                    if (resuser)
                   {
                     ngame.player3Name = resuser.User_name;
@@ -404,7 +404,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   }
           
                   resuser = await dbcnx.getUserById(m.P4_Id);
-                  console.log("----2----",resuser);
+                  //console.log("----2----",resuser);
                   if (resuser)
                   {
                     ngame.player4Name = resuser.User_name;
@@ -459,7 +459,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               if (m) {
                
                 // let resuser = await dbcnx.getUserById(m.P1_Id);
-                console.log("---3-----",resuser);
+                //console.log("---3-----",resuser);
                 if (resuser)
                 {
                   m.player1Name = resuser.User_name;
@@ -467,7 +467,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                 }
            
                 resuser = await dbcnx.getUserById(m.P2_Id);
-                console.log("---3-----",resuser);
+                //console.log("---3-----",resuser);
                 if (resuser)
                 {
                   m.player2Name = resuser.User_name;
@@ -475,7 +475,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                 }
            
                 resuser = await dbcnx.getUserById(m.P3_Id);
-                console.log("---3-----",resuser);
+                //console.log("---3-----",resuser);
                 if (resuser)
                 {
                   m.player3Name = resuser.User_name;
@@ -483,7 +483,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                 }
            
                 resuser = await dbcnx.getUserById(m.P4_Id);
-                console.log("---3-----",resuser);
+                //console.log("---3-----",resuser);
                 if (resuser)
                 {
                   m.player4Name = resuser.User_name;  
