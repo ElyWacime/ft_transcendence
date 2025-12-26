@@ -21,8 +21,8 @@ import { exit } from "process";
 
 let dbcnx = new SQLiteDB();
 const TICK_RATE = 50;
-const clients = new Map();
-const matches = new Map();
+export const clients = new Map();
+export const matches = new Map();
 const PADDLE_SPEED = 4;
 
 await dbcnx.connect();

@@ -1,10 +1,6 @@
 import { Tournament, Participate_Tournament, Match } from "./DBController.js";
+import {  clients, matches } from "./index.js";
 
-function nextPowerOfTwo(n) {
-  let p = 1;
-  while (p < n) p <<= 1;
-  return p;
-}
 
 export class TournamentService {
   constructor(db) {
@@ -98,6 +94,9 @@ export class TournamentService {
     m.id = matchId;
     await this.db.updateMatch(m);
     console.log("\n\nupdateMatch");
+    
+    clients.get(m.P1_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
+    clients.get(m.P2_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
 
     m = new Match();
     m.round = round;
@@ -113,12 +112,14 @@ export class TournamentService {
     await this.db.updateMatch(m);
     console.log("\n\nupdateMatch2");
 
-
+    clients.get(m.P1_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
+    clients.get(m.P2_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
 
 
 
     await this.db.db.run(`UPDATE Tournament SET result = 'PLAYING' WHERE id = ?`, [tId]);
     console.log("\n\nthis.db.db.run");
+
     await this.advanceIfReady(tId);
     console.log("\n\nadvanceIfReady");
 

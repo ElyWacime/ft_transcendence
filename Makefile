@@ -14,7 +14,7 @@ auth:
 	docker-compose build --no-cache auth-service
 	docker-compose up -d auth-service
 
-idr=c5d62296fa41
+idr=f13022e81f75
 idr2=qwqw_pong-server
 g:
 	docker stop $(idr) && docker rm $(idr)&& docker rmi $(idr2)
