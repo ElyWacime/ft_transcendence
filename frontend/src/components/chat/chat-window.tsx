@@ -1,13 +1,33 @@
 import { useState, useRef, useEffect } from "react"
 import { useParams } from "react-router-dom"
+import { Socket } from 'socket.io-client'
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
-export default function ChatWindow({ selectedId, conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onBlockConversation, onUnblockConversation, socket }) {
+type ChatWindowProps = {
+  selectedId?: number
+  conversation?: any
+  messages: any[]
+  onSendMessage: (content: string, conversationId: string) => void
+  onGetHistory: (conversationId: number) => void
+  isConnected: boolean
+  currentUser?: any
+  isBlocked: boolean
+  blockedBy?: string | null
+  canUnblock: boolean
+  incomingInvite?: any
+  onInvite?: (conversation: any) => void
+  onRespondInvite?: (accepted: boolean) => void
+  onBlockConversation?: (conversationId: number) => void
+  onUnblockConversation?: (conversationId: number) => void
+  socket?: Socket | null
+}
+
+export default function ChatWindow({ selectedId, conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onBlockConversation, onUnblockConversation, socket }: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
-  const messagesEndRef = useRef(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const { id } = useParams()
   const activeConversationId = id ? parseInt(id, 10) : null
 
@@ -70,7 +90,7 @@ export default function ChatWindow({ selectedId, conversation, messages, onSendM
     }
   }
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSend()
@@ -152,7 +172,7 @@ export default function ChatWindow({ selectedId, conversation, messages, onSendM
         {filteredMessages.map((message) => {
           const senderId = message.sender_id 
           const isOwnMessage = senderId === currentUser?.id
-          const formatTime = (timestamp) => {
+          const formatTime = (timestamp: string) => {
             if (!timestamp) return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             const date = new Date(timestamp)
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })

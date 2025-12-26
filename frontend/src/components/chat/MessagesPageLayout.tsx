@@ -2,12 +2,34 @@ import ChatSidebar from "./chat-sidebar"
 import ChatWindow from "./chat-window"
 import { useEffect } from "react"
 import { useParams } from "react-router-dom"
+import { Socket } from 'socket.io-client'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
+type MessagesPageLayoutProps = {
+  conversations: any[]
+  selectedId?: number
+  setSelectedId: (id: number) => void
+  messages: any[]
+  setMessages: (messages: any[]) => void
+  onSendMessage: (content: string, conversationId: string) => void
+  onGetHistory: (conversationId: number) => void
+  isConnected: boolean
+  currentUser?: any
+  isEmpty: boolean
+  onFetchConversations: () => void
+  blockedConversations: any
+  onBlockConversation: (conversationId: number) => void
+  onUnblockConversation: (conversationId: number) => void
+  onCheckBlockStatus: (conversation: any) => void
+  invitePrompt?: any
+  onInvite: (conversation: any) => void
+  onRespondInvite: (accepted: boolean) => void
+  socket?: Socket | null
+}
 
-export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, setMessages, onSendMessage, onGetHistory, isConnected, currentUser, isEmpty, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, invitePrompt, onInvite, onRespondInvite, socket }) {
+export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, setMessages, onSendMessage, onGetHistory, isConnected, currentUser, isEmpty, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
   const { id } = useParams()
 
   useEffect(() => {
@@ -33,7 +55,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
     }
   }, [selectedConversation, onCheckBlockStatus])
 
-  const handleStartConversation = async (userId) => {
+  const handleStartConversation = async (userId: number) => {
     try {
       const res = await fetch(`${SERVER_URL}/api/chat/conversation/start`, {
         method: 'POST',
@@ -55,7 +77,6 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
     <div className="page-wrapper">
       <div className="chat-container">
         <ChatSidebar
-          messages={messages}
           conversations={conversations}
           selectedId={selectedId}
           setSelectedId={setSelectedId}

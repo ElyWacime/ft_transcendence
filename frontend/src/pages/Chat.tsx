@@ -2,22 +2,22 @@ import { useEffect, useState, useCallback } from "react"
 import "../components/chat/App.css"
 import { useNavigate } from "react-router-dom"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client'
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
 
 export default function Chat() {
-  const [socket, setSocket] = useState(null)
+  const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
-  const [conversations, setConversations] = useState([])
-  const [selectedId, setSelectedId] = useState()
-  const [messages, setMessages] = useState([])
-  const [currentUser, setCurrentUser] = useState(null)
-  const [blockedConversations, setBlockedConversations] = useState({})
-  const [invitePrompt, setInvitePrompt] = useState(null)
+  const [conversations, setConversations] = useState<any[]>([])
+  const [selectedId, setSelectedId] = useState<number>()
+  const [messages, setMessages] = useState<any[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [blockedConversations, setBlockedConversations] = useState<any>({})
+  const [invitePrompt, setInvitePrompt] = useState<any>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function Chat() {
         setIsConnected(false)
       })
 
-      newSocket.on('receiveMessage', (message) => {
+      newSocket.on('receiveMessage', (message: any) => {
         setMessages(prev => {
           return [...prev, message]
         })
@@ -57,19 +57,19 @@ export default function Chat() {
         }))
       })
 
-      newSocket.on('messageError', (errorData) => {
+      newSocket.on('messageError', (errorData: any) => {
         console.error('Message error:', errorData)
       })
 
-      newSocket.on('blockStatusChanged', (data) => {
+      newSocket.on('blockStatusChanged', (data: any) => {
         const { conversationId, blockedBy } = data
         if (blockedBy === 'other') {
-          setBlockedConversations((prev) => ({
+          setBlockedConversations((prev: any) => ({
             ...prev,
             [conversationId]: { blocked: true, blockedBy: 'other' }
           }))
         } else if (blockedBy === null) {
-          setBlockedConversations((prev) => {
+          setBlockedConversations((prev: any) => {
             const updated = { ...prev }
             delete updated[conversationId]
             return updated
@@ -77,14 +77,16 @@ export default function Chat() {
         }
       })
 
-      newSocket.on('gameInvite', (data) => {
+      newSocket.on('gameInvite', (data: any) => {
         setInvitePrompt(data)
       })
 
-      newSocket.on('gameInviteResponse', (data) => {
+      newSocket.on('gameInviteResponse', (data: any) => {
         console.log('Invite response:', data)
         if (data.accepted) {
-          navigate('/loading?mode=2')
+          setTimeout(() => {
+            navigate('/loading?mode=2')
+          }, 500)
         }
       })
 
@@ -109,7 +111,7 @@ export default function Chat() {
       navigate(`/chat/${selectedId}`)
   }, [selectedId, navigate])
 
-  const handleSendMessage = useCallback((content, conversationId) => {
+  const handleSendMessage = useCallback((content: string, conversationId: string) => {
     if (!socket || !isConnected) {
       console.error('Not connected to socket server')
       return
@@ -121,7 +123,7 @@ export default function Chat() {
     })
   }, [socket, isConnected])
 
-  const sendInvite = useCallback((conversation) => {
+  const sendInvite = useCallback((conversation: any) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
     socket.emit('gameInvite', {
       conversationId: conversation.id,
@@ -131,7 +133,7 @@ export default function Chat() {
     })
   }, [socket, isConnected, currentUser])
 
-  const respondInvite = useCallback((accepted) => {
+  const respondInvite = useCallback((accepted: boolean) => {
     if (!socket || !invitePrompt) return
     socket.emit('gameInviteResponse', {
       conversationId: invitePrompt.conversationId,
@@ -140,11 +142,13 @@ export default function Chat() {
     })
     setInvitePrompt(null)
     if (accepted) {
-      navigate('/loading?mode=2')
+      setTimeout(() => {
+        navigate('/loading?mode=2')
+      }, 1500)
     }
   }, [socket, invitePrompt, navigate])
 
-  const getChatHistory = useCallback(async (conversationId) => {
+  const getChatHistory = useCallback(async (conversationId: number) => {
     if (!conversationId) {
       console.error('No conversation ID provided')
       return
@@ -158,19 +162,19 @@ export default function Chat() {
     }
   }, [])
 
-  const handleBlockConversation = useCallback((conversationId) => {
-    setBlockedConversations((prev) => ({ ...prev, [conversationId]: { blocked: true, blockedBy: 'you' } }))
+  const handleBlockConversation = useCallback((conversationId: number) => {
+    setBlockedConversations((prev: any) => ({ ...prev, [conversationId]: { blocked: true, blockedBy: 'you' } }))
   }, [])
 
-  const handleUnblockConversation = useCallback((conversationId) => {
-    setBlockedConversations((prev) => {
+  const handleUnblockConversation = useCallback((conversationId: number) => {
+    setBlockedConversations((prev: any) => {
       const updated = { ...prev }
       delete updated[conversationId]
       return updated
     })
   }, [])
 
-  const checkBlockStatus = useCallback(async (conversation) => {
+  const checkBlockStatus = useCallback(async (conversation: any) => {
     if (!conversation?.id || !conversation?.other_user_id) return
     try {
       const res = await fetch(`${SERVER_URL}/api/chat/block/status`, {
@@ -182,12 +186,12 @@ export default function Chat() {
       const data = await res.json()
       if (res.ok) {
         if (data.blocked === true) {
-          setBlockedConversations((prev) => ({
+          setBlockedConversations((prev: any) => ({
             ...prev,
             [conversation.id]: { blocked: true, blockedBy: data.blockedBy }
           }))
         } else {
-          setBlockedConversations((prev) => {
+          setBlockedConversations((prev: any) => {
             const updated = { ...prev }
             delete updated[conversation.id]
             return updated
