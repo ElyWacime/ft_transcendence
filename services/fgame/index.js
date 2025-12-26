@@ -455,7 +455,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m = await dbcnx.getLasttMatchByPlayerID(id);
               if (m) {
                
-                // let resuser = await dbcnx.getUserById(m.P1_Id);
+                let resuser = await dbcnx.getUserById(m.P1_Id);
                 //console.log("---3-----",resuser);
                 if (resuser)
                 {
