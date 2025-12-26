@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react"
 import { useParams } from "react-router-dom"
 
-const SERVER_URL = 'http://localhost:3700';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const SERVER_URL = API_URL
 
 export default function ChatWindow({ selectedId, conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onBlockConversation, onUnblockConversation, socket }) {
   const [inputValue, setInputValue] = useState("")
@@ -22,12 +24,11 @@ export default function ChatWindow({ selectedId, conversation, messages, onSendM
 
   const handleBlockToggle = async () => {
     if (!activeConversationId || !conversation?.other_user_id) return
-    // Only allow unblock if YOU blocked them
     if (isBlocked && !canUnblock) return
     
     try {
       const endpoint = canUnblock ? '/unblock' : '/block'
-      const response = await fetch(`${SERVER_URL}${endpoint}`, {
+      const response = await fetch(`${SERVER_URL}/api/chat${endpoint}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -40,7 +41,6 @@ export default function ChatWindow({ selectedId, conversation, messages, onSendM
       if (response.ok) {
         if (canUnblock) {
           onUnblockConversation?.(activeConversationId)
-          // Notify other user they've been unblocked
           socket?.emit('blockStatusChanged', {
             conversationId: activeConversationId,
             otherUserId: conversation.other_user_id,
@@ -48,7 +48,6 @@ export default function ChatWindow({ selectedId, conversation, messages, onSendM
           })
         } else {
           onBlockConversation?.(activeConversationId)
-          // Notify other user they've been blocked
           socket?.emit('blockStatusChanged', {
             conversationId: activeConversationId,
             otherUserId: conversation.other_user_id,

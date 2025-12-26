@@ -34,8 +34,22 @@ const App = () => (
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/chat/:id" element={<Chat />} />
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chat/:id"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              />              
               <Route
                 path="/tournament"
                 element={

@@ -1,7 +1,10 @@
 "use client"
 import { useState, useEffect } from "react"
 
-const SERVER_URL = 'http://localhost:3700'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const SERVER_URL = API_URL
+
 
 export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation }) {
   const [showSearch, setShowSearch] = useState(false)
@@ -11,7 +14,6 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
   const [searchError, setSearchError] = useState(null)
 
   useEffect(() => {
-    // Search bar toggle only, no fetch yet
   }, [showSearch])
 
   const searchUser = async () => {
@@ -24,7 +26,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     setLoading(true)
     setSearchError(null)
     try {
-      const res = await fetch(`${SERVER_URL}/getUser`, {
+      const res = await fetch(`${SERVER_URL}/api/chat/getUser`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -70,17 +72,14 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     const messageDate = new Date(dateString)
     const today = new Date()
     
-    // Check if it's the same day
     const isSameDay = 
       messageDate.getDate() === today.getDate() &&
       messageDate.getMonth() === today.getMonth() &&
       messageDate.getFullYear() === today.getFullYear()
     
     if (isSameDay) {
-      // Show time (HH:MM)
       return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     } else {
-      // Show date (MM-DD)
       const month = String(messageDate.getMonth() + 1).padStart(2, '0')
       const day = String(messageDate.getDate()).padStart(2, '0')
       return `${day} / ${month}`

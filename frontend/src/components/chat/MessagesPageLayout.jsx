@@ -3,6 +3,9 @@ import ChatWindow from "./chat-window"
 import { useEffect } from "react"
 import { useParams } from "react-router-dom"
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const SERVER_URL = API_URL
+
 
 export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, setMessages, onSendMessage, onGetHistory, isConnected, currentUser, isEmpty, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, invitePrompt, onInvite, onRespondInvite, socket }) {
   const { id } = useParams()
@@ -32,7 +35,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
 
   const handleStartConversation = async (userId) => {
     try {
-      const res = await fetch('http://localhost:3700/conversation/start', {
+      const res = await fetch(`${SERVER_URL}/api/chat/conversation/start`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

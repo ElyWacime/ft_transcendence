@@ -34,6 +34,19 @@ services:
     networks:
       - transcendence
 
+  chat-service:
+    build:
+      context: ./services/chat-service
+      dockerfile: Dockerfile
+    ports:
+      - "3700:3700"
+    volumes:
+      - ./services/chat-service:/app
+      - /app/node_modules
+    command: npm run start
+    networks:
+      - transcendence      
+
   # ---------- GATEWAY (NGINX) ----------
   gateway:
     image: nginx:stable-alpine

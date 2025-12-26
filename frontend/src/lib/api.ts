@@ -168,7 +168,7 @@ export const api = new TournamentAPI();
 // ---------------- USER AUTH API ---------------- //
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
-  private baseUrl = "http://10.30.238.84/api/users";
+  private baseUrl = `${API_URL}/api/users`;
 
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
@@ -176,8 +176,26 @@ class UserAPI {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, name }),
     });
+    const response = await res.json();
 
-    return await res.json();
+    if (res.ok) {
+      // Add user to chat after registration
+      try {
+        await fetch(`${API_URL}/api/chat/addUsers`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: response.id, username: name })
+        });
+      } catch (err) {
+        console.error('Failed to add user to chat:', err);
+        // Don't throw error here - registration was successful
+      }
+      
+      return response;
+    } else {
+      throw new Error(response.message || "Registration failed");
+    }
   }
 
   async login(email: string, password: string) {
