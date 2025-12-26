@@ -8,16 +8,20 @@ import { initializeDb, saveMessage, getChatHistory, insertUsers, getUsers, check
 const fastify = Fastify({
 });
 
+// TEMP: Allow every origin for debugging; tighten later.
+const allowAllOrigins = (origin, cb) => cb(null, true);
+
 await fastify.register(cookie);
 await fastify.register(cors, {
-  origin: "http://localhost",
-  methods: ["GET", "POST"], 
+  origin: allowAllOrigins,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "Cookie"],
   credentials: true
 });
 
 const io = new Server(fastify.server, {
   cors: {
-    origin: "http://localhost",  
+    origin: (requestOrigin, callback) => callback(null, true),
     methods: ["GET", "POST"], 
     credentials: true 
   }
