@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import type { KeyboardEvent } from 'react'
 import { useParams } from "react-router-dom"
 import { Socket } from 'socket.io-client'
 
@@ -7,7 +8,6 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
 type ChatWindowProps = {
-  selectedId?: number
   conversation?: any
   messages: any[]
   onSendMessage: (content: string, conversationId: string) => void
@@ -25,7 +25,7 @@ type ChatWindowProps = {
   socket?: Socket | null
 }
 
-export default function ChatWindow({ selectedId, conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onBlockConversation, onUnblockConversation, socket }: ChatWindowProps) {
+export default function ChatWindow({ conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onBlockConversation, onUnblockConversation, socket }: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { id } = useParams()
@@ -36,7 +36,7 @@ export default function ChatWindow({ selectedId, conversation, messages, onSendM
     if (activeConversationId) {
       onGetHistory(activeConversationId)
     }
-  }, [activeConversationId, id, onGetHistory])
+  }, [activeConversationId, id])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -90,7 +90,7 @@ export default function ChatWindow({ selectedId, conversation, messages, onSendM
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSend()

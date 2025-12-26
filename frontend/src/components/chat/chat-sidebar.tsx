@@ -1,6 +1,6 @@
 "use client"
-import { useState, useEffect } from "react"
-
+import { useState } from "react"
+import type { KeyboardEvent } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -19,8 +19,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
   const [searchResult, setSearchResult] = useState<any>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
 
-  useEffect(() => {
-  }, [showSearch])
+  // removed empty effect; not needed
 
   const searchUser = async () => {
     if (!searchInput.trim()) {
@@ -55,7 +54,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       searchUser()
     } else if (e.key === 'Escape') {

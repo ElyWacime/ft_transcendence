@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import "../components/chat/App.css"
 import { useNavigate } from "react-router-dom"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
@@ -84,9 +84,7 @@ export default function Chat() {
       newSocket.on('gameInviteResponse', (data: any) => {
         console.log('Invite response:', data)
         if (data.accepted) {
-          setTimeout(() => {
             navigate('/loading?mode=2')
-          }, 500)
         }
       })
 
@@ -96,7 +94,7 @@ export default function Chat() {
     te()
   }, [])
 
-  const fetchConversations = useCallback(async () => {
+  const fetchConversations = async () => {
     try {
       const res = await fetch(`${SERVER_URL}/api/chat/conversations`, { credentials: 'include' })
       const conversationsData = await res.json()
@@ -104,14 +102,14 @@ export default function Chat() {
     } catch (error) {
       console.error('Failed to fetch conversations:', error)
     }
-  }, [])
+  }
 
   useEffect(() => {
     if (selectedId)
       navigate(`/chat/${selectedId}`)
   }, [selectedId, navigate])
 
-  const handleSendMessage = useCallback((content: string, conversationId: string) => {
+  const handleSendMessage = (content: string, conversationId: string) => {
     if (!socket || !isConnected) {
       console.error('Not connected to socket server')
       return
@@ -121,9 +119,9 @@ export default function Chat() {
       conversationId: conversationId,
       content: content
     })
-  }, [socket, isConnected])
+  }
 
-  const sendInvite = useCallback((conversation: any) => {
+  const sendInvite = (conversation: any) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
     socket.emit('gameInvite', {
       conversationId: conversation.id,
@@ -131,9 +129,9 @@ export default function Chat() {
       fromUserId: currentUser?.id,
       fromUsername: currentUser?.username || 'Someone'
     })
-  }, [socket, isConnected, currentUser])
+  }
 
-  const respondInvite = useCallback((accepted: boolean) => {
+  const respondInvite = (accepted: boolean) => {
     if (!socket || !invitePrompt) return
     socket.emit('gameInviteResponse', {
       conversationId: invitePrompt.conversationId,
@@ -146,9 +144,9 @@ export default function Chat() {
         navigate('/loading?mode=2')
       }, 1500)
     }
-  }, [socket, invitePrompt, navigate])
+  }
 
-  const getChatHistory = useCallback(async (conversationId: number) => {
+  const getChatHistory = async (conversationId: number) => {
     if (!conversationId) {
       console.error('No conversation ID provided')
       return
@@ -160,21 +158,21 @@ export default function Chat() {
     } catch (error) {
       console.error('Failed to fetch chat history:', error)
     }
-  }, [])
+  }
 
-  const handleBlockConversation = useCallback((conversationId: number) => {
+  const handleBlockConversation = (conversationId: number) => {
     setBlockedConversations((prev: any) => ({ ...prev, [conversationId]: { blocked: true, blockedBy: 'you' } }))
-  }, [])
+  }
 
-  const handleUnblockConversation = useCallback((conversationId: number) => {
+  const handleUnblockConversation = (conversationId: number) => {
     setBlockedConversations((prev: any) => {
       const updated = { ...prev }
       delete updated[conversationId]
       return updated
     })
-  }, [])
+  }
 
-  const checkBlockStatus = useCallback(async (conversation: any) => {
+  const checkBlockStatus = async (conversation: any) => {
     if (!conversation?.id || !conversation?.other_user_id) return
     try {
       const res = await fetch(`${SERVER_URL}/api/chat/block/status`, {
@@ -201,7 +199,7 @@ export default function Chat() {
     } catch (error) {
       console.error('Failed to check block status:', error)
     }
-  }, [])
+  }
 
   return (
     <MessagesPageLayout 
@@ -209,12 +207,10 @@ export default function Chat() {
       selectedId={selectedId}
       setSelectedId={setSelectedId}
       messages={messages}
-      setMessages={setMessages}
       onSendMessage={handleSendMessage}
       onGetHistory={getChatHistory}
       isConnected={isConnected}
       currentUser={currentUser}
-      isEmpty={false}
       onFetchConversations={fetchConversations}
       blockedConversations={blockedConversations}
       onBlockConversation={handleBlockConversation}

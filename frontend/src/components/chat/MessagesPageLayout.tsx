@@ -12,12 +12,10 @@ type MessagesPageLayoutProps = {
   selectedId?: number
   setSelectedId: (id: number) => void
   messages: any[]
-  setMessages: (messages: any[]) => void
   onSendMessage: (content: string, conversationId: string) => void
   onGetHistory: (conversationId: number) => void
   isConnected: boolean
   currentUser?: any
-  isEmpty: boolean
   onFetchConversations: () => void
   blockedConversations: any
   onBlockConversation: (conversationId: number) => void
@@ -29,12 +27,12 @@ type MessagesPageLayoutProps = {
   socket?: Socket | null
 }
 
-export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, setMessages, onSendMessage, onGetHistory, isConnected, currentUser, isEmpty, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
+export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
   const { id } = useParams()
 
   useEffect(() => {
     onFetchConversations()
-  }, [onFetchConversations])
+  }, [])
 
   useEffect(() => {
     if (id) {
@@ -53,7 +51,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
     if (selectedConversation && onCheckBlockStatus) {
       onCheckBlockStatus(selectedConversation)
     }
-  }, [selectedConversation, onCheckBlockStatus])
+  }, [selectedConversation])
 
   const handleStartConversation = async (userId: number) => {
     try {
@@ -83,10 +81,8 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           onStartConversation={handleStartConversation}
         />
         <ChatWindow 
-          selectedId={selectedId}
-          conversation={isEmpty ? null : selectedConversation}
+          conversation={selectedConversation}
           messages={messages} 
-          setMessages={setMessages} 
           onSendMessage={onSendMessage}
           onGetHistory={onGetHistory}
           isConnected={isConnected}

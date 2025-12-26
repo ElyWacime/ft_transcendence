@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react'
+
 type ChatSectionProps = {
   messages: any[]
-  renderMessage: (message: any) => React.ReactNode
+  renderMessage: (message: any) => ReactNode
 }
 
 function ChatSection({ messages, renderMessage }: ChatSectionProps) {
