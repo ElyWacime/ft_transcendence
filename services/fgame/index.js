@@ -148,22 +148,6 @@ fastify.get('/', async (request, reply) => {
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
     const request = JSON.parse(msg);
-    if (request.type == "AUTHENTICATE") {
-      if (clients.has(id)) {
-        try {
-          // console.log("\n\n>>>>>try : ", email);
-          console.log("\n\n>>>66666>>close : ", email);
-          if (clients.get(id) != connection) {
-            console.log("\n\n>>>7777>>close : ", email);
-            clients.get(id).close();
-          }
-        }
-        catch (e) {
-          // console.log("\n\n>>>>>error: ", email, e);
-        }
-      }
-    }
-     
       const token = request.token;
       if (token) {
           const decoded = req.jwt.verify(token);
@@ -172,15 +156,15 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           const name = decoded.name;
           if (clients.has(id)) {
             try {
-              // console.log("\n\n>>>>>try : ", email);
-              console.log("\n\n>>>1111>>close : ", email);
+              // //console.log("\n\n>>>>>try : ", email);
+              //console.log("\n\n>>>1111>>close : ", email);
               if (clients.get(id) != connection) {
-                console.log("\n\n>>>2222>>close : ", email);
+                //console.log("\n\n>>>2222>>close : ", email);
                 clients.get(id).close();
               }
             }
             catch (e) {
-              // console.log("\n\n>>>>>error: ", email, e);
+              // //console.log("\n\n>>>>>error: ", email, e);
             }
           }
           clients.set(id, connection);
