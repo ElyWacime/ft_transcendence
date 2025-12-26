@@ -80,6 +80,8 @@ export class TournamentService {
     // for (const [a, b] of pairings) {
 
     // }
+    console.log("\n\nthis.db.db.run");
+    await this.db.db.run(`UPDATE Tournament SET result = 'PLAYING' WHERE id = ?`, [tId]);
     console.log("\n\nparticipants", participants);
     let m = new Match();
     m.round = round;
@@ -94,10 +96,17 @@ export class TournamentService {
     m.id = matchId;
     await this.db.updateMatch(m);
     console.log("\n\nupdateMatch");
-    
-    clients.get(m.P1_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
-    clients.get(m.P2_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
+    let socket = clients.get(m.P1_Id);
 
+    if (socket && socket.readyState === 1)
+      socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+    else
+      console.log("No socket for player ", m.P1_Id);
+    socket = clients.get(m.P2_Id);
+    if (socket && socket.readyState === 1)
+      socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+    else
+      console.log("No socket for player ", m.P2_Id);
     m = new Match();
     m.round = round;
     m.T_Id = tId;
@@ -111,15 +120,16 @@ export class TournamentService {
     m.id = matchId;
     await this.db.updateMatch(m);
     console.log("\n\nupdateMatch2");
-
-    clients.get(m.P1_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
-    clients.get(m.P2_Id).send(JSON.stringify({ type: 'tournament_match_started', tournamentId: tId }));
-
-
-
-    await this.db.db.run(`UPDATE Tournament SET result = 'PLAYING' WHERE id = ?`, [tId]);
-    console.log("\n\nthis.db.db.run");
-
+    socket = clients.get(m.P1_Id);
+    if (socket && socket.readyState === 1)
+      socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+    else
+      console.log("No socket for player ", m.P1_Id);
+    socket = clients.get(m.P2_Id);
+    if (socket && socket.readyState === 1)
+      socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+    else
+      console.log("No socket for player ", m.P2_Id);
     await this.advanceIfReady(tId);
     console.log("\n\nadvanceIfReady");
 

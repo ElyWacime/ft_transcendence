@@ -13,7 +13,8 @@ export default function SocketListener() {
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      if (data.type === "tournament_match_started") {
+      if (data.type === "redirect") {
+        toast("Redirecting...");
         navigate("/loading?mode=2");
       }
 

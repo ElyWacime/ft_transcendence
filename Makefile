@@ -1,3 +1,8 @@
+idr=ad5d1a8cccbc
+idr2=qwqw_pong-server
+g:
+	docker stop $(idr) && docker rm $(idr)&& docker rmi $(idr2)
+
 up:
 	docker compose up -d --build
 dn:
@@ -14,7 +19,3 @@ auth:
 	docker-compose build --no-cache auth-service
 	docker-compose up -d auth-service
 
-idr=f13022e81f75
-idr2=qwqw_pong-server
-g:
-	docker stop $(idr) && docker rm $(idr)&& docker rmi $(idr2)
