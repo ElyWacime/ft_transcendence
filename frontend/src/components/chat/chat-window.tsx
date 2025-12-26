@@ -109,7 +109,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
   }
 
   const peerName = conversation.other_user_username || conversation.name || "Chat partner"
-  const conversationLink = `/chat/${conversation.id}`
+  const userProfileLink = `/dashboard/${peerName}`
   const filteredMessages = activeConversationId
     ? messages.filter((message) => {
         const messageConversationId = message.conversation_id ?? message.conversationId
@@ -122,7 +122,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
       <div className="window-header">
         <div className="header-title">
           <div className="header-title-row">
-            <a className="chat-peer-link" href={conversationLink} aria-label={`Open chat with ${peerName}`}>
+            <a className="chat-peer-link" href={userProfileLink} aria-label={`Open chat with ${peerName}`}>
               {peerName}
             </a>
           </div>
