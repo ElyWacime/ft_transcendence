@@ -147,22 +147,35 @@ fastify.get('/', async (request, reply) => {
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
-      const request = JSON.parse(msg);
+    const request = JSON.parse(msg);
+    if (request.type == "AUTHENTICATE") {
+      if (clients.has(id)) {
+        try {
+          // console.log("\n\n>>>>>try : ", email);
+          console.log("\n\n>>>66666>>close : ", email);
+          if (clients.get(id) != connection) {
+            console.log("\n\n>>>7777>>close : ", email);
+            clients.get(id).close();
+          }
+        }
+        catch (e) {
+          // console.log("\n\n>>>>>error: ", email, e);
+        }
+      }
+    }
+     
       const token = request.token;
       if (token) {
-        // try {
           const decoded = req.jwt.verify(token);
-          // console.log("✅ Authentication successful!");
-          // console.log(decoded);
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
-          // console.log(id, email, name);
           if (clients.has(id)) {
             try {
               // console.log("\n\n>>>>>try : ", email);
+              console.log("\n\n>>>1111>>close : ", email);
               if (clients.get(id) != connection) {
-                // console.log("\n\n>>>>>close : ", email);
+                console.log("\n\n>>>2222>>close : ", email);
                 clients.get(id).close();
               }
             }
@@ -533,15 +546,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             //  console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
           }
           else if (request.type == "DELETE") {
-            // console.log("\n\n>>>>>deletePendingMatchByPlayerID: ");
             await dbcnx.deletePendingMatchByPlayerID(id);
-            // await dbcnx.deleteOngoingMatchByPlayerID(id);
           }
         }
-        // catch (jwtErr) {
-        //   console.log("❌ JWT verification failed:", jwtErr);
-        // }
-      // }
       else 
         console.log("⚠️ No token provided, proceeding without authentication");
   });
@@ -579,11 +586,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 import { match } from "assert";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
-console.log("Dashboard routes registered!");
+// console.log("Dashboard routes registered!");
 
 // Register tournament routes
 await registerTournamentRoutes(fastify, dbcnx);
-console.log("Tournament routes registered!");
+// console.log("Tournament routes registered!");
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 fastify.listen({ port: PORT, host: "0.0.0.0" });

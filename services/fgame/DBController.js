@@ -140,7 +140,7 @@ export class SQLiteDB {
         await this.db.exec(schema);
         //  Log every SQL statement executed
         // this.db.on("trace", (sql) => console.log("[SQL]", sql));
-        console.log("Database connected and table created!");
+        // console.log("Database connected and table created!");
 
         // Improve concurrency and avoid locking surprises
         try {
@@ -202,6 +202,7 @@ export class SQLiteDB {
     // -------------------------------
     // Match CRUD
     // -------------------------------
+
     async createMatch(m) {
         const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode, round) VALUES (?, ?, ?, ?)`, [m.P1_Id, m.T_Id, m.mode, m.round ?? 1]);
         return result.lastID;
