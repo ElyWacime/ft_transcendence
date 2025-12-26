@@ -70,30 +70,21 @@ const Dashboard_ayoub = () => {
 
 
     const fetchDashboardData = async () => {
-      try {
-        // Use identifier from URL if provided, otherwise extract user ID from JWT token
-        let userIdentifier = identifier;
-        
+      // Use identifier from URL if provided, otherwise extract user ID from JWT token
+      let userIdentifier = identifier;
+      
+      if (!userIdentifier) {
+        userIdentifier = getUserIdFromToken();
         if (!userIdentifier) {
-          userIdentifier = getUserIdFromToken();
-          if (!userIdentifier) {
-            setError("Unable to get user ID. Please provide a username/ID in the URL or log in.");
-            setLoading(false);
-            return;
-          }
+          setError("Unable to get user ID. Please provide a username/ID in the URL or log in.");
+          setLoading(false);
+          return;
         }
+      }
 
+      try {
         console.log("Fetching dashboard for user:", userIdentifier);
         const data = await playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier);
-        
-        // Only use localStorage avatar if we're viewing our own dashboard
-        const currentUserId = getUserIdFromToken();
-        if (currentUserId === userIdentifier || currentUserId === data.user.id) {
-          const localAvatar = localStorage.getItem("avatar_url");
-          if (localAvatar && data.user) {
-            data.user.avatar = localAvatar;
-          }
-        }
         
         setDashboardData(data);
         setAvatarKey(Date.now()); // Force avatar refresh
@@ -114,24 +105,25 @@ const Dashboard_ayoub = () => {
     fetchDashboardData();
   }, [identifier, isLoggedIn, navigate]);
 
-  // Listen for avatar updates
+  // Refetch dashboard data when avatar is updated
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'avatar_url' && dashboardData) {
-        setDashboardData({
-          ...dashboardData,
-          user: {
-            ...dashboardData.user,
-            avatar: e.newValue || dashboardData.user.avatar
-          }
-        });
-        setAvatarKey(Date.now());
+    const handleAvatarUpdate = () => {
+      // Refetch dashboard data to get updated avatar from database
+      const userIdentifier = identifier || getUserIdFromToken();
+      if (userIdentifier && !loading) {
+        playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier)
+          .then(data => {
+            setDashboardData(data);
+            setAvatarKey(Date.now());
+          })
+          .catch(err => console.error('Failed to refresh avatar:', err));
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [dashboardData]);
+    // Listen for custom avatar update event
+    window.addEventListener('avatarUpdated', handleAvatarUpdate);
+    return () => window.removeEventListener('avatarUpdated', handleAvatarUpdate);
+  }, [identifier, loading]);
 
   if (loading) {
     return (

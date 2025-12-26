@@ -269,6 +269,31 @@ class UserAPI {
     return await res.json();
   }
 
+  async getUserById(userId: string) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Not logged in. Please log in first.");
+    }
+
+    const res = await fetch(`/api/dashboard/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Get user by ID error:", res.status, errorText);
+      throw new Error(`Failed to fetch user: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    return data.user; // Return just the user object from dashboard response
+  }
+
   async searchByName(name: string) {
     const token = localStorage.getItem("token");
     if (!token) {

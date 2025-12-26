@@ -278,6 +278,41 @@ export async function userRoutes(app: FastifyInstance) {
       });
     }
   });
+
+  // Get user info by ID - returns avatar and other user data
+  app.get("/user-info/:userId", {
+    preHandler: app.authenticate,
+  }, async (req, reply) => {
+    try {
+      const { userId } = req.params as { userId: string };
+      
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+          loggedIn: true,
+          Auto_Match: true,
+          CreatedAt: true
+        }
+      });
+
+      if (!user) {
+        return reply.status(404).send({
+          error: "User not found"
+        });
+      }
+
+      return reply.send(user);
+    } catch (err) {
+      console.error('[user-info] Error:', err);
+      return reply.status(500).send({
+        error: "Internal server error"
+      });
+    }
+  });
 }
 
       // // In your user controller

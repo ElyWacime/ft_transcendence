@@ -147,12 +147,50 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       const totalWins = winsCount?.Winned || 0;
       const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
 
+      //ayoub                           //////////////////////////////
+
+      // Fetch latest avatar from auth-service database
+      let latestAvatar = user.avatar;
+      try {
+        const authHeader = request.headers.authorization;
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+        
+        if (token) {
+          const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
+          const userInfoUrl = `${authServiceUrl}/user-info/${userId}`;
+          
+          const authResponse = await fetch(userInfoUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (authResponse.ok) {
+            const authUser = await authResponse.json();
+            if (authUser.avatar) {
+              latestAvatar = authUser.avatar;
+              console.log("Fetched latest avatar from auth-service for user:", userId);
+              console.log("Latest avatar URL:", latestAvatar);
+              // Update fgame database with latest avatar
+              if (user.avatar !== latestAvatar) {
+                await dbcnx.db.run(`UPDATE Users SET avatar = ? WHERE id = ?`, [latestAvatar, userId]);
+              }
+            }
+          }
+        }
+      } catch (avatarError) {
+        console.log("Could not fetch latest avatar from auth-service:", avatarError.message);
+        // Continue with avatar from fgame database
+      }
+
+      /////////////////////////////////////////////////////////////////////ayob. 
       return {
         user: {
           id: user.id,
           email: user.email,
           User_name: user.User_name,
-          avatar: user.avatar,
+          avatar: latestAvatar,
           isOnline: user.isOnline,
           Auto_Match: user.Auto_Match,
           CreatedAt: user.CreatedAt

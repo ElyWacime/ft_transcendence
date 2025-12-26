@@ -7,17 +7,54 @@ import { userApi } from "@/lib/api";
 import { Camera, ArrowLeft, Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+function getUserIdFromToken(): string | null {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const decoded = JSON.parse(jsonPayload);
+    return decoded.id || null;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+}
+
 const ChangePicture = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState("");
   const [currentAvatar, setCurrentAvatar] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
-    const avatar = localStorage.getItem("avatar_url") || "";
-    setCurrentAvatar(avatar);
-    setPreviewUrl(avatar);
+    const fetchCurrentAvatar = async () => {
+      try {
+        const userId = getUserIdFromToken();
+        if (userId) {
+          const data = await userApi.getUserById(userId);
+          setCurrentAvatar(data.avatar || "");
+          setPreviewUrl(data.avatar || "");
+          setUsername(data.User_name || data.user_name || "");
+        }
+      } catch (error) {
+        console.error("Failed to fetch current avatar:", error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    fetchCurrentAvatar();
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,17 +121,13 @@ const ChangePicture = () => {
       if (res.success) {
         toast.success("Profile image updated successfully!");
         
-        if (res.avatar_url) {
-          localStorage.setItem('avatar_url', res.avatar_url);
-        }
-        
-        // Add a timestamp to force avatar refresh across the app
-        localStorage.setItem('avatar_updated_at', Date.now().toString());
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new Event('avatarUpdated'));
         
         // Navigate back to profile
         navigate("/profile");
         
-        // Force a page refresh to update all avatars
+        // Force a page refresh to update all avatars from database
         window.location.reload();
       } else {
         toast.error(res.message || "Image update failed.");
@@ -112,71 +145,78 @@ const ChangePicture = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-secondary px-4">
-      <div className="w-full max-w-md">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/profile")}
-          className="mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Settings
-        </Button>
+      {initialLoading ? (
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      ) : (
+        <div className="w-full max-w-md">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/profile")}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Settings
+          </Button>
 
-        <Card className="p-8 bg-background/60 backdrop-blur-sm border border-border">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
-              <Camera className="w-8 h-8 text-purple-500" />
-            </div>
-            <h2 className="text-2xl font-bold">Change Profile Picture</h2>
-            <p className="text-muted-foreground text-sm mt-2">
-              Upload a new profile picture
-            </p>
-          </div>
-
-          <form onSubmit={updateImage} className="space-y-6">
-            {/* Large Avatar Preview */}
-            <div className="flex justify-center">
-              <Avatar className="w-48 h-48 border-4 border-primary/20">
-                <AvatarImage src={previewUrl || "https://www.gravatar.com/avatar/"} />
-                <AvatarFallback className="text-6xl">
-                  {localStorage.getItem("username")?.charAt(0)?.toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
+          <Card className="p-8 bg-background/60 backdrop-blur-sm border border-border">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                <Camera className="w-8 h-8 text-purple-500" />
+              </div>
+              <h2 className="text-2xl font-bold">Change Profile Picture</h2>
+              <p className="text-muted-foreground text-sm mt-2">
+                Upload a new profile picture
+              </p>
             </div>
 
-            {/* File Input */}
-            <div>
-              <label 
-                htmlFor="image_id" 
-                className="block w-full p-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors text-center"
+            <form onSubmit={updateImage} className="space-y-6">
+              {/* Large Avatar Preview */}
+              <div className="flex justify-center">
+                <Avatar className="w-48 h-48 border-4 border-primary/20">
+                  <AvatarImage src={previewUrl || "https://www.gravatar.com/avatar/"} />
+                  <AvatarFallback className="text-6xl">
+                    {username?.charAt(0)?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              {/* File Input */}
+              <div>
+                <label 
+                  htmlFor="image_id" 
+                  className="block w-full p-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors text-center"
+                >
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Click to upload or drag and drop
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    PNG, JPG, GIF or WEBP (max 2MB)
+                  </p>
+                </label>
+                <input
+                  type="file"
+                  id="image_id"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full font-semibold"
+                disabled={loading}
               >
-                <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Click to upload or drag and drop
-                </span>
-                <p className="text-xs text-muted-foreground mt-1">
-                  PNG, JPG, GIF or WEBP (max 2MB)
-                </p>
-              </label>
-              <input
-                type="file"
-                id="image_id"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full font-semibold"
-              disabled={loading}
-            >
-              {loading ? "Uploading..." : "Update Picture"}
-            </Button>
-          </form>
-        </Card>
-      </div>
+                {loading ? "Uploading..." : "Update Picture"}
+              </Button>
+            </form>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

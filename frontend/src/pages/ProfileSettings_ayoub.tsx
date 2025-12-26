@@ -43,14 +43,45 @@ const ProfileSettings = () => {
   } | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [avatarKey, setAvatarKey] = useState(Date.now());
 
   useEffect(() => {
-    const tokenData = getUserInfoFromToken();
-    const email = localStorage.getItem("email") || tokenData?.email || "";
-    const username = localStorage.getItem("username") || tokenData?.username || "Player";
-    const avatar = localStorage.getItem("avatar_url") || "";
+    const fetchUserData = async () => {
+      try {
+        const tokenData = getUserInfoFromToken();
+        const userId = tokenData?.id;
+        
+        if (userId) {
+          // Fetch user data from database
+          const data = await userApi.getUserById(userId);
+          console.log("Fetched user data:", data);
+          console.log("Avatar URL:", data.avatar);
+          setUserInfo({
+            email: data.email || data.user_email || "",
+            username: data.User_name || data.user_name || "Player",
+            avatar: data.avatar || ""
+          });
+          setAvatarKey(Date.now()); // Force avatar refresh
+        } else {
+          // Fallback to localStorage if no token
+          const email = localStorage.getItem("email") || tokenData?.email || "";
+          const username = localStorage.getItem("username") || tokenData?.username || "Player";
+          setUserInfo({ email, username, avatar: "" });
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        // Fallback to token data
+        const tokenData = getUserInfoFromToken();
+        const email = localStorage.getItem("email") || tokenData?.email || "";
+        const username = localStorage.getItem("username") || tokenData?.username || "Player";
+        setUserInfo({ email, username, avatar: "" });
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    setUserInfo({ email, username, avatar });
+    fetchUserData();
   }, []);
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
@@ -102,6 +133,17 @@ const ProfileSettings = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-secondary">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-16 bg-gradient-secondary">
       <div className="container mx-auto px-4 py-8">
@@ -117,7 +159,7 @@ const ProfileSettings = () => {
           {/* User Profile Card */}
           <Card className="p-8 bg-background/60 backdrop-blur-sm border border-border">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-              <Avatar className="w-32 h-32 border-4 border-primary/20">
+              <Avatar key={avatarKey} className="w-32 h-32 border-4 border-primary/20">
                 <AvatarImage src={userInfo.avatar || "https://www.gravatar.com/avatar/"} />
                 <AvatarFallback className="text-4xl">
                   {userInfo.username?.charAt(0)?.toUpperCase() || "U"}
