@@ -119,7 +119,7 @@ export default function OnlineTournament() {
   }, [tournamentId]);
 
   async function handleCreate() {
-    setLoading(true); setError(null);
+    // setLoading(true); setError(null);
     try {
       const id = await createTournament(label, 8);
       setTournamentId(id);
@@ -132,7 +132,7 @@ export default function OnlineTournament() {
 
   async function handleJoin() {
     if (!tournamentId) return;
-    setLoading(true); setError(null);
+    // setLoading(true); setError(null);
     try {
       await joinTournament(tournamentId, token);
       await refresh();
@@ -142,10 +142,11 @@ export default function OnlineTournament() {
 
   async function handleStart() {
     if (!tournamentId) return;
-    setLoading(true); setError(null);
+    // setLoading(true);
+    // setError(null);
     try {
       await startTournament(tournamentId);
-      await refresh();
+      // await refresh();
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   }
 
@@ -159,28 +160,6 @@ export default function OnlineTournament() {
     }
   }
 
-  // const navigate = useNavigate();
-  async function handleReady(match: Match) {
-    if (!tournamentId || !token || !match.apiMatchId) return;
-    try {
-      const result = await setPlayerReady(tournamentId, match.apiMatchId, token);
-    // navigate("/loading");
-
-      console.log("Ready result:", result);
-      await refresh();
-    } catch (e: any) {
-      setError(e.message);
-    }
-  }
-
-  function onStartMatch(match: Match) {
-    if (!tournamentId || !token) return;
-    if (!isReady) {
-      console.log("WS not ready yet");
-    }
-    send({ type: "REGISTER", token, mode: 2, tournamentId, matchId: match.apiMatchId });
-  }
-  // return (<> </>);
   return(
     <div className="container mx-auto px-4 py-20 space-y-6">
       <Card className="bg-gradient-secondary border-border">
@@ -235,7 +214,7 @@ export default function OnlineTournament() {
                   <Button
                     onClick={async () => {
                       setTournamentId(t.id);
-                      setLoading(true);
+                      // setLoading(true);
                       try {
                         await joinTournament(t.id, token);
                         await refresh();

@@ -89,7 +89,7 @@ export class TournamentService {
     m.P1_Id = participants[0].id;
     m.P2_Id = participants[1].id;
     m.count_players = 2;
-    m.gameStatus = "PENDING";
+    m.gameStatus = "PLAYING";
     console.log("\n\nCreating Match for ", m);
     let matchId = await this.db.createMatch(m);
     console.log("\n\ncreateMatch");
@@ -113,7 +113,7 @@ export class TournamentService {
     m.P1_Id = participants[2].id;
     m.P2_Id = participants[3].id;
     m.count_players = 2;
-    m.gameStatus = "PENDING";
+    m.gameStatus = "PLAYING";
     console.log("\n\nCreating Match for2 ", m);
     matchId = await this.db.createMatch(m);
     console.log("\n\ncreateMatch2");

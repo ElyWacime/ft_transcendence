@@ -1,4 +1,4 @@
-idr=ad5d1a8cccbc
+idr=682c365e9fc6
 idr2=qwqw_pong-server
 g:
 	docker stop $(idr) && docker rm $(idr)&& docker rmi $(idr2)

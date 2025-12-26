@@ -50,12 +50,13 @@ export async function registerTournamentRoutes(fastify, db) {
   fastify.post('/api/tournaments/:id/start', async (req, reply) => {
     try {
       const { id } = req.params;
-      console.log("TOOOOOOO6666", req.params  );
-      console.log("TOOOOOOO6666", Number(id) );
+      // console.log("TOOOOOOO6666", req.params  );
+      // console.log("TOOOOOOO6666", Number(id) );
       const res = await service.start(Number(id));
+      
       return reply.code(200).send(res);
     } catch (e) {
-      console.log("TOOOOOOO",id);
+      // console.log("TOOOOOOO",id);
       return reply.code(400).send({ error: e.message });
     }
   });

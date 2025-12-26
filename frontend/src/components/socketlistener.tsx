@@ -17,10 +17,6 @@ export default function SocketListener() {
         toast("Redirecting...");
         navigate("/loading?mode=2");
       }
-
-      if (data.type === "notification") {
-        toast(data.message);
-      }
     };
   }, [socket]);
 
