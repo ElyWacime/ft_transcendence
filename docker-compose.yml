@@ -43,6 +43,8 @@ services:
     volumes:
       - ./services/chat-service:/app
       - /app/node_modules
+    env_file:
+      - ./services/chat-service/.env
     command: npm run start
     networks:
       - transcendence      
