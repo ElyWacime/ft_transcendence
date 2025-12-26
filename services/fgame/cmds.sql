@@ -3,7 +3,8 @@
 
 SELECT m.id,u1.User_name ,u2.User_name,m.gameStatus,m.score1,m.score2,m.T_Id  FROM Match m inner join Users u1 on m.P1_Id = u1.id
 inner join Users u2 on m.P2_Id = u2.id;
-
+-- docker compose exec -it pong-server bash
+-- sqlite3 database.sqlite
 SELECT u.User_name,p.T_Id  FROM Participate_Tournament p inner join Users u  on p.P_Id = u.id;
 
 SELECT * FROM Match;

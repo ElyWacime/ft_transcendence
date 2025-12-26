@@ -137,10 +137,7 @@ export class TournamentService {
   }
 
   async advanceIfReady(tId) {
-    const winners = await this.db.db.all(
-      `SELECT Winner_Id FROM Match WHERE T_Id = ? AND round = 1`,
-      [tId]
-    );
+    const winners = await this.db.db.all(`SELECT Winner_Id FROM Match WHERE T_Id = ? AND round = 1`,[tId] );
   
     // Not enough matches yet
     if (winners.length < 2) return;
@@ -161,7 +158,7 @@ export class TournamentService {
     m.P1_Id = a;
     m.P2_Id = b;
     m.count_players = 2;
-    m.gameStatus = "PENDING";
+    m.gameStatus = "PLAYING";
   
     const matchId = await this.db.createMatch(m);
     m.id = matchId;

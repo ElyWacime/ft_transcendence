@@ -25,7 +25,7 @@ interface GameOnlineProps {
 const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const email = localStorage.getItem("email");
   const { player1Name, player2Name,player3Name, player4Name, player1email, player2email,player3email, player4email,mode } = location.state as GameOnlineProps;
@@ -66,9 +66,7 @@ const GameOnline = () => {
     <div className="min-h-screen pt-16 pb-8">
       <div className="container mx-auto px-4 space-y-6">
         <div>
-      {!started ? (
-        <Countdown onFinish={() => setStarted(true)} />
-      ) : (
+      {!started ? ( <Countdown onFinish={() => setStarted(true)} />) : (
         <div className="max-w-6xl mx-auto">
           {isReady && (
             <PongCanvasOnline
