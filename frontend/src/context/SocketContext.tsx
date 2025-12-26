@@ -9,7 +9,8 @@ export default function SocketProvider({ children }: { children: React.ReactNode
   // const { user, token } = useAuth(); // adapt to your AuthContext
   const [socket, setSocket] = useState<WebSocket | null>(null);
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:3000/ws?token=${token}`);
+    
+    const ws = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws?token=${token}`);
     setSocket(ws);
     ws.onopen = () => {
       console.log("WebSocket connected 2")

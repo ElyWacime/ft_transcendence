@@ -77,6 +77,7 @@ export default function OnlineTournament() {
   
   // Run a background search once on mount to populate list
   useEffect(() => {
+    send({ type: "Authenticated", token:localStorage.getItem("token")});
     listAvailableTournaments({ auto: true });
   }, [listAvailableTournaments]);
 

@@ -2,7 +2,7 @@ let socket = null;
 
 export function connectSocket(token) {
   if (!socket) {
-    socket = new WebSocket(`ws://localhost:3000/ws?token=${token}`);
+    socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws?token=${token}`);
   }
   return socket;
 }
