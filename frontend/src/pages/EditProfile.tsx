@@ -25,7 +25,7 @@ const EditProfile = () => {
     //   login(token, "github_user");
 
     //   toast.success("Successfully logged in with GitHub!");
-    //   navigate("/tournament", { replace: true });
+    //   navigate("/online-tournament", { replace: true });
     // }
   }, [navigate, login]);
 
@@ -40,7 +40,7 @@ const EditProfile = () => {
       //   login(res.accessToken, email);
         
       //   toast.success("Welcome back!");
-      //   navigate("/tournament");
+      //   navigate("/online-tournament");
       // } else {
       //   toast.error(res.message || "Login failed");
       // }

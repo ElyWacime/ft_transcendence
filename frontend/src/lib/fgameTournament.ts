@@ -44,6 +44,7 @@ export async function startTournament(id: number): Promise<any> {
 }
 
 export async function getTournamentStatus(id: number): Promise<UITournament> {
+
   const res = await fetch(`${FGAME_URL}/api/tournaments/${id}`);
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || "Failed to get tournament");

@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TournamentBracket } from "@/components/TournamentBracket";
-import { api as mockApi, Tournament as UITournament, Match } from "@/lib/api";
 import { createTournament, joinTournament, startTournament, getTournamentStatus, getWsUrl, setPlayerReady } from "@/lib/fgameTournament";
 import { useAuth } from "@/context/AuthContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -257,16 +255,6 @@ export default function OnlineTournament() {
           </div>
         </CardContent>
       </Card>
-
-
-      {tournament && (
-        <TournamentBracket 
-          tournament={tournament} 
-          onStartMatch={onStartMatch}
-          onReady={handleReady}
-          currentUserId={currentUserId || undefined}
-        />
-      )}
     </div>
   );
 }

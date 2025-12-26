@@ -6,11 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import Home from "./pages/Home";
-import Tournament from "./pages/Tournament";
 import GameAI from "./pages/GameAI";
 import Game from "./pages/Game";
 import GameOnline from "./pages/GameOnline";
-import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
@@ -44,14 +42,6 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Home />} />
               <Route
-                path="/tournament"
-                element={
-                  <ProtectedRoute children={undefined}>
-                    <Tournament />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/online-tournament"
                 element={
                   <ProtectedRoute children={undefined}>
@@ -59,14 +49,6 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              {/* <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute children={undefined}>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              /> */}
               <Route path="/profile" element={<ProfileSettings />} />
               <Route path="/profile/change-email" element={<ChangeEmail />} />
               <Route path="/profile/change-password" element={<ChangePassword />} />
@@ -84,7 +66,6 @@ const App = () => (
               <Route path="/game" element={<Game />} />
               <Route path="/game-online" element={<GameOnline />} />
               <Route path="/game-ai" element={<GameAI />} />
-              <Route path="/result" element={<Result />} />
                 <Route path="/login" element={
                   <PublicRoute>
                     <Login />

@@ -29,7 +29,7 @@ const Login = () => {
       login(token, email);
 
       toast.success("Successfully logged in with GitHub!");
-      navigate("/tournament", { replace: true });
+      navigate("/online-tournament", { replace: true });
     }
   }, [navigate, login]);
 
