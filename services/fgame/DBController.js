@@ -23,7 +23,7 @@ export class Tournament {
         this.Label = "";
         this.CreatedAt = new Date();
         this.count_players = 0;
-        this.max_players = 8;
+        this.max_players = 4;
         this.result = "WIN";
         this.Winner_Id = null;
     }
@@ -174,14 +174,9 @@ export class SQLiteDB {
         }
     }
 
-    // -------------------------------
     // Tournament CRUD
-    // -------------------------------
     async createTournament(t) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");//toISOString()
-        const result = await this.db.run(`INSERT INTO Tournament (Label, CreatedAt, result, Winner_Id)
-             VALUES (?, ?, ?, NULL)`, [t.Label, nowf, t.result]);
+        const result = await this.db.run(`INSERT INTO Tournament (Label) VALUES (?)`, [t.Label]);
         return result.lastID;
     }
     async getTournaments() {
@@ -199,12 +194,10 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Tournament WHERE id = ?`, [id]);
     }
 
-    // -------------------------------
     // Match CRUD
-    // -------------------------------
 
     async createMatch(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode, round) VALUES (?, ?, ?, ?)`, [m.P1_Id, m.T_Id, m.mode, m.round ?? 1]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, round) VALUES (?, ?, ?)`, [m.P1_Id, m.T_Id, m.round]);
         return result.lastID;
     }
     async createMatch_not(m) {
@@ -346,9 +339,7 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
     }
 
-    // -------------------------------
     // Participate_Tournament CRUD
-    // -------------------------------
     async createParticipate(p) {
         const result = await this.db.run(`INSERT INTO Participate_Tournament (P_Id, T_Id)
              VALUES (?, ?)`, [p.P_Id, p.T_Id]);
@@ -361,7 +352,7 @@ export class SQLiteDB {
         return this.db.get(`SELECT * FROM Participate_Tournament WHERE id = ?`, [id]);
     }
     async getParticipantsByTournamentId(tId) {
-        return this.db.all(`SELECT U.* FROM Participate_Tournament PT INNER JOIN Users U ON U.id = PT.P_Id WHERE PT.T_Id = ? ORDER BY PT.CreatedAt ASC`, [tId]);
+        return this.db.all(`SELECT U.id FROM Participate_Tournament PT INNER JOIN Users U ON U.id = PT.P_Id WHERE PT.T_Id = ? `, [tId]);
     }
     async updateParticipation(id, p) {
         await this.db.run(`UPDATE Participate_Tournament SET 
@@ -372,9 +363,7 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Participate_Tournament WHERE id = ?`, [id]);
     }
 
-    // -------------------------------
     // Users CRUD
-    // -------------------------------
     
     async updateUsers(u) {
         await this.db.run(`UPDATE Users 

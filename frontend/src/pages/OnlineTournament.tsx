@@ -79,13 +79,13 @@ export default function OnlineTournament() {
   useEffect(() => {
     send({ type: "Authenticated", token:localStorage.getItem("token")});
     listAvailableTournaments({ auto: true });
-  }, [listAvailableTournaments]);
+  }, []);
 
   // Auto-refresh tournament every 2 seconds
   useEffect(() => {
     if (!tournamentId) return;
     
-    const interval = setInterval(async () => {
+    const interval = (async () => {
       try {
         const t = await getTournamentStatus(tournamentId);
         setTournament(t);
@@ -106,7 +106,7 @@ export default function OnlineTournament() {
       } catch (err) {
         console.error("Auto-refresh error:", err);
       }
-    }, 2000);
+    });
 
     return () => clearInterval(interval);
   }, [tournamentId, token, isReady, autoStarted]);
@@ -180,8 +180,8 @@ export default function OnlineTournament() {
     }
     send({ type: "REGISTER", token, mode: 2, tournamentId, matchId: match.apiMatchId });
   }
-
-  return (
+  // return (<> </>);
+  return(
     <div className="container mx-auto px-4 py-20 space-y-6">
       <Card className="bg-gradient-secondary border-border">
         <CardHeader>

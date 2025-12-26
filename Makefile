@@ -14,8 +14,7 @@ auth:
 	docker-compose build --no-cache auth-service
 	docker-compose up -d auth-service
 
-game:
-	@echo "Completely rebuilding game container from scratch..."
-	docker-compose down -v pong-server
-	docker-compose build --no-cache pong-server
-	docker-compose up -d pong-server
+idr=c5d62296fa41
+idr2=qwqw_pong-server
+g:
+	docker stop $(idr) && docker rm $(idr)&& docker rmi $(idr2)

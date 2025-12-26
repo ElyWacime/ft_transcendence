@@ -11,8 +11,8 @@ SELECT * FROM Users;
 SELECT * FROM Tournament;
 SELECT * FROM Participate_Tournament;
 
-DELETE FROM Tournament;
 DELETE FROM Participate_Tournament;
+DELETE FROM Tournament;
 DELETE FROM Match;
 
 INSERT INTO Users(id,email, User_name, User_password) VALUES ('1@11.11','1@11.11','1sss','qwertyuiop');

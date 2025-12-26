@@ -37,6 +37,7 @@ export async function joinTournament(id: number, token?: string): Promise<any> {
 export async function startTournament(id: number): Promise<any> {
   const res = await fetch(`${FGAME_URL}/api/tournaments/${id}/start`, {
     method: "POST",
+    credentials: "include",
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to start tournament");

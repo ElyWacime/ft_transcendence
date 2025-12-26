@@ -2,6 +2,7 @@ import { TournamentService } from "./TournamentService.js";
 import { Users } from "./DBController.js";
 
 export async function registerTournamentRoutes(fastify, db) {
+  
   const service = new TournamentService(db);
 
   fastify.post('/api/tournaments', async (req, reply) => {
@@ -26,13 +27,15 @@ export async function registerTournamentRoutes(fastify, db) {
           userId = decoded.id;
           const u = new Users();
           u.id = decoded.id;
-          u.email = decoded.email || '';
-          u.User_name = decoded.name || decoded.email || 'User';
+          u.email = decoded.email;
+          u.User_name = decoded.name ;
           u.isOnline = true;
           u.Auto_Match = true;
           u.loggedIn = true;
           await db.createUsers(u);
-        } catch {}
+        } catch(e) {
+          return reply.code(400).send({ error: e.message });
+        }
       }
       userId = userId || (req.body?.userId);
       if (!userId) return reply.code(400).send({ error: 'userId required' });
@@ -47,9 +50,12 @@ export async function registerTournamentRoutes(fastify, db) {
   fastify.post('/api/tournaments/:id/start', async (req, reply) => {
     try {
       const { id } = req.params;
+      console.log("TOOOOOOO6666", req.params  );
+      console.log("TOOOOOOO6666", Number(id) );
       const res = await service.start(Number(id));
       return reply.code(200).send(res);
     } catch (e) {
+      console.log("TOOOOOOO",id);
       return reply.code(400).send({ error: e.message });
     }
   });

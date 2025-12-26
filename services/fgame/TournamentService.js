@@ -11,11 +11,12 @@ export class TournamentService {
     this.db = db;
   }
 
-  async create(label = "New Tournament", maxPlayers = 8) {
+  async create(label = "New Tournament", maxPlayers = 4) {
     const t = new Tournament();
     t.Label = label;
-    t.max_players = Math.min(8, Math.max(2, maxPlayers));
-    t.result = "PENDING";
+    // t.max_players = 4;
+    // this.count_players = 0;
+    // t.result = "PENDING";
     const id = await this.db.createTournament(t);
     return id;
   }
@@ -42,126 +43,122 @@ export class TournamentService {
     p.T_Id = tId;
     await this.db.createParticipate(p);
 
-    // Update count_players on Tournament
-    const cnt = await this.db.db.get(`SELECT COUNT(*) as c FROM Participate_Tournament WHERE T_Id = ?`, [tId]);
-    await this.db.db.run(`UPDATE Tournament SET count_players = ? WHERE id = ?`, [cnt.c, tId]);
+    // Update count_players on Tournament console.log("Trying To INSERT ", tId);
+    // const cnt = await this.db.db.get(`SELECT COUNT(*) as c FROM Participate_Tournament WHERE T_Id = ?`, [tId]);
+    // await this.db.db.run(`UPDATE Tournament SET count_players = ? WHERE id = ?`, [cnt.c, tId]);
     return { joined: true };
   }
 
   async start(tId) {
+    console.log("\n\nTrying To INSERT ", tId);
     const t = await this.db.getTournamentById(tId);
+    console.log("\n\ngetTournamentById ");
     if (!t) throw new Error("Tournament not found");
     
     // Prevent re-starting already started tournaments
     if (t.result === 'PLAYING' || t.result === 'FINISHED') {
       throw new Error("Tournament already started");
     }
-    
     const participants = await this.db.getParticipantsByTournamentId(tId);
+    console.log("\n\ngetParticipantsByTournamentId");
     
     // Validate: must have 2, 4, 6, or 8 players (power of 2)
-    const validCounts = [2, 4];
-    if (!validCounts.includes(participants.length)) {
-      throw new Error(`Tournament requires 2, 4, 6, or 8 players. Currently ${participants.length} participants.`);
+    const validCounts = 4;
+    if (validCounts !== participants.length) {
+      throw new Error(`Tournament requires 4 players. Currently ${participants.length} participants.`);
     }
 
-    const bracketSize = Math.min(t.max_players || 8, participants.length);
-    const seeds = participants.slice(0, bracketSize).map(p => p.id);
+    // const bracketSize = Math.min(t.max_players || 4, participants.length);
+    // const seeds = participants.slice(0, bracketSize).map(p => p.id);
 
     // Round 1 pairings
     const round = 1;
-    const pairings = [];
-    for (let i = 0; i < seeds.length; i += 2) {
-      const a = seeds[i] || null;
-      const b = seeds[i + 1] || null;
-      pairings.push([a, b]);
-    }
+    // const pairings = [];
+    // for (let i = 0; i < participants.length; i += 2) {
+    //   const a = participants[i];
+    //   const b = participants[i + 1] ;
+    //   pairings.push([a, b]);
+    // }
+    // console.log("\n\nfor 1");
+    // // Create matches for round 1
+    // for (const [a, b] of pairings) {
 
-    // Create matches for round 1
-    for (const [a, b] of pairings) {
-      const m = new Match();
-      m.mode = 2;
-      m.round = round;
-      m.T_Id = tId;
-      m.P1_Id = a;
-      m.P2_Id = b;
-      m.count_players = (a ? 1 : 0) + (b ? 1 : 0);
-      m.gameStatus = m.count_players === 2 ? "PLAYING" : "PENDING";
-      const matchId = await this.db.createMatch(m);
-      m.id = matchId;
-      await this.db.updateMatch(m);
+    // }
+    console.log("\n\nparticipants", participants);
+    let m = new Match();
+    m.round = round;
+    m.T_Id = tId;
+    m.P1_Id = participants[0].id;
+    m.P2_Id = participants[1].id;
+    m.count_players = 2;
+    m.gameStatus = "PENDING";
+    console.log("\n\nCreating Match for ", m);
+    let matchId = await this.db.createMatch(m);
+    console.log("\n\ncreateMatch");
+    m.id = matchId;
+    await this.db.updateMatch(m);
+    console.log("\n\nupdateMatch");
 
-      // Auto-advance byes
-      if (a && !b) {
-        m.Winner_Id = a;
-        m.gameStatus = "FINISHED";
-        await this.db.updateMatch(m);
-      }
-      if (!a && b) {
-        m.Winner_Id = b;
-        m.gameStatus = "FINISHED";
-        await this.db.updateMatch(m);
-      }
-    }
+    m = new Match();
+    m.round = round;
+    m.T_Id = tId;
+    m.P1_Id = participants[2].id;
+    m.P2_Id = participants[3].id;
+    m.count_players = 2;
+    m.gameStatus = "PENDING";
+    console.log("\n\nCreating Match for2 ", m);
+    matchId = await this.db.createMatch(m);
+    console.log("\n\ncreateMatch2");
+    m.id = matchId;
+    await this.db.updateMatch(m);
+    console.log("\n\nupdateMatch2");
+
+
+
+
 
     await this.db.db.run(`UPDATE Tournament SET result = 'PLAYING' WHERE id = ?`, [tId]);
-    // Attempt immediate advancement in case of byes
+    console.log("\n\nthis.db.db.run");
     await this.advanceIfReady(tId);
+    console.log("\n\nadvanceIfReady");
 
     return { started: true };
   }
 
   async advanceIfReady(tId) {
-    // Determine current highest round
-    const rounds = await this.db.db.all(`SELECT DISTINCT round FROM Match WHERE T_Id = ? ORDER BY round ASC`, [tId]);
-    if (rounds.length === 0) return;
-    const maxRound = rounds[rounds.length - 1].round;
-
-    // If all matches in maxRound are finished, create next round
-    const currentMatches = await this.db.getMatchesByTournamentAndRound(tId, maxRound);
-    if (!currentMatches.length) return;
-
-    const allFinished = currentMatches.every(m => m.gameStatus === "FINISHED");
-    if (!allFinished) return;
-
-    const winners = currentMatches.map(m => m.Winner_Id).filter(Boolean);
-    if (winners.length <= 1) {
-      // Declare tournament winner
-      const champ = winners[0] || null;
-      await this.db.db.run(`UPDATE Tournament SET result = 'FINISHED', Winner_Id = ? WHERE id = ?`, [champ, tId]);
+    const winners = await this.db.db.all(
+      `SELECT Winner_Id FROM Match WHERE T_Id = ? AND round = 1`,
+      [tId]
+    );
+  
+    // Not enough matches yet
+    if (winners.length < 2) return;
+  
+    // If any winner is NULL, stop
+    if (!winners.every(w => w.Winner_Id)) {
+      console.log("Waiting for all winners...");
       return;
     }
-
-    const nextRound = maxRound + 1;
-    for (let i = 0; i < winners.length; i += 2) {
-      const a = winners[i] || null;
-      const b = winners[i + 1] || null;
-      const m = new Match();
-      m.mode = 2;
-      m.round = nextRound;
-      m.T_Id = tId;
-      m.P1_Id = a;
-      m.P2_Id = b;
-      m.count_players = (a ? 1 : 0) + (b ? 1 : 0);
-      m.gameStatus = m.count_players === 2 ? "PLAYING" : "PENDING";
-      const matchId = await this.db.createMatch(m);
-      m.id = matchId;
-      await this.db.updateMatch(m);
-
-      // Auto-advance byes if any
-      if (a && !b) {
-        m.Winner_Id = a;
-        m.gameStatus = "FINISHED";
-        await this.db.updateMatch(m);
-      }
-      if (!a && b) {
-        m.Winner_Id = b;
-        m.gameStatus = "FINISHED";
-        await this.db.updateMatch(m);
-      }
-    }
+  
+    console.log("Winners ready:", winners);
+  
+    const [a, b] = winners.map(w => w.Winner_Id);
+  
+    const m = new Match();
+    m.round = 2;
+    m.T_Id = tId;
+    m.P1_Id = a;
+    m.P2_Id = b;
+    m.count_players = 2;
+    m.gameStatus = "PENDING";
+  
+    const matchId = await this.db.createMatch(m);
+    m.id = matchId;
+    await this.db.updateMatch(m);
+  
+    console.log("Final match created");
   }
-
+  
   async getStatus(tId) {
     const t = await this.db.getTournamentById(tId);
     const matches = await this.db.getTournamentMatches(tId);
