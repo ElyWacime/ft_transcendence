@@ -19,7 +19,6 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
-import Profile from "./pages/Profile";
 import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
