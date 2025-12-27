@@ -172,6 +172,7 @@
   font-size: 1rem;
   color: white;
   transition: all 0.2s;
+  color: white;
 }
 
 .input::placeholder {

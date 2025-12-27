@@ -34,8 +34,6 @@ interface GameState {
   ball: Ball;
   paddle1: Paddle;
   paddle2: Paddle;
-  paddle3: Paddle;
-  paddle4: Paddle;
   score: { player1: number; player2: number };
   gameStatus: "waiting" | "playing" | "paused" | "FINISHED";
 }
@@ -56,8 +54,6 @@ export const PongCanvasAI = ({
   aiDifficulty = Difficulty.HARD,
   player2Name = enableAI ? "AI Opponent" : "Player 2",
   player1Name = localStorage.getItem("email") || "Player 1",
-  player3Name = "Player 3",
-  player4Name = "Player 4",
   onGameEnd,
   maxScore = 5,
 }: PongCanvasProps) => {
@@ -78,8 +74,6 @@ export const PongCanvasAI = ({
     },
     paddle1: { x: 20, y: 250, width: 15, height: 100 },
     paddle2: { x: 765, y: 250, width: 15, height: 100 },
-    paddle3: { x: 60, y: 250, width: 15, height: 100 },
-    paddle4: { x: 725, y: 250, width: 15, height: 100 },
     score: { player1: 0, player2: 0 },
     gameStatus: "waiting",
 
@@ -103,8 +97,6 @@ export const PongCanvasAI = ({
       ball: createBall(1),
       paddle1: { ...prev.paddle1, y: 250 },
       paddle2: { ...prev.paddle2, y: 250 },
-      paddle3: { ...prev.paddle3, y: 250 },
-      paddle4: { ...prev.paddle4, y: 250 },
       score: { player1: 0, player2: 0 },
       gameStatus: "waiting",
     }));
@@ -265,9 +257,7 @@ export const PongCanvasAI = ({
           ball.dx < 0
         ) {
           ball.x = p1.x + p1.width + ball.radius;
-          ball.dx = -ball.dx;
-          console.log("hereee"+ newState.ball.dx);
-          console.log("hereee"+ newState.ball.dy);
+          ball.dx = -ball.dx;;
           // Accelerate
           if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
             newState.ball.dx *= accelerateSpeed;

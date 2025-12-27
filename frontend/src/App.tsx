@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import Home from "./pages/Home";
-import Tournament from "./pages/Tournament";
+import LocalTournament from "./pages/LocalTournament";
 import GameAI from "./pages/GameAI";
 import Game from "./pages/Game";
 import GameOnline from "./pages/GameOnline";
@@ -19,11 +19,14 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
+
 import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
+import Chat from "./pages/Chat";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,7 +35,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
+        <AuthProvider children={undefined}>
           <div className="page-wrapper">
             <Navigation />
             <Routes>
@@ -40,18 +43,31 @@ const App = () => (
               <Route
                 path="/tournament"
                 element={
-                  <ProtectedRoute>
-                    <Tournament />
+                    <LocalTournament />
+                }
+              />
+               <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Chat />
                   </ProtectedRoute>
                 }
               />
-
-              <Route path="/profile"
-              element={
-                <ProtectedRoute>
+              <Route
+                path="/chat/:id"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              /> 
+              <Route path="/profile" 
+                element={
+                  <ProtectedRoute>
                     <ProfileSettings />
                   </ProtectedRoute>
-                }/>
+                } />
               <Route path="/profile/change-email" element={<ChangeEmail />} />
               <Route path="/profile/change-password" element={<ChangePassword />} />
               <Route path="/profile/change-picture" element={<ChangePicture />} />
@@ -89,4 +105,3 @@ const App = () => (
 );
 
 export default App;
-

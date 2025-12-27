@@ -22,6 +22,16 @@ export async function createUser(
       message: "User already exists with this email",
     });
   }
+  const name_user = await prisma.user.findUnique({
+    where: {
+      name: name,
+    },
+  });
+  if (name_user) {
+    return reply.code(401).send({
+      message: "User already exists with this name",
+    });
+  }
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await prisma.user.create({
@@ -64,12 +74,15 @@ export async function login(
   };
   
   const token = req.jwt.sign(payload);
-  reply.setCookie("access_token", token, {
+
+  const replay = reply.setCookie("access_token", token, {
     path: "/",
     httpOnly: true,
     secure: false,
     sameSite: "lax",
   });
+  console.log("\n\n\nreply from cookies: ", replay);
+  console.log("\n\n\naccess_token cookie set", token);
   return { accessToken: token };
 }
 

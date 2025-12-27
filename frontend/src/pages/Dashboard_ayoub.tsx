@@ -44,7 +44,6 @@ interface DashboardData {
     totalWins: number;
     totalLosses: number;
     winRate: number;
-    tournamentParticipations: number;
   };
   lastMatch: any | null;
 }
@@ -210,10 +209,6 @@ const Dashboard_ayoub = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Win Rate</span>
                   <span className="font-bold text-lg text-primary">{statistics.winRate}%</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Tournaments</span>
-                  <span className="font-bold text-lg">{statistics.tournamentParticipations}</span>
                 </div>
               </div>
             </div>

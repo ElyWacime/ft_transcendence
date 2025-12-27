@@ -31,11 +31,10 @@ export interface AIGameState {
   };
 }
 
-export interface AIAction {
+export interface AIAction 
+{
   moveUp: boolean;
   moveDown: boolean;
-  usePowerUp: boolean;
-  powerUpType?: string;
 }
 
 export class AIOpponent {
@@ -61,7 +60,7 @@ export class AIOpponent {
     const currentTime = Date.now();
     if (currentTime - this.lastDecisionTime < this.reactionTime) {
       return this.cachedAction;
-    }
+      }
 
     // Decide behavior directly (simplified: tracking, anticipating or defensive)
     const stateToUse = gameState;
@@ -197,14 +196,18 @@ export class AIOpponent {
   
 
   private addHumanImperfections(action: AIAction): void {
-    if (Math.random() < this.mistakeChance) {
-      if (action.moveUp) {
+    if (Math.random() < this.mistakeChance)
+      {
+      if (action.moveUp)
+        {
         action.moveUp = false;
         action.moveDown = true;
-      } else if (action.moveDown) {
+      }
+      else if (action.moveDown)
+        {
         action.moveDown = false;
         action.moveUp = true;
-      }
+        }
     }
 
     if (Math.random() < this.hesitationChance) {
@@ -227,11 +230,6 @@ export class AIOpponent {
     if (action.moveDown) {
       this.dispatchKeyEvent("keydown", "ArrowDown");
       setTimeout(() => this.dispatchKeyEvent("keyup", "ArrowDown"), 50);
-    }
-
-    if (action.usePowerUp && action.powerUpType) {
-      this.dispatchKeyEvent("keydown", " ");
-      setTimeout(() => this.dispatchKeyEvent("keyup", " "), 50);
     }
   }
 

@@ -13,3 +13,21 @@ auth:
 	docker-compose down -v auth-service
 	docker-compose build --no-cache auth-service
 	docker-compose up -d auth-service
+
+chat:
+	@echo "Completely rebuilding chat container from scratch..."
+	docker-compose down -v chat-service
+	docker-compose build --no-cache chat-service
+	docker-compose up -d chat-service
+
+gateway:
+	@echo "Completely rebuilding gateway container from scratch..."
+	docker-compose down -v gateway
+	docker-compose build --no-cache gateway
+	docker-compose up -d gateway
+
+game:
+	@echo "Completely rebuilding game container from scratch..."
+	docker-compose down -v pong-server
+	docker-compose build --no-cache pong-server
+	docker-compose up -d pong-server
