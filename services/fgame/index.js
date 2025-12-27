@@ -9,7 +9,7 @@ const fastify = Fastify({ logger: false });
 await fastify.register(websocket);
 //ayoub//
 await fastify.register(cors, {
-  origin: ['http://10.11.8.4'],
+  origin: ['http://10.12.7.4'],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -194,7 +194,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               //console.log("\n\n>>>1111>>close : ", email);
               if (clients.get(id) != connection) {
                 console.log("\n\nclose SOCKET FOR : ", id);
-                clients.get(id).close();
+                // clients.get(id).close();
               }
             }
             catch (e) {
