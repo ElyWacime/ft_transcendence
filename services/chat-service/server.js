@@ -8,7 +8,6 @@ import { initializeDb, saveMessage, getChatHistory, insertUsers, getUsers, check
 const fastify = Fastify({
 });
 
-// TEMP: Allow every origin for debugging; tighten later.
 const allowAllOrigins = (origin, cb) => cb(null, true);
 
 await fastify.register(cookie);

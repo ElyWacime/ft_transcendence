@@ -203,6 +203,7 @@ class UserAPI {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
+      credentials: "include",
     });
 
     return await res.json();

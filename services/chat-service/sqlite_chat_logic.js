@@ -29,17 +29,17 @@ async function initializeDb() {
     }
 }
 
-async function saveMessage(conversationId, senderId, content, messageType = 'text') {
+async function saveMessage(conversationId, senderId, content) {
     const stmt = `
-        INSERT INTO messages (conversation_id, sender_id, body, message_type)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO messages (conversation_id, sender_id, body)
+        VALUES (?, ?, ?)
     `;
 
-    const result = await db.run(stmt, [conversationId, senderId, content, messageType]);
+    const result = await db.run(stmt, [conversationId, senderId, content]);
     const messageId = result.lastID;
 
     const row = await db.get(
-        `SELECT m.id, m.conversation_id, m.sender_id, m.body, m.message_type, m.created_at, u.username AS sender_username
+        `SELECT m.id, m.conversation_id, m.sender_id, m.body, m.created_at, u.username AS sender_username
          FROM messages m
          LEFT JOIN users u ON u.id = m.sender_id
          WHERE m.id = ?`,
@@ -56,7 +56,6 @@ async function getChatHistory(conversationId) {
             m.conversation_id,
             m.sender_id,
             m.body,
-            m.message_type,
             m.created_at,
             u.username as sender_username
         FROM messages m
@@ -178,10 +177,10 @@ async function createNewConversation(senderId, receipentId) {
     const conversationId = await generateUniqueConversationId();
 
     const insertConvStmt = `
-        INSERT INTO conversations (id, created_at, updated_at)
-        VALUES (?, ?, ?)
+        INSERT INTO conversations (id, created_at)
+        VALUES (?, ?)
     `;
-    await db.run(insertConvStmt, [conversationId, now, now]);
+    await db.run(insertConvStmt, [conversationId, now]);
 
     const insertParticipantStmt = `
         INSERT INTO conversation_participants (conversation_id, user_id)
@@ -194,22 +193,19 @@ async function createNewConversation(senderId, receipentId) {
 
 async function getConversationsForUser(userId) {
     const stmt = `
-        SELECT c.id, c.created_at, cp.last_read_message_id, cp.unread_count,
+        SELECT c.id, c.created_at,
         u.id as other_user_id,
         u.username as other_user_username,
-        u.display_name as other_user_display_name,
         m.body as last_message_body,
-        m.created_at as last_message_at,
-        mu.id as last_message_sender_id
+        m.created_at as last_message_created_at
         FROM conversations c
         JOIN conversation_participants cp ON cp.conversation_id = c.id
         LEFT JOIN conversation_participants cp2 ON cp2.conversation_id = c.id AND cp2.user_id != cp.user_id
         JOIN users u ON u.id = cp2.user_id
         LEFT JOIN messages m ON m.conversation_id = c.id 
         AND m.id = (SELECT MAX(id) FROM messages WHERE conversation_id = c.id)
-        LEFT JOIN users mu ON mu.id = m.sender_id
         WHERE cp.user_id = ?
-        ORDER BY m.created_at DESC, c.updated_at DESC
+        ORDER BY m.created_at DESC, c.created_at DESC
     `;                          
 
     const conversations = await db.all(stmt, [userId]);

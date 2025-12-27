@@ -74,12 +74,15 @@ export async function login(
   };
   
   const token = req.jwt.sign(payload);
-  reply.setCookie("access_token", token, {
+
+  const replay = reply.setCookie("access_token", token, {
     path: "/",
     httpOnly: true,
     secure: false,
     sameSite: "lax",
   });
+  console.log("\n\n\nreply from cookies: ", replay);
+  console.log("\n\n\naccess_token cookie set", token);
   return { accessToken: token };
 }
 

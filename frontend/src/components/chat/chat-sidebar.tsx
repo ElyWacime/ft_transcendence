@@ -1,20 +1,25 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import type { KeyboardEvent } from 'react'
 
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
+type ChatSidebarProps = {
+  conversations: any[]
+  selectedId?: number
+  setSelectedId: (id: number) => void
+  onStartConversation?: (userId: number) => void
+}
 
-export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation }) {
+export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation }: ChatSidebarProps) {
   const [showSearch, setShowSearch] = useState(false)
   const [searchInput, setSearchInput] = useState("")
   const [loading, setLoading] = useState(false)
-  const [searchResult, setSearchResult] = useState(null)
-  const [searchError, setSearchError] = useState(null)
+  const [searchResult, setSearchResult] = useState<any>(null)
+  const [searchError, setSearchError] = useState<string | null>(null)
 
-  useEffect(() => {
-  }, [showSearch])
+  // removed empty effect; not needed
 
   const searchUser = async () => {
     if (!searchInput.trim()) {
@@ -49,7 +54,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     }
   }
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       searchUser()
     } else if (e.key === 'Escape') {
@@ -68,7 +73,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     setSearchError(null)
   }
 
-  const formatTime = (dateString) => {
+  const formatTime = (dateString: string) => {
     const messageDate = new Date(dateString)
     const today = new Date()
     
