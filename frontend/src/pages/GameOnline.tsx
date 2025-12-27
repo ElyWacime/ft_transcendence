@@ -33,7 +33,7 @@ const GameOnline = () => {
 
   const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
 
-  const endGame = () => {
+  const endGame = (id_match) => {
     // console.log("11111444Sending START message for Pong Online");
 
     ws.send(JSON.stringify({
@@ -43,7 +43,8 @@ const GameOnline = () => {
       tournement: false,
       keys: { ArrowUp: false, ArrowDown: false },
       mode: mode,
-      id: localStorage.getItem("email")
+      id: localStorage.getItem("email"),
+      id_match: id_match
     }));
   };
 
@@ -54,7 +55,7 @@ const GameOnline = () => {
       // console.log("server saus 3=== ", data);
       if (data.gameStatus == "FINISHED") {
         // ws.close();
-        endGame();
+        endGame(data.id);
         // console.log("Match FINISHED try to navigate>>>>>>>");
         navigate("/");
       }

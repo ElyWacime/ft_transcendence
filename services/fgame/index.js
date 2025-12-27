@@ -290,16 +290,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           if (request.type == "REGISTER") {
             let m = await dbcnx.getOngoingMatchByPlayerID(id);
             if (!m) {
-              // let tournamentId = request.tournement?.tournamentId || request.tournamentId || null;
-              // if (tournamentId) {
-              //   m = await dbcnx.getTournamentOpenMatch(tournamentId);
-              //   if (!m) {
-              //     m = await dbcnx.getMatchPlayerCanJoin(request.mode);
-              //   }
-              // } else
-              // {
-              //   m = await dbcnx.getMatchPlayerCanJoin(request.mode);
-              // }
               m = await dbcnx.getMatchPlayerCanJoin(request.mode);
               if (!m) {
                 m = new Match();
@@ -561,9 +551,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           }
           else if (request.type == "FINISHED") {
             // console.log("\n\n>>>>>getLasttMatchByPlayerID: ");
-            let m = await dbcnx.getLasttMatchByPlayerID(id);
+            let m = await dbcnx.getMatchById(id);
             if (m) {
-              let tmp = matches.get(m.id);
+              let tmp = matches.get(request.id_match);
               // console.log("\n\n>>>>>tmp === ", tmp);
               if (tmp) {
                 m.score1 = tmp.score1;

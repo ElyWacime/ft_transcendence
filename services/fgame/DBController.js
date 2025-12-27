@@ -391,15 +391,15 @@ export class SQLiteDB {
     
 
     async createUsers(t) {
-        let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? or User_name = ? or email = ? `, [t.id,t.User_name,t.email]);
+        let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? or User_name = ? or email = ?`, [t.id,t.User_name,t.email]);
         // if (a)
         //     return await this.db.run(`UPDATE Users 
         //     SET 
         //     email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
         //     WHERE id = ?`, [t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.id]);
         if (!a)
-            return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
-            VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1, t.avatar]);
+            a =  await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar) VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1, t.avatar]);
+        return a;
         // else
         // {
         //     a = await this.db.get(`SELECT * FROM Users WHERE  User_name = ?`, [t.User_name]);
