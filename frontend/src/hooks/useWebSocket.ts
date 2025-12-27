@@ -11,7 +11,7 @@ export function useWebSocket(url: string) {
         wsRef.current = ws;
 
         const handleOpen = () => {
-            console.log("WebSocket connected");
+            console.log("WebSocket connected 3");
             setIsReady(true);
         };
 

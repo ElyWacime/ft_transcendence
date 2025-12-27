@@ -9,7 +9,7 @@ const fastify = Fastify({ logger: false });
 await fastify.register(websocket);
 //ayoub//
 await fastify.register(cors, {
-  origin: ['http://10.12.7.4'],
+  origin: ['http://10.11.8.4'],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -196,7 +196,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               // //console.log("\n\n>>>>>try : ", email);
               //console.log("\n\n>>>1111>>close : ", email);
               if (clients.get(id) != connection) {
-                //console.log("\n\n>>>2222>>close : ", email);
+                console.log("\n\nclose SOCKET FOR : ", id);
                 clients.get(id).close();
               }
             }
@@ -512,6 +512,12 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             }
             // else
             //  console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
+          }
+          else if (request.type == "GET_TOURNAMENTS") {
+            let t = await dbcnx.getAvailableTournaments();
+            let data = JSON.stringify({ type: "TOURNAMENTS_LIST", tournaments: t });
+            sendtoplayer(id, data);
+            console.log("Sent tournaments list to player ", data);
           }
           else if (request.type == "DELETE") {
             await dbcnx.deletePendingMatchByPlayerID(id);

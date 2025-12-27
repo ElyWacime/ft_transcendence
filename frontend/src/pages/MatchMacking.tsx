@@ -44,7 +44,6 @@ const MatchMacking = () => {
     });
     useEffect(() => {
         if (!ws || !isReady) return;
-        
         ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
@@ -54,10 +53,9 @@ const MatchMacking = () => {
             mode,
             id: email,
         }));
-
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
-            console.log(data);
+            // console.log(data);
             setFeatures(() => {
                 return [
                     {
@@ -112,7 +110,7 @@ const MatchMacking = () => {
                 }));
             }
             ws.removeEventListener("message", handleMessage);
-            ws.close();
+            // ws.close();
         };
     }, [ws, isReady]);
 

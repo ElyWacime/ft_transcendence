@@ -121,58 +121,66 @@ export class SQLiteDB {
         this.db = null;
     }
     async connect() {
-        // Ensure container FS is writable for DB file and directory
-        try {
-            fs.mkdirSync("/app", { recursive: true });
-            try { fs.accessSync("/app", fs.constants.W_OK); } catch { fs.chmodSync("/app", 0o777); }
-        } catch (e) {
-            console.warn("/app permission check failed:", e?.message || e);
-        }
-
-        this.db = await open({ 
-            filename: "/app/database.sqlite", 
-            driver: sqlite3.Database,
-            mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE
-        });
+        this.db = await open({ filename: "database.sqlite", driver: sqlite3.Database, });
         const schema = fs.readFileSync("game.sql", "utf8");
-        // Apply base schema. Some legacy DBs may lack new columns; indexes requiring
-        // them will be created after runtime migrations below.
         await this.db.exec(schema);
         //  Log every SQL statement executed
         // this.db.on("trace", (sql) => console.log("[SQL]", sql));
-        // console.log("Database connected and table created!");
-
-        // Improve concurrency and avoid locking surprises
-        try {
-            await this.db.exec(`PRAGMA journal_mode=WAL;`);
-            await this.db.exec(`PRAGMA synchronous=NORMAL;`);
-            await this.db.exec(`PRAGMA busy_timeout=5000;`);
-        } catch (e) {
-            console.warn("SQLite pragmas failed:", e?.message || e);
-        }
-
-        // Sanity write test to catch readonly mounts early
-        try {
-            await this.db.exec(`CREATE TABLE IF NOT EXISTS __rw_probe(id INTEGER);`);
-        } catch (e) {
-            console.error("SQLite write probe failed:", e?.message || e);
-            throw e;
-        }
-
-        // Runtime migration: ensure 'round' column exists on Match
-        const cols = await this.db.all(`PRAGMA table_info('Match')`);
-        const hasRound = cols.some(c => c.name === 'round');
-        if (!hasRound) {
-            await this.db.run(`ALTER TABLE Match ADD COLUMN round INTEGER NOT NULL DEFAULT 1`);
-            console.log("Added 'round' column to Match table");
-        }
-        // Create composite index on (T_Id, round) once the column is guaranteed.
-        try {
-            await this.db.run(`CREATE INDEX IF NOT EXISTS idx_match_tournament_round ON Match(T_Id, round)`);
-        } catch (e) {
-            console.warn("Skipping idx_match_tournament_round creation:", e?.message || e);
-        }
+        console.log("Database connected and table created!");
     }
+    // async connect() {
+    //     // Ensure container FS is writable for DB file and directory
+    //     try {
+    //         fs.mkdirSync("/app", { recursive: true });
+    //         try { fs.accessSync("/app", fs.constants.W_OK); } catch { fs.chmodSync("/app", 0o777); }
+    //     } catch (e) {
+    //         console.warn("/app permission check failed:", e?.message || e);
+    //     }
+
+    //     this.db = await open({ 
+    //         filename: "/app/database.sqlite", 
+    //         driver: sqlite3.Database,
+    //         mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE
+    //     });
+    //     const schema = fs.readFileSync("game.sql", "utf8");
+    //     // Apply base schema. Some legacy DBs may lack new columns; indexes requiring
+    //     // them will be created after runtime migrations below.
+    //     await this.db.exec(schema);
+    //     //  Log every SQL statement executed
+    //     // this.db.on("trace", (sql) => console.log("[SQL]", sql));
+    //     // console.log("Database connected and table created!");
+
+    //     // Improve concurrency and avoid locking surprises
+    //     try {
+    //         await this.db.exec(`PRAGMA journal_mode=WAL;`);
+    //         await this.db.exec(`PRAGMA synchronous=NORMAL;`);
+    //         await this.db.exec(`PRAGMA busy_timeout=5000;`);
+    //     } catch (e) {
+    //         console.warn("SQLite pragmas failed:", e?.message || e);
+    //     }
+
+    //     // Sanity write test to catch readonly mounts early
+    //     try {
+    //         await this.db.exec(`CREATE TABLE IF NOT EXISTS __rw_probe(id INTEGER);`);
+    //     } catch (e) {
+    //         console.error("SQLite write probe failed:", e?.message || e);
+    //         throw e;
+    //     }
+
+    //     // Runtime migration: ensure 'round' column exists on Match
+    //     const cols = await this.db.all(`PRAGMA table_info('Match')`);
+    //     const hasRound = cols.some(c => c.name === 'round');
+    //     if (!hasRound) {
+    //         await this.db.run(`ALTER TABLE Match ADD COLUMN round INTEGER NOT NULL DEFAULT 1`);
+    //         console.log("Added 'round' column to Match table");
+    //     }
+    //     // Create composite index on (T_Id, round) once the column is guaranteed.
+    //     try {
+    //         await this.db.run(`CREATE INDEX IF NOT EXISTS idx_match_tournament_round ON Match(T_Id, round)`);
+    //     } catch (e) {
+    //         console.warn("Skipping idx_match_tournament_round creation:", e?.message || e);
+    //     }
+    // }
 
     // Tournament CRUD
     async createTournament(t) {
@@ -181,6 +189,9 @@ export class SQLiteDB {
     }
     async getTournaments() {
         return this.db.all(`SELECT * FROM Tournament`);
+    }
+    async getAvailableTournaments() {
+        return this.db.all(`SELECT * FROM Tournament where count_players < max_players`);
     }
     async getTournamentById(id) {
         return this.db.get(`SELECT * FROM Tournament WHERE id = ?`, [id]);
