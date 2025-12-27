@@ -171,6 +171,7 @@
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   transition: all 0.2s;
+  color: white;
 }
 
 .input::placeholder {

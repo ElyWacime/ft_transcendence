@@ -203,7 +203,6 @@ class UserAPI {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-      credentials: "include",
     });
 
     return await res.json();
@@ -286,6 +285,65 @@ class UserAPI {
     });
 
     return await res.json();
+  }
+
+  async getUserById(userId: string) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Not logged in. Please log in first.");
+    }
+
+    const res = await fetch(`/api/dashboard/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Get user by ID error:", res.status, errorText);
+      throw new Error(`Failed to fetch user: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    return data.user; // Return just the user object from dashboard response
+  }
+
+  async searchByName(name: string) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Not logged in. Please log in first to search for players.");
+    }
+
+    console.log('[searchByName] Token length:', token.length);
+    console.log('[searchByName] Token starts with:', token.substring(0, 20) + '...');
+
+    const res = await fetch(`${this.baseUrl}/search-this-name`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name }),
+      credentials: 'include',
+    });
+
+    console.log('[searchByName] Response status:', res.status);
+    const data = await res.json();
+    
+    if (!res.ok || data.valid === false) {
+      throw new Error(data?.error || "User not found");
+    }
+
+    return data as {
+      valid: true;
+      user_name: string;
+      user_email: string;
+      user_id: string;
+    };
   }
 }
 
