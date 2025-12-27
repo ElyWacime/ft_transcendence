@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
 import Home from "./pages/Home";
-import Tournament from "./pages/Tournament";
+import LocalTournament from "./pages/LocalTournament";
 import GameAI from "./pages/GameAI";
 import Game from "./pages/Game";
 import GameOnline from "./pages/GameOnline";
@@ -18,7 +18,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
-import Profile from "./pages/Profile";
+
 import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
@@ -42,9 +42,7 @@ const App = () => (
               <Route
                 path="/tournament"
                 element={
-                  <ProtectedRoute children={undefined}>
-                    <Tournament />
-                  </ProtectedRoute>
+                    <LocalTournament />
                 }
               />
                <Route

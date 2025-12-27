@@ -25,3 +25,9 @@ gateway:
 	docker-compose down -v gateway
 	docker-compose build --no-cache gateway
 	docker-compose up -d gateway
+
+game:
+	@echo "Completely rebuilding game container from scratch..."
+	docker-compose down -v pong-server
+	docker-compose build --no-cache pong-server
+	docker-compose up -d pong-server
