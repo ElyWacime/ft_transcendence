@@ -15,7 +15,7 @@ await fastify.register(cors, {
   allowedHeaders: ["Content-Type", "Authorization"]
 });
 //ayoub//
-import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
+import { Users, Match, SQLiteDB, GameState, Tournament } from "./DBController.js";
 import { registerTournamentRoutes } from "./tournament_routes.js";
 import { exit } from "process";
 
@@ -123,8 +123,6 @@ function resetBall(direction = 1, m) {
   m.Ball_dy = 2;
 }
 
-
-
 fastify.register(fjwt, { 
   secret: process.env.JWT_ACCESS_SECRET
 });
@@ -180,7 +178,6 @@ async function advanceIfReady  (tId) {
   else
     console.log("No socket for player ", m.P2_Id);
 }
-
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
@@ -502,7 +499,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               // Tournament progression if applicable
               if (m.T_Id) {
                 try {
-                  
                   await advanceIfReady(m.T_Id);
                 } catch (e) {
                   console.error("Tournament advance error:", e);
@@ -518,6 +514,75 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             let data = JSON.stringify({ type: "TOURNAMENTS_LIST", tournaments: t });
             sendtoplayer(id, data);
             console.log("Sent tournaments list to player ", data);
+          }
+          else if (request.type == "CREATE_TOURNAMENT") {
+            let tour = new Tournament();
+            tour.label = request.label;
+            await dbcnx.createTournament(tour);
+            let t = await dbcnx.getAvailableTournaments();
+            let data = JSON.stringify({ type: "TOURNAMENTS_LIST", tournaments: t });
+            sendtoplayer(id, data);
+            console.log("Sent tournaments list to player ", data);
+          }
+          else if (request.type == "JOIN_TOURNAMENT") {
+            await dbcnx.createParticipate(id, request.tournamentId);
+            let t = await dbcnx.getAvailableTournaments();
+            let data = JSON.stringify({ type: "TOURNAMENTS_LIST", tournaments: t });
+            sendtoplayer(id, data);
+            console.log("Sent tournaments list to player ", data);
+          }
+          else if (request.type == "START_TOURNAMENT") {
+            const participants =  await dbcnx.getParticipantsByTournamentId(request.tournamentId);
+            // console.log("\n\nthis.db.db.run");
+            await dbcnx.updateTournamentstatus(request.tournamentId,'PLAYING');
+            let m = new Match();
+            m.round = round;
+            m.T_Id = tId;
+            m.P1_Id = participants[0].id;
+            m.P2_Id = participants[1].id;
+            m.count_players = 2;
+            m.gameStatus = "PLAYING";
+            // console.log("\n\nCreating Match for ", m);
+            let matchId = await dbcnx.createMatch(m);
+            // console.log("\n\ncreateMatch");
+            m.id = matchId;
+            await dbcnx.updateMatch(m);
+            // console.log("\n\nupdateMatch");
+            let socket = clients.get(m.P1_Id);
+            if (socket && socket.readyState === 1)
+              socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+            else
+              console.log("No socket for player ", m.P1_Id);
+            socket = clients.get(m.P2_Id);
+            if (socket && socket.readyState === 1)
+              socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+            else
+              console.log("No socket for player ", m.P2_Id);
+            m = new Match();
+            m.round = round;
+            m.T_Id = tId;
+            m.P1_Id = participants[2].id;
+            m.P2_Id = participants[3].id;
+            m.count_players = 2;
+            m.gameStatus = "PLAYING";
+            // console.log("\n\nCreating Match for2 ", m);
+            matchId = await dbcnx.createMatch(m);
+            // console.log("\n\ncreateMatch2");
+            m.id = matchId;
+            await dbcnx.updateMatch(m);
+            // console.log("\n\nupdateMatch2");
+            socket = clients.get(m.P1_Id);
+            if (socket && socket.readyState === 1)
+              socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+            else
+              console.log("No socket for player ", m.P1_Id);
+            socket = clients.get(m.P2_Id);
+            if (socket && socket.readyState === 1)
+              socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+            else
+              console.log("No socket for player ", m.P2_Id);
+            // await this.advanceIfReady(tId);
+            // console.log("\n\nadvanceIfReady");
           }
           else if (request.type == "DELETE") {
             await dbcnx.deletePendingMatchByPlayerID(id);

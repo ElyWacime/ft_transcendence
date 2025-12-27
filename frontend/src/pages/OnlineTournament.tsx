@@ -44,7 +44,7 @@ export default function OnlineTournament() {
   const [error, setError] = useState<string | null>(null);
   const [autoStarted, setAutoStarted] = useState(false);
 
-  const [availableTournaments, setAvailableTournaments] = useState<UITournament[]>([]);
+
   const [searchingAvailable, setSearchingAvailable] = useState(false);
 
   const token = useMemo(() => localStorage.getItem("token") || undefined, []);
@@ -52,7 +52,8 @@ export default function OnlineTournament() {
   const wsUrl = getWsUrl();
   const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
 
-  const [features, setFeatures] = useState<Tournament[]>([]);
+  // const [features, setFeatures] = useState<Tournament[]>([]);
+  const [availableTournaments, setAvailableTournaments] =useState<Tournament[]>([]);
   useEffect(() => {
     if (!ws || !isReady) return;
     ws.send(JSON.stringify({
@@ -62,152 +63,57 @@ export default function OnlineTournament() {
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       if (data.type == "TOURNAMENTS_LIST")
-        setFeatures(() => { return data.tournaments;});
+      {
+        console.log("TOURNAMENTS_LIST data:", data);
+        setAvailableTournaments(() => { return data.tournaments;});
+       }
     };
     ws.addEventListener("message", handleMessage);
     return () => {
-        // if (ws.readyState === WebSocket.OPEN) {
-        //     ws.send(JSON.stringify({
-        //         token:localStorage.getItem("token"),
-        //         type: "DELETE",
-        //     }));
-        // }
         ws.removeEventListener("message", handleMessage);
         // ws.close();
     };
 }, [ws, isReady]);
 
-  // Search sequentially from 1 until an id doesn't exist (stop on first missing), max cap to avoid infinite loop
-  // const listAvailableTournaments = useCallback(async (opts?: { auto?: boolean }) => {
-  //   if (searchingAvailable) return;
-  //   setSearchingAvailable(true);
-  //   setError(null);
-  //   const found: UITournament[] = [];
-  //   try {
-  //     let id = 1;
-  //     const MAX_ATTEMPTS = 1000; // safety cap
-  //     while (id <= MAX_ATTEMPTS) {
-  //       try {
-  //         const t = await getTournamentStatus(id);
-  //         if (!t) {
-  //           // stop on missing
-  //           break;
-  //         }
-  //         found.push(t);
-  //         id++;
-  //       } catch (e) {
-  //         // stop when an ID is missing / not found
-  //         break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     setError(e.message || "Failed to list tournaments");
-  //   } finally {
-  //     setAvailableTournaments(found);
-  //     setSearchingAvailable(false);
-  //   }
-  // }, [searchingAvailable]);
-  
-  // Run a background search once on mount to populate list
-  // useEffect(() => {
-  //   ws.send({ type: "Authenticated", token:localStorage.getItem("token")});
-  //   listAvailableTournaments({ auto: true });
-  // }, []);
 
-  // // Auto-refresh tournament every 2 seconds
-  // useEffect(() => {
-  //   if (!tournamentId) return;
-    
-  //   const interval = (async () => {
-  //     try {
-  //       const t = await getTournamentStatus(tournamentId);
-  //       setTournament(t);
+  async function handleCreate(label) {
+    if (!ws || !isReady) {
+      console.log("WebSocket not ready");
+      return;
+    };
+    console.log("handleCreate tournament label:", token, label);
 
-  //       // Auto-start game if both players are ready
-  //       if (!autoStarted && t.matches) {
-  //         for (const match of t.matches) {
-  //           if (match.status === 'pending' && (match.p1Ready ?? 0) === 1 && (match.p2Ready ?? 0) === 1) {
-  //             // Both ready, trigger game
-  //             if (token && isReady) {
-  //               setAutoStarted(true);
-  //               send({ type: "REGISTER", token, mode: 2, tournamentId, matchId: match.apiMatchId });
-  //               break;
-  //             }
-  //           }
-  //         }
-  //       }
-  //     } catch (err) {
-  //       console.error("Auto-refresh error:", err);
-  //     }
-  //   });
-
-  //   return () => clearInterval(interval);
-  // }, [tournamentId, token, isReady, autoStarted]);
-
-  // useEffect(() => {
-  //   if (tournamentId !== null) {
-  //     refresh();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [tournamentId]);
-
-  // async function handleCreate() {
-  //   // setLoading(true); setError(null);
-  //   try {
-  //     const id = await createTournament(label, 8);
-  //     setTournamentId(id);
-  //     await refresh();
-  //     await listAvailableTournaments();
-  //   } catch (e: any) {
-  //     setError(e.message);
-  //   } finally { setLoading(false); }
-  // }
-
-  // async function handleJoin() {
-  //   if (!tournamentId) return;
-  //   // setLoading(true); setError(null);
-  //   try {
-  //     await joinTournament(tournamentId, token);
-  //     await refresh();
-  //     await listAvailableTournaments();
-  //   } catch (e: any) { setError(e.message); } finally { setLoading(false); }
-  // }
-
-  // async function handleStart() {
-  //   if (!tournamentId) return;
-  //   // setLoading(true);
-  //   // setError(null);
-  //   try {
-  //     await startTournament(tournamentId);
-  //     // await refresh();
-  //   } catch (e: any) { setError(e.message); } finally { setLoading(false); }
-  // }
-
-  // async function refresh() {
-  //   if (!tournamentId) return;
-  //   try {
-  //     const t = await getTournamentStatus(tournamentId);
-  //     setTournament(t);
-  //   } catch (e: any) {
-  //     setError(e.message);
-  //   }
-  // }
-  // return (<></>);
-
-
-
-
-
-  async function handleCreate() {
-
+    ws.send(JSON.stringify({
+        token:localStorage.getItem("token"),
+      type: "CREATE_TOURNAMENT",
+      label: label
+    }));
   }
 
-  async function handleJoin() {
-
+  async function handleJoin(id) {
+    if (!ws || !isReady) {
+      console.log("WebSocket not ready");
+      return;
+    };
+    console.log("Joining tournament id:", token, id);
+    ws.send(JSON.stringify({
+      token:localStorage.getItem("token"),
+      type: "JOIN_TOURNAMENT",
+      tournamentId: id
+    }));
   }
 
-  async function handleStart() {
-
+  async function handleStart(id) {
+    if (!ws || !isReady) {
+      console.log("WebSocket not ready");
+      return;
+    };
+    console.log("handleStart tournament id:", token, id);
+    ws.send(JSON.stringify({
+        token:localStorage.getItem("token"),
+      type: "START_TOURNAMENT",
+      tournamentId: id
+    }));
   }
 
   return(
@@ -222,22 +128,10 @@ export default function OnlineTournament() {
               <label className="text-sm text-muted-foreground">Label</label>
               <Input value={label} onChange={(e) => setLabel(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Tournament ID</label>
-              <Input
-                value={tournamentId ?? ""}
-                onChange={(e) => setTournamentId(e.target.value === "" ? null : Number(e.target.value))}
-                placeholder="Enter ID to load"
-              />
-            </div>
             <div className="flex items-end space-x-2">
-              <Button onClick={handleCreate} className="bg-gradient-primary">Create</Button>
-              <Button onClick={handleJoin} className="bg-gradient-primary">Join</Button>
-              <Button onClick={handleStart} className="bg-gradient-primary">Start</Button>
+              <Button onClick={() => handleCreate({label})} className="bg-gradient-primary">Create</Button>
             </div>
           </div>
-          {/* {error && <div className="text-destructive">{error}</div>}
-          {loading && <div className="text-muted-foreground">Loading...</div>} */}
         </CardContent>
       </Card>
 
@@ -248,33 +142,17 @@ export default function OnlineTournament() {
         </CardHeader>
         <CardContent>
           {searchingAvailable && <div className="text-muted-foreground">Searching for tournaments...</div>}
-          {!searchingAvailable && availableTournaments.length === 0 && <div className="text-muted-foreground">No tournaments found</div>}
+          {availableTournaments.length == 0 && <div className="text-muted-foreground">No tournaments found</div>}
           <div className="space-y-2">
             {availableTournaments.map((t) => (
               <div key={t.id} className="flex items-center justify-between p-2 border rounded">
                 <div>
                   <div className="font-semibold">#{t.id} {t.Label ? `- ${t.Label}` : ""}</div>
-                  <div className="text-sm text-muted-foreground">{t.count_players ?? 0}/{t.max_players ?? 8} players • {t.status ?? "unknown"}</div>
+                  <div className="text-sm text-muted-foreground">{t.count_players ?? 0}/{t.max_players ?? 8} players • {t.result ?? "PENDING2"}</div>
                 </div>
                 <div className="space-x-2">
-                  <Button
-                    onClick={async () => {
-                      setTournamentId(t.id);
-                      // setLoading(true);
-                      try {
-                        await joinTournament(t.id, token);
-                        await refresh();
-                        await listAvailableTournaments();
-                      } catch (e: any) {
-                        setError(e.message);
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    disabled={!isLoggedIn || (t.max_players && (t.count_players ?? 0) >= t.max_players)}
-                  >
-                    Join
-                  </Button>
+                  {t.max_players  == t.count_players  &&  <Button onClick={() => handleStart(t.id)}>START</Button>}
+                  <Button onClick={() => handleJoin(t.id)} > Join </Button>
                 </div>
               </div>
             ))}

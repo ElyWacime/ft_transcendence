@@ -24,7 +24,7 @@ export class Tournament {
         this.CreatedAt = new Date();
         this.count_players = 0;
         this.max_players = 4;
-        this.result = "WIN";
+        this.result = "PENDING";
         this.Winner_Id = null;
     }
 }
@@ -125,7 +125,7 @@ export class SQLiteDB {
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
         //  Log every SQL statement executed
-        // this.db.on("trace", (sql) => console.log("[SQL]", sql));
+        this.db.on("trace", (sql) => console.log("[SQL]", sql));
         console.log("Database connected and table created!");
     }
     // async connect() {
@@ -201,6 +201,9 @@ export class SQLiteDB {
              SET Label=?, count_players=?, result=?, Winner_Id=? 
              WHERE id = ?`, [t.Label, t.count_players, t.result, t.Winner_Id, id]);
     }
+    async updateTournamentstatus(id, status) {
+        await this.db.run(`UPDATE Tournament SET result = ? WHERE id = ?`, [status, id]);
+    } 
     async deleteTournament(id) {
         await this.db.run(`DELETE FROM Tournament WHERE id = ?`, [id]);
     }
