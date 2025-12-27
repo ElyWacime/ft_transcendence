@@ -5,9 +5,11 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Lock, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const ChangePassword = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,13 +22,13 @@ const ChangePassword = () => {
       toast.error("New passwords do not match");
       return;
     }
-    
     setLoading(true);
     try {
       const res = await userApi.update_password(oldPassword, newPassword);
       if (res.success) {
         toast.success("Password updated successfully!");
-        navigate("/profile");
+        await logout();
+        navigate("/login");
       } else {
         toast.error(res.message || "Password update failed.");
       }

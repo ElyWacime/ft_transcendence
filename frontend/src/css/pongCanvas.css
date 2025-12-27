@@ -1,0 +1,423 @@
+/* ----- PONG CANVAS */
+
+/* Pong Game Interface Styles */
+.pong-game-interface {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* space-y-6 */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Player Controls Grid */
+.player-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem; /* gap-4 */
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .player-controls-grid {
+    grid-template-columns: 1fr auto 1fr; /* md:grid-cols-3 */
+    align-items: center;
+  }
+}
+
+/* Player Card */
+.player-card {
+  background-image: var(--gradient-secondary);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0;
+}
+
+.player-card:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: var(--shadow-neon);
+  transform: translateY(-2px);
+}
+
+.player-card-header {
+  padding-bottom: 0.5rem; /* pb-2 */
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.player-card-title {
+  text-align: center;
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin: 0;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.player-card-content {
+  text-align: center;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.player-score {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  color: hsl(var(--primary));
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.player1-score,
+.player2-score {
+  position: relative;
+}
+
+.player-control-hint {
+  font-size: 0.875rem; /* text-sm */
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.5rem; /* mt-2 */
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Game Controls Center */
+.game-controls-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.game-controls-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem; /* space-y-2 */
+  width: 100%;
+  max-width: 200px;
+}
+
+.game-control-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* mr-2 equivalent */
+  padding: 0.625rem 1.25rem;
+  border-radius: calc(var(--radius) - 2px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.start-button,
+.resume-button {
+  background-image: var(--gradient-primary);
+  color: hsl(var(--primary-foreground));
+  font-weight: 600;
+}
+
+.start-button:hover,
+.resume-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.pause-button {
+  background: transparent;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+.pause-button:hover {
+  background-color: hsl(var(--accent) / 0.1);
+  border-color: hsl(var(--accent));
+  transform: translateY(-2px);
+}
+
+.additional-controls {
+  display: flex;
+  gap: 0.5rem; /* space-x-2 */
+  justify-content: center;
+  width: 100%;
+}
+
+.reset-button-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem; /* px-2 py-1 */
+  font-size: 0.75rem; /* text-sm */
+  background: transparent;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 4px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.reset-button-small:hover {
+  background-color: hsl(var(--accent) / 0.1);
+  border-color: hsl(var(--accent));
+  transform: translateY(-1px);
+}
+
+.button-icon {
+  width: 1rem; /* w-4 */
+  height: 1rem; /* h-4 */
+  flex-shrink: 0;
+}
+
+/* Game Canvas Container */
+.game-canvas-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.game-canvas {
+  width: 800px;
+  max-width: 100%;
+  height: 600px;
+  max-height: 70vh;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px); /* rounded-lg */
+  background-color: hsl(var(--card));
+  box-shadow: var(--shadow-card);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.game-canvas:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: var(--shadow-glow);
+}
+
+/* Score Animation */
+@keyframes score-pulse {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 0 0 0 hsl(var(--primary));
+  }
+  50% {
+    transform: scale(1.2);
+    text-shadow: 0 0 15px hsl(var(--primary) / 0.7);
+  }
+}
+
+.player-score.scored {
+  animation: score-pulse 0.5s ease-in-out;
+}
+
+/* Game Status Indicators */
+.player-card.waiting .player-score {
+  opacity: 0.5;
+}
+
+.player-card.playing .player-score {
+  color: hsl(var(--accent));
+}
+
+/* Game Status Badge */
+.game-status-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-size: 0.625rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .player-controls-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .game-controls-center {
+    order: 3;
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+  }
+  
+  .player-card {
+    width: 100%;
+  }
+  
+  .player-card-title {
+    font-size: 1rem;
+  }
+  
+  .player-score {
+    font-size: 1.5rem;
+  }
+  
+  .game-canvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4/3;
+    max-height: 60vh;
+  }
+  
+  .game-control-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .player-card-title {
+    font-size: 1rem;
+  }
+  
+  .player-score {
+    font-size: 1.75rem;
+  }
+  
+  .game-canvas {
+    width: 90%;
+    height: auto;
+    aspect-ratio: 4/3;
+  }
+}
+
+/* Different button states for game status */
+.game-controls-center.waiting .start-button {
+  animation: pulse 2s infinite;
+}
+
+.game-controls-center.paused .resume-button {
+  background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Winner/Loser States */
+.player-card.winner {
+  border-color: hsl(var(--accent));
+  background: linear-gradient(135deg, 
+    hsl(var(--card)), 
+    color-mix(in srgb, hsl(var(--accent)) 10%, transparent)
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.player-card.winner::after {
+  content: '🏆';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.25rem;
+  opacity: 0.7;
+}
+
+.player-card.loser {
+  opacity: 0.7;
+  filter: grayscale(30%);
+}
+
+/* Focus States for Accessibility */
+.game-control-button:focus-visible,
+.reset-button-small:focus-visible,
+.game-canvas:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+}
+
+/* Disabled State */
+.game-control-button:disabled,
+.reset-button-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* AI Difficulty Indicator */
+.ai-difficulty-badge {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.625rem;
+  border-radius: 4px;
+  font-weight: 600;
+  margin-left: 0.25rem;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+.ai-difficulty-badge.easy {
+  background: hsl(142 76% 36% / 0.2);
+  color: hsl(142 76% 36%);
+}
+
+.ai-difficulty-badge.medium {
+  background: hsl(45 93% 47% / 0.2);
+  color: hsl(45 93% 47%);
+}
+
+.ai-difficulty-badge.hard {
+  background: hsl(0 84% 60% / 0.2);
+  color: hsl(0 84% 60%);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .player-card,
+  .game-control-button,
+  .reset-button-small,
+  .player-score.scored {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
+  
+  .player-card:hover {
+    transform: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .player-card {
+    border-width: 2px;
+  }
+  
+  .game-canvas {
+    border-width: 2px;
+  }
+  
+  .game-control-button,
+  .reset-button-small {
+    border-width: 2px;
+  }
+}
+
+/* -----END PONG CANVAS */

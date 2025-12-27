@@ -115,51 +115,50 @@ const MatchMacking = () => {
             ws.close();
         };
     }, [ws, isReady]);
-
     return (
         <>
-            {<div className="min-h-screen pt-16">
-                {/* Hero Section */}
-                <section className="relative py-20 px-4 text-center overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-glow opacity-30"></div>
-                    <div className="relative z-10 max-w-4xl mx-auto">
-                        <h1 className="text-6xl md:text-8xl font-game font-bold mb-6 glow-text animate-float">
-                            PONG
-                            <span className="text-primary"> ARENA</span>
-                        </h1>
-                        <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                            Play against players online!
-                        </p>
-                    </div>
-                </section>
-
-                {/* Features Grid */}
-                <section className="py-20 px-">
-                    <div className="max-w-6xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-game font-bold text-center mb-12 glow-text">
-                            Game Features
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                            {features.map((feature, index) => (
-                                < Card
-                                    key={index}
-                                    className="p-6 bg-gradient-secondary border-border hover:border-primary transition-all duration-300 hover:shadow-glow group"
-                                >
-                                    <div className="flex flex-col items-center text-center space-y-4">
-                                        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                            <feature.icon className="w-6 h-6 text-primary-foreground" />
-                                        </div>
-                                        <h3 className="font-semibold text-lg">{feature.title}</h3>
-                                        <p className="text-muted-foreground text-sm">{feature.description}</p>
-                                    </div>
-                                </Card>
-                            ))}
+          <div className="home-page">
+            {/* Hero Section */}
+            <section className="hero-section">
+              <div className="hero-glow-overlay"></div>
+              <div className="hero-content">
+                <h1 className="hero-title glow-text animate-float">
+                  PONG
+                  <span className="text-primary"> ARENA</span>
+                </h1>
+                <p className="hero-subtitle">
+                  Play against players online!
+                </p>
+              </div>
+            </section>
+      
+            {/* Features Grid */}
+            <section className="features-section">
+              <div className="features-container">
+                <h2 className="features-title glow-text">
+                  Game Features
+                </h2>
+                <div className="features-grid">
+                  {features.map((feature, index) => (
+                    <Card
+                      key={index}
+                      className="feature-card"
+                    >
+                      <div className="feature-card-content">
+                        <div className="feature-icon-container">
+                          <feature.icon className="feature-icon" />
                         </div>
-                    </div>
-                </section >
-            </div >}
+                        <h3 className="feature-card-title">{feature.title}</h3>
+                        <p className="feature-card-description">{feature.description}</p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
         </>
-    );
+      );
 };
 
 export default MatchMacking;

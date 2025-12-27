@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
-import { AIOpponent, AIAction, AIGameState, Difficulty } from "@/lib/ai/AIOpponent";
+
 
 interface PongCanvasProps {
   player1Name?: string;
@@ -11,8 +11,6 @@ interface PongCanvasProps {
   player4Name?: string;
   onGameEnd?: (player1Score: number, player2Score: number) => void;
   maxScore?: number;
-  enableAI?: boolean;
-  aiDifficulty?: Difficulty;
 }
 
 interface Paddle {
@@ -45,16 +43,9 @@ const paddleSpeed = 10;
 const accelerateSpeed = 1.2;
 const max_Speed = 25;
 const angle = Math.PI / 8;
-const aiSpeedMultipliers: Record<Difficulty, number> = {
-  [Difficulty.EASY]: 1,
-  [Difficulty.MEDIUM]: 1,
-  [Difficulty.HARD]: 1,
-};
 
 export const PongCanvas = ({
-  enableAI = false,
-  aiDifficulty = Difficulty.MEDIUM,
-  player2Name = enableAI ? "AI Opponent" : "Player 2",
+  player2Name =  "Player 2",
   player1Name = localStorage.getItem("email") || "Player 1",
   player3Name = "Player 3",
   player4Name = "Player 4",
@@ -66,7 +57,6 @@ export const PongCanvas = ({
   const lastTimeRef = useRef<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameStateRef = useRef<GameState | null>(null);
-  const aiRef = useRef<AIOpponent | null>(null);
 
   const [gameState, setGameState] = useState<GameState>({
     ball: {
@@ -197,47 +187,17 @@ export const PongCanvas = ({
         if (!canvas) return prev;
 
         // Get AI action if enabled
-        let aiAction: AIAction | null = null;
-        if (enableAI && aiRef.current) {
-          aiAction = aiRef.current.update(mapGameStateToAI(newState, canvas.height));
-        }
 
         // Paddle 1 (W/S) - unchanged
         if (keysPressed.current.has("KeyW") && newState.paddle1.y > 0)
           newState.paddle1.y -= paddleSpeed * delta;
         if (keysPressed.current.has("KeyS") && newState.paddle1.y < canvas.height - newState.paddle1.height)
           newState.paddle1.y += paddleSpeed * delta;
-
-        // MODIFIED: Paddle 2 (AI or Human) from second file
-        if (!enableAI) {
-          // Human player 2 (Arrow keys)
-          if (keysPressed.current.has("ArrowUp") && newState.paddle2.y > 0)
+        if (keysPressed.current.has("ArrowUp") && newState.paddle2.y > 0)
             newState.paddle2.y -= paddleSpeed * delta;
-          if (keysPressed.current.has("ArrowDown") && newState.paddle2.y < canvas.height - newState.paddle2.height)
-            newState.paddle2.y += paddleSpeed * delta;
-        } else if (aiAction && aiRef.current) {
-          // AI movement from second file
-          const aiSpeed = paddleSpeed * delta * aiSpeedMultipliers[aiDifficulty];
-          const ballApproaching = newState.ball.dx > 0;
-          
-          if (ballApproaching) {
-            if (aiAction.moveUp && newState.paddle2.y > 0) {
-              newState.paddle2.y = Math.max(0, newState.paddle2.y - aiSpeed);
-            }
-            if (aiAction.moveDown && newState.paddle2.y < canvas.height - newState.paddle2.height) {
-              newState.paddle2.y = Math.min(canvas.height - newState.paddle2.height, newState.paddle2.y + aiSpeed);
-            }
-          } else {
-            // Return to center when ball is moving away
-            const centerY = canvas.height / 2 - newState.paddle2.height / 2;
-            const diff = centerY - newState.paddle2.y;
-            if (Math.abs(diff) > 5) {
-              const passiveSpeed = aiSpeed * 0.4;
-              newState.paddle2.y += Math.sign(diff) * passiveSpeed;
-              newState.paddle2.y = Math.max(0, Math.min(canvas.height - newState.paddle2.height, newState.paddle2.y));
-            }
-          }
-        }
+        if (keysPressed.current.has("ArrowDown") && newState.paddle2.y < canvas.height - newState.paddle2.height)
+          newState.paddle2.y += paddleSpeed * delta;
+        
 
         // Ball movement - unchanged
         newState.ball.x += newState.ball.dx * delta;
@@ -309,13 +269,11 @@ export const PongCanvas = ({
         return newState;
       });
     },
-    [createBall, maxScore, onGameEnd, enableAI, aiDifficulty, mapGameStateToAI]
+    [createBall, maxScore, onGameEnd]
   );
 
   // MODIFIED useEffect to add AI initialization and proper cleanup
   useEffect(() => {
-    // ADDED: Initialize AI
-    aiRef.current = enableAI ? new AIOpponent(aiDifficulty) : null;
 
     // Keyboard event handlers - unchanged
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -365,12 +323,8 @@ export const PongCanvas = ({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       cancelAnimationFrame(animationRef.current);
-      // ADDED: Clean up AI instance
-      if (aiRef.current) {
-        aiRef.current.cleanup?.();
-      }
     };
-  }, [enableAI, aiDifficulty, gameState, updateGame, draw]);
+  }, [gameState, updateGame, draw]);
 
   const startGame = () => {
     lastTimeRef.current = null;
@@ -391,77 +345,72 @@ export const PongCanvas = ({
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
-  // ADDED: Friendly difficulty display
-  const friendlyDifficulty = aiDifficulty.charAt(0) + aiDifficulty.slice(1).toLowerCase();
-  const opponentControlHint = enableAI ? `AI • ${friendlyDifficulty}` : 'Arrow Keys';
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-secondary border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{player1Name}</CardTitle>
+    <div className="pong-game-interface">
+      <div className="player-controls-grid">
+        <Card className="player-card player1-card">
+          <CardHeader className="player-card-header">
+            <CardTitle className="player-card-title">{player1Name}</CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <div className="text-3xl font-game font-bold text-primary">
+          <CardContent className="player-card-content">
+            <div className="player-score player1-score">
               {gameState.score.player1}
             </div>
-            <div className="text-sm text-muted-foreground mt-2">W/S Keys</div>
+            <div className="player-control-hint">W/S Keys</div>
           </CardContent>
         </Card>
-
-        <div className="flex items-center justify-center">
-          <div className="space-y-2">
+  
+        <div className="game-controls-center">
+          <div className="game-controls-buttons">
             {gameState.gameStatus === "waiting" && (
-              <Button onClick={startGame} className="bg-gradient-primary">
-                <Play className="w-4 h-4 mr-2" />
+              <Button onClick={startGame} className="game-control-button start-button">
+                <Play className="button-icon" />
                 Start Game
               </Button>
             )}
             {gameState.gameStatus === "playing" && (
-              <Button onClick={pauseGame} className="border border-border">
-                <Pause className="w-4 h-4 mr-2" />
+              <Button onClick={pauseGame} className="game-control-button pause-button">
+                <Pause className="button-icon" />
                 Pause
               </Button>
             )}
             {gameState.gameStatus === "paused" && (
-              <Button onClick={resumeGame} className="bg-gradient-primary">
-                <Play className="w-4 h-4 mr-2" />
+              <Button onClick={resumeGame} className="game-control-button resume-button">
+                <Play className="button-icon" />
                 Resume
               </Button>
             )}
-            <div className="flex space-x-2">
-              <Button onClick={resetGame} className="px-2 py-1 text-sm border border-border">
-                <RotateCcw className="w-4 h-4 mr-2" />
+            <div className="additional-controls">
+              <Button onClick={resetGame} className="reset-button-small">
+                <RotateCcw className="button-icon" />
                 Reset
               </Button>
             </div>
           </div>
         </div>
-
-        <Card className="bg-gradient-secondary border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-center text-lg">{player2Name}</CardTitle>
+  
+        <Card className="player-card player2-card">
+          <CardHeader className="player-card-header">
+            <CardTitle className="player-card-title">{player2Name}</CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <div className="text-3xl font-game font-bold text-primary">
+          <CardContent className="player-card-content">
+            <div className="player-score player2-score">
               {gameState.score.player2}
             </div>
-            {/* CHANGED: Show AI difficulty or Arrow Keys */}
-            <div className="text-sm text-muted-foreground mt-2">
-              {opponentControlHint}
+            <div className="player-control-hint">
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <div className="flex justify-center">
+  
+      <div className="game-canvas-container">
         <canvas
           ref={canvasRef}
           width={800}
           height={600}
           tabIndex={0}
-          className="border border-border rounded-lg bg-card shadow-card"
+          className="game-canvas"
         />
       </div>
     </div>

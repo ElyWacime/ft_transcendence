@@ -1,0 +1,423 @@
+/* -----AI GAME */
+
+/* AI Game Page Styles */
+.ai-game-page {
+  min-height: 100vh;
+  padding-top: 4rem; /* pt-16 */
+  padding-bottom: 2rem; /* pb-8 */
+  background: linear-gradient(135deg, hsl(222 47% 4%), hsl(222 47% 6%));
+  color: hsl(var(--foreground));
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.ai-game-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem; /* px-4 */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* space-y-6 */
+}
+
+/* Responsive container */
+@media (min-width: 640px) {
+  .ai-game-container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .ai-game-container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ai-game-container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .ai-game-container {
+    max-width: 1280px;
+  }
+}
+
+/* AI Game Header */
+.ai-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ai-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* space-x-2 */
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.ai-back-button:hover {
+  background-color: hsl(var(--accent) / 0.1);
+  border-color: hsl(var(--accent));
+  transform: translateY(-1px);
+}
+
+.back-icon {
+  width: 1rem; /* w-4 */
+  height: 1rem; /* h-4 */
+  stroke-width: 2;
+}
+
+.ai-game-title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+  padding: 0 0.5rem;
+}
+
+.ai-game-title {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* space-x-2 */
+  flex-wrap: wrap;
+  margin: 0;
+  color: hsl(var(--foreground));
+}
+
+.ai-game-title.glow-text {
+  text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.5),
+               0 0 20px hsl(var(--neon-blue) / 0.3);
+}
+
+.ai-icon {
+  width: 2rem; /* w-8 */
+  height: 2rem; /* h-8 */
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+}
+
+.ai-game-subtitle {
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.5rem; /* mt-2 */
+  font-size: 0.875rem;
+  line-height: 1.4;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ai-difficulty-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.ai-difficulty-button:hover {
+  background-color: hsl(var(--primary) / 0.1);
+  border-color: hsl(var(--primary));
+  transform: translateY(-1px);
+}
+
+.difficulty-icon {
+  width: 1rem; /* w-4 */
+  height: 1rem; /* h-4 */
+}
+
+/* Responsive typography */
+@media (min-width: 768px) {
+  .ai-game-title {
+    font-size: 2.25rem; /* md:text-4xl */
+  }
+  
+  .ai-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .ai-game-subtitle {
+    font-size: 1rem;
+  }
+}
+
+/* AI Game Canvas Container */
+.ai-game-canvas-container {
+  width: 100%;
+  max-width: 72rem; /* max-w-6xl */
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Ensure PongCanvas has proper sizing */
+.ai-game-canvas-container > * {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+/* AI Mode Info Card */
+.ai-mode-info-card {
+  max-width: 42rem; /* max-w-2xl */
+  margin: 0 auto;
+  text-align: center;
+  background-image: var(--gradient-secondary);
+  padding: 1rem; /* p-4 */
+  border-radius: calc(var(--radius) - 2px); /* rounded-lg */
+  border: 1px solid hsl(var(--border));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ai-mode-info-title {
+  font-weight: 600; /* font-semibold */
+  font-size: 1rem;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem; /* mb-2 */
+  line-height: 1.5;
+}
+
+.ai-mode-info-description {
+  font-size: 0.875rem; /* text-sm */
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Difficulty Badge Colors */
+.difficulty-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.difficulty-easy {
+  background-color: hsl(142 76% 36% / 0.2);
+  color: hsl(142 76% 36%);
+  border: 1px solid hsl(142 76% 36% / 0.3);
+}
+
+.difficulty-medium {
+  background-color: hsl(45 93% 47% / 0.2);
+  color: hsl(45 93% 47%);
+  border: 1px solid hsl(45 93% 47% / 0.3);
+}
+
+.difficulty-hard {
+  background-color: hsl(0 84% 60% / 0.2);
+  color: hsl(0 84% 60%);
+  border: 1px solid hsl(0 84% 60% / 0.3);
+}
+
+.difficulty-extreme {
+  background-color: hsl(270 95% 75% / 0.2);
+  color: hsl(270 95% 75%);
+  border: 1px solid hsl(270 95% 75% / 0.3);
+}
+
+/* AI Opponent Indicator */
+/* Mobile Responsiveness */
+@media (max-width: 767px) {
+  .ai-game-page {
+    padding-top: 3.5rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .ai-game-container {
+    padding: 0 0.75rem;
+    gap: 1.25rem;
+  }
+  
+  .ai-game-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .ai-back-button {
+    align-self: flex-start;
+  }
+  
+  .ai-game-title-container {
+    order: 2;
+    width: 100%;
+  }
+  
+  .ai-difficulty-button {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+  
+  .ai-game-title {
+    font-size: 1.25rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .ai-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .ai-game-subtitle {
+    font-size: 0.75rem;
+    padding: 0 0.5rem;
+  }
+  
+  .ai-game-canvas-container {
+    max-width: 100%;
+  }
+  
+  .ai-mode-info-card {
+    padding: 0.75rem;
+    margin: 0 0.5rem;
+  }
+}
+
+/* Tablet Responsiveness */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ai-game-title {
+    font-size: 1.75rem;
+  }
+  
+  .ai-game-container {
+    padding: 0 1.5rem;
+  }
+  
+  .ai-game-header {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Desktop Enhancements */
+@media (min-width: 1024px) {
+  .ai-game-container {
+    padding: 0 2rem;
+  }
+  
+  .ai-game-title {
+    font-size: 2.5rem;
+  }
+  
+  .ai-difficulty-button {
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* Focus States for Accessibility */
+.ai-back-button:focus-visible,
+.ai-difficulty-button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-color: hsl(var(--ring));
+}
+
+/* Button Variants */
+.button-outline {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* AI-specific animations */
+@keyframes ai-thinking {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.ai-game-page.loading .ai-game-canvas-container::before {
+  content: 'Initializing AI...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: hsl(var(--background) / 0.9);
+  padding: 2rem 3rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  z-index: 10;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .ai-back-button,
+  .ai-difficulty-button {
+    animation: none;
+    transition: none;
+  }
+  
+  .ai-back-button:hover,
+  .ai-difficulty-button:hover {
+    transform: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .ai-back-button,
+  .ai-difficulty-button {
+    border-width: 2px;
+  }
+  
+  .ai-mode-info-card {
+    border-width: 2px;
+  }
+}

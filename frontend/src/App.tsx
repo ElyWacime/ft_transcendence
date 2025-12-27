@@ -24,6 +24,8 @@ import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
+import Chat from "./pages/Chat";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -33,7 +35,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider children={undefined}>
-          <div className="min-h-screen bg-background">
+          <div className="page-wrapper">
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
@@ -45,18 +47,34 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              {/* <Route
-                path="/profile"
+               <Route
+                path="/chat"
                 element={
                   <ProtectedRoute children={undefined}>
-                    <Profile />
+                    <Chat />
                   </ProtectedRoute>
                 }
-              /> */}
-              <Route path="/profile" element={<ProfileSettings />} />
+              />
+              <Route
+                path="/chat/:id"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              /> 
               <Route path="/profile/change-email" element={<ChangeEmail />} />
               <Route path="/profile/change-password" element={<ChangePassword />} />
               <Route path="/profile/change-picture" element={<ChangePicture />} />
+
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <ProfileSettings />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route
                 path="/dashboard/:id?"
@@ -91,4 +109,3 @@ const App = () => (
 );
 
 export default App;
-

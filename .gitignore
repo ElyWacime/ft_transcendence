@@ -26,3 +26,7 @@ dist-ssr
 
 *.pem
 .env
+.env.local
+.env.*.local
+data.db 
+dev.db

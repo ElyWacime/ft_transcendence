@@ -1,0 +1,166 @@
+/* -----NAVBAR */
+/* Navigation Styles */
+.main-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: hsl(var(--card) / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.nav-container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+.nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem; /* h-16 */
+}
+
+/* Logo */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* space-x-2 */
+}
+
+.logo-icon {
+  width: 2rem; /* w-8 */
+  height: 2rem; /* h-8 */
+  background-image: var(--gradient-primary);
+  border-radius: 0.5rem; /* rounded-lg */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon-svg {
+  width: 1.25rem; /* w-5 */
+  height: 1.25rem; /* h-5 */
+  color: hsl(var(--primary-foreground));
+}
+
+.logo-text {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700;
+  text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.5);
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* space-x-6 */
+}
+
+/* Common nav item styles */
+.nav-button,
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* space-x-2 */
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  border-radius: 0.5rem; /* rounded-lg */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+}
+
+/* Regular nav link styles */
+.nav-link-inactive {
+  color: hsl(var(--muted-foreground));
+}
+
+.nav-link-inactive:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+/* Active nav link styles */
+.nav-link-active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: var(--shadow-neon);
+}
+
+/* Logout button specific styles */
+.logout-button {
+  color: hsl(var(--muted-foreground));
+}
+
+.logout-button:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.nav-icon {
+  width: 1rem; /* w-4 */
+  height: 1rem; /* h-4 */
+}
+
+.nav-label {
+  font-weight: 500; /* font-medium */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .nav-links {
+    gap: 0.75rem;
+  }
+  
+  .nav-button,
+  .nav-link {
+    padding: 0.5rem;
+  }
+  
+  .nav-label {
+    display: none; /* Hide text on small screens, show only icons */
+  }
+}
+
+/* Container responsive widths */
+@media (min-width: 640px) {
+  .nav-container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .nav-container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav-container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .nav-container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .nav-container {
+    max-width: 1536px;
+  }
+}
+/* -----END NAVBAR */

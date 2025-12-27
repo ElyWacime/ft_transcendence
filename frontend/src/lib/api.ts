@@ -168,7 +168,7 @@ export const api = new TournamentAPI();
 // ---------------- USER AUTH API ---------------- //
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
-  private baseUrl = "http://localhost/api/users";
+  private baseUrl = `${API_URL}/api/users`;
 
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
@@ -176,8 +176,26 @@ class UserAPI {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, name }),
     });
+    const response = await res.json();
 
-    return await res.json();
+    if (res.ok) {
+      // Add user to chat after registration
+      try {
+        await fetch(`${API_URL}/api/chat/addUsers`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: response.id, username: name })
+        });
+      } catch (err) {
+        console.error('Failed to add user to chat:', err);
+        // Don't throw error here - registration was successful
+      }
+      
+      return response;
+    } else {
+      throw new Error(response.message || "Registration failed");
+    }
   }
 
   async login(email: string, password: string) {
@@ -185,6 +203,7 @@ class UserAPI {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
+      credentials: "include",
     });
 
     return await res.json();
@@ -268,44 +287,6 @@ class UserAPI {
 
     return await res.json();
   }
-
-  // async update_image_alternative(image: File, description?: string) {
-  //   const token = localStorage.getItem("token");
-    
-  //   const formData = new FormData();
-  //   formData.append('image', image);
-    
-  //   if (description) {
-  //     formData.append('description', description);
-  //   }
-    
-  //   const res = await fetch(`${this.baseUrl}/update_image`, {
-  //     method: "PUT",
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //     body: formData,
-  //     credentials: 'include',
-  //   });
-
-  //   return await res.json();
-  // }
-
-  // async update_image_json(imageData: { image: string; type?: string }) {
-  //   const token = localStorage.getItem("token");
-    
-  //   const res = await fetch(`${this.baseUrl}/update_image`, {
-  //     method: "PUT",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //     body: JSON.stringify(imageData),
-  //     credentials: 'include',
-  //   });
-
-  //   return await res.json();
-  // }
 }
 
 export const userApi = new UserAPI();
