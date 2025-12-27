@@ -4,14 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
 
 function usePongWebSocket(ws, mode, email, setGameState) {
+    const navigate = useNavigate();
     useEffect(() => {
         if (!ws) return;
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
             // console.log("MODE === ", localStorage.getItem("email"), data.player1Name, data.player2email, data.player3email, data.player4email);
+            if (data.type == "redirect") {
+                toast("Navigate to Play");
+                  navigate("/loading?mode=2");
+                }
+            // console.log("server saus 1=== ", data);
             setGameState((prev) => ({
                 ...prev,
                 ball: {
@@ -41,6 +48,7 @@ function usePongWebSocket(ws, mode, email, setGameState) {
         ws.addEventListener("message", handleMessage);
         
         // start game automatically
+        // console.log("11111Sending START message for Pong Online");
         ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
@@ -60,6 +68,7 @@ function usePongControls(ws, mode, email) {
 
     const sendMove = (direction: string) => {
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        // console.log("111222211Sending START message for Pong Online");
 
         ws.send(JSON.stringify({
             token:localStorage.getItem("token"),

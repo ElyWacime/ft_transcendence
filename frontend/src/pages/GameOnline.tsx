@@ -34,6 +34,8 @@ const GameOnline = () => {
   const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
 
   const endGame = () => {
+    // console.log("11111444Sending START message for Pong Online");
+
     ws.send(JSON.stringify({
       token:localStorage.getItem("token"),
       type: "FINISHED",
@@ -49,16 +51,24 @@ const GameOnline = () => {
     if (!ws) return;
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      // console.log("server saus 3=== ", data);
       if (data.gameStatus == "FINISHED") {
         // ws.close();
         endGame();
         // console.log("Match FINISHED try to navigate>>>>>>>");
         navigate("/");
       }
+      if (data.type == "redirect") {
+        toast("Navigate to Play");
+          navigate("/loading?mode=2");
+        }
     };
     ws.addEventListener("message", handleMessage);
     return () => {
       ws.removeEventListener("message", handleMessage);
+      if(ws.readyState === WebSocket.OPEN) {
+        // ws.close();
+      }
     };
   }, [ws]);
 

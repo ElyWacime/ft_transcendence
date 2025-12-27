@@ -9,14 +9,21 @@ export default function SocketListener() {
 
   useEffect(() => {
     if (!socket) return;
-
-    socket.onmessage = (event) => {
+    const handleMessage = (event) => {
       const data = JSON.parse(event.data);
-
-      if (data.type === "redirect") {
-        toast("Redirecting...");
-        navigate("/loading?mode=2");
-      }
+      // console.log("server saus 2=== ", data);
+      console.log("Received WebSocket message:", data);
+      if (data.type == "redirect") {
+            toast("Navigate to Play");
+              navigate("/loading?mode=2");
+            }
+          };
+    socket.addEventListener("message", handleMessage);
+    return () => {
+      // socket.removeEventListener("message", handleMessage);
+      // if(socket.readyState === WebSocket.OPEN) {
+      //   socket.close();
+      // }
     };
   }, [socket]);
 

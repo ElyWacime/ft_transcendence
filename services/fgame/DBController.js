@@ -191,7 +191,7 @@ export class SQLiteDB {
         return this.db.all(`SELECT * FROM Tournament`);
     }
     async getAvailableTournaments() {
-        return this.db.all(`SELECT * FROM Tournament where count_players < max_players`);
+        return this.db.all(`SELECT * FROM Tournament where  result != 'FINISHED'`);   
     }
     async getTournamentById(id) {
         return this.db.get(`SELECT * FROM Tournament WHERE id = ?`, [id]);
@@ -358,9 +358,8 @@ export class SQLiteDB {
     }
 
     // Participate_Tournament CRUD
-    async createParticipate(p) {
-        const result = await this.db.run(`INSERT INTO Participate_Tournament (P_Id, T_Id)
-             VALUES (?, ?)`, [p.P_Id, p.T_Id]);
+    async createParticipate(id, tournamentId) {
+        const result = await this.db.run(`INSERT INTO Participate_Tournament (P_Id, T_Id) VALUES (?, ?)`, [id, tournamentId]);
         return result.lastID;
     }
     async getParticipations() {
@@ -392,17 +391,30 @@ export class SQLiteDB {
     
 
     async createUsers(t) {
-        // let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
-        // update based on id only.
-        let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? `, [t.id]);
-        if (a)
-            return await this.db.run(`UPDATE Users 
-            SET 
-            email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
-            WHERE id = ?`, [t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.id]);
-        else
+        let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? or User_name = ? or email = ? `, [t.id,t.User_name,t.email]);
+        // if (a)
+        //     return await this.db.run(`UPDATE Users 
+        //     SET 
+        //     email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
+        //     WHERE id = ?`, [t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.id]);
+        if (!a)
             return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
-            VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1 , t.avatar]);
+            VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1, t.avatar]);
+        // else
+        // {
+        //     a = await this.db.get(`SELECT * FROM Users WHERE  User_name = ?`, [t.User_name]);
+        //     if (!a)
+        //     await this.db.run(`UPDATE Users 
+        //         SET 
+        //         User_name = ?
+        //         WHERE id = ?`, [t.User_name, t.id]);
+        //     a = await this.db.get(`SELECT * FROM Users WHERE  email = ?`, [t.email]);
+        //     if (!a) 
+        //     await this.db.run(`UPDATE Users 
+        //         SET 
+        //         email = ?
+        //         WHERE id = ?`, [t.email, t.id]);
+        // }
     }
 
     // async createUsers(t) {

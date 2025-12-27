@@ -5,6 +5,7 @@ import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const MatchMacking = () => {
     const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
@@ -44,6 +45,8 @@ const MatchMacking = () => {
     });
     useEffect(() => {
         if (!ws || !isReady) return;
+        // console.log("11155511Sending START message for Pong Online");
+
         ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
@@ -55,6 +58,7 @@ const MatchMacking = () => {
         }));
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
+            // console.log("server saus 4=== ", data);
             // console.log(data);
             setFeatures(() => {
                 return [
@@ -95,10 +99,16 @@ const MatchMacking = () => {
                     },
                 });
             }
+            if (data.type == "redirect") {
+                toast("Navigate to Play");
+                  navigate("/loading?mode=2");
+                }
         };
         ws.addEventListener("message", handleMessage);
         return () => {
             if (ws.readyState === WebSocket.OPEN) {
+        // console.log("11116661Sending START message for Pong Online");
+
                 ws.send(JSON.stringify({
                     token:localStorage.getItem("token"),
                     type: "DELETE",

@@ -16,6 +16,8 @@ export default function SocketProvider({ children }: { children: React.ReactNode
       console.log("WebSocket connected 4");
       if (!ws || ws.readyState != WebSocket.OPEN)
         return;
+        // console.log("11333111Sending START message for Pong Online");
+
       ws.send(JSON.stringify({ type: "AUTHENTICATE", token }) );
     };
     const handleClose = () => {

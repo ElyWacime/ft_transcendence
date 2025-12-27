@@ -3,8 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 import { useEffect } from "react";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { toast } from "sonner";
 const Home = () => {
   const navigate = useNavigate();
+  const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+  useEffect(() => {
+    if (!ws) return;
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      // console.log("server saus 93=== ", data);
+      if (data.type == "redirect") {
+        toast("Navigate to Play");
+          navigate("/loading?mode=2");
+        }
+    };
+    ws.addEventListener("message", handleMessage);
+    return () => {
+      ws.removeEventListener("message", handleMessage);
+      if(ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    };
+  }, [ws]);
 
   const features = [
     {
@@ -37,6 +58,7 @@ const Home = () => {
       description: "Outsmart this AI ",
     }
   ];
+  
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}

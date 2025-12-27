@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { createTournament, joinTournament, startTournament, getTournamentStatus, getWsUrl, setPlayerReady } from "@/lib/fgameTournament";
 import { useAuth } from "@/context/AuthContext";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { toast } from "sonner";
 // import { useNavigate } from "react-router-dom";
 // Helper to get user ID from JWT token
 function getUserIdFromToken(): string | null {
@@ -51,22 +53,29 @@ export default function OnlineTournament() {
   const currentUserId = useMemo(() => getUserIdFromToken(), []);
   const wsUrl = getWsUrl();
   const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
-
+  const navigate = useNavigate();
   // const [features, setFeatures] = useState<Tournament[]>([]);
   const [availableTournaments, setAvailableTournaments] =useState<Tournament[]>([]);
   useEffect(() => {
-    if (!ws || !isReady) return;
+    if (!ws || !isReady || (ws.readyState !== WebSocket.OPEN)) return;
+    console.log("11177711Sending START message for Pong Online");
+
     ws.send(JSON.stringify({
         token:localStorage.getItem("token"),
         type: "GET_TOURNAMENTS"
     }));
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      // console.log("server saus 5=== ", data);
       if (data.type == "TOURNAMENTS_LIST")
       {
         console.log("TOURNAMENTS_LIST data:", data);
         setAvailableTournaments(() => { return data.tournaments;});
-       }
+      }
+      if (data.type == "redirect") {
+        toast("Navigate to Play");
+          navigate("/loading?mode=2");
+        }
     };
     ws.addEventListener("message", handleMessage);
     return () => {
@@ -77,11 +86,12 @@ export default function OnlineTournament() {
 
 
   async function handleCreate(label) {
-    if (!ws || !isReady) {
+    if (!ws || !isReady || (ws.readyState !== WebSocket.OPEN)) {
       console.log("WebSocket not ready");
       return;
     };
     console.log("handleCreate tournament label:", token, label);
+    // console.log("1188111Sending START message for Pong Online");
 
     ws.send(JSON.stringify({
         token:localStorage.getItem("token"),
@@ -91,11 +101,13 @@ export default function OnlineTournament() {
   }
 
   async function handleJoin(id) {
-    if (!ws || !isReady) {
+    if (!ws || !isReady || (ws.readyState !== WebSocket.OPEN)) {
       console.log("WebSocket not ready");
       return;
     };
     console.log("Joining tournament id:", token, id);
+    // console.log("11199911Sending START message for Pong Online");
+
     ws.send(JSON.stringify({
       token:localStorage.getItem("token"),
       type: "JOIN_TOURNAMENT",
@@ -104,11 +116,14 @@ export default function OnlineTournament() {
   }
 
   async function handleStart(id) {
-    if (!ws || !isReady) {
+    if (!ws || !isReady || (ws.readyState !== WebSocket.OPEN)) {
       console.log("WebSocket not ready");
       return;
     };
     console.log("handleStart tournament id:", token, id);
+    // console.log("112223132111Sending START message for Pong Online");
+    // console.log("11111989989Sending START message for Pong Online");
+
     ws.send(JSON.stringify({
         token:localStorage.getItem("token"),
       type: "START_TOURNAMENT",
