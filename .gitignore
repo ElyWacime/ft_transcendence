@@ -25,4 +25,6 @@ dist-ssr
 *.sw?
 
 *.pem
-# .env
+.env
+data.db 
+dev.db

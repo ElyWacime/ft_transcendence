@@ -176,8 +176,26 @@ class UserAPI {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, name }),
     });
+    const response = await res.json();
 
-    return await res.json();
+    if (res.ok) {
+      // Add user to chat after registration
+      try {
+        await fetch(`${API_URL}/api/chat/addUsers`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: response.id, username: name })
+        });
+      } catch (err) {
+        console.error('Failed to add user to chat:', err);
+        // Don't throw error here - registration was successful
+      }
+      
+      return response;
+    } else {
+      throw new Error(response.message || "Registration failed");
+    }
   }
 
   async login(email: string, password: string) {

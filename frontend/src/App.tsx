@@ -24,6 +24,8 @@ import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
+import Chat from "./pages/Chat";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -45,6 +47,22 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+               <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chat/:id"
+                element={
+                  <ProtectedRoute children={undefined}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              /> 
               <Route path="/profile/change-email" element={<ChangeEmail />} />
               <Route path="/profile/change-password" element={<ChangePassword />} />
               <Route path="/profile/change-picture" element={<ChangePicture />} />
@@ -91,4 +109,3 @@ const App = () => (
 );
 
 export default App;
-

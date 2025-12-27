@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlayerForm } from "@/components/PlayerForm";
 import { TournamentBracket } from "@/components/TournamentBracket";
-import { Chat } from "@/components/Chat";
 import { Trophy, Play, Users } from "lucide-react";
 import { Tournament as TournamentType, Match, api } from "@/lib/api";
 import { toast } from "sonner";
@@ -173,14 +172,6 @@ const Tournament = () => {
             />
           </div>
         )}
-
-        {/* Chat Component */}
-        <Chat
-          isOpen={isChatOpen}
-          onToggle={() => setIsChatOpen(!isChatOpen)}
-          currentPlayerId={currentPlayer?.id}
-          currentPlayerAlias={currentPlayer?.alias}
-        />
       </div>
     </div>
   );
