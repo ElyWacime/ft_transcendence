@@ -201,7 +201,7 @@ export class SQLiteDB {
         return result.lastID;
     }
     async createMatch_not(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id, mode, round) VALUES (?, ?, ?)`, [m.P1_Id, m.mode, m.round ?? 1]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id, mode, round) VALUES (?, ?, ?)`, [m.P1_Id, m.mode, m.round]);
         return result.lastID;
     }
     async getMatches() {
@@ -329,7 +329,7 @@ export class SQLiteDB {
         `,
             [m.P1_Id, m.P2_Id, m.P3_Id, m.P4_Id,
             m.score1, m.score2,
-            m.gameStatus, m.Winner_Id, m.T_Id, m.round ?? 1,
+            m.gameStatus, m.Winner_Id, m.T_Id, m.round,
             m.count_players,
             m.id]
         );

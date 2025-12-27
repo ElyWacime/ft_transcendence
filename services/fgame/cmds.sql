@@ -1,7 +1,7 @@
 .headers on
 .mode column
 
-SELECT m.id,u1.User_name ,u2.User_name,m.gameStatus,m.score1,m.score2,m.T_Id  FROM Match m inner join Users u1 on m.P1_Id = u1.id
+SELECT m.id,u1.User_name ,u2.User_name,m.gameStatus,m.score1,m.score2,m.T_Id,m.mode  FROM Match m inner join Users u1 on m.P1_Id = u1.id
 inner join Users u2 on m.P2_Id = u2.id;
 -- docker compose exec -it pong-server bash
 -- sqlite3 database.sqlite

@@ -170,57 +170,46 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           clients.set(id, connection);
           if (request.type == "REGISTER") {
             let u = new Users();
-            u.id = id; //to add in localstorage
+            u.id = id;
             u.email = email;
             u.User_name = name;
             u.isOnline = true;
             u.Auto_Match = true;
-            // console.log("BUser  ===== ", u);
             await dbcnx.createUsers(u);
             u = await dbcnx.getUserById(u.id);
-            // console.log("getUserById  ===== ", u);
-            // console.log("AUser  ===== ", v);
-            // console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
             let m = await dbcnx.getOngoingMatchByPlayerID(id);
-            // let m = await dbcnx.getOngoingMatchByPlayerID(id, request.mode);
             if (!m) {
-              // console.log("\n\n>>>>>Player is not in Match ", id);
-              // console.log("\n\n>>>>>getMatchPlayerCanJoin: ");
-              let tournamentId = request.tournement?.tournamentId || request.tournamentId || null;
-              if (tournamentId) {
-                // Join an open tournament match (created during start)
-                m = await dbcnx.getTournamentOpenMatch(tournamentId);
-                if (!m) {
-                  // No open match yet for tournament
-                  // Fall back to standard matchmaking
-                  m = await dbcnx.getMatchPlayerCanJoin(request.mode);
-                }
-              } else {
-                m = await dbcnx.getMatchPlayerCanJoin(request.mode);
-              }
+              // let tournamentId = request.tournement?.tournamentId || request.tournamentId || null;
+              // if (tournamentId) {
+              //   m = await dbcnx.getTournamentOpenMatch(tournamentId);
+              //   if (!m) {
+              //     m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+              //   }
+              // } else
+              // {
+              //   m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+              // }
+              m = await dbcnx.getMatchPlayerCanJoin(request.mode);
               if (!m) {
-                // Create a new non-tournament match or a tournament seeded holder
                 m = new Match();
                 m.P1_Id = u.id;
-            
                 let resuser = await dbcnx.getUserById(u.id);
-                
                 m.player1Name = resuser.User_name;
                 m.mode = request.mode;
-                if (!tournamentId) {
+                if (!request.tournement) {
                   m.id = await dbcnx.createMatch_not(m);
                 } else {
-                  m.T_Id = tournamentId;
-                  m.round = 1;
-                  m.id = await dbcnx.createMatch(m);
+                  // m.T_Id = tournamentId;
+                  // m.round = 1;
+                  // m.id = await dbcnx.createMatch(m);
                 }
-              } else {
-                // console.log("\n\n\t\t>>>>> Can JOIN: ");
-                if (request.mode == 2) {
+              }
+              else
+              {
+                if (request.mode == 2)
+                {
                   m.P2_Id = u.id;
-              
                   let resuser = await dbcnx.getUserById(u.id);
-                  
                   m.player2Name = resuser.User_name;
                   m.count_players = m.count_players + 1;
                 }
@@ -249,7 +238,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                     m.player4Name = resuser.User_name;
                     m.count_players = m.count_players + 1;
                   }
-                  // console.log("\n\n>>>00000>>updateMatch: ",m);
+
                   await dbcnx.updateMatch(m);
                 }
                 if (m.count_players == m.mode) {
@@ -260,82 +249,59 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.P2_Id = m.P2_Id;
                   ngame.P3_Id = m.P3_Id;
                   ngame.P4_Id = m.P4_Id;
-                  // ngame.player1Name = m.player1Name;
-                  // ngame.player2Name = m.player2Name;
-                  // ngame.player3Name = m.player3Name;
-                  // ngame.player4Name = m.player4Name;
-              
                   let resuser = await dbcnx.getUserById(m.P1_Id);
-                  //console.log("----0----",resuser);
                   if (resuser)
                   {
                     ngame.player1Name = resuser.User_name;
                     ngame.player1email = resuser.email;
                   }
-          
                   resuser = await dbcnx.getUserById(m.P2_Id);
-                  //console.log("----0----",resuser);
                   if (resuser)
                   {
                     ngame.player2Name = resuser.User_name;
                     ngame.player2email = resuser.email;
                   }
-            
                   resuser = await dbcnx.getUserById(m.P3_Id);
-                  //console.log("----0----",resuser);
                   if (resuser)
                   {
                     ngame.player3Name = resuser.User_name;
                     ngame.player3email = resuser.email;
                    }
-          
                    resuser = await dbcnx.getUserById(m.P4_Id);
-                   //console.log("----0----",resuser);
                    if (resuser)
                   {
                     ngame.player4Name = resuser.User_name;
                     ngame.player4email = resuser.email;
                   }
                   ngame.gameStatus = m.gameStatus;
-                  ngame.T_Id = m.T_Id;
+                  // ngame.T_Id = m.T_Id;
                   // ngame.round = m.round;
                   ngame.count_players = m.count_players;
                   ngame.mode = m.mode;
                   matches.set(m.id, ngame);
-                  // console.log("\n\n>>>>>updateMatch: ");
-                  // console.log("\n\n>>>111100000>>updateMatch: ",ngame);
                   await dbcnx.updateMatch(m);
                 }
               }
               let ngame = new GameState();
-
-          
               let resuser = await dbcnx.getUserById(m.P1_Id);
-              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player1Name = resuser.User_name;
                 ngame.player1email = resuser.email;
               }
-      
               resuser = await dbcnx.getUserById(m.P2_Id);
-              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player2Name = resuser.User_name;
                 ngame.player2email = resuser.email;
               }
-      
               resuser = await dbcnx.getUserById(m.P3_Id);
-              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player3Name = resuser.User_name;
                 ngame.player3email = resuser.email;
               }
-      
               resuser = await dbcnx.getUserById(m.P4_Id);
-              //console.log("---1-----",resuser);
               if (resuser)
               {
                 ngame.player4Name = resuser.User_name;
@@ -346,10 +312,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               ngame.P2_Id = m.P2_Id;
               ngame.P3_Id = m.P3_Id;
               ngame.P4_Id = m.P4_Id;
-              // ngame.player1Name = m.player1Name;
-              // ngame.player2Name = m.player2Name;
-              // ngame.player3Name = m.player3Name;
-              // ngame.player4Name = m.player4Name;
               ngame.gameStatus = m.gameStatus;
               ngame.T_Id = m.T_Id;
               ngame.round = m.round;
@@ -371,37 +333,25 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.P2_Id = m.P2_Id;
                   ngame.P3_Id = m.P3_Id;
                   ngame.P4_Id = m.P4_Id;
-                  // ngame.player1Name = m.player1Name;
-                  // ngame.player2Name = m.player2Name;
-                  // ngame.player3Name = m.player3Name;
-                  // ngame.player4Name = m.player4Name;
-              
                   let resuser = await dbcnx.getUserById(m.P1_Id);
-                  //console.log("----2----",resuser);
                   if (resuser)
                   {
                     ngame.player1Name = resuser.User_name;
                     ngame.player1email = resuser.email;
                   }
-          
                   resuser = await dbcnx.getUserById(m.P2_Id);
-                  //console.log("----2----",resuser);
                   if (resuser)
                   {
                     ngame.player2Name = resuser.User_name;
                     ngame.player2email = resuser.email;
                    }
-          
                    resuser = await dbcnx.getUserById(m.P3_Id);
-                   //console.log("----2----",resuser);
                    if (resuser)
                   {
                     ngame.player3Name = resuser.User_name;
                     ngame.player3email = resuser.email;
                   }
-          
                   resuser = await dbcnx.getUserById(m.P4_Id);
-                  //console.log("----2----",resuser);
                   if (resuser)
                   {
                     ngame.player4Name = resuser.User_name;
@@ -412,14 +362,12 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.round = m.round;
                   ngame.count_players = m.count_players;
                   ngame.mode = m.mode;
+                  ngame.Winner_Id = m.Winner_Id;
+                  ngame.score1 = m.score1;
+                  ngame.score2 = m.score2;
                   matches.set(m.id, ngame);
-                  // console.log("\n\n>>>>>updateMatch: ");
-                  // console.log("\n\n>>>111100000>>updateMatch: ",ngame);
-                  await dbcnx.updateMatch(m);
-                }
-              
-            // console.log("\n\n>>>>>Player in Match ", id);
-              
+                  await dbcnx.updateMatch(m); 
+              }
             }
           }
           else if (request.type == "MOVE") {
