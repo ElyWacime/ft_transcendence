@@ -49,7 +49,7 @@ await registerDashboardRoutes_ayoub(fastify, dbcnx);
 The dashboard endpoint will be available at:
 
 ```
-GET http://localhost:3000/api/dashboard/:id
+GET http://10.30.239.32:3000/api/dashboard/:id
 ```
 
 Where `:id` is the user ID.

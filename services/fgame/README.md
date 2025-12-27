@@ -23,8 +23,8 @@ npm start
 4. Verify (in another terminal):
 
 ```bash
-curl http://localhost:3000/
-# or open http://localhost:3000/ in the browser
+curl http://10.30.239.32:3000/
+# or open http://10.30.239.32:3000/ in the browser
 ```
 
 The server responds with JSON: `{ "message": "Hello from Fastify!" }`.

@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { userApi } from "@/lib/api";
 
 function getUserInfoFromToken() {
   try {
@@ -32,15 +35,79 @@ const ProfileSettings = () => {
     username: "",
     avatar: ""
   });
+  const [searchName, setSearchName] = useState("");
+  const [searchResult, setSearchResult] = useState<{
+    user_id: string;
+    user_name: string;
+    user_email: string;
+  } | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [avatarKey, setAvatarKey] = useState(Date.now());
 
   useEffect(() => {
-    const tokenData = getUserInfoFromToken();
-    const email = localStorage.getItem("email") || tokenData?.email || "";
-    const username = localStorage.getItem("username") || tokenData?.username || "Player";
-    const avatar = localStorage.getItem("avatar_url") || "";
+    const fetchUserData = async () => {
+      try {
+        const tokenData = getUserInfoFromToken();
+        const userId = tokenData?.id;
+        
+        if (userId) {
+          // Fetch user data from database
+          const data = await userApi.getUserById(userId);
+          console.log("Fetched user data:", data);
+          console.log("Avatar URL:", data.avatar);
+          setUserInfo({
+            email: data.email || data.user_email || "",
+            username: data.User_name || data.user_name || "Player",
+            avatar: data.avatar || ""
+          });
+          setAvatarKey(Date.now()); // Force avatar refresh
+        } else {
+          // Fallback to localStorage if no token
+          const email = localStorage.getItem("email") || tokenData?.email || "";
+          const username = localStorage.getItem("username") || tokenData?.username || "Player";
+          setUserInfo({ email, username, avatar: "" });
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        // Fallback to token data
+        const tokenData = getUserInfoFromToken();
+        const email = localStorage.getItem("email") || tokenData?.email || "";
+        const username = localStorage.getItem("username") || tokenData?.username || "Player";
+        setUserInfo({ email, username, avatar: "" });
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    setUserInfo({ email, username, avatar });
+    fetchUserData();
   }, []);
+
+  const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSearchLoading(true);
+    setSearchError(null);
+    setSearchResult(null);
+
+    const trimmed = searchName.trim();
+    if (!trimmed) {
+      setSearchError("Enter a username to search");
+      setSearchLoading(false);
+      return;
+    }
+
+    try {
+      const data = await userApi.searchByName(trimmed);
+      setSearchResult(data);
+      toast.success("User found");
+    } catch (err: any) {
+      setSearchError(err?.message || "User not found");
+      toast.error(err?.message || "User not found");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
 
   const settingsOptions = [
     {
@@ -66,6 +133,17 @@ const ProfileSettings = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-secondary">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-16 bg-gradient-secondary">
       <div className="container mx-auto px-4 py-8">
@@ -81,7 +159,7 @@ const ProfileSettings = () => {
           {/* User Profile Card */}
           <Card className="p-8 bg-background/60 backdrop-blur-sm border border-border">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-              <Avatar className="w-32 h-32 border-4 border-primary/20">
+              <Avatar key={avatarKey} className="w-32 h-32 border-4 border-primary/20">
                 <AvatarImage src={userInfo.avatar || "https://www.gravatar.com/avatar/"} />
                 <AvatarFallback className="text-4xl">
                   {userInfo.username?.charAt(0)?.toUpperCase() || "U"}
@@ -99,6 +177,48 @@ const ProfileSettings = () => {
                   View Dashboard
                 </Button>
               </div>
+            </div>
+          </Card>
+
+          {/* Search other players */}
+          <Card className="p-6 bg-background/60 backdrop-blur-sm border border-border">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-semibold flex items-center space-x-2">
+                  <User className="w-5 h-5 text-primary" />
+                  <span>Find a player</span>
+                </h3>
+              </div>
+              <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+                <Input
+                  placeholder="Enter player name"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                  disabled={searchLoading}
+                  className="bg-muted/20 border border-border text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <Button type="submit" disabled={searchLoading}>
+                  {searchLoading ? "Searching..." : "Search"}
+                </Button>
+              </form>
+              {searchError && (
+                <p className="text-sm text-destructive">{searchError}</p>
+              )}
+              {searchResult && (
+                <div className="border border-border rounded-lg p-4 bg-background/40">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Username</p>
+                      <p className="text-lg font-semibold">{searchResult.user_name}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{searchResult.user_email}</p>
+                      <p className="text-xs text-muted-foreground mt-1">ID: {searchResult.user_id}</p>
+                    </div>
+                    <Button onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
+                      View dashboard
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
 

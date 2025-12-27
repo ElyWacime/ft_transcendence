@@ -3,7 +3,7 @@
 ## Steps to Test
 
 1. **Make sure you're logged in:**
-   - Go to: `http://localhost:8080/login`
+   - Go to: `http://10.30.239.32:8080/login`
    - Log in with your credentials
    - Check browser console (F12) to verify token exists:
      ```javascript
@@ -11,7 +11,7 @@
      ```
 
 2. **Access the dashboard:**
-   - Go to: `http://localhost:8080/dashboard`
+   - Go to: `http://10.30.239.32:8080/dashboard`
    - Open browser console (F12) to see logs
 
 3. **Check backend logs:**
@@ -67,6 +67,6 @@ When you access `/dashboard`:
 4. **Test endpoint directly:**
    ```bash
    # Get your token first, then:
-   curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:3000/api/dashboard/YOUR_USER_ID
+   curl -H "Authorization: Bearer YOUR_TOKEN" http://10.30.239.32:3000/api/dashboard/YOUR_USER_ID
    ```
 

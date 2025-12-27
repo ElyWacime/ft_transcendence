@@ -229,13 +229,15 @@ export async function logout(
 interface UpdateImageBody {
   image: string; // base64 string
   image_name: string;
+  file_type?: string;
+  file_size?: number;
 }
 
 export const update_image = async (
   req: FastifyRequest<{ Body: UpdateImageBody }>,
   reply: FastifyReply
 ) => {
-  const { image, image_name } = req.body;
+  const { image, image_name, file_type } = req.body;
   
   try {
     const userId = (req.user as any)?.id;
@@ -249,11 +251,30 @@ export const update_image = async (
     
     const imageBuffer = Buffer.from(image, 'base64');
     
+    // Determine the correct MIME type from file_type or image_name
+    let mimeType = 'image/png';
+    if (file_type) {
+      mimeType = file_type;
+    } else if (image_name) {
+      const ext = image_name.toLowerCase().split('.').pop();
+      const mimeMap: { [key: string]: string } = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp'
+      };
+      mimeType = mimeMap[ext || 'png'] || 'image/png';
+    }
+    
+    const avatarUrl = `data:${mimeType};base64,${image}`;
+    
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         image: imageBuffer,
-        image_name: image_name
+        image_name: image_name,
+        avatar: avatarUrl  // Update the avatar field with base64 data URL
       },
       select: {
         id: true,
@@ -263,7 +284,7 @@ export const update_image = async (
       }
     });
     
-    const avatarUrl = `data:image/png;base64,${image}`;
+    console.log(`[update_image] Updated avatar for user ${userId}, MIME type: ${mimeType}`);
     
     return reply.send({
       success: true,
@@ -273,7 +294,7 @@ export const update_image = async (
     });
     
   } catch (err) {
-    console.error(err);
+    console.error('[update_image] Error:', err);
 
     if (err.code === 'P2025') {
       return reply.status(404).send({

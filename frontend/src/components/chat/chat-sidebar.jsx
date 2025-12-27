@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_URL = import.meta.env.VITE_API_URL || 'http://10.30.239.32';
 const SERVER_URL = API_URL
 
 

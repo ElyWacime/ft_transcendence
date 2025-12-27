@@ -1,13 +1,13 @@
 # Debug Dashboard "Not Found" Error
 
 ## Issue
-When accessing `localhost/dashboard`, you get "Failed to fetch dashboard: Not Found"
+When accessing `10.30.239.32/dashboard`, you get "Failed to fetch dashboard: Not Found"
 
 ## Possible Causes
 
 ### 1. User Not Logged In
 - If you access `/dashboard` without an ID, the app tries to extract user ID from JWT token
-- **Solution**: Log in first at `http://localhost:8080/login`
+- **Solution**: Log in first at `http://10.30.239.32:8080/login`
 
 ### 2. User ID Doesn't Exist in Database
 - The JWT token contains a user ID, but that user doesn't exist in the database
@@ -49,20 +49,20 @@ docker exec trans-pong-server-1 sqlite3 /app/database.sqlite "SELECT id, email, 
 ### Step 4: Test with direct URL
 Try accessing the dashboard with a user ID directly:
 ```
-http://localhost:8080/dashboard/YOUR_USER_ID
+http://10.30.239.32:8080/dashboard/YOUR_USER_ID
 ```
 
 ## Quick Fixes
 
 ### Option 1: Log in first
-1. Go to: `http://localhost:8080/login`
+1. Go to: `http://10.30.239.32:8080/login`
 2. Log in with your credentials
-3. Then go to: `http://localhost:8080/dashboard`
+3. Then go to: `http://10.30.239.32:8080/dashboard`
 
 ### Option 2: Use user ID in URL
 If you know a valid user ID:
 ```
-http://localhost:8080/dashboard/YOUR_USER_ID
+http://10.30.239.32:8080/dashboard/YOUR_USER_ID
 ```
 
 ### Option 3: Create a test user

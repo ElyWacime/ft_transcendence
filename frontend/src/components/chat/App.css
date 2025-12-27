@@ -121,7 +121,7 @@ body {
   border-radius: 20px;
   font-size: 14px;
   background: hsl(var(--input));
-  color: hsl(var(--foreground));
+  color: #fff;
   outline: none;
   transition: border-color var(--transition-smooth);
 }

@@ -6,12 +6,12 @@ The dashboard can be accessed in two ways:
 
 ### Option 1: With User ID in URL (No Login Required)
 ```
-http://localhost:8080/dashboard/:id
+http://10.30.239.32:8080/dashboard/:id
 ```
 
 **Example:**
 ```
-http://localhost:8080/dashboard/user123
+http://10.30.239.32:8080/dashboard/user123
 ```
 
 **Where to get the ID:**
@@ -21,7 +21,7 @@ http://localhost:8080/dashboard/user123
 
 ### Option 2: Without ID (Requires Login)
 ```
-http://localhost:8080/dashboard
+http://10.30.239.32:8080/dashboard
 ```
 
 This will automatically extract the user ID from your JWT token stored in localStorage.
@@ -90,24 +90,24 @@ The `:id?` makes the ID parameter optional:
 
 The backend endpoint is:
 ```
-GET http://localhost:3000/api/dashboard/:id
+GET http://10.30.239.32:3000/api/dashboard/:id
 ```
 
 **Example:**
 ```
-GET http://localhost:3000/api/dashboard/user123
+GET http://10.30.239.32:3000/api/dashboard/user123
 ```
 
 ## Testing
 
 1. **Test with ID in URL:**
    ```
-   http://localhost:8080/dashboard/your-user-id-here
+   http://10.30.239.32:8080/dashboard/your-user-id-here
    ```
 
 2. **Test without ID (requires login):**
    - First, log in to your application
-   - Then navigate to: `http://localhost:8080/dashboard`
+   - Then navigate to: `http://10.30.239.32:8080/dashboard`
    - The dashboard will automatically use your logged-in user ID
 
 ## Troubleshooting

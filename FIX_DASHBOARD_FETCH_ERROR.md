@@ -3,7 +3,7 @@
 ## ✅ What I Fixed
 
 1. **Added gateway route** in `services/gateway/nginx.conf` to proxy dashboard API requests
-2. **Updated API URL** in `frontend/src/lib/api_ayoub.ts` to use gateway instead of direct localhost:3000
+2. **Updated API URL** in `frontend/src/lib/api_ayoub.ts` to use gateway instead of direct 10.30.239.32:3000
 
 ## 🔄 What You Need to Do
 
@@ -38,19 +38,19 @@ npm run dev
 ### Test 1: Check Gateway Route
 ```bash
 # Should return dashboard data or 404 (if user doesn't exist)
-curl http://localhost/api/dashboard/test-user-id
+curl http://10.30.239.32/api/dashboard/test-user-id
 ```
 
 ### Test 2: Check Backend Directly
 ```bash
 # Should return dashboard data
-curl http://localhost:3000/api/dashboard/test-user-id
+curl http://10.30.239.32:3000/api/dashboard/test-user-id
 ```
 
 ### Test 3: Test in Browser
 1. Open browser console (F12)
 2. Go to Network tab
-3. Navigate to: `http://localhost:8080/dashboard/YOUR_USER_ID`
+3. Navigate to: `http://10.30.239.32:8080/dashboard/YOUR_USER_ID`
 4. Check if the request to `/api/dashboard/:id` succeeds
 
 ## 🔍 Debugging
@@ -82,7 +82,7 @@ curl http://localhost:3000/api/dashboard/test-user-id
 
 6. **Verify Backend Route**
    - Check backend console for: "Dashboard routes registered!"
-   - Test: `curl http://localhost:3000/api/dashboard/test-id`
+   - Test: `curl http://10.30.239.32:3000/api/dashboard/test-id`
 
 ## 📋 Common Issues
 

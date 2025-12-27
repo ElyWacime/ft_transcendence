@@ -52,7 +52,7 @@
             <ol>
                 <li>Make sure you're logged in to the application</li>
                 <li>Click the button below to extract your User ID</li>
-                <li>Use the ID to access: <code>http://localhost:8080/dashboard/YOUR_ID</code></li>
+                <li>Use the ID to access: <code>http://10.30.239.32:8080/dashboard/YOUR_ID</code></li>
             </ol>
         </div>
 
@@ -95,7 +95,7 @@
                     "👤 Name: " + (decoded.name || "Not found") + "\n\n" +
                     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
                     "🔗 Dashboard URL:\n" +
-                    "http://localhost:8080/dashboard/" + (decoded.id || "YOUR_ID") + "\n\n" +
+                    "http://10.30.239.32:8080/dashboard/" + (decoded.id || "YOUR_ID") + "\n\n" +
                     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
                     "📄 Full Token Data:\n" +
                     JSON.stringify(decoded, null, 2);

@@ -30,12 +30,12 @@ docker-compose restart frontend
 
 **Option A: With User ID (No Login Required)**
 ```
-http://localhost:8080/dashboard/YOUR_USER_ID
+http://10.30.239.32:8080/dashboard/YOUR_USER_ID
 ```
 
 **Option B: Without ID (Requires Login)**
-1. First, log in at: `http://localhost:8080/login`
-2. Then go to: `http://localhost:8080/dashboard`
+1. First, log in at: `http://10.30.239.32:8080/login`
+2. Then go to: `http://10.30.239.32:8080/dashboard`
 
 ## 🔍 How to Get Your User ID
 
@@ -129,7 +129,7 @@ Test if the backend endpoint works:
 
 ```bash
 # Replace YOUR_USER_ID with actual user ID
-curl http://localhost:3000/api/dashboard/YOUR_USER_ID
+curl http://10.30.239.32:3000/api/dashboard/YOUR_USER_ID
 ```
 
 Expected response:
@@ -157,8 +157,8 @@ Before testing, make sure:
 
 ## 🔗 Correct URLs
 
-- Frontend: `http://localhost:8080/dashboard` or `http://localhost:8080/dashboard/:id`
-- Backend API: `http://localhost:3000/api/dashboard/:id`
+- Frontend: `http://10.30.239.32:8080/dashboard` or `http://10.30.239.32:8080/dashboard/:id`
+- Backend API: `http://10.30.239.32:3000/api/dashboard/:id`
 
 ## 💡 Still Not Working?
 
@@ -173,12 +173,12 @@ Before testing, make sure:
 
 ```bash
 # Test backend endpoint
-curl http://localhost:3000/api/dashboard/test-id
+curl http://10.30.239.32:3000/api/dashboard/test-id
 
 # Check if frontend is running
-curl http://localhost:8080
+curl http://10.30.239.32:8080
 
 # Check if backend is running
-curl http://localhost:3000
+curl http://10.30.239.32:3000
 ```
 

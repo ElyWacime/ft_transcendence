@@ -1,4 +1,4 @@
-
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,8 +18,12 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchMacking from "./pages/MatchMacking";
-import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
+import ProfileSettings from "./pages/ProfileSettings_ayoub";
+import ChangeEmail from "./pages/Change_email_page";
+import ChangePassword from "./pages/ChangePassword";
+import ChangePicture from "./pages/change-picture";
+import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 
 const queryClient = new QueryClient();
 
@@ -29,15 +33,15 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider children={undefined}>
-          <div className="min-h-screen bg-background">
+        <AuthProvider>
+          <div className="page-wrapper min-h-screen bg-background">
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route
                 path="/chat"
                 element={
-                  <ProtectedRoute children={undefined}>
+                  <ProtectedRoute>
                     <Chat />
                   </ProtectedRoute>
                 }
@@ -45,15 +49,15 @@ const App = () => (
               <Route
                 path="/chat/:id"
                 element={
-                  <ProtectedRoute children={undefined}>
+                  <ProtectedRoute>
                     <Chat />
                   </ProtectedRoute>
                 }
-              />              
+              />
               <Route
                 path="/tournament"
                 element={
-                  <ProtectedRoute children={undefined}>
+                  <ProtectedRoute>
                     <Tournament />
                   </ProtectedRoute>
                 }
@@ -61,8 +65,40 @@ const App = () => (
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute children={undefined}>
-                    <Profile />
+                  <ProtectedRoute>
+                    <ProfileSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/change-email"
+                element={
+                  <ProtectedRoute>
+                    <ChangeEmail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/change-password"
+                element={
+                  <ProtectedRoute>
+                    <ChangePassword />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/change-picture"
+                element={
+                  <ProtectedRoute>
+                    <ChangePicture />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/:identifier?"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard_ayoub />
                   </ProtectedRoute>
                 }
               />
@@ -71,16 +107,22 @@ const App = () => (
               <Route path="/game-online" element={<GameOnline />} />
               <Route path="/game-ai" element={<GameAI />} />
               <Route path="/result" element={<Result />} />
-                <Route path="/login" element={
+              <Route
+                path="/login"
+                element={
                   <PublicRoute>
                     <Login />
                   </PublicRoute>
-                } />
-                <Route path="/register" element={
+                }
+              />
+              <Route
+                path="/register"
+                element={
                   <PublicRoute>
                     <Register />
                   </PublicRoute>
-                } />
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
