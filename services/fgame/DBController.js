@@ -340,7 +340,7 @@ export class SQLiteDB {
     }
 
     async getwinnerIDs(id) {
-        await this.db.run(`SELECT Winner_Id FROM Match WHERE T_Id = ? AND round = 1 and  gameStatus = 'FINISHED'`, [id]);
+        return this.db.all(`SELECT Winner_Id as id FROM Match WHERE T_Id = ? AND round = 1 AND gameStatus = 'FINISHED' AND Winner_Id IS NOT NULL`, [id]);
     }
 
     // Participate_Tournament CRUD

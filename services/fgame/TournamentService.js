@@ -146,8 +146,8 @@ export class TournamentService {
     const totalRounds = Math.log2(participants.length);
     const stageNames = {
       1: participants.length === 2 ? "Final" : "Round 1",
-      2: "Semi-Final",
-      3: "Quarter-Final"
+      2: totalRounds === 2 ? "Final" : "Semi-Final",
+      3: totalRounds === 3 ? "Semi-Final" : "Quarter-Final"
     };
     
     return { 

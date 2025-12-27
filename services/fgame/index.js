@@ -145,40 +145,35 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
-async function advanceIfReady  (tId) {
+async function advanceIfReady(tId) {
   const winners = await dbcnx.getwinnerIDs(tId);
-  // Not enough matches yet
-  if (!winners) return;
-  else
-    console.log("Winners not found:", winners);
-  // If any winner is NULL, stop
-  // if (!winners.every(w => w.Winner_Id)) {
-  //   console.log("Waiting for all winners...");
-  //   return;
-  // }
-  console.log("Winners ready:", winners);
-  // const [a, b] = winners.map(w => w.Winner_Id);
+  if (!winners || winners.length < 2) return;
+
+  // Check if final match with same players already exists
+  const existingMatch = await dbcnx.db.get(
+    `SELECT * FROM Match WHERE T_Id = ? AND round = 2 AND 
+     ((P1_Id = ? AND P2_Id = ?) OR (P1_Id = ? AND P2_Id = ?))`,
+    [tId, winners[0].id, winners[1].id, winners[1].id, winners[0].id]
+  );
+  if (existingMatch) return;
+
   const m = new Match();
   m.round = 2;
   m.T_Id = tId;
   m.P1_Id = winners[0].id;
   m.P2_Id = winners[1].id;
   m.count_players = 2;
-  m.gameStatus = "PLAYING";
-  const matchId = await this.db.createMatch(m);
+  m.gameStatus = "PENDING";
+  const matchId = await dbcnx.createMatch(m);
   m.id = matchId;
-  await this.db.updateMatch(m);
-  console.log("Final match created");
+  await dbcnx.updateMatch(m);
+
   let socket = clients.get(m.P1_Id);
   if (socket && socket.readyState === 1)
     socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
-  else
-    console.log("No socket for player ", m.P1_Id);
   socket = clients.get(m.P2_Id);
   if (socket && socket.readyState === 1)
     socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
-  else
-    console.log("No socket for player ", m.P2_Id);
 }
 
 
@@ -499,10 +494,12 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m.gameStatus = "FINISHED";
               // console.log("\n\n>>>>>updateMatch: ");
               await dbcnx.updateMatch(m);
+              if (m.T_Id && m.round >= 2 && m.Winner_Id) {
+                await dbcnx.db.run(`UPDATE Tournament SET result = 'FINISHED', Winner_Id = ? WHERE id = ?`, [m.Winner_Id, m.T_Id]);
+              }
               // Tournament progression if applicable
               if (m.T_Id) {
                 try {
-                  
                   await advanceIfReady(m.T_Id);
                 } catch (e) {
                   console.error("Tournament advance error:", e);

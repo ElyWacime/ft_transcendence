@@ -1,5 +1,5 @@
-idr=c99b3e74f771
-idr2=qwqw_pong-server
+idr=6085f9f49263
+idr2=ft_transcendence-pong-server
 g:
 	docker stop $(idr) && docker rm $(idr)&& docker rmi $(idr2)
 
