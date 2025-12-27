@@ -281,7 +281,6 @@ export class SQLiteDB {
         gameStatus != 'FINISHED';`, [id]);
     }
 
-
     async getCurrentMatchByPlayerID(id) {
         return this.db.get(`SELECT *
         FROM Match
@@ -291,6 +290,7 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
+
     async getOngoingMatchByPlayerID(id) {
         return this.db.get(`SELECT *
         FROM Match
@@ -337,6 +337,10 @@ export class SQLiteDB {
 
     async deleteMatch(id) {
         await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
+    }
+
+    async getwinnerIDs(id) {
+        await this.db.run(`SELECT Winner_Id FROM Match WHERE T_Id = ? AND round = 1 and  gameStatus = 'FINISHED'`, [id]);
     }
 
     // Participate_Tournament CRUD

@@ -130,43 +130,13 @@ export class TournamentService {
       socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
     else
       console.log("No socket for player ", m.P2_Id);
-    await this.advanceIfReady(tId);
+    // await this.advanceIfReady(tId);
     console.log("\n\nadvanceIfReady");
 
     return { started: true };
   }
 
-  async advanceIfReady(tId) {
-    const winners = await this.db.db.all(`SELECT Winner_Id FROM Match WHERE T_Id = ? AND round = 1`,[tId] );
-  
-    // Not enough matches yet
-    if (winners.length < 2) return;
-  
-    // If any winner is NULL, stop
-    if (!winners.every(w => w.Winner_Id)) {
-      console.log("Waiting for all winners...");
-      return;
-    }
-  
-    console.log("Winners ready:", winners);
-  
-    const [a, b] = winners.map(w => w.Winner_Id);
-  
-    const m = new Match();
-    m.round = 2;
-    m.T_Id = tId;
-    m.P1_Id = a;
-    m.P2_Id = b;
-    m.count_players = 2;
-    m.gameStatus = "PLAYING";
-  
-    const matchId = await this.db.createMatch(m);
-    m.id = matchId;
-    await this.db.updateMatch(m);
-  
-    console.log("Final match created");
-  }
-  
+
   async getStatus(tId) {
     const t = await this.db.getTournamentById(tId);
     const matches = await this.db.getTournamentMatches(tId);

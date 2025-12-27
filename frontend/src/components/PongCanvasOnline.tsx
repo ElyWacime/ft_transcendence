@@ -39,6 +39,7 @@ function usePongWebSocket(ws, mode, email, setGameState) {
         };
 
         ws.addEventListener("message", handleMessage);
+        
         // start game automatically
         ws.send(JSON.stringify({
             token: localStorage.getItem("token"),

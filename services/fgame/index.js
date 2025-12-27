@@ -145,6 +145,43 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
+async function advanceIfReady  (tId) {
+  const winners = await dbcnx.getwinnerIDs(tId);
+  // Not enough matches yet
+  if (!winners) return;
+  else
+    console.log("Winners not found:", winners);
+  // If any winner is NULL, stop
+  // if (!winners.every(w => w.Winner_Id)) {
+  //   console.log("Waiting for all winners...");
+  //   return;
+  // }
+  console.log("Winners ready:", winners);
+  // const [a, b] = winners.map(w => w.Winner_Id);
+  const m = new Match();
+  m.round = 2;
+  m.T_Id = tId;
+  m.P1_Id = winners[0].id;
+  m.P2_Id = winners[1].id;
+  m.count_players = 2;
+  m.gameStatus = "PLAYING";
+  const matchId = await this.db.createMatch(m);
+  m.id = matchId;
+  await this.db.updateMatch(m);
+  console.log("Final match created");
+  let socket = clients.get(m.P1_Id);
+  if (socket && socket.readyState === 1)
+    socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+  else
+    console.log("No socket for player ", m.P1_Id);
+  socket = clients.get(m.P2_Id);
+  if (socket && socket.readyState === 1)
+    socket.send(JSON.stringify({ type: 'redirect', tournamentId: tId }));
+  else
+    console.log("No socket for player ", m.P2_Id);
+}
+
+
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
     const request = JSON.parse(msg);
@@ -465,9 +502,8 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               // Tournament progression if applicable
               if (m.T_Id) {
                 try {
-                  const { TournamentService } = await import("./TournamentService.js");
-                  const ts = new TournamentService(dbcnx);
-                  await ts.advanceIfReady(m.T_Id);
+                  
+                  await advanceIfReady(m.T_Id);
                 } catch (e) {
                   console.error("Tournament advance error:", e);
                 }
