@@ -149,9 +149,9 @@ const ChangePicture = () => {
       {initialLoading ? (
         <div className="change-password-shell">
           <Card className="change-password-card">
-            <div className="text-center py-6">
+            <div className="loading-container">
               <div className="loading-spinner"></div>
-              <p className="text-muted-foreground">Loading...</p>
+              <p className="loading-text">Loading...</p>
             </div>
           </Card>
         </div>
@@ -162,14 +162,14 @@ const ChangePicture = () => {
             onClick={() => navigate("/profile")}
             className="back-link"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="back-link-icon" />
             <span>Back to Settings</span>
           </Button>
 
           <Card className="change-password-card">
             <div className="change-password-header">
               <div className="icon-ring" style={{ background: "rgba(147, 51, 234, 0.14)", borderColor: "rgba(147, 51, 234, 0.24)" }}>
-                <Camera className="w-8 h-8 text-purple-400" />
+                <Camera className="camera-icon" />
               </div>
               <div>
                 <h2>Change Profile Picture</h2>
@@ -178,10 +178,10 @@ const ChangePicture = () => {
             </div>
 
             <form onSubmit={updateImage} className="change-password-form" style={{ gap: "18px" }}>
-              <div className="justify-center">
-                <Avatar className="w-44 h-44 border-4 border-primary/20">
+              <div className="avatar-center">
+                <Avatar className="avatar-large">
                   <AvatarImage src={previewUrl || "https://www.gravatar.com/avatar/"} />
-                  <AvatarFallback className="text-6xl">
+                  <AvatarFallback className="avatar-fallback-large">
                     {username?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -202,8 +202,7 @@ const ChangePicture = () => {
                   id="image_id"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="hidden"
-                  style={{ display: "none" }}
+                  className="file-input-hidden"
                 />
               </div>
 

@@ -1,4 +1,4 @@
-/* Tournament Bracket Styles */
+
 .space-y-6 > * + * {
   margin-top: 1.5rem;
 }
@@ -233,7 +233,7 @@
   border-radius: 9999px;
 }
 
-/* Border and styling */
+
 .border {
   border: 1px solid hsl(var(--border));
 }

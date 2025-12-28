@@ -5,6 +5,11 @@
   flex-direction: column;
 }
 
+
+.tournament-match {
+  position: relative;
+}
+
 .setup-card {
   width: 100%;
   max-width: 36rem;
@@ -32,6 +37,14 @@
   color: #bfdbfe;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+
+.title-icon {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
 }
 
 .setup-card-content {

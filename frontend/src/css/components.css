@@ -1,12 +1,12 @@
-/* Component Styles - Pure CSS */
 
-/* Page wrapper */
+
+
 .page-wrapper {
   min-height: 100vh;
   background-color: hsl(var(--background));
 }
 
-/* Button Component */
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -38,7 +38,7 @@
   flex-shrink: 0;
 }
 
-/* Button Variants */
+
 .button-default {
   background-color: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
@@ -96,7 +96,7 @@
   text-decoration: underline;
 }
 
-/* Button Sizes */
+
 .button-size-default {
   height: 2.5rem;
   padding: 0.5rem 1rem;
@@ -120,7 +120,7 @@
   padding: 0;
 }
 
-/* Card Component */
+
 .card {
   border-radius: 0.5rem;
   border: 1px solid hsl(var(--border));
@@ -160,7 +160,7 @@
   padding-top: 0;
 }
 
-/* Input Component */
+
 .input {
   display: flex;
   height: 2.5rem;
@@ -203,7 +203,7 @@
   }
 }
 
-/* Badge Component */
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -254,7 +254,7 @@
   color: hsl(var(--foreground));
 }
 
-/* Utility Classes - Currently Used Only */
+
 .container {
   width: 100%;
   margin-right: auto;

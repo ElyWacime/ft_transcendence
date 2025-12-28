@@ -1,6 +1,6 @@
-/* ------LOGIN */
 
-/* Login Page Styles */
+
+
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -9,26 +9,26 @@
   align-items: center;
   background-image: var(--gradient-secondary);
   text-align: center;
-  padding: 0 1rem; /* px-4 */
+  padding: 0 1rem; 
   color: hsl(var(--foreground));
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* Header */
+
 .login-header {
-  margin-bottom: 2.5rem; /* mb-10 */
+  margin-bottom: 2.5rem; 
   max-width: 800px;
 }
 
 .login-title {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 2.25rem; /* text-4xl */
+  font-size: 2.25rem; 
   font-weight: 700;
   line-height: 1.2;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem; /* space-x-3 */
+  gap: 0.75rem; 
   flex-wrap: wrap;
   margin: 0;
   color: hsl(var(--foreground));
@@ -40,23 +40,23 @@
 }
 
 .trophy-icon {
-  width: 2rem; /* w-8 */
-  height: 2rem; /* h-8 */
+  width: 2rem; 
+  height: 2rem; 
   color: hsl(var(--primary));
   flex-shrink: 0;
 }
 
 .login-subtitle {
   color: hsl(var(--muted-foreground));
-  margin-top: 0.5rem; /* mt-2 */
-  font-size: 0.875rem; /* text-sm */
+  margin-top: 0.5rem; 
+  font-size: 0.875rem; 
   line-height: 1.4;
 }
 
-/* Responsive typography */
+
 @media (min-width: 768px) {
   .login-title {
-    font-size: 3.75rem; /* md:text-6xl */
+    font-size: 3.75rem; 
   }
   
   .trophy-icon {
@@ -65,43 +65,43 @@
   }
   
   .login-subtitle {
-    font-size: 1rem; /* md:text-base */
+    font-size: 1rem; 
   }
 }
 
-/* Login Form */
+
 .login-form {
   width: 100%;
-  max-width: 24rem; /* max-w-sm */
+  max-width: 24rem; 
   background-color: hsl(var(--background) / 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid hsl(var(--border));
-  border-radius: calc(var(--radius) - 2px); /* rounded-lg */
-  padding: 1.5rem; /* p-6 */
+  border-radius: calc(var(--radius) - 2px); 
+  padding: 1.5rem; 
   box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* space-y-4 */
+  gap: 1rem; 
 }
 
-/* Form Group */
+
 .form-group {
   text-align: left;
 }
 
 .form-label {
   display: block;
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 500; /* font-medium */
+  font-size: 0.875rem; 
+  font-weight: 500; 
   color: hsl(var(--muted-foreground));
-  margin-bottom: 0.25rem; /* mb-1 */
+  margin-bottom: 0.25rem; 
 }
 
 .form-input {
   width: 100%;
-  padding: 0.75rem; /* p-3 */
-  border-radius: calc(var(--radius) - 4px); /* rounded-md */
+  padding: 0.75rem; 
+  border-radius: calc(var(--radius) - 4px); 
   background-color: hsl(var(--muted) / 0.2);
   border: 1px solid hsl(var(--border));
   color: hsl(var(--foreground));
@@ -121,12 +121,12 @@
   color: hsl(var(--muted-foreground) / 0.6);
 }
 
-/* Login Button */
+
 .login-button {
   width: 100%;
-  margin-top: 1rem; /* mt-4 */
-  font-weight: 600; /* font-semibold */
-  font-size: 1.125rem; /* text-lg */
+  margin-top: 1rem; 
+  font-weight: 600; 
+  font-size: 1.125rem; 
   padding: 0.75rem 1.5rem;
   background-color: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
@@ -149,34 +149,34 @@
   cursor: not-allowed;
 }
 
-/* Form Divider */
+
 .form-divider {
   display: flex;
   align-items: center;
-  margin: 1rem 0; /* my-4 */
+  margin: 1rem 0; 
 }
 
 .divider-line {
   flex-grow: 1;
-  height: 1px; /* h-px */
+  height: 1px; 
   background-color: hsl(var(--border));
 }
 
 .divider-text {
-  padding: 0 0.5rem; /* px-2 */
-  font-size: 0.875rem; /* text-sm */
+  padding: 0 0.5rem; 
+  font-size: 0.875rem; 
   color: hsl(var(--muted-foreground));
 }
 
-/* GitHub Login Button */
+
 .github-login-button {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* gap-2 */
-  font-weight: 600; /* font-semibold */
-  font-size: 1.125rem; /* text-lg */
+  gap: 0.5rem; 
+  font-weight: 600; 
+  font-size: 1.125rem; 
   padding: 0.75rem 1.5rem;
   background: transparent;
   color: hsl(var(--foreground));
@@ -196,15 +196,15 @@
 }
 
 .github-icon {
-  width: 1.25rem; /* w-5 */
-  height: 1.25rem; /* h-5 */
+  width: 1.25rem; 
+  height: 1.25rem; 
 }
 
-/* Login Footer */
+
 .login-footer {
   color: hsl(var(--muted-foreground));
-  margin-top: 1.5rem; /* mt-6 */
-  font-size: 0.875rem; /* text-sm */
+  margin-top: 1.5rem; 
+  font-size: 0.875rem; 
   text-align: center;
   line-height: 1.5;
 }
@@ -226,7 +226,7 @@
   color: hsl(var(--primary) / 0.8);
 }
 
-/* Error States */
+
 .form-input.error {
   border-color: hsl(var(--destructive));
   background-color: hsl(var(--destructive) / 0.05);
@@ -244,7 +244,7 @@
   text-align: left;
 }
 
-/* Loading Animation */
+
 .login-button.loading {
   position: relative;
   color: transparent;
@@ -271,7 +271,7 @@
   }
 }
 
-/* Success States */
+
 .form-input.success {
   border-color: hsl(var(--accent));
   background-color: hsl(var(--accent) / 0.05);
@@ -288,7 +288,7 @@
   gap: 0.5rem;
 }
 
-/* Mobile Responsiveness */
+
 @media (max-width: 640px) {
   .login-page {
     padding: 0 0.75rem;
@@ -322,7 +322,7 @@
   }
 }
 
-/* Tablet Responsiveness */
+
 @media (min-width: 641px) and (max-width: 1023px) {
   .login-title {
     font-size: 3rem;
@@ -334,7 +334,7 @@
   }
 }
 
-/* Desktop Enhancements */
+
 @media (min-width: 1024px) {
   .login-form {
     max-width: 28rem;
@@ -352,7 +352,7 @@
   }
 }
 
-/* Focus States for Accessibility */
+
 .form-input:focus-visible,
 .login-button:focus-visible,
 .github-login-button:focus-visible,
@@ -365,7 +365,7 @@
   outline-offset: 1px;
 }
 
-/* Dark Mode Adjustments */
+
 @media (prefers-color-scheme: dark) {
   .login-form {
     background-color: hsl(var(--background) / 0.7);
@@ -376,7 +376,7 @@
   }
 }
 
-/* High Contrast Mode */
+
 @media (prefers-contrast: high) {
   .login-form {
     border-width: 2px;
@@ -389,7 +389,7 @@
   }
 }
 
-/* Reduced Motion */
+
 @media (prefers-reduced-motion: reduce) {
   .login-button,
   .github-login-button,
@@ -405,7 +405,7 @@
   }
 }
 
-/* Password visibility toggle (optional enhancement) */
+
 .password-input-wrapper {
   position: relative;
 }
@@ -429,7 +429,7 @@
   color: hsl(var(--foreground));
 }
 
-/* Form validation indicators */
+
 .form-input.valid {
   border-right-width: 4px;
   border-right-color: hsl(var(--accent));
@@ -440,7 +440,7 @@
   border-right-color: hsl(var(--destructive));
 }
 
-/* Login form shake animation for invalid attempts */
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }

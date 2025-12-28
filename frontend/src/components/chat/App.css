@@ -20,7 +20,7 @@
   border: 1px solid hsl(var(--border));
 }
 
-/* ===== SIDEBAR STYLES ===== */
+
 .sidebar {
   width: 320px;
   border-right: 1px solid hsl(var(--border));
@@ -31,7 +31,7 @@
   flex-shrink: 0;
 }
 
-/* Sidebar Header */
+
 .sidebar-header {
   padding: 16px 20px;
   display: flex;
@@ -68,7 +68,7 @@
   color: hsl(var(--secondary-foreground));
 }
 
-/* New Chat Button */
+
 .new-chat-btn {
   width: 36px;
   height: 36px;
@@ -95,7 +95,7 @@
   color: hsl(var(--primary-foreground));
 }
 
-/* Search Input */
+
 .search-section {
   flex: 1;
   display: flex;
@@ -124,7 +124,7 @@
   color: hsl(var(--muted-foreground));
 }
 
-/* Users List */
+
 .users-list {
   flex: 1;
   overflow-y: auto;
@@ -175,7 +175,7 @@
   font-size: 14px;
 }
 
-/* Conversations List */
+
 .conversations-list {
   flex: 1;
   overflow-y: auto;
@@ -202,7 +202,7 @@
   background: hsl(var(--ring));
 }
 
-/* Conversation Item */
+
 .conversation-item {
   padding: 10px 12px;
   border-radius: calc(var(--radius) - 4px);
@@ -253,7 +253,7 @@
   gap: 8px;
 }
 
-/* ===== CHAT WINDOW STYLES ===== */
+
 .chat-window {
   flex: 1;
   display: flex;
@@ -263,7 +263,7 @@
   overflow: hidden;
 }
 
-/* Window Header */
+
 .window-header {
   display: flex;
   justify-content: space-between;
@@ -413,7 +413,7 @@
   margin: 0;
 }
 
-/* Messages Container */
+
 .messages-container {
   flex: 1;
   overflow-y: auto;
@@ -440,7 +440,7 @@
   background: hsl(var(--ring));
 }
 
-/* Message Styles */
+
 .message {
   display: flex;
   margin-bottom: 2px;
@@ -482,7 +482,7 @@
   padding: 0 4px;
 }
 
-/* Empty State */
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -504,7 +504,7 @@
   margin: 0;
 }
 
-/* Input Area */
+
 .input-area {
   display: flex;
   gap: 12px;

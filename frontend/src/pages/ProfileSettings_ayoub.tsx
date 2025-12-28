@@ -139,7 +139,7 @@ const ProfileSettings = () => {
       <div className="loading-state">
         <div className="loading-content">
           <div className="loading-spinner"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
+          <p className="loading-text">Loading profile...</p>
         </div>
       </div>
     );
@@ -147,34 +147,34 @@ const ProfileSettings = () => {
 
   return (
     <div className="profile-page">
-      <div className="container mx-auto px-4 py-8">
+      <div className="profile-container">
         <div className="profile-header">
-          <h1 className="text-4xl md:text-6xl font-game font-bold glow-text space-x-3">
-            <Trophy className="w-8 h-8 text-primary" />
+          <h1 className="profile-title glow-text">
+            <Trophy className="profile-title-icon" />
             <span>Profile Settings</span>
           </h1>
-          <p className="text-muted-foreground mt-2">Manage your account settings</p>
+          <p className="profile-subtitle">Manage your account settings</p>
         </div>
 
-        <div className="max-w-4xl mx-auto space-y-6">
+  <div className="profile-content">
           {/* User Profile Card */}
-          <Card className="profile-card p-8">
-            <div className="flex flex-col md:flex-row items-center md:items-start md:space-x-6 gap-4 md:gap-0">
-              <Avatar key={avatarKey} className="w-32 h-32 border-4 border-primary/20">
+          <Card className="profile-card">
+            <div className="profile-user-card">
+              <Avatar key={avatarKey} className="profile-avatar">
                 <AvatarImage src={userInfo.avatar || "https://www.gravatar.com/avatar/"} />
-                <AvatarFallback className="text-4xl">
+                <AvatarFallback className="profile-avatar-fallback">
                   {userInfo.username?.charAt(0)?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 text-center md:text-left">
-                <h2 className="text-3xl font-bold mb-2">{userInfo.username}</h2>
-                <p className="text-muted-foreground mb-4">{userInfo.email}</p>
+              <div className="profile-user-info">
+                <h2 className="profile-user-name">{userInfo.username}</h2>
+                <p className="profile-user-email">{userInfo.email}</p>
                 <Button
                   variant="outline"
                   onClick={() => navigate("/dashboard")}
-                  className="mt-2"
+                  className="profile-dashboard-btn"
                 >
-                  <User className="w-4 h-4 mr-2" />
+                  <User className="profile-dashboard-icon" />
                   View Dashboard
                 </Button>
               </div>
@@ -182,36 +182,36 @@ const ProfileSettings = () => {
           </Card>
 
           {/* Search other players */}
-          <Card className="profile-card profile-search-card p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-semibold space-x-2">
-                  <User className="w-5 h-5 text-primary" />
+          <Card className="profile-card profile-search-card">
+            <div className="profile-search-section">
+              <div className="profile-search-header">
+                <h3 className="profile-search-title">
+                  <User className="profile-search-icon" />
                   <span>Find a player</span>
                 </h3>
               </div>
-              <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
+              <form onSubmit={handleSearch} className="profile-search-form">
                 <Input
                   placeholder="Enter player name"
                   value={searchName}
                   onChange={(e) => setSearchName(e.target.value)}
                   disabled={searchLoading}
-                  className="bg-muted/20 border border-border text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="profile-search-input"
                 />
                 <Button type="submit" disabled={searchLoading}>
                   {searchLoading ? "Searching..." : "Search"}
                 </Button>
               </form>
               {searchError && (
-                <p className="text-sm text-destructive">{searchError}</p>
+                <p className="profile-error-text">{searchError}</p>
               )}
               {searchResult && (
-                <div className="border border-border rounded-lg p-4 bg-background/40">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                <div className="profile-search-result">
+                  <div className="profile-result-content">
                     <div>
-                      <p className="text-sm text-muted-foreground">Username</p>
-                      <p className="text-lg font-semibold">{searchResult.user_name}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{searchResult.user_email}</p>
+                      <p className="profile-result-label">Username</p>
+                      <p className="profile-result-name">{searchResult.user_name}</p>
+                      <p className="profile-result-email">{searchResult.user_email}</p>
                     </div>
                     <Button onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
                       View dashboard
@@ -226,21 +226,23 @@ const ProfileSettings = () => {
           <div className="profile-settings-grid">
             {settingsOptions.map((option) => {
               const IconComponent = option.icon;
+                          const iconColorClass = option.color === 'text-blue-500' ? 'icon-blue' : 
+                                                  option.color === 'text-green-500' ? 'icon-green' : 'icon-purple';
               return (
                 <Card
                   key={option.path}
-                  className="profile-card p-6 hover:border-primary/50 transition-all cursor-pointer"
+                  className="profile-card profile-option-card"
                   onClick={() => navigate(option.path)}
                 >
-                  <div className="text-center space-y-3">
-                    <div className="flex justify-center">
-                      <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center transition-transform hover:scale-110">
-                        <IconComponent className={`w-8 h-8 ${option.color}`} />
+                  <div className="profile-option-content">
+                    <div className="profile-option-icon-wrapper">
+                      <div className="profile-option-icon-bg">
+                        <IconComponent className={`profile-option-icon ${iconColorClass}`} />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold">{option.title}</h3>
-                    <p className="text-sm text-muted-foreground">{option.description}</p>
-                    <Button variant="outline" className="w-full mt-2 text-primary border-primary/60 hover:bg-primary/10">
+                    <h3 className="profile-option-title">{option.title}</h3>
+                    <p className="profile-option-description">{option.description}</p>
+                    <Button variant="outline" className="profile-option-button">
                       Update →
                     </Button>
                   </div>

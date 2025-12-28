@@ -1,32 +1,32 @@
-/* ----- PONG CANVAS */
 
-/* Pong Game Interface Styles */
+
+
 .pong-game-interface {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* space-y-6 */
+  gap: 1.5rem; 
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
-/* Player Controls Grid */
+
 .player-controls-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem; /* gap-4 */
+  gap: 1rem; 
   width: 100%;
 }
 
 @media (min-width: 768px) {
   .player-controls-grid {
-    grid-template-columns: 1fr auto 1fr; /* md:grid-cols-3 */
+    grid-template-columns: 1fr auto 1fr; 
     align-items: center;
   }
 }
 
-/* Player Card */
+
 .player-card {
   background-image: var(--gradient-secondary);
   border: 1px solid hsl(var(--border));
@@ -43,13 +43,13 @@
 }
 
 .player-card-header {
-  padding-bottom: 0.5rem; /* pb-2 */
+  padding-bottom: 0.5rem; 
   padding: 1.5rem 1.5rem 0.5rem;
 }
 
 .player-card-title {
   text-align: center;
-  font-size: 1.125rem; /* text-lg */
+  font-size: 1.125rem; 
   font-weight: 600;
   color: hsl(var(--foreground));
   margin: 0;
@@ -64,7 +64,7 @@
 
 .player-score {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 1.875rem; /* text-3xl */
+  font-size: 1.875rem; 
   font-weight: 700;
   color: hsl(var(--primary));
   line-height: 1;
@@ -77,14 +77,14 @@
 }
 
 .player-control-hint {
-  font-size: 0.875rem; /* text-sm */
+  font-size: 0.875rem; 
   color: hsl(var(--muted-foreground));
-  margin-top: 0.5rem; /* mt-2 */
+  margin-top: 0.5rem; 
   font-weight: 400;
   opacity: 0.8;
 }
 
-/* Game Controls Center */
+
 .game-controls-center {
   display: flex;
   align-items: center;
@@ -96,7 +96,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem; /* space-y-2 */
+  gap: 0.5rem; 
   width: 100%;
   max-width: 200px;
 }
@@ -105,7 +105,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* mr-2 equivalent */
+  gap: 0.5rem; 
   padding: 0.625rem 1.25rem;
   border-radius: calc(var(--radius) - 2px);
   font-weight: 500;
@@ -145,7 +145,7 @@
 
 .additional-controls {
   display: flex;
-  gap: 0.5rem; /* space-x-2 */
+  gap: 0.5rem; 
   justify-content: center;
   width: 100%;
 }
@@ -155,8 +155,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.25rem 0.75rem; /* px-2 py-1 */
-  font-size: 0.75rem; /* text-sm */
+  padding: 0.25rem 0.75rem; 
+  font-size: 0.75rem; 
   background: transparent;
   color: hsl(var(--foreground));
   border: 1px solid hsl(var(--border));
@@ -174,12 +174,12 @@
 }
 
 .button-icon {
-  width: 1rem; /* w-4 */
-  height: 1rem; /* h-4 */
+  width: 1rem; 
+  height: 1rem; 
   flex-shrink: 0;
 }
 
-/* Game Canvas Container */
+
 .game-canvas-container {
   display: flex;
   justify-content: center;
@@ -193,7 +193,7 @@
   height: 600px;
   max-height: 70vh;
   border: 1px solid hsl(var(--border));
-  border-radius: calc(var(--radius) - 2px); /* rounded-lg */
+  border-radius: calc(var(--radius) - 2px); 
   background-color: hsl(var(--card));
   box-shadow: var(--shadow-card);
   outline: none;
@@ -206,7 +206,7 @@
   box-shadow: var(--shadow-glow);
 }
 
-/* Score Animation */
+
 @keyframes score-pulse {
   0%, 100% {
     transform: scale(1);
@@ -222,7 +222,7 @@
   animation: score-pulse 0.5s ease-in-out;
 }
 
-/* Game Status Indicators */
+
 .player-card.waiting .player-score {
   opacity: 0.5;
 }
@@ -231,7 +231,7 @@
   color: hsl(var(--accent));
 }
 
-/* Game Status Badge */
+
 .game-status-badge {
   position: absolute;
   top: -8px;
@@ -245,7 +245,7 @@
   z-index: 1;
 }
 
-/* Responsive Design */
+
 @media (max-width: 767px) {
   .player-controls-grid {
     grid-template-columns: 1fr;
@@ -299,7 +299,7 @@
   }
 }
 
-/* Different button states for game status */
+
 .game-controls-center.waiting .start-button {
   animation: pulse 2s infinite;
 }
@@ -319,7 +319,7 @@
   }
 }
 
-/* Winner/Loser States */
+
 .player-card.winner {
   border-color: hsl(var(--accent));
   background: linear-gradient(135deg, 
@@ -344,7 +344,7 @@
   filter: grayscale(30%);
 }
 
-/* Focus States for Accessibility */
+
 .game-control-button:focus-visible,
 .reset-button-small:focus-visible,
 .game-canvas:focus-visible {
@@ -353,7 +353,7 @@
   box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
 }
 
-/* Disabled State */
+
 .game-control-button:disabled,
 .reset-button-small:disabled {
   opacity: 0.5;
@@ -361,7 +361,7 @@
   pointer-events: none;
 }
 
-/* AI Difficulty Indicator */
+
 .ai-difficulty-badge {
   display: inline-block;
   padding: 0.125rem 0.375rem;
@@ -388,7 +388,7 @@
   color: hsl(0 84% 60%);
 }
 
-/* Reduced Motion Support */
+
 @media (prefers-reduced-motion: reduce) {
   .player-card,
   .game-control-button,
@@ -404,7 +404,7 @@
   }
 }
 
-/* High Contrast Mode */
+
 @media (prefers-contrast: high) {
   .player-card {
     border-width: 2px;
@@ -420,4 +420,3 @@
   }
 }
 
-/* -----END PONG CANVAS */

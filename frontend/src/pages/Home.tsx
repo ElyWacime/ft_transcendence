@@ -46,7 +46,7 @@ const Home = () => {
         <div className="hero-content">
           <h1 className="hero-title animate-float">
             PONG
-            <span className="text-primary"> ARENA</span>
+            <span className="hero-title-accent"> ARENA</span>
           </h1>
           <p className="hero-subtitle">
             The ultimate retro gaming tournament experience.
@@ -74,7 +74,7 @@ const Home = () => {
               <Card 
                 onClick={() => { navigate(feature.page) }}
                 key={index}
-                className="feature-card group"
+                className="feature-card"
               >
                 <div className="feature-card-content">
                   <div className="feature-icon-container">

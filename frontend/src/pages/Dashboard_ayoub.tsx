@@ -130,7 +130,7 @@ const Dashboard_ayoub = () => {
       <div className="loading-state">
         <div className="loading-content">
           <div className="loading-spinner"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="loading-text">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -150,7 +150,7 @@ const Dashboard_ayoub = () => {
 
   return (
     <div className="dashboard-page">
-      <div className="container mx-auto px-4 py-8 mt-10">
+      <div className="dashboard-container">
         {/* Header */}
         <div className="dashboard-header">
           <h1 className="dashboard-title glow-text">
@@ -178,27 +178,27 @@ const Dashboard_ayoub = () => {
 
           {/* Statistics Cards */}
           <Card className="dashboard-card">
-            <div className="space-y-4">
+            <div className="stat-section">
               <h3 className="section-title">
                 <TrendingUp className="stat-icon" />
                 <span>Statistics</span>
               </h3>
               <div className="dashboard-stats">
                 <div className="stat-row">
-                  <span className="text-muted-foreground">Total Matches</span>
+                  <span className="stat-label">Total Matches</span>
                   <span className="stat-value">{statistics.totalMatches}</span>
                 </div>
                 <div className="stat-row">
-                  <span className="text-muted-foreground">Wins</span>
-                  <span className="stat-value text-green-500">{statistics.totalWins}</span>
+                  <span className="stat-label">Wins</span>
+                  <span className="stat-value stat-value-success">{statistics.totalWins}</span>
                 </div>
                 <div className="stat-row">
-                  <span className="text-muted-foreground">Losses</span>
-                  <span className="stat-value text-red-500">{statistics.totalLosses}</span>
+                  <span className="stat-label">Losses</span>
+                  <span className="stat-value stat-value-danger">{statistics.totalLosses}</span>
                 </div>
                 <div className="stat-row">
-                  <span className="text-muted-foreground">Win Rate</span>
-                  <span className="stat-value text-primary">{statistics.winRate}%</span>
+                  <span className="stat-label">Win Rate</span>
+                  <span className="stat-value stat-value-primary">{statistics.winRate}%</span>
                 </div>
               </div>
             </div>
@@ -206,27 +206,27 @@ const Dashboard_ayoub = () => {
 
           {/* Last Match, Account, Performance */}
           <Card className="dashboard-card">
-            <div className="space-y-6">
-              <div className="space-y-3">
+            <div className="card-sections">
+              <div className="card-section">
                 <h3 className="section-title">
                   <Gamepad2 className="stat-icon" />
                   <span>Last Match</span>
                 </h3>
                 {lastMatch ? (
-                  <div className="space-y-3">
+                  <div className="match-details">
                     <div className="stat-row">
                       <span className="stat-label">Status</span>
                       <span className={`badge-status ${lastMatch.gameStatus === 'FINISHED' ? 'finished' : 'pending'}`}>
                         {lastMatch.gameStatus}
                       </span>
                     </div>
-                    <div className="space-y-2">
+                    <div className="match-scores">
                       <div className="stat-row">
-                        <span className="text-sm">{lastMatch.player1Name || "Player 1"}</span>
+                        <span className="player-name">{lastMatch.player1Name || "Player 1"}</span>
                         <span className="stat-value">{lastMatch.score1 || 0}</span>
                       </div>
                       <div className="stat-row">
-                        <span className="text-sm">{lastMatch.player2Name || "Player 2"}</span>
+                        <span className="player-name">{lastMatch.player2Name || "Player 2"}</span>
                         <span className="stat-value">{lastMatch.score2 || 0}
                         </span>
                       </div>
@@ -234,7 +234,7 @@ const Dashboard_ayoub = () => {
                     {lastMatch.Winner_Id && (
                       <div className="stat-row stat-row-emphasis">
                         <span className="stat-label">
-                          <Award className="text-yellow-500" style={{width: '1rem', height: '1rem'}} />
+                          <Award className="award-icon" />
                           Winner
                         </span>
                         <span className="stat-value">
@@ -246,11 +246,11 @@ const Dashboard_ayoub = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-sm">No matches played yet</p>
+                  <p className="empty-state-text">No matches played yet</p>
                 )}
               </div>
 
-              <div className="space-y-3">
+              <div className="card-section">
                 <h3 className="section-title">
                   <User className="stat-icon" />
                   <span>Account Information</span>
@@ -263,7 +263,7 @@ const Dashboard_ayoub = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="card-section">
                 <h3 className="section-title">
                   <Users className="stat-icon" />
                   <span>Performance</span>
@@ -275,7 +275,7 @@ const Dashboard_ayoub = () => {
                   </div>
                   <div className="stat-row">
                     <span className="stat-label">Win Percentage</span>
-                    <span className="stat-value text-primary">{statistics.winRate}%</span>
+                    <span className="stat-value stat-value-primary">{statistics.winRate}%</span>
                   </div>
                 </div>
               </div>

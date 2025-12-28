@@ -1,5 +1,5 @@
-/* -----GAME CANVAS */
-/* Pong Game Container */
+
+
 .pong-game-container {
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@
   align-items: center;
 }
 
-/* Player Info Grid */
+
 .player-info-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -25,14 +25,14 @@
   }
 }
 
-/* Player Card */
+
 .player-card {
   background-image: var(--gradient-secondary);
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 0; /* Prevents flexbox overflow */
+  min-width: 0; 
 }
 
 .player-card:hover {
@@ -41,13 +41,13 @@
 }
 
 .player-card-header {
-  padding-bottom: 0.5rem; /* pb-2 */
-  padding: 1.5rem 1.5rem 0.5rem; /* Assuming CardHeader padding */
+  padding-bottom: 0.5rem; 
+  padding: 1.5rem 1.5rem 0.5rem; 
 }
 
 .player-card-title {
   text-align: center;
-  font-size: 1.125rem; /* text-lg */
+  font-size: 1.125rem; 
   font-weight: 600;
   color: hsl(var(--foreground));
   margin: 0;
@@ -56,33 +56,33 @@
 
 .player-card-content {
   text-align: center;
-  padding: 0 1.5rem 1.5rem; /* Assuming CardContent padding */
+  padding: 0 1.5rem 1.5rem; 
 }
 
 .player-score {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 1.875rem; /* text-3xl */
+  font-size: 1.875rem; 
   font-weight: 700;
   color: hsl(var(--primary));
   line-height: 1;
 }
 
 .player-controls {
-  font-size: 0.875rem; /* text-sm */
+  font-size: 0.875rem; 
   color: hsl(var(--muted-foreground));
-  margin-top: 0.5rem; /* mt-2 */
+  margin-top: 0.5rem; 
   font-weight: 400;
 }
 
-/* Game Controls Center */
+
 .game-controls-center {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem; /* space-y-4 */
+  gap: 1rem; 
   padding: 0.5rem 0;
-  order: 2; /* For mobile layout */
+  order: 2; 
 }
 
 @media (min-width: 768px) {
@@ -103,15 +103,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem 0.5rem; /* px-2 py-1 */
-  font-size: 0.875rem; /* text-sm */
+  padding: 0.25rem 0.5rem; 
+  font-size: 0.875rem; 
   background: transparent;
   color: hsl(var(--foreground));
   border: 1px solid hsl(var(--border));
   border-radius: calc(var(--radius) - 4px);
   cursor: pointer;
   transition: all 0.3s ease;
-  gap: 0.5rem; /* mr-2 equivalent */
+  gap: 0.5rem; 
   white-space: nowrap;
 }
 
@@ -122,11 +122,11 @@
 }
 
 .reset-icon {
-  width: 1rem; /* w-4 */
-  height: 1rem; /* h-4 */
+  width: 1rem; 
+  height: 1rem; 
 }
 
-/* Game Canvas Wrapper */
+
 .game-canvas-wrapper {
   display: flex;
   justify-content: center;
@@ -154,7 +154,7 @@
   box-shadow: var(--shadow-glow);
 }
 
-/* Utility Classes */
+
 .bg-gradient-secondary {
   background-image: var(--gradient-secondary);
 }
@@ -183,7 +183,7 @@
   box-shadow: var(--shadow-card);
 }
 
-/* Responsive Design */
+
 @media (max-width: 767px) {
   .player-card-title {
     font-size: 1rem;
@@ -209,13 +209,13 @@
   }
 }
 
-/* Special styling for multiplayer mode (mode == 4) */
+
 .player-card.multiplayer .player-card-title {
   font-size: 0.95rem;
   line-height: 1.3;
 }
 
-/* Score animations */
+
 @keyframes score-pulse {
   0%, 100% {
     transform: scale(1);
@@ -231,7 +231,7 @@
   animation: score-pulse 0.5s ease-in-out;
 }
 
-/* Focus states for accessibility */
+
 .game-canvas:focus-visible {
   outline: 3px solid hsl(var(--ring));
   outline-offset: 3px;
@@ -242,21 +242,21 @@
   outline-offset: 2px;
 }
 
-/* Loading state */
+
 .pong-game-container.loading .player-card,
 .pong-game-container.loading .game-canvas {
   opacity: 0.6;
   pointer-events: none;
 }
 
-/* Game finished state */
+
 .pong-game-container.game-finished .player-card {
   border-color: hsl(var(--primary) / 0.5);
   background-image: var(--gradient-primary);
   background-blend-mode: overlay;
 }
 
-/* Winner highlight effect */
+
 .player-card.winner {
   border-width: 2px;
   border-color: hsl(var(--primary));

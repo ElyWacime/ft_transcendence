@@ -1,6 +1,6 @@
 
-/* -----REGISTER */
-/* Register Page Styles */
+
+
 .register-page {
   min-height: 100vh;
   display: flex;
@@ -9,26 +9,26 @@
   align-items: center;
   background-image: var(--gradient-secondary);
   text-align: center;
-  padding: 0 1rem; /* px-4 */
+  padding: 0 1rem; 
   color: hsl(var(--foreground));
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* Header */
+
 .register-header {
-  margin-bottom: 2.5rem; /* mb-10 */
+  margin-bottom: 2.5rem; 
   max-width: 800px;
 }
 
 .register-title {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 2.25rem; /* text-4xl */
+  font-size: 2.25rem; 
   font-weight: 700;
   line-height: 1.2;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem; /* space-x-3 */
+  gap: 0.75rem; 
   flex-wrap: wrap;
   margin: 0;
   color: hsl(var(--foreground));
@@ -40,23 +40,23 @@
 }
 
 .trophy-icon {
-  width: 2rem; /* w-8 */
-  height: 2rem; /* h-8 */
+  width: 2rem; 
+  height: 2rem; 
   color: hsl(var(--primary));
   flex-shrink: 0;
 }
 
 .register-subtitle {
   color: hsl(var(--muted-foreground));
-  margin-top: 0.5rem; /* mt-2 */
-  font-size: 0.875rem; /* text-sm */
+  margin-top: 0.5rem; 
+  font-size: 0.875rem; 
   line-height: 1.4;
 }
 
-/* Responsive typography */
+
 @media (min-width: 768px) {
   .register-title {
-    font-size: 3.75rem; /* md:text-6xl */
+    font-size: 3.75rem; 
   }
   
   .trophy-icon {
@@ -65,43 +65,43 @@
   }
   
   .register-subtitle {
-    font-size: 1rem; /* md:text-base */
+    font-size: 1rem; 
   }
 }
 
-/* Register Form */
+
 .register-form {
   width: 100%;
-  max-width: 24rem; /* max-w-sm */
+  max-width: 24rem; 
   background-color: hsl(var(--background) / 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid hsl(var(--border));
-  border-radius: calc(var(--radius) - 2px); /* rounded-lg */
-  padding: 1.5rem; /* p-6 */
+  border-radius: calc(var(--radius) - 2px); 
+  padding: 1.5rem; 
   box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* space-y-4 */
+  gap: 1rem; 
 }
 
-/* Form Group */
+
 .form-group {
   text-align: left;
 }
 
 .form-label {
   display: block;
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 500; /* font-medium */
+  font-size: 0.875rem; 
+  font-weight: 500; 
   color: hsl(var(--muted-foreground));
-  margin-bottom: 0.25rem; /* mb-1 */
+  margin-bottom: 0.25rem; 
 }
 
 .form-input {
   width: 100%;
-  padding: 0.75rem; /* p-3 */
-  border-radius: calc(var(--radius) - 4px); /* rounded-md */
+  padding: 0.75rem; 
+  border-radius: calc(var(--radius) - 4px); 
   background-color: hsl(var(--muted) / 0.2);
   border: 1px solid hsl(var(--border));
   color: hsl(var(--foreground));
@@ -121,7 +121,7 @@
   color: hsl(var(--muted-foreground) / 0.6);
 }
 
-/* Password strength indicator (optional enhancement) */
+
 .password-strength {
   margin-top: 0.25rem;
   height: 4px;
@@ -151,12 +151,12 @@
   width: 100%;
 }
 
-/* Register Button */
+
 .register-button {
   width: 100%;
-  margin-top: 1rem; /* mt-4 */
-  font-weight: 600; /* font-semibold */
-  font-size: 1.125rem; /* text-lg */
+  margin-top: 1rem; 
+  font-weight: 600; 
+  font-size: 1.125rem; 
   padding: 0.75rem 1.5rem;
   background-color: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
@@ -179,11 +179,11 @@
   cursor: not-allowed;
 }
 
-/* Register Footer */
+
 .register-footer {
   color: hsl(var(--muted-foreground));
-  margin-top: 1.5rem; /* mt-6 */
-  font-size: 0.875rem; /* text-sm */
+  margin-top: 1.5rem; 
+  font-size: 0.875rem; 
   text-align: center;
   line-height: 1.5;
 }
@@ -205,7 +205,7 @@
   color: hsl(var(--primary) / 0.8);
 }
 
-/* Form Validation Styles */
+
 .form-input.error {
   border-color: hsl(var(--destructive));
   background-color: hsl(var(--destructive) / 0.05);
@@ -239,7 +239,7 @@
   gap: 0.5rem;
 }
 
-/* Loading Animation */
+
 .register-button.loading {
   position: relative;
   color: transparent;
@@ -266,7 +266,7 @@
   }
 }
 
-/* Additional form validation hints */
+
 .form-hint {
   font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
@@ -282,7 +282,7 @@
   color: hsl(var(--destructive));
 }
 
-/* Checkbox for terms (optional enhancement) */
+
 .terms-checkbox {
   display: flex;
   align-items: flex-start;
@@ -296,12 +296,6 @@
   accent-color: hsl(var(--primary));
 }
 
-/* .terms-label {
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  line-height: 1.4;
-} */
-
 .terms-link {
   color: hsl(var(--primary));
   text-decoration: none;
@@ -311,7 +305,7 @@
   text-decoration: underline;
 }
 
-/* Mobile Responsiveness */
+
 @media (max-width: 640px) {
   .register-page {
     padding: 0 0.75rem;
@@ -344,7 +338,7 @@
   }
 }
 
-/* Tablet Responsiveness */
+
 @media (min-width: 641px) and (max-width: 1023px) {
   .register-title {
     font-size: 3rem;
@@ -356,7 +350,7 @@
   }
 }
 
-/* Desktop Enhancements */
+
 @media (min-width: 1024px) {
   .register-form {
     max-width: 28rem;
@@ -373,7 +367,7 @@
   }
 }
 
-/* Focus States for Accessibility */
+
 .form-input:focus-visible,
 .register-button:focus-visible,
 .login-link:focus-visible {
@@ -385,7 +379,7 @@
   outline-offset: 1px;
 }
 
-/* Password field with toggle visibility (optional) */
+
 .password-field {
   position: relative;
 }
@@ -409,7 +403,7 @@
   color: hsl(var(--foreground));
 }
 
-/* Form shake animation for invalid submissions */
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
@@ -420,50 +414,7 @@
   animation: shake 0.5s ease-in-out;
 }
 
-/* Progress indicator for multi-step registration (optional)
-.registration-progress {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  position: relative;
-}
 
-.registration-progress::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: hsl(var(--border));
-  z-index: 0;
-} */
-
-/* .progress-step {
-  position: relative;
-  z-index: 1;
-  background-color: hsl(var(--background));
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  border: 2px solid hsl(var(--border));
-  color: hsl(var(--muted-foreground));
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.progress-step.active {
-  border-color: hsl(var(--primary));
-  color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.1);
-}
-
-.progress-step.completed {
-  border-color: hsl(var(--accent));
-  color: hsl(var(--accent));
-  background-color: hsl(var(--accent) / 0.1);
-} */
-
-/* Registration success state */
 .registration-success {
   text-align: center;
   padding: 2rem;
@@ -475,7 +426,7 @@
   margin-bottom: 1rem;
 }
 
-/* Reduced Motion Support */
+
 @media (prefers-reduced-motion: reduce) {
   .register-button,
   .form-input,
@@ -489,7 +440,7 @@
   }
 }
 
-/* High Contrast Mode */
+
 @media (prefers-contrast: high) {
   .register-form {
     border-width: 2px;
@@ -500,4 +451,3 @@
     border-width: 2px;
   }
 }
-/* -----END REGISTER */

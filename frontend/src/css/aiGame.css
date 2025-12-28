@@ -1,6 +1,6 @@
-/* -----AI GAME */
 
-/* AI Game Page Styles */
+
+
 .ai-game-page {
   min-height: 100vh;
   padding-top: 5.5rem;
@@ -23,7 +23,7 @@
   flex: 1;
 }
 
-/* Responsive container */
+
 @media (min-width: 640px) {
   .ai-game-container {
     max-width: 640px;
@@ -48,7 +48,7 @@
   }
 }
 
-/* AI Game Header */
+
 .ai-game-header {
   display: flex;
   align-items: center;
@@ -62,7 +62,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* space-x-2 */
+  gap: 0.5rem; 
   padding: 0.5rem 1rem;
   background: transparent;
   color: hsl(var(--foreground));
@@ -83,8 +83,8 @@
 }
 
 .back-icon {
-  width: 1rem; /* w-4 */
-  height: 1rem; /* h-4 */
+  width: 1rem; 
+  height: 1rem; 
   stroke-width: 2;
 }
 
@@ -102,13 +102,13 @@
 
 .ai-game-title {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 1.5rem; /* text-2xl */
+  font-size: 1.5rem; 
   font-weight: 700;
   line-height: 1.2;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* space-x-2 */
+  gap: 0.5rem; 
   flex-wrap: wrap;
   margin: 0;
   color: hsl(var(--foreground));
@@ -120,15 +120,15 @@
 }
 
 .ai-icon {
-  width: 2rem; /* w-8 */
-  height: 2rem; /* h-8 */
+  width: 2rem; 
+  height: 2rem; 
   color: hsl(var(--primary));
   flex-shrink: 0;
 }
 
 .ai-game-subtitle {
   color: hsl(var(--muted-foreground));
-  margin-top: 0.5rem; /* mt-2 */
+  margin-top: 0.5rem; 
   font-size: 0.875rem;
   line-height: 1.4;
   max-width: 36rem;
@@ -161,14 +161,14 @@
 }
 
 .difficulty-icon {
-  width: 1rem; /* w-4 */
-  height: 1rem; /* h-4 */
+  width: 1rem; 
+  height: 1rem; 
 }
 
-/* Responsive typography */
+
 @media (min-width: 768px) {
   .ai-game-title {
-    font-size: 2.25rem; /* md:text-4xl */
+    font-size: 2.25rem; 
   }
   
   .ai-icon {
@@ -181,7 +181,7 @@
   }
 }
 
-/* AI Game Canvas Container */
+
 .ai-game-canvas-container {
   width: 100%;
   max-width: 100%;
@@ -191,7 +191,7 @@
   justify-content: center;
 }
 
-/* Ensure PongCanvas has proper sizing */
+
 .ai-game-canvas-container > * {
   width: 100%;
   height: auto;
@@ -200,35 +200,35 @@
   box-shadow: var(--shadow-card);
 }
 
-/* AI Mode Info Card */
+
 .ai-mode-info-card {
-  max-width: 42rem; /* max-w-2xl */
+  max-width: 42rem; 
   margin: 0 auto;
   text-align: center;
   background-image: var(--gradient-secondary);
-  padding: 1rem; /* p-4 */
-  border-radius: calc(var(--radius) - 2px); /* rounded-lg */
+  padding: 1rem; 
+  border-radius: calc(var(--radius) - 2px); 
   border: 1px solid hsl(var(--border));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
 .ai-mode-info-title {
-  font-weight: 600; /* font-semibold */
+  font-weight: 600; 
   font-size: 1rem;
   color: hsl(var(--foreground));
-  margin-bottom: 0.5rem; /* mb-2 */
+  margin-bottom: 0.5rem; 
   line-height: 1.5;
 }
 
 .ai-mode-info-description {
-  font-size: 0.875rem; /* text-sm */
+  font-size: 0.875rem; 
   color: hsl(var(--muted-foreground));
   line-height: 1.5;
   margin: 0;
 }
 
-/* Difficulty Badge Colors */
+
 .difficulty-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -264,8 +264,8 @@
   border: 1px solid hsl(270 95% 75% / 0.3);
 }
 
-/* AI Opponent Indicator */
-/* Mobile Responsiveness */
+
+
 @media (max-width: 767px) {
   .ai-game-page {
     padding-top: 3.5rem;
@@ -325,7 +325,7 @@
   }
 }
 
-/* Tablet Responsiveness */
+
 @media (min-width: 768px) and (max-width: 1023px) {
   .ai-game-title {
     font-size: 1.75rem;
@@ -340,7 +340,7 @@
   }
 }
 
-/* Desktop Enhancements */
+
 @media (min-width: 1024px) {
   .ai-game-container {
     padding: 0 2rem;
@@ -356,7 +356,7 @@
   }
 }
 
-/* Focus States for Accessibility */
+
 .ai-back-button:focus-visible,
 .ai-difficulty-button:focus-visible {
   outline: 2px solid hsl(var(--ring));
@@ -364,14 +364,14 @@
   border-color: hsl(var(--ring));
 }
 
-/* Button Variants */
+
 .button-outline {
   background: transparent;
   border: 1px solid hsl(var(--border));
   color: hsl(var(--foreground));
 }
 
-/* AI-specific animations */
+
 @keyframes ai-thinking {
   0%, 100% {
     transform: translateX(0);
@@ -402,7 +402,7 @@
   box-shadow: var(--shadow-card);
 }
 
-/* Reduced Motion Support */
+
 @media (prefers-reduced-motion: reduce) {
   .ai-back-button,
   .ai-difficulty-button {
@@ -416,7 +416,7 @@
   }
 }
 
-/* High Contrast Mode */
+
 @media (prefers-contrast: high) {
   .ai-back-button,
   .ai-difficulty-button {

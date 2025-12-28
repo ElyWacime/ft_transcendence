@@ -42,14 +42,14 @@ const ChangeEmail = () => {
           onClick={() => navigate("/profile")}
           className="back-link"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="back-link-icon" />
           <span>Back to Settings</span>
         </Button>
 
         <Card className="change-password-card">
           <div className="change-password-header">
             <div className="icon-ring" style={{ background: "rgba(59, 130, 246, 0.14)", borderColor: "rgba(59, 130, 246, 0.24)" }}>
-              <Mail className="w-8 h-8 text-blue-400" />
+              <Mail className="mail-icon" />
             </div>
             <div>
               <h2>Change Email</h2>

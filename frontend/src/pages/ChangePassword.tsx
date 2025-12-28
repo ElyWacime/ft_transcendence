@@ -50,14 +50,14 @@ const ChangePassword = () => {
           onClick={() => navigate("/profile")}
           className="back-link"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="back-link-icon" />
           <span>Back to Settings</span>
         </Button>
 
         <Card className="change-password-card">
           <div className="change-password-header">
             <div className="icon-ring">
-              <Lock className="w-8 h-8 text-green-500" />
+              <Lock className="lock-icon" />
             </div>
             <div>
               <h2>Change Password</h2>

@@ -132,7 +132,7 @@ const LocalTournament = () => {
               </Button>
               <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
                 <h1 className="ai-game-title glow-text">
-                  <Trophy className="inline mr-2" />
+                  <Trophy className="title-icon" />
                   Local Tournament
                 </h1>
                 <p className="ai-game-subtitle">4-Player Local Tournament</p>
@@ -191,7 +191,7 @@ const LocalTournament = () => {
             </div>
           </div>
         ) : currentMatch ? (
-          <div className="tournament-match relative w-full">
+          <div className="tournament-match">
             <div className="game-header">
               <Button
                 onClick={handleBackToSetup}
@@ -224,7 +224,7 @@ const LocalTournament = () => {
             </div>
           </div>
         ) : phase === "completed" ? (
-          <div className="tournament-match relative w-full">
+          <div className="tournament-match">
             <div className="game-header">
               <Button
                 onClick={handleBackToSetup}
