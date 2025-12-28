@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Play, CheckCircle, Clock } from "lucide-react";
 import { Match, Tournament } from "@/lib/api";
+import "../css/tournament-bracket.css";
 
 interface TournamentBracketProps {
   tournament: Tournament;
@@ -49,7 +50,7 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
       {/* Tournament Header */}
       <Card className="bg-gradient-secondary border-default">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 font-game">
+          <CardTitle className="space-x-2 font-game">
             <Trophy className="icon-md text-primary" />
             <span>{tournament.name}</span>
             {tournament.status === 'completed' && tournament.winner && (
@@ -98,7 +99,7 @@ export const TournamentBracket = ({ tournament, onStartMatch }: TournamentBracke
                 >
                   <CardHeader className="padding-bottom-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
+                      <div className="space-x-2">
                         {getMatchStatusIcon(match.status)}
                         <span className="font-semibold">Match {match.id.split('-')[1]}</span>
                       </div>

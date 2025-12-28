@@ -127,9 +127,9 @@ const Dashboard_ayoub = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-secondary">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <div className="loading-state">
+        <div className="loading-content">
+          <div className="loading-spinner"></div>
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
@@ -138,9 +138,9 @@ const Dashboard_ayoub = () => {
 
   if (error || !dashboardData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-secondary">
-        <Card className="p-8 max-w-md">
-          <p className="text-destructive text-center">{error || "Failed to load dashboard"}</p>
+      <div className="loading-state">
+        <Card className="error-card">
+          <p className="error-message">{error || "Failed to load dashboard"}</p>
         </Card>
       </div>
     );
@@ -153,8 +153,8 @@ const Dashboard_ayoub = () => {
       <div className="container mx-auto px-4 py-8 mt-10">
         {/* Header */}
         <div className="dashboard-header">
-          <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
-            <Trophy className="w-8 h-8 text-primary" />
+          <h1 className="dashboard-title glow-text">
+            <Trophy className="dashboard-title-icon" />
             <span>Player Dashboard</span>
           </h1>
         </div>
@@ -162,16 +162,16 @@ const Dashboard_ayoub = () => {
         <div className="dashboard-grid">
           {/* User Profile Card */}
           <Card className="dashboard-card">
-            <div className="flex flex-col items-center text-center gap-4">
-              <Avatar key={avatarKey} className="w-24 h-24 border-4 border-primary/20">
+            <div className="profile-container">
+              <Avatar key={avatarKey} className="profile-avatar">
                 <AvatarImage src={avatarSrc} />
                 <AvatarFallback>
                   {user.User_name?.charAt(0)?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-2xl font-bold">{user.User_name || "Player"}</h2>
-                <p className="text-muted-foreground text-sm">{user.email}</p>
+                <h2 className="profile-name">{user.User_name || "Player"}</h2>
+                <p className="profile-email">{user.email}</p>
               </div>
             </div>
           </Card>
@@ -180,7 +180,7 @@ const Dashboard_ayoub = () => {
           <Card className="dashboard-card">
             <div className="space-y-4">
               <h3 className="section-title">
-                <TrendingUp className="w-5 h-5 text-primary" />
+                <TrendingUp className="stat-icon" />
                 <span>Statistics</span>
               </h3>
               <div className="dashboard-stats">
@@ -209,7 +209,7 @@ const Dashboard_ayoub = () => {
             <div className="space-y-6">
               <div className="space-y-3">
                 <h3 className="section-title">
-                  <Gamepad2 className="w-5 h-5 text-primary" />
+                  <Gamepad2 className="stat-icon" />
                   <span>Last Match</span>
                 </h3>
                 {lastMatch ? (
@@ -233,8 +233,8 @@ const Dashboard_ayoub = () => {
                     </div>
                     {lastMatch.Winner_Id && (
                       <div className="stat-row stat-row-emphasis">
-                        <span className="stat-label flex items-center gap-2">
-                          <Award className="w-4 h-4 text-yellow-500" />
+                        <span className="stat-label">
+                          <Award className="text-yellow-500" style={{width: '1rem', height: '1rem'}} />
                           Winner
                         </span>
                         <span className="stat-value">
@@ -252,7 +252,7 @@ const Dashboard_ayoub = () => {
 
               <div className="space-y-3">
                 <h3 className="section-title">
-                  <User className="w-5 h-5 text-primary" />
+                  <User className="stat-icon" />
                   <span>Account Information</span>
                 </h3>
                 <div className="dashboard-stats">
@@ -265,7 +265,7 @@ const Dashboard_ayoub = () => {
 
               <div className="space-y-3">
                 <h3 className="section-title">
-                  <Users className="w-5 h-5 text-primary" />
+                  <Users className="stat-icon" />
                   <span>Performance</span>
                 </h3>
                 <div className="dashboard-stats">

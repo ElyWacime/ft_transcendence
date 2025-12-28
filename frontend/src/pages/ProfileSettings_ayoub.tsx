@@ -136,9 +136,9 @@ const ProfileSettings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-secondary">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <div className="loading-state">
+        <div className="loading-content">
+          <div className="loading-spinner"></div>
           <p className="text-muted-foreground">Loading profile...</p>
         </div>
       </div>
@@ -149,7 +149,7 @@ const ProfileSettings = () => {
     <div className="profile-page">
       <div className="container mx-auto px-4 py-8">
         <div className="profile-header">
-          <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
+          <h1 className="text-4xl md:text-6xl font-game font-bold glow-text space-x-3">
             <Trophy className="w-8 h-8 text-primary" />
             <span>Profile Settings</span>
           </h1>
@@ -159,7 +159,7 @@ const ProfileSettings = () => {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* User Profile Card */}
           <Card className="profile-card p-8">
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+            <div className="flex flex-col md:flex-row items-center md:items-start md:space-x-6 gap-4 md:gap-0">
               <Avatar key={avatarKey} className="w-32 h-32 border-4 border-primary/20">
                 <AvatarImage src={userInfo.avatar || "https://www.gravatar.com/avatar/"} />
                 <AvatarFallback className="text-4xl">
@@ -185,7 +185,7 @@ const ProfileSettings = () => {
           <Card className="profile-card profile-search-card p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-semibold flex items-center space-x-2">
+                <h3 className="text-2xl font-semibold space-x-2">
                   <User className="w-5 h-5 text-primary" />
                   <span>Find a player</span>
                 </h3>
@@ -229,12 +229,12 @@ const ProfileSettings = () => {
               return (
                 <Card
                   key={option.path}
-                  className="profile-card p-6 hover:border-primary/50 transition-all cursor-pointer group"
+                  className="profile-card p-6 hover:border-primary/50 transition-all cursor-pointer"
                   onClick={() => navigate(option.path)}
                 >
                   <div className="text-center space-y-3">
                     <div className="flex justify-center">
-                      <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center transition-transform hover:scale-110">
                         <IconComponent className={`w-8 h-8 ${option.color}`} />
                       </div>
                     </div>

@@ -150,7 +150,7 @@ const ChangePicture = () => {
         <div className="change-password-shell">
           <Card className="change-password-card">
             <div className="text-center py-6">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <div className="loading-spinner"></div>
               <p className="text-muted-foreground">Loading...</p>
             </div>
           </Card>
@@ -178,7 +178,7 @@ const ChangePicture = () => {
             </div>
 
             <form onSubmit={updateImage} className="change-password-form" style={{ gap: "18px" }}>
-              <div className="flex justify-center">
+              <div className="justify-center">
                 <Avatar className="w-44 h-44 border-4 border-primary/20">
                   <AvatarImage src={previewUrl || "https://www.gravatar.com/avatar/"} />
                   <AvatarFallback className="text-6xl">
