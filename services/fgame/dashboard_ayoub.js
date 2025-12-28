@@ -1,12 +1,7 @@
-// Dashboard route handler for player information
-// To use this, import and call: await registerDashboardRoutes_ayoub(fastify, dbcnx);
-// Make sure CORS is registered in your Fastify instance before calling this function
-
 import { Users } from "./DBController.js";
 
 export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
-  // Dashboard endpoint to get player information and statistics
-  // Accepts both username and ID - tries username first, then falls back to ID
+
   fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     console.log("\n\n=== DASHBOARD REQUEST RECEIVED ===");
     console.log("Timestamp:", new Date().toISOString());
@@ -15,7 +10,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       console.log("User identifier from params:", identifier);
       console.log("Authorization header:", request.headers.authorization ? "Present" : "Missing");
       
-      // Get user information from fgame database - try username first, then ID
       let user = await dbcnx.getUserByName(identifier);
       if (!user) {
         user = await dbcnx.getUserById(identifier);
@@ -23,7 +17,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       const id = user?.id || identifier;
       console.log("User found in fgame database:", !!user);
       
-      // If user doesn't exist in fgame database, try to fetch from auth-service or create with zero stats
       if (!user) {
         const authHeader = request.headers.authorization;
         const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
@@ -41,13 +34,11 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
           return reply.code(404).send({ error: 'User not found.' });
         }
 
-        // Check if viewing own dashboard or someone else's
         const matchesId = decoded.id === identifier;
         const matchesUsername = decoded.name === identifier;
         const isOwnDashboard = matchesId || matchesUsername;
 
         if (isOwnDashboard) {
-          // Auto-create for self
           console.log("User not in fgame database; auto-creating for self with identifier:", identifier);
           try {
             const newUser = new Users();
@@ -79,7 +70,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
             return reply.code(500).send({ error: 'Internal server error' });
           }
         } else {
-          // Viewing someone else's dashboard - try to fetch from auth-service
           console.log("Fetching user from auth-service for identifier:", identifier);
           try {
             const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
@@ -102,7 +92,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
             const authUser = await authResponse.json();
             console.log("Found user in auth-service:", authUser.user_name);
             
-            // Create user in fgame database with zero stats
             const newUser = new Users();
             newUser.id = authUser.user_id;
             newUser.email = authUser.user_email || '';
@@ -116,7 +105,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
             user = await dbcnx.getUserById(authUser.user_id);
 
             if (!user) {
-              // Use fallback if still not found
               user = {
                 id: newUser.id,
                 email: newUser.email,
@@ -134,7 +122,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         }
       }
 
-      // Get player statistics - using db.get directly for matches count since UserCountMatches_ayoub uses db.run
       const userId = user.id;
       const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
         Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [userId, userId, userId, userId]);
@@ -142,14 +129,10 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       const tournParticipation = await dbcnx.UserCountTournParticipation_ayoub(userId);
       const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(userId);
 
-      // Calculate win rate
       const totalMatches = matchesCount?.Played || 0;
       const totalWins = winsCount?.Winned || 0;
       const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
 
-      //ayoub                           //////////////////////////////
-
-      // Fetch latest avatar from auth-service database
       let latestAvatar = user.avatar;
       try {
         const authHeader = request.headers.authorization;
@@ -172,7 +155,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
               latestAvatar = authUser.avatar;
               console.log("Fetched latest avatar from auth-service for user:", userId);
               console.log("Latest avatar URL:", latestAvatar);
-              // Update fgame database with latest avatar
               if (user.avatar !== latestAvatar) {
                 await dbcnx.db.run(`UPDATE Users SET avatar = ? WHERE id = ?`, [latestAvatar, userId]);
               }
@@ -181,10 +163,8 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         }
       } catch (avatarError) {
         console.log("Could not fetch latest avatar from auth-service:", avatarError.message);
-        // Continue with avatar from fgame database
       }
 
-      /////////////////////////////////////////////////////////////////////ayob. 
       return {
         user: {
           id: user.id,

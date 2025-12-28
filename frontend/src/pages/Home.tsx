@@ -35,6 +35,7 @@ const Home = () => {
       icon: Zap,
       title: "1 vs AI",
       description: "Outsmart this AI ",
+      page: "/game-ai",
     }
   ];
   return (
@@ -48,7 +49,6 @@ const Home = () => {
             <span className="text-primary"> ARENA</span>
           </h1>
           <p className="hero-subtitle">
-            The ultimate retro gaming tournament experience.
             The ultimate retro gaming tournament experience.
             Compete, dominate, and become the Pong champion!
           </p>
@@ -86,33 +86,6 @@ const Home = () => {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
-  
-      {/* Quick Actions */}
-      <section className="quick-actions-section">
-        <div className="quick-actions-container">
-          <h2 className="quick-actions-title glow-text">Ready to Play?</h2>
-          {/* <div className="quick-actions-buttons">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => { navigate("/tournament") }}
-              className="quick-action-button"
-            >
-              <Users className="button-icon" />
-              Setup Tournament
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => { navigate("/game") }}
-              className="quick-action-button"
-            >
-              <Gamepad2 className="button-icon" />
-              Quick Game
-            </Button>
-          </div> */}
         </div>
       </section>
     </div>

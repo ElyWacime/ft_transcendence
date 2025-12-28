@@ -7,6 +7,7 @@ import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
+import "../css/profile.css";
 
 function getUserInfoFromToken() {
   try {
@@ -145,9 +146,9 @@ const ProfileSettings = () => {
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-secondary">
+    <div className="profile-page">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 text-center">
+        <div className="profile-header">
           <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
             <Trophy className="w-8 h-8 text-primary" />
             <span>Profile Settings</span>
@@ -157,7 +158,7 @@ const ProfileSettings = () => {
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* User Profile Card */}
-          <Card className="p-8 bg-background/60 backdrop-blur-sm border border-border">
+          <Card className="profile-card p-8">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
               <Avatar key={avatarKey} className="w-32 h-32 border-4 border-primary/20">
                 <AvatarImage src={userInfo.avatar || "https://www.gravatar.com/avatar/"} />
@@ -181,7 +182,7 @@ const ProfileSettings = () => {
           </Card>
 
           {/* Search other players */}
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border border-border">
+          <Card className="profile-card profile-search-card p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-semibold flex items-center space-x-2">
@@ -211,7 +212,6 @@ const ProfileSettings = () => {
                       <p className="text-sm text-muted-foreground">Username</p>
                       <p className="text-lg font-semibold">{searchResult.user_name}</p>
                       <p className="text-sm text-muted-foreground mt-1">{searchResult.user_email}</p>
-                      <p className="text-xs text-muted-foreground mt-1">ID: {searchResult.user_id}</p>
                     </div>
                     <Button onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
                       View dashboard
@@ -223,13 +223,13 @@ const ProfileSettings = () => {
           </Card>
 
           {/* Settings Options */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="profile-settings-grid">
             {settingsOptions.map((option) => {
               const IconComponent = option.icon;
               return (
                 <Card
                   key={option.path}
-                  className="p-6 bg-background/60 backdrop-blur-sm border border-border hover:border-primary/50 transition-all cursor-pointer group"
+                  className="profile-card p-6 hover:border-primary/50 transition-all cursor-pointer group"
                   onClick={() => navigate(option.path)}
                 >
                   <div className="text-center space-y-3">
@@ -240,7 +240,7 @@ const ProfileSettings = () => {
                     </div>
                     <h3 className="text-xl font-semibold">{option.title}</h3>
                     <p className="text-sm text-muted-foreground">{option.description}</p>
-                    <Button variant="ghost" className="w-full mt-2">
+                    <Button variant="outline" className="w-full mt-2 text-primary border-primary/60 hover:bg-primary/10">
                       Update →
                     </Button>
                   </div>

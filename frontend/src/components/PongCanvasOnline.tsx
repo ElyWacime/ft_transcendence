@@ -210,7 +210,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                   {gameState.score.player1}
                 </div>
                 <div className="player-controls">
-                  W / S Keys
+                  Arrow Keys
                 </div>
               </CardContent>
             </Card>

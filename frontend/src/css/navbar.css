@@ -32,6 +32,96 @@
   display: flex;
   align-items: center;
   gap: 0.5rem; /* space-x-2 */
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.nav-logo:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+}
+
+/* Dropdown Styles */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+}
+
+.nav-dropdown-button:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.dropdown-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  transition: transform 0.2s ease;
+}
+
+.nav-dropdown-button[aria-expanded="true"] .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  min-width: 180px;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+}
+
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.nav-dropdown-item:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border-left-color: hsl(var(--primary));
+}
+
+.nav-dropdown-item-active {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  border-left-color: hsl(var(--primary));
+}
+
+.nav-dropdown-item .nav-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .logo-icon {
@@ -54,6 +144,7 @@
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 1.25rem; /* text-xl */
   font-weight: 700;
+  color: hsl(var(--foreground));
   text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.5);
 }
 

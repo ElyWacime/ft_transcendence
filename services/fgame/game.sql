@@ -1,9 +1,7 @@
 PRAGMA foreign_keys = ON;
 
--- USERS TABLE
 CREATE TABLE IF NOT EXISTS Users (
     id TEXT PRIMARY KEY,
-    -- id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE,
     User_name TEXT  UNIQUE,
     User_password TEXT ,
@@ -12,10 +10,8 @@ CREATE TABLE IF NOT EXISTS Users (
     isOnline INTEGER  DEFAULT 0,
     avatar TEXT DEFAULT 'https://www.gravatar.com/avatar/',
     CreatedAt DATETIME  DEFAULT CURRENT_TIMESTAMP
-    -- UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- FRIEND REQUEST TABLE
 CREATE TABLE IF NOT EXISTS FriendRequest (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     senderId TEXT NOT NULL,
@@ -27,7 +23,6 @@ CREATE TABLE IF NOT EXISTS FriendRequest (
     FOREIGN KEY (receiverId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- TOURNAMENT TABLE
 CREATE TABLE IF NOT EXISTS Tournament (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     Label TEXT NOT NULL DEFAULT 'New Tournament',
@@ -39,7 +34,6 @@ CREATE TABLE IF NOT EXISTS Tournament (
     FOREIGN KEY (Winner_Id) REFERENCES Users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- PARTICIPATE TOURNAMENT TABLE
 CREATE TABLE IF NOT EXISTS Participate_Tournament (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     P_Id TEXT NOT NULL,
@@ -50,7 +44,6 @@ CREATE TABLE IF NOT EXISTS Participate_Tournament (
     FOREIGN KEY (T_Id) REFERENCES Tournament(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- MATCH TABLE
 CREATE TABLE IF NOT EXISTS Match (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     P1_Id TEXT  DEFAULT NULL,
@@ -63,9 +56,8 @@ CREATE TABLE IF NOT EXISTS Match (
     count_players INTEGER DEFAULT 1,
     CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     gameStatus TEXT DEFAULT 'PENDING' CHECK(gameStatus IN ('PENDING','PLAYING','FINISHED')),
-    -- result TEXT  DEFAULT 'PENDING',  
     Winner_Id INTEGER DEFAULT NULL,
-    T_Id INTEGER DEFAULT NULL,-- add here id
+    T_Id INTEGER DEFAULT NULL,
     FOREIGN KEY (P1_Id) REFERENCES Users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (P2_Id) REFERENCES Users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (P3_Id) REFERENCES Users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -74,7 +66,6 @@ CREATE TABLE IF NOT EXISTS Match (
     FOREIGN KEY (T_Id) REFERENCES Tournament(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- MESSAGES TABLE
 CREATE TABLE IF NOT EXISTS Messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     Message_Text TEXT NOT NULL,
@@ -84,42 +75,4 @@ CREATE TABLE IF NOT EXISTS Messages (
     FOREIGN KEY (Sender) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (Receiver) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
--- -- INDEXES
--- CREATE INDEX IF NOT EXISTS idx_friendrequest_sender ON FriendRequest(senderId);
--- CREATE INDEX IF NOT EXISTS idx_friendrequest_receiver ON FriendRequest(receiverId);
--- CREATE INDEX IF NOT EXISTS idx_messages_sender_receiver ON Messages(Sender, Receiver);
--- CREATE INDEX IF NOT EXISTS idx_participatetournament_tournament ON Participate_Tournament(T_Id);
-
-
-
--- -- and count_players < max_players
--- CREATE TRIGGER tr_T_Insert
--- AFTER INSERT ON Participate_Tournament
--- FOR EACH ROW
--- BEGIN
---     UPDATE Tournament
---     SET count_players = count_players + 1
---     WHERE id = NEW.T_Id ;
--- END;
-
-
--- CREATE TRIGGER tr_T_Delete
--- AFTER DELETE ON Participate_Tournament
--- FOR EACH ROW
--- BEGIN
---     UPDATE Tournament
---     SET count_players = count_players - 1
---     WHERE id = OLD.T_Id;
--- END;
-
-
--- CREATE TRIGGER tr_Match_Update
--- AFTER UPDATE ON Match
--- FOR EACH ROW
--- BEGIN
---     UPDATE Tournament
---     SET result = 'FINISHED', Winner_Id = NEW.Winner_Id
---     WHERE NEW.T_Id IS NOT NULL AND  id = NEW.T_Id   AND (SELECT COUNT(*) FROM Match WHERE T_Id = NEW.T_Id AND gameStatus = 'FINISHED') = 7;
--- END;
 

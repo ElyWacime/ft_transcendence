@@ -10,6 +10,10 @@
   padding: 5rem 1rem; /* py-20 px-4 */
   text-align: center;
   overflow: hidden;
+
+  /* Pull the hero background up to sit flush beneath the navbar while keeping content pushed down */
+  margin-top: -4rem;
+  padding-top: calc(5rem + 4rem);
 }
 
 .hero-glow-overlay {
@@ -99,27 +103,30 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem; /* gap-6 */
+  align-items: stretch;
 }
 
 @media (min-width: 768px) {
   .features-grid {
-    grid-template-columns: repeat(2, 1fr); /* md:grid-cols-2 */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
   .features-grid {
-    grid-template-columns: repeat(4, 1fr); /* lg:grid-cols-4 */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 }
 
 .feature-card {
-  padding: 1.5rem; /* p-6 */
+  padding: 1.75rem; /* add breathing room */
   background-image: var(--gradient-secondary);
   border: 1px solid hsl(var(--border));
   transition: all 0.3s ease;
+  height: 100%;
+  border-radius: 0.75rem;
 }
 
 .feature-card:hover {
@@ -133,6 +140,8 @@
   align-items: center;
   text-align: center;
   gap: 1rem; /* space-y-4 */
+  width: 100%;
+  padding: 0.25rem 0.25rem;
 }
 
 .feature-icon-container {

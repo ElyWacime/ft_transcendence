@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Mail, ArrowLeft } from "lucide-react";
+import "../css/change-password.css";
 
 const ChangeEmail = () => {
   const navigate = useNavigate();
@@ -34,60 +35,54 @@ const ChangeEmail = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-secondary px-4">
-      <div className="w-full max-w-md">
+    <div className="change-password-page">
+      <div className="change-password-shell">
         <Button
           variant="ghost"
           onClick={() => navigate("/profile")}
-          className="mb-4"
+          className="back-link"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Settings
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Settings</span>
         </Button>
 
-        <Card className="p-8 bg-background/60 backdrop-blur-sm border border-border">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-8 h-8 text-blue-500" />
+        <Card className="change-password-card">
+          <div className="change-password-header">
+            <div className="icon-ring" style={{ background: "rgba(59, 130, 246, 0.14)", borderColor: "rgba(59, 130, 246, 0.24)" }}>
+              <Mail className="w-8 h-8 text-blue-400" />
             </div>
-            <h2 className="text-2xl font-bold">Change Email</h2>
-            <p className="text-muted-foreground text-sm mt-2">
-              Enter your new email and current password
-            </p>
+            <div>
+              <h2>Change Email</h2>
+              <p>Enter your new email and current password.</p>
+            </div>
           </div>
 
-          <form onSubmit={updateEmail} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">
-                New Email
-              </label>
+          <form onSubmit={updateEmail} className="change-password-form">
+            <div className="field">
+              <label>New Email</label>
               <input
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 required
-                className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
                 placeholder="you@example.com"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">
-                Current Password
-              </label>
+            <div className="field">
+              <label>Current Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
                 placeholder="••••••••"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full mt-4 font-semibold"
+              className="submit-btn"
               disabled={loading}
             >
               {loading ? "Updating..." : "Update Email"}

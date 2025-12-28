@@ -13,7 +13,7 @@ const Game = () => {
 
   // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
-  const player1 = location.state?.player1 || { alias: localStorage.getItem("email") };
+  const player1 = location.state?.player1 || { alias: "Player 1" };
   const player2 = location.state?.player2 || { alias: "Player 2" };
 
   const handleGameEnd = async (player1Score: number, player2Score: number) => {

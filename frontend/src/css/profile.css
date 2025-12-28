@@ -1,0 +1,66 @@
+.profile-page {
+  min-height: 100vh;
+  padding-top: 4rem;
+  background-image: var(--gradient-secondary);
+  color: hsl(var(--foreground));
+}
+
+.profile-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.profile-header h1 {
+  justify-content: center;
+}
+
+.profile-card {
+  background-color: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-card);
+  padding: 1.75rem;
+  border-radius: 0.85rem;
+}
+
+.profile-search-card form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .profile-search-card form {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+  }
+}
+
+.profile-search-card input {
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+}
+
+.profile-search-card button {
+  min-height: 48px;
+  border-radius: 0.65rem;
+}
+
+.profile-card .space-y-4,
+.profile-card .space-y-3,
+.profile-card .flex,
+.profile-card .text-center {
+  gap: 0.75rem;
+}
+
+.profile-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .profile-settings-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

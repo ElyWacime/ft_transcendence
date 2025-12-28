@@ -6,6 +6,7 @@ import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
 import { Trophy, User, TrendingUp, Gamepad2, Award, Users } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import "../css/dashboard.css";
 
 // Helper function to decode JWT token and get user ID
 function getUserIdFromToken(): string | null {
@@ -148,150 +149,133 @@ const Dashboard_ayoub = () => {
   const { user, statistics, lastMatch } = dashboardData;
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-secondary">
-      <div className="container mx-auto px-4 py-8">
+    <div className="dashboard-page">
+      <div className="container mx-auto px-4 py-8 mt-10">
         {/* Header */}
-        <div className="mb-8 text-center">
+        <div className="dashboard-header">
           <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
             <Trophy className="w-8 h-8 text-primary" />
             <span>Player Dashboard</span>
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="dashboard-grid">
           {/* User Profile Card */}
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border border-border">
-            <div className="flex flex-col items-center text-center space-y-4">
-                <Avatar key={avatarKey} className="w-24 h-24">
-              <AvatarImage src={avatarSrc} />
-              <AvatarFallback>
-                {user.User_name?.charAt(0)?.toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
+          <Card className="dashboard-card">
+            <div className="flex flex-col items-center text-center gap-4">
+              <Avatar key={avatarKey} className="w-24 h-24 border-4 border-primary/20">
+                <AvatarImage src={avatarSrc} />
+                <AvatarFallback>
+                  {user.User_name?.charAt(0)?.toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
               <div>
                 <h2 className="text-2xl font-bold">{user.User_name || "Player"}</h2>
                 <p className="text-muted-foreground text-sm">{user.email}</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${user.isOnline ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                <span className="text-sm text-muted-foreground">
-                  {user.isOnline ? "Online" : "Offline"}
-                </span>
-              </div>
-              {user.Auto_Match && (
-                <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
-                  Auto Match Enabled
-                </span>
-              )}
             </div>
           </Card>
 
           {/* Statistics Cards */}
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border border-border">
+          <Card className="dashboard-card">
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold flex items-center space-x-2">
+              <h3 className="section-title">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <span>Statistics</span>
               </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
+              <div className="dashboard-stats">
+                <div className="stat-row">
                   <span className="text-muted-foreground">Total Matches</span>
-                  <span className="font-bold text-lg">{statistics.totalMatches}</span>
+                  <span className="stat-value">{statistics.totalMatches}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="stat-row">
                   <span className="text-muted-foreground">Wins</span>
-                  <span className="font-bold text-lg text-green-500">{statistics.totalWins}</span>
+                  <span className="stat-value text-green-500">{statistics.totalWins}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="stat-row">
                   <span className="text-muted-foreground">Losses</span>
-                  <span className="font-bold text-lg text-red-500">{statistics.totalLosses}</span>
+                  <span className="stat-value text-red-500">{statistics.totalLosses}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="stat-row">
                   <span className="text-muted-foreground">Win Rate</span>
-                  <span className="font-bold text-lg text-primary">{statistics.winRate}%</span>
+                  <span className="stat-value text-primary">{statistics.winRate}%</span>
                 </div>
               </div>
             </div>
           </Card>
 
-          {/* Last Match Card */}
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border border-border">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold flex items-center space-x-2">
-                <Gamepad2 className="w-5 h-5 text-primary" />
-                <span>Last Match</span>
-              </h3>
-              {lastMatch ? (
-                <div className="space-y-3">
-                  <div className="text-sm text-muted-foreground">
-                    Status: <span className={`font-semibold ${lastMatch.gameStatus === 'FINISHED' ? 'text-green-500' : 'text-yellow-500'}`}>
-                      {lastMatch.gameStatus}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">{lastMatch.player1Name || "Player 1"}</span>
-                      <span className="font-bold">{lastMatch.score1 || 0}</span>
+          {/* Last Match, Account, Performance */}
+          <Card className="dashboard-card">
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <h3 className="section-title">
+                  <Gamepad2 className="w-5 h-5 text-primary" />
+                  <span>Last Match</span>
+                </h3>
+                {lastMatch ? (
+                  <div className="space-y-3">
+                    <div className="stat-row">
+                      <span className="stat-label">Status</span>
+                      <span className={`badge-status ${lastMatch.gameStatus === 'FINISHED' ? 'finished' : 'pending'}`}>
+                        {lastMatch.gameStatus}
+                      </span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">{lastMatch.player2Name || "Player 2"}</span>
-                      <span className="font-bold">{lastMatch.score2 || 0}</span>
+                    <div className="space-y-2">
+                      <div className="stat-row">
+                        <span className="text-sm">{lastMatch.player1Name || "Player 1"}</span>
+                        <span className="stat-value">{lastMatch.score1 || 0}</span>
+                      </div>
+                      <div className="stat-row">
+                        <span className="text-sm">{lastMatch.player2Name || "Player 2"}</span>
+                        <span className="stat-value">{lastMatch.score2 || 0}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  {lastMatch.Winner_Id && (
-                    <div className="pt-2 border-t border-border">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Award className="w-4 h-4 text-yellow-500" />
-                        <span className="text-muted-foreground">Winner: </span>
-                        <span className="font-semibold">
+                    {lastMatch.Winner_Id && (
+                      <div className="stat-row stat-row-emphasis">
+                        <span className="stat-label flex items-center gap-2">
+                          <Award className="w-4 h-4 text-yellow-500" />
+                          Winner
+                        </span>
+                        <span className="stat-value">
                           {lastMatch.Winner_Id === lastMatch.P1_Id ? lastMatch.player1Name : 
                            lastMatch.Winner_Id === lastMatch.P2_Id ? lastMatch.player2Name : 
                            "Unknown"}
                         </span>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">No matches played yet</p>
-              )}
-            </div>
-          </Card>
-        </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">No matches played yet</p>
+                )}
+              </div>
 
-        {/* Additional Info Section */}
-        <div className="mt-8 max-w-6xl mx-auto">
-          <Card className="p-6 bg-background/60 backdrop-blur-sm border border-border">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-3 flex items-center space-x-2">
+              <div className="space-y-3">
+                <h3 className="section-title">
                   <User className="w-5 h-5 text-primary" />
                   <span>Account Information</span>
                 </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Member since:</span>
-                    <span>{new Date(user.CreatedAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">User ID:</span>
-                    <span className="font-mono text-xs">{user.id}</span>
+                <div className="dashboard-stats">
+                  <div className="stat-row">
+                    <span className="stat-label">Member since</span>
+                    <span className="stat-value">{new Date(user.CreatedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-3 flex items-center space-x-2">
+
+              <div className="space-y-3">
+                <h3 className="section-title">
                   <Users className="w-5 h-5 text-primary" />
                   <span>Performance</span>
                 </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Games:</span>
-                    <span className="font-semibold">{statistics.totalMatches}</span>
+                <div className="dashboard-stats">
+                  <div className="stat-row">
+                    <span className="stat-label">Total Games</span>
+                    <span className="stat-value">{statistics.totalMatches}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Win Percentage:</span>
-                    <span className="font-semibold text-primary">{statistics.winRate}%</span>
+                  <div className="stat-row">
+                    <span className="stat-label">Win Percentage</span>
+                    <span className="stat-value text-primary">{statistics.winRate}%</span>
                   </div>
                 </div>
               </div>

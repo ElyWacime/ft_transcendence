@@ -261,7 +261,6 @@ export const PongCanvas = ({
         // Check end - unchanged
         if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
           newState.gameStatus = "FINISHED";
-          onGameEnd?.(newState.score.player1, newState.score.player2);
         }
 
         // ADDED: Update ref
@@ -345,6 +344,13 @@ export const PongCanvas = ({
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
+  // Notify parent when game finishes to avoid setState during render
+  useEffect(() => {
+    if (gameState.gameStatus === "FINISHED" && onGameEnd) {
+      onGameEnd(gameState.score.player1, gameState.score.player2);
+    }
+  }, [gameState.gameStatus, gameState.score.player1, gameState.score.player2, onGameEnd]);
+
 
   return (
     <div className="pong-game-interface">
@@ -398,8 +404,7 @@ export const PongCanvas = ({
             <div className="player-score player2-score">
               {gameState.score.player2}
             </div>
-            <div className="player-control-hint">
-            </div>
+            <div className="player-control-hint">Arrow Keys</div>
           </CardContent>
         </Card>
       </div>

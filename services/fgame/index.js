@@ -1,18 +1,16 @@
 import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
-import fjwt from "@fastify/jwt";  // Default import
+import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
 import jwt from 'jsonwebtoken';
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
-//ayoub//
 await fastify.register(cors, {
   origin: true,
   credentials: true
 });
-//ayoub//
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 import { exit } from "process";
 
@@ -126,13 +124,11 @@ fastify.register(fjwt, {
   secret: process.env.JWT_ACCESS_SECRET
 });
 
-// --- THIS HOOK IS CRITICAL ---
 fastify.addHook("preHandler", (req, _res, next) => {
   req.jwt = fastify.jwt;
   next();
 });
 
-// --- Cookies ---
 fastify.register(fastifyCookie, {
   secret: process.env.JWT_ACCESS_SECRET,
   hook: "preHandler",
@@ -147,24 +143,18 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       const request = JSON.parse(msg);
       const token = request.token;
       if (token) {
-        // try {
           const decoded = req.jwt.verify(token);
-          // console.log("✅ Authentication successful!");
-          // console.log(decoded);
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
           console.log(id, email, name);
           if (clients.has(id)) {
             try {
-              // console.log("\n\n>>>>>try : ", email);
               if (clients.get(id) != connection) {
-                // console.log("\n\n>>>>>close : ", email);
                 clients.get(id).close();
               }
             }
             catch (e) {
-              // console.log("\n\n>>>>>error: ", email, e);
             }
           }
           clients.set(id, connection);
@@ -175,27 +165,20 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             u.User_name = name;
             u.isOnline = true;
             u.Auto_Match = true;
-            // console.log("BUser  ===== ", u);
             await dbcnx.createUsers(u);
             u = await dbcnx.getUserById(u.id);
-            // console.log("getUserById  ===== ", u);
-            // console.log("AUser  ===== ", v);
-            // console.log("\n\n>>>>>getOngoingMatchByPlayerID: ");
+
             let m = await dbcnx.getOngoingMatchByPlayerID(id);
-            // let m = await dbcnx.getOngoingMatchByPlayerID(id, request.mode);
             if (!m) {
-              // console.log("\n\n>>>>>Player is not in Match ", id);
-              // console.log("\n\n>>>>>getMatchPlayerCanJoin: ");
+
               m = await dbcnx.getMatchPlayerCanJoin(request.mode);
               if (!m) {
-                // console.log("\n\n\t\t>>>>> Can't JOIN Need To Create: ");
                 m = new Match();
                 m.P1_Id = u.id;
                 let resuser = await dbcnx.getUserById(u.id);
                 m.player1Name = resuser.User_name;
                 m.mode = request.mode;
                 if (!request.tournement) {
-                  // console.log("\n\n>>>>>createMatch_not: ");
                   m.id = await dbcnx.createMatch_not(m);
                 }
                 else {
@@ -340,18 +323,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             else {
               m = await dbcnx.getLasttMatchByPlayerID(id);
               if (m) {
-                // let resuser = await dbcnx.getUserById(m.P1_Id);
-                // if (resuser)
-                //   m.player1Name = resuser.User_name;
-                // resuser = await dbcnx.getUserById(m.P2_Id);
-                // if (resuser)
-                //   m.player2Name = resuser.User_name;
-                // resuser = await dbcnx.getUserById(m.P3_Id);
-                // if (resuser)
-                //   m.player3Name = resuser.User_name;
-                // resuser = await dbcnx.getUserById(m.P4_Id);
-                // if (resuser)
-                //   m.player4Name = resuser.User_name;
                 let tmp = matches.get(m.id);
                 let data = JSON.stringify(tmp);
                 sendtoplayer(m.P1_Id, data);
@@ -386,15 +357,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             //  console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
           }
           else if (request.type == "DELETE") {
-            // console.log("\n\n>>>>>deletePendingMatchByPlayerID: ");
             await dbcnx.deletePendingMatchByPlayerID(id);
-            // await dbcnx.deleteOngoingMatchByPlayerID(id);
           }
         }
-        // catch (jwtErr) {
-        //   console.log("❌ JWT verification failed:", jwtErr);
-        // }
-      // }
+
       else 
         console.log("⚠️ No token provided, proceeding without authentication");
   });
@@ -414,7 +380,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   }, 1000 / TICK_RATE);
 
   connection.on("close", () => {
-    // get the match if finished delete it from matches else leave it 
     for (const [id, client] of clients) {
       if (client == connection) {
         // console.log("\n\n>>>>>close old :", id);
@@ -427,8 +392,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
-///ayoub/
-// Register dashboard routes
+
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
 console.log("Dashboard routes registered!");

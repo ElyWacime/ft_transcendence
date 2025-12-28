@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Camera, ArrowLeft, Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import "../css/change-password.css";
 
 function getUserIdFromToken(): string | null {
   try {
@@ -144,38 +145,41 @@ const ChangePicture = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-secondary px-4">
+    <div className="change-password-page">
       {initialLoading ? (
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="change-password-shell">
+          <Card className="change-password-card">
+            <div className="text-center py-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          </Card>
         </div>
       ) : (
-        <div className="w-full max-w-md">
+        <div className="change-password-shell">
           <Button
             variant="ghost"
             onClick={() => navigate("/profile")}
-            className="mb-4"
+            className="back-link"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Settings
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Settings</span>
           </Button>
 
-          <Card className="p-8 bg-background/60 backdrop-blur-sm border border-border">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
-                <Camera className="w-8 h-8 text-purple-500" />
+          <Card className="change-password-card">
+            <div className="change-password-header">
+              <div className="icon-ring" style={{ background: "rgba(147, 51, 234, 0.14)", borderColor: "rgba(147, 51, 234, 0.24)" }}>
+                <Camera className="w-8 h-8 text-purple-400" />
               </div>
-              <h2 className="text-2xl font-bold">Change Profile Picture</h2>
-              <p className="text-muted-foreground text-sm mt-2">
-                Upload a new profile picture
-              </p>
+              <div>
+                <h2>Change Profile Picture</h2>
+                <p>Upload a new profile picture.</p>
+              </div>
             </div>
 
-            <form onSubmit={updateImage} className="space-y-6">
-              {/* Large Avatar Preview */}
+            <form onSubmit={updateImage} className="change-password-form" style={{ gap: "18px" }}>
               <div className="flex justify-center">
-                <Avatar className="w-48 h-48 border-4 border-primary/20">
+                <Avatar className="w-44 h-44 border-4 border-primary/20">
                   <AvatarImage src={previewUrl || "https://www.gravatar.com/avatar/"} />
                   <AvatarFallback className="text-6xl">
                     {username?.charAt(0)?.toUpperCase() || "U"}
@@ -183,19 +187,15 @@ const ChangePicture = () => {
                 </Avatar>
               </div>
 
-              {/* File Input */}
               <div>
-                <label 
-                  htmlFor="image_id" 
-                  className="block w-full p-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors text-center"
+                <label
+                  htmlFor="image_id"
+                  className="upload-dropzone"
+                  role="button"
                 >
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    Click to upload or drag and drop
-                  </span>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    PNG, JPG, GIF or WEBP (max 2MB)
-                  </p>
+                  <Upload className="upload-icon" />
+                  <span className="upload-hint">Click to upload or drag and drop</span>
+                  <p className="upload-note">PNG, JPG, GIF or WEBP (max 2MB)</p>
                 </label>
                 <input
                   type="file"
@@ -203,12 +203,13 @@ const ChangePicture = () => {
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
+                  style={{ display: "none" }}
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full font-semibold"
+                className="submit-btn"
                 disabled={loading}
               >
                 {loading ? "Uploading..." : "Update Picture"}

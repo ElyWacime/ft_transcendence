@@ -9,12 +9,12 @@
   width: 100%;
   max-width: 36rem;
   margin: 2rem auto 0;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-  border: 2px solid rgba(59, 130, 246, 0.6);
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(160deg, #050814 0%, #0a0f1f 55%, #050814 100%);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
   border-radius: 1rem;
   overflow: hidden;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 }
 
 .setup-card-header {

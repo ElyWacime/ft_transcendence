@@ -13,7 +13,6 @@ export class Users {
         this.isOnline = true;
         this.avatar = 'https://www.gravatar.com/avatar/';
         this.CreatedAt = new Date();
-        // this.UpdatedAt = new Date();
     }
 }
 
@@ -115,17 +114,12 @@ export class SQLiteDB {
         this.db = await open({ filename: "database.sqlite", driver: sqlite3.Database, });
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
-        //  Log every SQL statement executed
-        // this.db.on("trace", (sql) => console.log("[SQL]", sql));
         console.log("Database connected and table created!");
     }
 
-    // -------------------------------
-    // Tournament CRUD
-    // -------------------------------
     async createTournament(t) {
         let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");//toISOString()
+        let nowf = now.toLocaleString("fr-FR");
         const result = await this.db.run(`INSERT INTO Tournament (Label, CreatedAt, result, Winner_Id)
              VALUES (?, ?, ?, NULL)`, [t.Label, nowf, t.result]);
         return result.lastID;
@@ -145,9 +139,6 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Tournament WHERE id = ?`, [id]);
     }
 
-    // -------------------------------
-    // Match CRUD
-    // -------------------------------
     async createMatch(m) {
         const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode) VALUES (?, ?, ?)`, [m.P1_Id, m.T_Id, m.mode]);
         return result.lastID;
@@ -163,7 +154,6 @@ export class SQLiteDB {
         return this.db.get(`SELECT * FROM Match WHERE id = ?`, [id]);
     }
     async getMatchPlayerCanJoin(mode) {
-        // console.log("*****************   CALLED    ******************");
         return this.db.get(`SELECT * FROM Match   
                             WHERE mode = ? and   
                             count_players <  mode   and 
@@ -279,9 +269,6 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
     }
 
-    // -------------------------------
-    // Participate_Tournament CRUD
-    // -------------------------------
     async createParticipate(p) {
         const result = await this.db.run(`INSERT INTO Participate_Tournament (P_Id, T_Id)
              VALUES (?, ?)`, p.P_Id, p.T_Id);
@@ -302,10 +289,6 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Participate_Tournament WHERE id = ?`, [id]);
     }
 
-    // -------------------------------
-    // Users CRUD
-    // -------------------------------
-    
     async updateUsers(u) {
         await this.db.run(`UPDATE Users 
              SET 
@@ -315,8 +298,6 @@ export class SQLiteDB {
     
 
     async createUsers(t) {
-        // let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
-        // update based on id only.
         let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? `, [t.id]);
         if (a)
             return await this.db.run(`UPDATE Users 
@@ -328,13 +309,6 @@ export class SQLiteDB {
             VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1 , t.avatar]);
     }
 
-    // async createUsers(t) {
-    //     let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
-    //     // let a = await this.db.get(`SELECT * FROM Users WHERE User_name = ? OR email = ? or id = ? `, [t.User_name, t.email, t.id]);
-    //     if (!a)
-    //         return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, loggedIn,Auto_Match,isOnline,avatar)
-    //         VALUES (?,?, ?, ?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar]);
-    // }
     async getUserss() {
         return this.db.all(`SELECT * FROM Users`);
     }
@@ -377,7 +351,6 @@ export class SQLiteDB {
         await this.db.run(`SELECT count(*) as Participate  FROM  Participate_Tournament   Where P_Id = ?;`,[id]);
     }
 
-        ///////////ayoubbb1////////////////////
         async UserCountWins_ayoub(id) {
             return await this.db.get(`SELECT count(*) as Winned  FROM  Match 
             Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
