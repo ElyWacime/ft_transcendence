@@ -1,32 +1,19 @@
-+4456666+ Logs
-logs
-*.log
-npm-debug.log*
-
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
 node_modules/
+package-lock.json
+
 dist
 dist-ssr
+build
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.db
+dev.db
+data.db
+services/chat-service/dev.db
+services/auth-service/prisma/db/data.db
 
-*.pem
 .env
 .env.local
 .env.*.local
-data.db 
-dev.db
+
+.docker
