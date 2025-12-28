@@ -3,26 +3,20 @@ import { Users } from "./DBController.js";
 export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
 
   fastify.get('/api/dashboard/:identifier', async (request, reply) => {
-    console.log("\n\n=== DASHBOARD REQUEST RECEIVED ===");
-    console.log("Timestamp:", new Date().toISOString());
     try {
       const { identifier } = request.params;
-      console.log("User identifier from params:", identifier);
-      console.log("Authorization header:", request.headers.authorization ? "Present" : "Missing");
       
       let user = await dbcnx.getUserByName(identifier);
       if (!user) {
         user = await dbcnx.getUserById(identifier);
       }
       const id = user?.id || identifier;
-      console.log("User found in fgame database:", !!user);
       
       if (!user) {
         const authHeader = request.headers.authorization;
         const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
         if (!token) {
-          console.log("User not found and no token provided; returning 404");
           return reply.code(404).send({ error: 'User not found.' });
         }
 
@@ -30,7 +24,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         try {
           decoded = fastify.jwt.verify(token);
         } catch (verifyError) {
-          console.error("JWT verification failed:", verifyError.message);
           return reply.code(404).send({ error: 'User not found.' });
         }
 
@@ -39,7 +32,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         const isOwnDashboard = matchesId || matchesUsername;
 
         if (isOwnDashboard) {
-          console.log("User not in fgame database; auto-creating for self with identifier:", identifier);
           try {
             const newUser = new Users();
             newUser.id = decoded.id;
@@ -66,11 +58,9 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
               };
             }
           } catch (createError) {
-            console.error("Error creating user for self-dashboard:", createError);
             return reply.code(500).send({ error: 'Internal server error' });
           }
         } else {
-          console.log("Fetching user from auth-service for identifier:", identifier);
           try {
             const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
             const searchUrl = `${authServiceUrl}/api/auth/search-this-name`;
@@ -85,12 +75,10 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
             });
 
             if (!authResponse.ok) {
-              console.log("User not found in auth-service; returning 404");
               return reply.code(404).send({ error: 'User not found.' });
             }
 
             const authUser = await authResponse.json();
-            console.log("Found user in auth-service:", authUser.user_name);
             
             const newUser = new Users();
             newUser.id = authUser.user_id;
@@ -116,7 +104,6 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
               };
             }
           } catch (fetchError) {
-            console.error("Error fetching user from auth-service:", fetchError);
             return reply.code(404).send({ error: 'User not found.' });
           }
         }

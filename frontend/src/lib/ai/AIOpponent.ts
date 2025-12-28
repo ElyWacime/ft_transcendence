@@ -45,9 +45,8 @@ export class AIOpponent {
   private mistakeChance: number;
   private hesitationChance: number;
   private lastDecisionTime = 0;
-  private cachedAction: AIAction = { moveUp: false, moveDown: false, usePowerUp: false };
+  private cachedAction: AIAction = { moveUp: false, moveDown: false};
   constructor() {
-    // Fixed internal profile: HARD
     this.reactionTime = 120;
     this.accuracy = 0.95;
     this.predictionSkill = 0.98;
@@ -62,12 +61,11 @@ export class AIOpponent {
       return this.cachedAction;
       }
 
-    // Decide behavior directly (simplified: tracking, anticipating or defensive)
     const stateToUse = gameState;
     const ball = stateToUse.ball;
     const isBallApproaching = ball.velocityX > 0;
 
-    let action: AIAction = { moveUp: false, moveDown: false, usePowerUp: false };
+    let action: AIAction = { moveUp: false, moveDown: false};
 
     if (!isBallApproaching) {
       this.defensiveBehavior(stateToUse, action);
@@ -77,7 +75,6 @@ export class AIOpponent {
       this.trackingBehavior(stateToUse, action);
     }
 
-    // Add human-like imperfection
     this.addHumanImperfections(action);
 
     this.cachedAction = action;
@@ -95,7 +92,6 @@ export class AIOpponent {
   }
 
   private anticipatingBehavior(gameState: AIGameState, action: AIAction): void {
-    // Predict where the ball will be after multiple bounces
     const predictedPosition = this.predictComplexTrajectory(gameState);
     const paddleCenter = gameState.aiPaddle.y + gameState.aiPaddle.height / 2;
 
@@ -103,7 +99,6 @@ export class AIOpponent {
   }
 
   private defensiveBehavior(gameState: AIGameState, action: AIAction): void {
-    // Move to center position when not under immediate threat
     const centerY = gameState.gameHeight / 2;
     const paddleCenter = gameState.aiPaddle.y + gameState.aiPaddle.height / 2;
 
@@ -115,13 +110,12 @@ export class AIOpponent {
     const ball = gameState.ball;
     const aiPaddle = gameState.aiPaddle;
 
-    // Simple prediction: where will ball be when it reaches paddle x position
-    if (ball.velocityX <= 0) return ball.y; // Ball moving away
+    if (ball.velocityX <= 0) return ball.y;
 
     const timeToReachPaddle = (aiPaddle.x - ball.x) / ball.velocityX;
     let predictedY = ball.y + ball.velocityY * timeToReachPaddle;
 
-    // Predict wall bounces
+    // Predict 
     while (predictedY < 0 || predictedY > gameState.gameHeight) {
       if (predictedY < 0) {
         predictedY = -predictedY;
@@ -134,7 +128,7 @@ export class AIOpponent {
   }
 
   private predictComplexTrajectory(gameState: AIGameState): number {
-    // More sophisticated prediction considering multiple bounces
+    //here if there is multiple bouncc
     const ball = gameState.ball;
     const aiPaddle = gameState.aiPaddle;
 
@@ -145,18 +139,15 @@ export class AIOpponent {
     let simulatedVX = ball.velocityX;
     let simulatedVY = ball.velocityY;
 
-    // Simulate ball trajectory until it reaches paddle
     while (simulatedX < aiPaddle.x) {
       simulatedX += simulatedVX;
       simulatedY += simulatedVY;
 
-      // Handle wall collisions
       if (simulatedY <= 0 || simulatedY >= gameState.gameHeight) {
         simulatedVY = -simulatedVY;
         simulatedY = Math.max(0, Math.min(gameState.gameHeight, simulatedY));
       }
 
-      // Add some randomness based on difficulty
       if (Math.random() > this.predictionSkill) {
         simulatedVY += (Math.random() - 0.5) * 2;
       }
@@ -185,7 +176,7 @@ export class AIOpponent {
 
   private shouldAnticipate(gameState: AIGameState): boolean {
     const ball = gameState.ball;
-    // Anticipate when ball is moving fast or at tricky angles
+    // here when there is complexity tragect
     const ballSpeed = Math.sqrt(ball.velocityX ** 2 + ball.velocityY ** 2);
     const isFastBall = ballSpeed > 8;
     const isTrickyAngle = Math.abs(ball.velocityY) > Math.abs(ball.velocityX);
@@ -218,7 +209,6 @@ export class AIOpponent {
 
   
 
-  // Method to simulate keyboard input (as required)
   public simulateKeyboardInput(action: AIAction): void {
     if (typeof document === "undefined") return;
 

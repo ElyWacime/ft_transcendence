@@ -183,7 +183,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                 }
                 else {
                   // console.log("\n\n>>>>>createMatch: ");
-                  // m.T_Id = GET_TORNAMENTID_FROMDB
                   console.log("\n\n>>>05550000>>updateMatch: ",m);
                   m.id = await dbcnx.createMatch(m);
                 }
@@ -215,7 +214,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                     m.player4Name = resuser.User_name;
                     m.count_players = m.count_players + 1;
                   }
-                  // console.log("\n\n>>>00000>>updateMatch: ",m);
                   await dbcnx.updateMatch(m);
                 }
                 if (m.count_players == m.mode) {
@@ -226,10 +224,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.P2_Id = m.P2_Id;
                   ngame.P3_Id = m.P3_Id;
                   ngame.P4_Id = m.P4_Id;
-                  // ngame.player1Name = m.player1Name;
-                  // ngame.player2Name = m.player2Name;
-                  // ngame.player3Name = m.player3Name;
-                  // ngame.player4Name = m.player4Name;
                   let resuser = await dbcnx.getUserById(m.P1_Id);
                   if (resuser)
                   ngame.player1Name = resuser.User_name;
@@ -247,8 +241,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   ngame.count_players = m.count_players;
                   ngame.mode = m.mode;
                   matches.set(m.id, ngame);
-                  // console.log("\n\n>>>>>updateMatch: ");
-                  // console.log("\n\n>>>111100000>>updateMatch: ",ngame);
                   await dbcnx.updateMatch(m);
                 }
               }
@@ -272,11 +264,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               ngame.P2_Id = m.P2_Id;
               ngame.P3_Id = m.P3_Id;
               ngame.P4_Id = m.P4_Id;
-
-              // ngame.player1Name = m.player1Name;
-              // ngame.player2Name = m.player2Name;
-              // ngame.player3Name = m.player3Name;
-              // ngame.player4Name = m.player4Name;
               
               ngame.gameStatus = m.gameStatus;
               ngame.T_Id = m.T_Id;
@@ -288,8 +275,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               sendtoplayer(ngame.P3_Id, data);
               sendtoplayer(ngame.P4_Id, data);
             }
-            // else
-            // console.log("\n\n>>>>>Player in Match ", id);
           }
           else if (request.type == "MOVE") {
             let m = await dbcnx.getCurrentMatchByPlayerID(id);
@@ -298,26 +283,18 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               if (match.P1_Id == id) {
                 match.p1UPkey = request.keys.ArrowUp;
                 match.p1Downkey = request.keys.ArrowDown;
-                // console.log("\n\n>>>>>Move: ", id);
-                // console.log(match.P1_Id, match.p1UPkey, match.p1Downkey);
               }
               else if (match.P2_Id == id) {
                 match.p2UPkey = request.keys.ArrowUp;
                 match.p2Downkey = request.keys.ArrowDown;
-                // console.log("\n\n>>>>>Move: ", id);
-                // console.log(match.P2_Id, match.p2UPkey, match.p2Downkey);
               }
               else if (match.P3_Id && match.P3_Id == id) {
                 match.p3UPkey = request.keys.ArrowUp;
                 match.p3Downkey = request.keys.ArrowDown;
-                // console.log("\n\n>>>>>Move: ", id);
-                // console.log(match.P3_Id, match.p3UPkey, match.p3Downkey);
               }
               else if (match.P4_Id && match.P4_Id == id) {
                 match.p4UPkey = request.keys.ArrowUp;
                 match.p4Downkey = request.keys.ArrowDown;
-                // console.log("\n\n>>>>>Move: ", id);
-                // console.log(match.P4_Id, match.p4UPkey, match.p4Downkey);
               }
             }
             else {
@@ -335,11 +312,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             }
           }
           else if (request.type == "FINISHED") {
-            // console.log("\n\n>>>>>getLasttMatchByPlayerID: ");
             let m = await dbcnx.getLasttMatchByPlayerID(id);
             if (m) {
               let tmp = matches.get(m.id);
-              // console.log("\n\n>>>>>tmp === ", tmp);
               if (tmp) {
                 m.score1 = tmp.score1;
                 m.score2 = tmp.score2;
@@ -349,12 +324,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               else
                 m.Winner_Id = m.P2_Id;
               m.gameStatus = "FINISHED";
-              // console.log("\n\n>>>>>updateMatch: ");
               await dbcnx.updateMatch(m);
               matches.delete(m.id);
             }
-            // else
-            //  console.log("\n\n>>>>>getFinishedMatchByPlayerID not Found");
           }
           else if (request.type == "DELETE") {
             await dbcnx.deletePendingMatchByPlayerID(id);

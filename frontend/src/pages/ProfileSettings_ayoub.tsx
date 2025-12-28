@@ -54,25 +54,21 @@ const ProfileSettings = () => {
         const userId = tokenData?.id;
         
         if (userId) {
-          // Fetch user data from database
           const data = await userApi.getUserById(userId);
-          console.log("Fetched user data:", data);
-          console.log("Avatar URL:", data.avatar);
+
           setUserInfo({
             email: data.email || data.user_email || "",
             username: data.User_name || data.user_name || "Player",
             avatar: data.avatar || ""
           });
-          setAvatarKey(Date.now()); // Force avatar refresh
+          setAvatarKey(Date.now());
         } else {
-          // Fallback to localStorage if no token
           const email = localStorage.getItem("email") || tokenData?.email || "";
           const username = localStorage.getItem("username") || tokenData?.username || "Player";
           setUserInfo({ email, username, avatar: "" });
         }
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        // Fallback to token data
         const tokenData = getUserInfoFromToken();
         const email = localStorage.getItem("email") || tokenData?.email || "";
         const username = localStorage.getItem("username") || tokenData?.username || "Player";
@@ -157,7 +153,7 @@ const ProfileSettings = () => {
         </div>
 
   <div className="profile-content">
-          {/* User Profile Card */}
+          {} 
           <Card className="profile-card">
             <div className="profile-user-card">
               <Avatar key={avatarKey} className="profile-avatar">
@@ -222,7 +218,7 @@ const ProfileSettings = () => {
             </div>
           </Card>
 
-          {/* Settings Options */}
+          {}
           <div className="profile-settings-grid">
             {settingsOptions.map((option) => {
               const IconComponent = option.icon;

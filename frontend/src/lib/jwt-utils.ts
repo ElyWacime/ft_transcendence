@@ -1,11 +1,7 @@
-/**
- * Decode JWT payload WITHOUT verification (client-side only)
- * Safe to use since JWT is signed by server and payload is visible anyway
- */
+
 export function decodeJWT(token: string): Record<string, any> | null {
   try {
     if (!token || token.split('.').length !== 3) {
-      console.warn('[decodeJWT] Invalid token format');
       return null;
     }
 
@@ -20,33 +16,22 @@ export function decodeJWT(token: string): Record<string, any> | null {
     
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error('[decodeJWT] Failed to decode token:', error);
     return null;
   }
 }
-
-/**
- * Check if JWT token is expired
- */
 export function isTokenExpired(token: string): boolean {
   const payload = decodeJWT(token);
   if (!payload || !payload.exp) return false;
 
-  const expirationTime = payload.exp * 1000; // Convert to milliseconds
+  const expirationTime = payload.exp * 1000;
   return Date.now() > expirationTime;
 }
 
-/**
- * Get user ID from token
- */
 export function getUserIdFromToken(token: string): string | null {
   const payload = decodeJWT(token);
   return payload?.id || null;
 }
 
-/**
- * Get email from token
- */
 export function getEmailFromToken(token: string): string | null {
   const payload = decodeJWT(token);
   return payload?.email || null;

@@ -8,10 +8,8 @@ export async function setupDashboard_ayoub(fastify, dbcnx) {
       credentials: true
     });
   } catch (error) {
-    console.log("CORS registration skipped (might already be registered)");
   }
 
   await registerDashboardRoutes_ayoub(fastify, dbcnx);
-  console.log("Dashboard routes registered successfully!");
 }
 

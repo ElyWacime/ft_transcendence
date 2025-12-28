@@ -36,7 +36,6 @@ export interface ChatMessage {
   type: "message" | "system";
 }
 
-// ---------------- MOCK TOURNAMENT API ---------------- //
 class TournamentAPI {
   private mockTournament: Tournament | null = null;
   private mockMessages: ChatMessage[] = [];
@@ -165,7 +164,6 @@ class TournamentAPI {
 
 export const api = new TournamentAPI();
 
-// ---------------- USER AUTH API ---------------- //
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
   private baseUrl = `${API_URL}/api/users`;
@@ -179,7 +177,6 @@ class UserAPI {
     const response = await res.json();
 
     if (res.ok) {
-      // Add user to chat after registration
       try {
         await fetch(`${API_URL}/api/chat/addUsers`, {
           method: 'POST',
@@ -189,7 +186,6 @@ class UserAPI {
         });
       } catch (err) {
         console.error('Failed to add user to chat:', err);
-        // Don't throw error here - registration was successful
       }
       
       return response;
@@ -261,23 +257,22 @@ class UserAPI {
     return await res.json();
   }
   async update_image(imageData: { 
-    image: string;       // Base64 string (without data: prefix)
-    image_name: string;  // File name
-    file_type?: string;  // Optional
-    file_size?: number;  // Optional
+    image: string;      
+    image_name: string; 
+    file_type?: string;
+    file_size?: number;
   }) {
     const token = localStorage.getItem("token");
     
     const res = await fetch(`${this.baseUrl}/update_image`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",  // Important: JSON not FormData
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         image: imageData.image,
         image_name: imageData.image_name,
-        // Optionally include other fields if your backend accepts them
         ...(imageData.file_type && { file_type: imageData.file_type }),
         ...(imageData.file_size && { file_size: imageData.file_size }),
       }),
@@ -309,7 +304,7 @@ class UserAPI {
     }
 
     const data = await res.json();
-    return data.user; // Return just the user object from dashboard response
+    return data.user;
   }
 
   async searchByName(name: string) {
@@ -318,8 +313,6 @@ class UserAPI {
       throw new Error("Not logged in. Please log in first to search for players.");
     }
 
-    console.log('[searchByName] Token length:', token.length);
-    console.log('[searchByName] Token starts with:', token.substring(0, 20) + '...');
 
     const res = await fetch(`${this.baseUrl}/search-this-name`, {
       method: "POST",
@@ -345,26 +338,6 @@ class UserAPI {
       user_id: string;
     };
   }
-
-  // async update_image_alternative(image: File, description?: string) {
-  //   const token = localStorage.getItem("token");
-    
-  //   const formData = new FormData();
-  //   formData.append('image', image);
-    
-  //   if (description) {
-  //     formData.append('description', description);
-  //   }
-    
-  //   const res = await fetch(`${this.baseUrl}/update_image`, {
-  //     method: "PUT",
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //     body: formData,
-  //     credentials: 'include',
-  //   });
-
 }
 
 export const userApi = new UserAPI();

@@ -8,7 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import "../css/dashboard.css";
 
-// Helper function to decode JWT token and get user ID
 function getUserIdFromToken(): string | null {
   try {
     const token = localStorage.getItem("token");
@@ -62,7 +61,6 @@ const Dashboard_ayoub = () => {
 : `${dashboardData?.user.avatar || "https://www.gravatar.com/avatar/"}?t=${avatarKey}`;
 
   useEffect(() => {
-    // If no identifier in URL and user is not logged in, redirect to login
     if (!identifier && !isLoggedIn) {
       navigate("/login");
       return;
@@ -70,7 +68,6 @@ const Dashboard_ayoub = () => {
 
 
     const fetchDashboardData = async () => {
-      // Use identifier from URL if provided, otherwise extract user ID from JWT token
       let userIdentifier = identifier;
       
       if (!userIdentifier) {
@@ -87,7 +84,7 @@ const Dashboard_ayoub = () => {
         const data = await playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier);
         
         setDashboardData(data);
-        setAvatarKey(Date.now()); // Force avatar refresh
+        setAvatarKey(Date.now());
       } catch (err: any) {
         console.error("Failed to fetch dashboard:", err);
         console.error("Error details:", err.message);
@@ -105,10 +102,8 @@ const Dashboard_ayoub = () => {
     fetchDashboardData();
   }, [identifier, isLoggedIn, navigate]);
 
-  // Refetch dashboard data when avatar is updated
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      // Refetch dashboard data to get updated avatar from database
       const userIdentifier = identifier || getUserIdFromToken();
       if (userIdentifier && !loading) {
         playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier)
@@ -120,7 +115,6 @@ const Dashboard_ayoub = () => {
       }
     };
 
-    // Listen for custom avatar update event
     window.addEventListener('avatarUpdated', handleAvatarUpdate);
     return () => window.removeEventListener('avatarUpdated', handleAvatarUpdate);
   }, [identifier, loading]);
@@ -151,7 +145,7 @@ const Dashboard_ayoub = () => {
   return (
     <div className="dashboard-page">
       <div className="dashboard-container">
-        {/* Header */}
+        {}
         <div className="dashboard-header">
           <h1 className="dashboard-title glow-text">
             <Trophy className="dashboard-title-icon" />
@@ -160,7 +154,7 @@ const Dashboard_ayoub = () => {
         </div>
 
         <div className="dashboard-grid">
-          {/* User Profile Card */}
+          {}
           <Card className="dashboard-card">
             <div className="profile-container">
               <Avatar key={avatarKey} className="profile-avatar">
@@ -176,7 +170,7 @@ const Dashboard_ayoub = () => {
             </div>
           </Card>
 
-          {/* Statistics Cards */}
+          {}
           <Card className="dashboard-card">
             <div className="stat-section">
               <h3 className="section-title">
@@ -204,7 +198,7 @@ const Dashboard_ayoub = () => {
             </div>
           </Card>
 
-          {/* Last Match, Account, Performance */}
+          {}
           <Card className="dashboard-card">
             <div className="card-sections">
               <div className="card-section">

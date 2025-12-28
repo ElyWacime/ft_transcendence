@@ -254,7 +254,6 @@ export const update_image = async (
     
     const imageBuffer = Buffer.from(image, 'base64');
     
-    // Determine the correct MIME type from file_type or image_name
     let mimeType = 'image/png';
     if (file_type) {
       mimeType = file_type;
@@ -277,7 +276,7 @@ export const update_image = async (
       data: {
         image: imageBuffer,
         image_name: image_name,
-        avatar: avatarUrl  // Update the avatar field with base64 data URL
+        avatar: avatarUrl
       },
       select: {
         id: true,

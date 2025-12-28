@@ -122,13 +122,10 @@ const ChangePicture = () => {
       if (res.success) {
         toast.success("Profile image updated successfully!");
         
-        // Dispatch custom event to notify other components
         window.dispatchEvent(new Event('avatarUpdated'));
         
-        // Navigate back to profile
         navigate("/profile");
         
-        // Force a page refresh to update all avatars from database
         window.location.reload();
       } else {
         toast.error(res.message || "Image update failed.");

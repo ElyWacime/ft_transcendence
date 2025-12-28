@@ -279,7 +279,6 @@ export async function userRoutes(app: FastifyInstance) {
     }
   });
 
-  // Get user info by ID - returns avatar and other user data
   app.get("/user-info/:userId", {
     preHandler: app.authenticate,
   }, async (req, reply) => {
