@@ -14,3 +14,6 @@ clean:
 	rm -f services/auth-service/prisma/db/data.db
 	docker system prune -f
 
+rm:
+	docker stop $$(docker ps -aq) && docker rm $$(docker ps -aq) && docker rmi $$(docker images -aq)  &&  docker system prune -a --volumes
+	

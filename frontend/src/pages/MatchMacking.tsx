@@ -12,7 +12,7 @@ const MatchMacking = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [role, setRole] = useState<boolean>(true);
-    const mode = searchParams.get("mode"); // "4"
+    const mode = searchParams.get("mode");
     const email = localStorage.getItem("email");
     const [features, setFeatures] = useState(() => {
         return [
@@ -131,8 +131,7 @@ const MatchMacking = () => {
                 </p>
               </div>
             </section>
-      
-            {/* Features Grid */}
+
             <section className="features-section">
               <div className="features-container">
                 <h2 className="features-title glow-text">

@@ -36,7 +36,6 @@ function usePongWebSocket(ws, mode, email, setGameState) {
         };
 
         ws.addEventListener("message", handleMessage);
-        // start game automatically
         ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
@@ -188,7 +187,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         player4Name:  player4Name,
         gameStatus: "PENDING",
     });
-    // console.log("MODE === ", player1Name, player2Name, player3Name, player4Name);
     usePongWebSocket(ws, mode, email, setGameState);
     usePongControls(ws, mode, email);
     usePongRenderer(canvasRef, gameState);

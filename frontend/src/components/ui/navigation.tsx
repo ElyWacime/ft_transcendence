@@ -48,7 +48,6 @@ export const Navigation = () => {
       },
     ];
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (gamesDropdownRef.current && !gamesDropdownRef.current.contains(event.target as Node)) {
@@ -113,7 +112,6 @@ export const Navigation = () => {
               {/* Other nav items */}
               {navItems.map((item) =>
                 item.onClick ? (
-                  // If item has onClick (Logout)
                   <button
                     key={item.label}
                     onClick={item.onClick}
@@ -123,7 +121,6 @@ export const Navigation = () => {
                     <span className="nav-label">{item.label}</span>
                   </button>
                 ) : (
-                  // Regular NavLink
                   <NavLink
                     key={item.path}
                     to={item.path}

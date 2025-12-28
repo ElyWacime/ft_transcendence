@@ -115,7 +115,6 @@ export class AIOpponent {
     const timeToReachPaddle = (aiPaddle.x - ball.x) / ball.velocityX;
     let predictedY = ball.y + ball.velocityY * timeToReachPaddle;
 
-    // Predict 
     while (predictedY < 0 || predictedY > gameState.gameHeight) {
       if (predictedY < 0) {
         predictedY = -predictedY;
@@ -176,7 +175,6 @@ export class AIOpponent {
 
   private shouldAnticipate(gameState: AIGameState): boolean {
     const ball = gameState.ball;
-    // here when there is complexity tragect
     const ballSpeed = Math.sqrt(ball.velocityX ** 2 + ball.velocityY ** 2);
     const isFastBall = ballSpeed > 8;
     const isTrickyAngle = Math.abs(ball.velocityY) > Math.abs(ball.velocityX);

@@ -16,7 +16,7 @@ interface Player {
 interface MatchState {
   player1: Player;
   player2: Player;
-  round: number; // 1 for semifinal, 2 for final
+  round: number; 
   matchId: string;
 }
 
@@ -34,7 +34,6 @@ const LocalTournament = () => {
   const [semifinalWinners, setSemifinalWinners] = useState<Player[]>([]);
   const [tournamentWinner, setTournamentWinner] = useState<Player | null>(null);
 
-  // Phase 1: Setup - Get player aliases
   const handleAliasChange = (index: number, value: string) => {
     const newAliases = [...aliases];
     newAliases[index] = value;
@@ -54,7 +53,6 @@ const LocalTournament = () => {
 
     setPlayers(newPlayers);
 
-    // Start first semifinal match: Player 1 vs Player 2
     const firstMatch: MatchState = {
       player1: newPlayers[0],
       player2: newPlayers[1],
@@ -76,19 +74,16 @@ const LocalTournament = () => {
     
     setMatchResults(prev => [...prev, result]);
 
-    // Determine next match
     if (currentMatch.matchId === "semi1") {
-      // First semifinal done, start second semifinal
       setSemifinalWinners(prev => [...prev, winner]);
       const secondMatch: MatchState = {
-        player1: players[2], // Player 3
-        player2: players[3], // Player 4
+        player1: players[2], 
+        player2: players[3], 
         round: 1,
         matchId: "semi2",
       };
       setCurrentMatch(secondMatch);
     } else if (currentMatch.matchId === "semi2") {
-      // Both semifinals done, start finals
       setSemifinalWinners(prev => [...prev, winner]);
       const finalMatch: MatchState = {
         player1: semifinalWinners[0],
@@ -99,7 +94,6 @@ const LocalTournament = () => {
       setCurrentMatch(finalMatch);
       setPhase("finals");
     } else if (currentMatch.matchId === "final") {
-      // Tournament complete
       setTournamentWinner(winner);
       setCurrentMatch(null);
       setPhase("completed");

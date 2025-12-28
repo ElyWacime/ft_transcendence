@@ -67,4 +67,3 @@ The application uses a microservices architecture:
 - Gateway: Routes requests to appropriate services
 
 Services communicate via HTTP and WebSocket protocols.
-

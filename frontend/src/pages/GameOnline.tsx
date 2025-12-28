@@ -42,7 +42,6 @@ const GameOnline = () => {
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       if (data.gameStatus == "FINISHED") {
-        // ws.close();
         endGame();
         console.log("Match FINISHED try to navigate>>>>>>>");
         navigate("/");
@@ -53,40 +52,6 @@ const GameOnline = () => {
       ws.removeEventListener("message", handleMessage);
     };
   }, [ws]);
-
-  // const handleGameEnd = async (player1Score: number, player2Score: number) => {
-  //   try {
-  //     if (match) {
-  //       // Update match result in tournament
-  //       await api.updateMatchResult(match.id, player1Score, player2Score);
-
-  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
-
-  //       // Send system message
-  //       await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
-
-  //       toast.success(`${winner} wins the match!`);
-
-  //       // Navigate to result page
-  //       setTimeout(() => {
-  //         navigate("/result", {
-  //           state: {
-  //             match,
-  //             winner: player1Score > player2Score ? player1 : player2,
-  //             finalScore: { player1: player1Score, player2: player2Score }
-  //           }
-  //         });
-  //       }, 2000);
-  //     } else {
-  //       // Quick game - no tournament
-  //       const winner = player1Score > player2Score ? player1.alias : player2.alias;
-  //       toast.success(`${winner} wins!`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to update match result:", error);
-  //     toast.error("Failed to save match result");
-  //   }
-  // };
 
   return (
     <div className="game-page">

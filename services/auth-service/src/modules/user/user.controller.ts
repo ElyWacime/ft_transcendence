@@ -230,7 +230,7 @@ export async function logout(
 
 
 interface UpdateImageBody {
-  image: string; // base64 string
+  image: string;
   image_name: string;
   file_type?: string;
   file_size?: number;

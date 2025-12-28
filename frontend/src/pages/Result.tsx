@@ -12,13 +12,11 @@ const Result = () => {
   const navigate = useNavigate();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   
-  // Get result data from navigation state
   const match = location.state?.match as Match | undefined;
   const winner = location.state?.winner as Player | undefined;
   const finalScore = location.state?.finalScore as { player1: number; player2: number } | undefined;
 
   useEffect(() => {
-    // Load updated tournament data
     const loadTournament = async () => {
       try {
         const updatedTournament = await api.getTournament();
@@ -32,7 +30,6 @@ const Result = () => {
   }, []);
 
   useEffect(() => {
-    // Redirect if no match data
     if (!match || !winner || !finalScore) {
       toast.error("No match result data found");
       navigate("/tournament");

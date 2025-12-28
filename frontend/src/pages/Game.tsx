@@ -11,7 +11,6 @@ const Game = () => {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  // Get match data from navigation state
   const match = location.state?.match as Match | undefined;
   const player1 = location.state?.player1 || { alias: "Player 1" };
   const player2 = location.state?.player2 || { alias: "Player 2" };
@@ -19,17 +18,14 @@ const Game = () => {
   const handleGameEnd = async (player1Score: number, player2Score: number) => {
     try {
       if (match) {
-        // Update match result in tournament
         await api.updateMatchResult(match.id, player1Score, player2Score);
 
         const winner = player1Score > player2Score ? player1.alias : player2.alias;
 
-        // Send system message
         await api.sendSystemMessage(`Match completed! ${winner} defeated ${player1Score > player2Score ? player2.alias : player1.alias} (${player1Score}-${player2Score})`);
 
         toast.success(`${winner} wins the match!`);
 
-        // Navigate to result page
         setTimeout(() => {
           navigate("/result", {
             state: {
@@ -40,7 +36,6 @@ const Game = () => {
           });
         }, 2000);
       } else {
-        // Quick game - no tournament
         const winner = player1Score > player2Score ? player1.alias : player2.alias;
         toast.success(`${winner} wins!`);
       }

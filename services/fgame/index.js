@@ -182,13 +182,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   m.id = await dbcnx.createMatch_not(m);
                 }
                 else {
-                  // console.log("\n\n>>>>>createMatch: ");
                   console.log("\n\n>>>05550000>>updateMatch: ",m);
                   m.id = await dbcnx.createMatch(m);
                 }
               }
               else {
-                // console.log("\n\n\t\t>>>>> Can JOIN: ");
                 if (request.mode == 2) {
                   m.P2_Id = u.id;
                   let resuser = await dbcnx.getUserById(u.id);
@@ -343,7 +341,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     for (const [id, match] of matches) {
       tick(match);
       let data = JSON.stringify(match);
-      // console.log(data);
       sendtoplayer(match.P1_Id, data);
       sendtoplayer(match.P2_Id, data);
       sendtoplayer(match.P3_Id, data);
@@ -354,13 +351,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("close", () => {
     for (const [id, client] of clients) {
       if (client == connection) {
-        // console.log("\n\n>>>>>close old :", id);
         clients.delete(id);
         break;
       }
     }
     clearInterval(interval);
-    // console.log("\n\n>>>>>Client disconnected. Total clients:", clients.size);
   });
 });
 
