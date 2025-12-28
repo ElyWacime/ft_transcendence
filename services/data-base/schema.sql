@@ -1,9 +1,7 @@
 -- Enable foreign keys
 PRAGMA foreign_keys = ON;
 
--- =============================
--- USERS TABLE
--- =============================
+
 CREATE TABLE IF NOT EXISTS Users (
     id CHAR(36) NOT NULL PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
@@ -17,9 +15,7 @@ CREATE TABLE IF NOT EXISTS Users (
     UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- =============================
--- FRIEND REQUEST TABLE
--- =============================
+
 CREATE TABLE IF NOT EXISTS FriendRequest (
     id CHAR(36) NOT NULL PRIMARY KEY,
     senderId CHAR(36) NOT NULL,
@@ -31,9 +27,7 @@ CREATE TABLE IF NOT EXISTS FriendRequest (
     FOREIGN KEY (receiverId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- =============================
--- TOURNAMENT TABLE
--- =============================
+
 CREATE TABLE IF NOT EXISTS Tournament (
     id CHAR(36) NOT NULL PRIMARY KEY,
     Label TEXT NOT NULL,
@@ -44,9 +38,7 @@ CREATE TABLE IF NOT EXISTS Tournament (
     FOREIGN KEY (Winner_Id) REFERENCES Users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- =============================
--- PARTICIPATE TOURNAMENT TABLE
--- =============================
+
 CREATE TABLE IF NOT EXISTS Participate_Tournament (
     id CHAR(36) NOT NULL PRIMARY KEY,
     P_Id CHAR(36) NOT NULL,
@@ -57,9 +49,7 @@ CREATE TABLE IF NOT EXISTS Participate_Tournament (
     FOREIGN KEY (T_Id) REFERENCES Tournament(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- =============================
--- MATCH TABLE
--- =============================
+
 CREATE TABLE IF NOT EXISTS MatchTable (
     id CHAR(36) NOT NULL PRIMARY KEY,
     P1_Id CHAR(36) NOT NULL,
@@ -83,9 +73,7 @@ CREATE TABLE IF NOT EXISTS MatchTable (
     FOREIGN KEY (tournamentId) REFERENCES Tournament(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- =============================
--- MESSAGES TABLE
--- =============================
+
 CREATE TABLE IF NOT EXISTS Messages (
     id CHAR(36) NOT NULL PRIMARY KEY,
     Message_Text TEXT NOT NULL,
@@ -96,9 +84,7 @@ CREATE TABLE IF NOT EXISTS Messages (
     FOREIGN KEY (Receiver) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- =============================
--- INDEXES FOR PERFORMANCE
--- =============================
+
 CREATE INDEX IF NOT EXISTS idx_friendrequest_sender ON FriendRequest(senderId);
 CREATE INDEX IF NOT EXISTS idx_friendrequest_receiver ON FriendRequest(receiverId);
 CREATE INDEX IF NOT EXISTS idx_messages_sender_receiver ON Messages(Sender, Receiver);
