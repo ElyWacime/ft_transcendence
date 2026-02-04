@@ -14,25 +14,23 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 👇 Handle ?token=... redirect from GitHub OAuth
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-  
-    if (token) {
+    const email = params.get("email");
+
+    if (token && email) {
       localStorage.setItem("token", token);
-  
-      // 👇 instantly update auth context
-      login(token, "github_user");
-  
+      localStorage.setItem("email", email);
+
+      login(token, email);
+
       toast.success("Successfully logged in with GitHub!");
       navigate("/tournament", { replace: true });
     }
   }, [navigate, login]);
 
 
-  // 👇 Standard login form
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -42,7 +40,7 @@ const Login = () => {
       if (res.accessToken) {
         login(res.accessToken, email);
         toast.success("Welcome back!");
-        navigate("/tournament");
+        navigate("/");
       } else {
         toast.error(res.message || "Login failed");
       }
@@ -54,31 +52,30 @@ const Login = () => {
     }
   };
 
-  // 👇 GitHub OAuth redirect
   const handleGitHubLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/api/users/auth/github`;
+    window.location.href = `${window.location.origin}/api/users/auth/github`;
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-secondary text-center px-4">
+    <div className="login-page">
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
-          <Trophy className="w-8 h-8 text-primary" />
+      <div className="login-header">
+        <h1 className="login-title glow-text">
+          <Trophy className="trophy-icon" />
           <span>FT TRANSCENDENCE</span>
         </h1>
-        <p className="text-muted-foreground mt-2 text-sm md:text-base">
+        <p className="login-subtitle">
           Log in to continue your journey 🕹️
         </p>
       </div>
-
+  
       {/* Login Card */}
       <form
         onSubmit={handleLogin}
-        className="w-full max-w-sm bg-background/60 backdrop-blur-sm border border-border rounded-lg p-6 shadow-xl space-y-4"
+        className="login-form"
       >
-        <div className="text-left">
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
+        <div className="form-group">
+          <label className="form-label">
             Email
           </label>
           <input
@@ -86,13 +83,13 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            className="form-input"
             placeholder="you@example.com"
           />
         </div>
-
-        <div className="text-left">
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
+  
+        <div className="form-group">
+          <label className="form-label">
             Password
           </label>
           <input
@@ -100,43 +97,43 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            className="form-input"
             placeholder="••••••••"
           />
         </div>
-
+  
         <Button
           type="submit"
-          className="w-full mt-4 font-semibold text-lg"
+          className="login-button"
           disabled={loading}
         >
           {loading ? "Logging in..." : "Login"}
         </Button>
-
+  
         {/* Divider */}
-        <div className="flex items-center my-4">
-          <div className="flex-grow h-px bg-border" />
-          <span className="px-2 text-sm text-muted-foreground">or</span>
-          <div className="flex-grow h-px bg-border" />
+        <div className="form-divider">
+          <div className="divider-line" />
+          <span className="divider-text">or</span>
+          <div className="divider-line" />
         </div>
-
+  
         {/* GitHub OAuth Button */}
         <Button
           type="button"
           variant="outline"
-          className="w-full flex items-center justify-center gap-2 font-semibold text-lg"
+          className="github-login-button"
           onClick={handleGitHubLogin}
         >
-          <Github className="w-5 h-5" />
+          <Github className="github-icon" />
           Continue with GitHub
         </Button>
       </form>
-
+  
       {/* Footer */}
-      <p className="text-muted-foreground mt-6 text-sm">
-        Don’t have an account?{" "}
+      <p className="login-footer">
+        Don't have an account?{" "}
         <button
-          className="text-primary hover:underline"
+          className="signup-link"
           onClick={() => navigate("/register")}
         >
           Sign up

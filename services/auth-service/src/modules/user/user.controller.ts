@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateUserInput, LoginUserInput } from "./user.schema";
+import { CreateUserInput, LoginUserInput, UpdateEmailInput, UpdatePassInput } from "./user.schema";
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
 
@@ -22,6 +22,16 @@ export async function createUser(
       message: "User already exists with this email",
     });
   }
+  const name_user = await prisma.user.findUnique({
+    where: {
+      name: name,
+    },
+  });
+  if (name_user) {
+    return reply.code(401).send({
+      message: "User already exists with this name",
+    });
+  }
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await prisma.user.create({
@@ -36,15 +46,7 @@ export async function createUser(
     return reply.code(500).send(e);
   }
 }
-// Add this at the top of your auth server files if missing
-// declare global {
-//   interface Console {
-//     log(message?: any, ...optionalParams: any[]): void;
-//     error(message?: any, ...optionalParams: any[]): void;
-//     // Add other console methods as needed
-//   }
-//   var console: Console;
-// }
+
 export async function login(
   req: FastifyRequest<{
     Body: LoginUserInput;
@@ -70,24 +72,136 @@ export async function login(
     email: user.email,
     name: user.name,
   };
-    // DEBUG: What secret is actually being used?
-    // console.log("🔐 AUTH SERVER DEBUG:");
-    // console.log("   JWT_ACCESS_SECRET from env:", process.env.JWT_ACCESS_SECRET);
-    // console.log("   Secret length:", process.env.JWT_ACCESS_SECRET?.length);
-    // console.log("   Secret char codes:", 
-      // Array.from(process.env.JWT_ACCESS_SECRET || '').map(c => c.charCodeAt(0)));
-    
-    const token = req.jwt.sign(payload);
-    
-    // console.log("   Token created (first 50):", token.substring(0, 50) + "...");
-    // console.log("   Token length:", token.length);
-  // const token = req.jwt.sign(payload);
-  reply.setCookie("access_token", token, {
+  
+  const token = req.jwt.sign(payload);
+
+  const replay = reply.setCookie("access_token", token, {
     path: "/",
     httpOnly: true,
     secure: false,
+    sameSite: "lax",
   });
+  console.log("\n\n\nreply from cookies: ", replay);
+  console.log("\n\n\naccess_token cookie set", token);
   return { accessToken: token };
+}
+
+export async function update_email(
+  req: FastifyRequest<{
+    Body: UpdateEmailInput;
+  }>,
+  reply: FastifyReply,
+) {
+  const { new_email, password } = req.body;
+
+  const cookieToken = req.cookies.access_token;
+
+  try {
+    const decoded = req.jwt.verify(cookieToken);
+    const decoded_email = decoded.email;
+    const user = await prisma.user.findUnique({ 
+      where: { email: decoded_email } 
+    });
+    
+    if (!user) {
+      return reply.code(404).send({ message: "User not found" });
+    }
+  
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return reply.code(401).send({ message: "Invalid password" });
+    }
+  
+    const emailExists = await prisma.user.findUnique({
+      where: { email: new_email }
+    });
+    
+    if (emailExists) {
+      return reply.code(409).send({ message: "Email already in use" });
+    }
+  
+    const updatedUser = await prisma.user.update({
+      where: { email: decoded_email },
+      data: { email: new_email },
+    });
+  
+    const token = req.jwt.sign({
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+    });
+  
+    reply.setCookie("access_token", token, {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+  
+    return {
+      success: true,
+      message: "Email updated successfully",
+      accessToken: token,
+    };
+     
+  } catch (error) {
+    console.error(error);
+    return reply.code(401).send({ 
+      message: error,
+    });
+  }
+}
+
+export async function update_password(
+  req: FastifyRequest<{
+    Body: UpdatePassInput;
+  }>,
+  reply: FastifyReply,
+) {
+  try {
+    const userToken = req.user as {
+      id: string;
+      email: string;
+    };
+
+    const { current_password, new_password } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email: userToken.email },
+    });
+
+    if (!user) {
+      return reply.code(404).send({ message: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      current_password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      return reply.code(401).send({ message: "Invalid password" });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+
+    await prisma.user.update({
+      where: { email: userToken.email },
+      data: { password: hashedPassword },
+    });
+
+    reply.clearCookie("access_token");
+
+    return reply.send({
+      success: true,
+      message: "Password updated successfully. Please log in again.",
+    });
+  } catch (err) {
+    console.error(err);
+    return reply.code(500).send({
+      message: "Internal server error",
+    });
+  }
 }
 
 export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
@@ -106,13 +220,94 @@ export async function logout(
   reply: FastifyReply,
 ) {
   const { email } = req.body;
-  console.log("\n\n\n\n\n\n\n\n\n");
-  console.log("Logout body received:", req.body);
-  console.log("\n\n\n\n\n\n\n\n\n");
-  await prisma.user.update({
+  const user = await prisma.user.update({
     where: { email },
     data: { loggedIn: false },
   });
   reply.clearCookie("access_token");
   return reply.send({ message: "Logout successful" });
 }
+
+
+interface UpdateImageBody {
+  image: string;
+  image_name: string;
+  file_type?: string;
+  file_size?: number;
+}
+
+export const update_image = async (
+  req: FastifyRequest<{ Body: UpdateImageBody }>,
+  reply: FastifyReply
+) => {
+  const { image, image_name, file_type } = req.body;
+  
+  try {
+    const userId = (req.user as any)?.id;
+    
+    if (!userId) {
+      return reply.status(401).send({ 
+        success: false, 
+        message: "Unauthorized" 
+      });
+    }
+    
+    const imageBuffer = Buffer.from(image, 'base64');
+    
+    let mimeType = 'image/png';
+    if (file_type) {
+      mimeType = file_type;
+    } else if (image_name) {
+      const ext = image_name.toLowerCase().split('.').pop();
+      const mimeMap: { [key: string]: string } = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp'
+      };
+      mimeType = mimeMap[ext || 'png'] || 'image/png';
+    }
+    
+    const avatarUrl = `data:${mimeType};base64,${image}`;
+    
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        image: imageBuffer,
+        image_name: image_name,
+        avatar: avatarUrl
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true
+      }
+    });
+    
+    console.log(`[update_image] Updated avatar for user ${userId}, MIME type: ${mimeType}`);
+    
+    return reply.send({
+      success: true,
+      message: "Image updated successfully",
+      avatar_url: avatarUrl,
+      user: updatedUser
+    });
+    
+  } catch (err) {
+    console.error('[update_image] Error:', err);
+
+    if (err.code === 'P2025') {
+      return reply.status(404).send({
+        success: false,
+        message: "User not found"
+      });
+    }
+    
+    return reply.status(500).send({
+      success: false,
+      message: "Failed to update image"
+    });
+  }
+};

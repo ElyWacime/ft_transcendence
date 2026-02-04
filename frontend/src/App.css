@@ -6,6 +6,17 @@
   text-align: center;
 }
 
+.container {
+  margin: 0 auto;
+  padding: 2rem;
+  max-width: 1400px;
+}
+
+.dark-mode {
+  background: #222;
+  color: #fff;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

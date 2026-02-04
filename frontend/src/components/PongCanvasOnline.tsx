@@ -9,7 +9,7 @@ import React from "react";
 
 function usePongWebSocket(ws, mode, email, setGameState) {
     useEffect(() => {
-        if (!ws) return;
+      if (!ws) return;
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
@@ -35,8 +35,8 @@ function usePongWebSocket(ws, mode, email, setGameState) {
             }));
         };
 
-        ws.addEventListener("message", handleMessage);
-        // start game automatically
+      ws.addEventListener("message", handleMessage);
+      if (ws &&  ws.readyState == WebSocket.OPEN)
         ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
@@ -188,77 +188,73 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         player4Name:  player4Name,
         gameStatus: "PENDING",
     });
-    console.log("MODE === ", player1Name, player2Name, player3Name, player4Name);
     usePongWebSocket(ws, mode, email, setGameState);
     usePongControls(ws, mode, email);
     usePongRenderer(canvasRef, gameState);
 
     return (
-        <div className="space-y-6">
-            {/* Player Info & Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-
-                {/* Player 1 Card */}
-                <Card className="bg-gradient-secondary border-border">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-center text-lg">{player1Name} {mode == 4 ? " // ":"" }   { player3Name}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center">
-                        <div className="text-3xl font-game font-bold text-primary">
-                            {gameState.score.player1}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-2">
-                            W / S Keys
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Center Controls */}
-                <div className="flex flex-col items-center justify-center space-y-4">
-                    {/* {gameState.gameStatus === 'waiting' && (
-            <Button onClick={startGame} className="bg-gradient-primary flex items-center">
-              <Play className="w-4 h-4 mr-2" />
-              Start Game
-            </Button>
-          )} */}
-                    {gameState.gameStatus == 'FINISHED' && < Button className="px-2 py-1 text-sm border border-border flex items-center">
-                        <RotateCcw className="w-4 h-4 mr-2" />
-                        Reset
-                    </Button>
-                    }
+        <div className="pong-game-container">
+          {/* Player Info & Controls */}
+          <div className="player-info-grid">
+      
+            {/* Player 1 Card */}
+            <Card className="player-card player1-card">
+              <CardHeader className="player-card-header">
+                <CardTitle className="player-card-title">
+                  {player1Name || "PLAYER1"} {mode == 4 ? " // " : ""} {player3Name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="player-card-content">
+                <div className="player-score">
+                  {gameState.score.player1}
                 </div>
-
-                {/* Player 2 Card */}
-                <Card className="bg-gradient-secondary border-border">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-center text-lg">{player2Name }{mode == 4 ? " // ":"" }  { player4Name}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center">
-                        <div className="text-3xl font-game font-bold text-primary">
-                            {gameState.score.player2}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-2">
-                            Arrow Keys
-                        </div>
-                    </CardContent>
-                </Card>
-
+                <div className="player-controls">
+                  Arrow Keys
+                </div>
+              </CardContent>
+            </Card>
+      
+            {/* Center Controls */}
+            <div className="game-controls-center">
+              {gameState.gameStatus == 'FINISHED' && (
+                <Button className="reset-button">
+                  <RotateCcw className="reset-icon" />
+                  Reset
+                </Button>
+              )}
             </div>
-
-            {/* Game Canvas */}
-            <div className="flex justify-center mt-6">
-                <canvas
-                    ref={canvasRef}
-                    width={800}
-                    height={600}
-                    tabIndex={0}
-                    className="border border-border rounded-lg bg-card shadow-card focus:outline-none"
-                />
-            </div>
-
-        </div >
-    );
-
+      
+            {/* Player 2 Card */}
+            <Card className="player-card player2-card">
+              <CardHeader className="player-card-header">
+                <CardTitle className="player-card-title">
+                  {player2Name|| "PLAYER2tmp"} {mode == 4 ? " // " : ""} {player4Name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="player-card-content">
+                <div className="player-score">
+                  {gameState.score.player2}
+                </div>
+                <div className="player-controls">
+                  Arrow Keys
+                </div>
+              </CardContent>
+            </Card>
+      
+          </div>
+      
+          {/* Game Canvas */}
+          <div className="game-canvas-wrapper">
+            <canvas
+              ref={canvasRef}
+              width={800}
+              height={600}
+              tabIndex={0}
+              className="game-canvas"
+            />
+          </div>
+        </div>
+      );
 };
 
 

@@ -34,25 +34,25 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-secondary text-center px-4">
+    <div className="register-page">
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-4xl md:text-6xl font-game font-bold glow-text flex items-center justify-center space-x-3">
-          <Trophy className="w-8 h-8 text-primary" />
+      <div className="register-header">
+        <h1 className="register-title glow-text">
+          <Trophy className="trophy-icon" />
           <span>FT TRANSCENDENCE</span>
         </h1>
-        <p className="text-muted-foreground mt-2 text-sm md:text-base">
+        <p className="register-subtitle">
           Create your account and join the arena 🕹️
         </p>
       </div>
-
+  
       {/* Register Card */}
       <form
         onSubmit={handleRegister}
-        className="w-full max-w-sm bg-background/60 backdrop-blur-sm border border-border rounded-lg p-6 shadow-xl space-y-4"
+        className="register-form"
       >
-        <div className="text-left">
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
+        <div className="form-group">
+          <label className="form-label">
             Name
           </label>
           <input
@@ -60,13 +60,13 @@ const Register = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            className="form-input"
             placeholder="Player name"
           />
         </div>
-
-        <div className="text-left">
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
+  
+        <div className="form-group">
+          <label className="form-label">
             Email
           </label>
           <input
@@ -74,13 +74,13 @@ const Register = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            className="form-input"
             placeholder="you@example.com"
           />
         </div>
-
-        <div className="text-left">
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
+  
+        <div className="form-group">
+          <label className="form-label">
             Password
           </label>
           <input
@@ -88,25 +88,25 @@ const Register = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full p-3 rounded-md bg-muted/20 border border-border focus:outline-none focus:ring-2 focus:ring-primary text-white"
+            className="form-input"
             placeholder="••••••••"
           />
         </div>
-
+  
         <Button
           type="submit"
-          className="w-full mt-4 font-semibold text-lg"
+          className="register-button"
           disabled={loading}
         >
           {loading ? "Registering..." : "Sign Up"}
         </Button>
       </form>
-
+  
       {/* Footer */}
-      <p className="text-muted-foreground mt-6 text-sm">
+      <p className="register-footer">
         Already have an account?{" "}
         <button
-          className="text-primary hover:underline"
+          className="login-link"
           onClick={() => navigate("/login")}
         >
           Log in

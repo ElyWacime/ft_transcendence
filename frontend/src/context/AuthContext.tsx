@@ -16,14 +16,13 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    // initialize from localStorage on first render
     return !!localStorage.getItem("token");
   });
 
   const login = (token: string, email: string) => {
     localStorage.setItem("token", token);
     localStorage.setItem("email", email);
-    setIsLoggedIn(true); // triggers re-render
+    setIsLoggedIn(true);
   };
 
   const logout = async () => {
@@ -35,10 +34,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     localStorage.removeItem("token");
     localStorage.removeItem("email");
-    setIsLoggedIn(false); // triggers re-render
+    setIsLoggedIn(false);
   };
 
-  // Optional effect to sync if localStorage changes externally
   useEffect(() => {
     const handleStorage = () => {
       setIsLoggedIn(!!localStorage.getItem("token"));

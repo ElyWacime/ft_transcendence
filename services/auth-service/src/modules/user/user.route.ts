@@ -1,13 +1,12 @@
 import { FastifyInstance } from "fastify";
-import { createUser, login, logout } from "./user.controller";
-import { FastifyInstance } from "fastify";
+import { createUser, login, logout, update_email, update_password, update_image} from "./user.controller";
+import prisma from "../../utils/prisma";
 
 export async function userRoutes(app: FastifyInstance) {
   app.get("/", { preHandler: [app.authenticate] }, async () => {
     return { message: "ok" };
   });
 
-  // --- REGISTER ---
   app.post("/register", {
     schema: {
       body: {
@@ -33,7 +32,6 @@ export async function userRoutes(app: FastifyInstance) {
     handler: createUser,
   });
 
-  // --- LOGIN ---
   app.post("/login", {
     schema: {
       body: {
@@ -68,7 +66,118 @@ export async function userRoutes(app: FastifyInstance) {
     },
     handler: logout,
   });
-  app.post("/validate-token", {
+
+  app.put("/update_email", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["new_email", "password"],
+        properties: {
+          new_email: { type: "string", format: "email" },
+          password: { type: "string", minLength: 6 },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" },
+            accessToken: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: update_email,
+  });
+
+  app.put("/update_password", {
+    preHandler: app.authenticate,
+    schema: {
+      body: {
+        type: "object",
+        required: ["current_password", "new_password"],
+        properties: {
+          current_password: { type: "string", minLength: 6 },
+          new_password: { type: "string", minLength: 6 },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" },
+            accessToken: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: update_password,
+  });
+
+  app.put("/update_image", {
+    preHandler: app.authenticate,
+    schema: {
+      body: {
+        type: "object",
+        required: ["image", "image_name"],
+        properties: {
+          image: { 
+            type: "string",
+          },
+          image_name: { 
+            type: "string",
+            minLength: 1,
+            maxLength: 255
+          }
+        }
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" },
+            avatar_url: { type: "string" },
+            user: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                email: { type: "string" },
+                name: { type: "string" },
+                avatar: { type: "string" }
+              }
+            }
+          }
+        },
+        401: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" }
+          }
+        },
+        404: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" }
+          }
+        },
+        500: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" }
+          }
+        }
+      }
+    },
+    handler: update_image
+  });
+  
+  app.post("/validate_token", {
     schema: {
       body: {
         type: "object",
@@ -83,9 +192,15 @@ export async function userRoutes(app: FastifyInstance) {
     
     try {
       const decoded = req.jwt.verify(token);
+      const current_user = await prisma.user.findUnique({
+      where: { id: decoded.id }
+    });
+    
       return reply.send({
         valid: true,
-        user: decoded, 
+        user_name: current_user.name,
+        user_id: current_user.id,
+        user_email: current_user.email,
       });
     } catch (err) {
       return reply.status(401).send({
@@ -94,5 +209,108 @@ export async function userRoutes(app: FastifyInstance) {
       });
     }
   });
-  //app.post("/logout", { preHandler: [app.authenticate] }, logout);
+
+  app.post("/search-this-name", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["name"],
+        properties: {
+          name: { type: "string" },
+        }
+      }
+    }
+  }, async (req, reply) => {
+    try {
+      const authHeader = req.headers.authorization || '';
+      const parts = authHeader.split(' ');
+      const token = parts.length === 2 && parts[0].toLowerCase() === 'bearer' ? parts[1] : null;
+      
+      if (!token) {
+        console.log('[search-this-name] No authorization header:', authHeader);
+        return reply.status(401).send({
+          valid: false,
+          error: "Missing authorization token"
+        });
+      }
+      
+      console.log('[search-this-name] Verifying token...');
+      let decoded;
+      try {
+        decoded = app.jwt.verify(token) as any;
+      } catch (verifyErr) {
+        console.log('[search-this-name] Token verification failed:', verifyErr);
+        return reply.status(401).send({
+          valid: false,
+          error: "Invalid or expired token"
+        });
+      }
+      
+      if (!decoded) {
+        console.log('[search-this-name] Token decoded to null');
+        return reply.status(401).send({
+          valid: false,
+          error: "Invalid token"
+        });
+      }
+      
+      console.log('[search-this-name] Token verified, searching for user:', req.body.name);
+      const current_user = await prisma.user.findFirst({
+        where: { name: req.body.name }
+      });
+      if (!current_user) {
+        return reply.status(404).send({
+          valid: false,
+          error: "User not found"
+        });
+      }  
+      return reply.send({
+        valid: true,
+        user_name: current_user.name,
+        user_id: current_user.id,
+        user_email: current_user.email,
+      });
+    } catch (err) {
+      console.log('[search-this-name] Unexpected error:', err);
+      return reply.status(500).send({
+        valid: false,
+        error: "Internal server error"
+      });
+    }
+  });
+
+  app.get("/user-info/:userId", {
+    preHandler: app.authenticate,
+  }, async (req, reply) => {
+    try {
+      const { userId } = req.params as { userId: string };
+      
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+          loggedIn: true,
+          Auto_Match: true,
+          CreatedAt: true
+        }
+      });
+
+      if (!user) {
+        return reply.status(404).send({
+          error: "User not found"
+        });
+      }
+
+      return reply.send(user);
+    } catch (err) {
+      console.error('[user-info] Error:', err);
+      return reply.status(500).send({
+        error: "Internal server error"
+      });
+    }
+  });
+  
 }

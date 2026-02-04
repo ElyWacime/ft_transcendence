@@ -1,2 +1,0 @@
-npx tsc DBController.ts --target ES2020 --module ES2020
-npx tsc DBController.ts

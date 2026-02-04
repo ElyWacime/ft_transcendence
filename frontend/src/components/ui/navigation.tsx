@@ -1,101 +1,142 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Trophy, Gamepad2, MessageSquare, LogIn, LogOut } from "lucide-react";
+import { Trophy, Gamepad2, MessageSquare, LogIn, LogOut, User, Bot, ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { useState, useRef, useEffect } from "react";
 
 export const Navigation = () => {
   const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
+  const [isGamesOpen, setIsGamesOpen] = useState(false);
+  const gamesDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
-    await logout(); // calls backend + clears token
+    await logout();
     toast.success("Logged out successfully!");
     navigate("/login");
   };
 
-  // Regular pages (no Login/Logout yet)
-  const baseNavItems = [
-    { path: "/", label: "Home", icon: Home },
+  const gamesModes = [
     { path: "/tournament", label: "Tournament", icon: Trophy },
-    { path: "/game", label: "Game", icon: Gamepad2 },
+    { path: "/game-ai", label: "VS AI", icon: Bot },
+    { path: "/game", label: "Local Game", icon: Gamepad2 },
   ];
 
-  // Add either Login or Logout depending on auth state
+  const baseNavItems = [
+    { path: "/chat", label: "Chat", icon: MessageSquare },
+    { path: "/profile", label: "Profile", icon: User},
+  ];
+
   const navItems = isLoggedIn
     ? [
-        ...baseNavItems,
-        {
-          path: "#",
-          label: "Logout",
-          icon: LogOut,
-          onClick: handleLogout,
-        },
-      ]
+      ...baseNavItems,
+      {
+        path: "#",
+        label: "Logout",
+        icon: LogOut,
+        onClick: handleLogout,
+      },
+    ]
     : [
-        ...baseNavItems,
-        {
-          path: "/login",
-          label: "Login",
-          icon: LogIn,
-        },
-      ];
+      ...baseNavItems,
+      {
+        path: "/login",
+        label: "Login",
+        icon: LogIn,
+      },
+    ];
 
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Gamepad2 className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-game text-xl font-bold glow-text">
-              PONG ARENA
-            </span>
-          </div>
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (gamesDropdownRef.current && !gamesDropdownRef.current.contains(event.target as Node)) {
+        setIsGamesOpen(false);
+      }
+    };
 
-          {/* Links */}
-          <div className="flex items-center space-x-6">
-            {navItems.map((item) =>
-              item.onClick ? (
-                // If item has onClick (Logout)
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+    return (
+      <nav className="main-nav">
+        <div className="nav-container">
+          <div className="nav-content">
+            {/* Logo */}
+            <button
+              className="nav-logo"
+              onClick={() => navigate("/")}
+              aria-label="Go to Home"
+            >
+              <div className="logo-icon">
+                <Gamepad2 className="logo-icon-svg" />
+              </div>
+              <span className="logo-text">
+                PONG ARENA
+              </span>
+            </button>
+    
+            {/* Links */}
+            <div className="nav-links">
+              {/* Games Dropdown */}
+              <div className="nav-dropdown" ref={gamesDropdownRef}>
                 <button
-                  key={item.label}
-                  onClick={item.onClick}
-                  className={cn(
-                    "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300",
-                    "hover:bg-secondary hover:text-secondary-foreground text-muted-foreground hover:text-foreground"
-                  )}
+                  className="nav-dropdown-button"
+                  onClick={() => setIsGamesOpen(!isGamesOpen)}
+                  aria-expanded={isGamesOpen}
                 >
-                  <item.icon className="w-4 h-4" />
-                  <span className="font-medium">{item.label}</span>
+                  <Gamepad2 className="nav-icon" />
+                  <span className="nav-label">Games</span>
+                  <ChevronDown className="dropdown-icon" />
                 </button>
-              ) : (
-                // Regular NavLink (Home, Tournament, Login)
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300",
-                      "hover:bg-secondary hover:text-secondary-foreground",
-                      isActive
-                        ? "bg-primary text-primary-foreground glow-blue"
-                        : "text-muted-foreground hover:text-foreground"
-                    )
-                  }
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="font-medium">{item.label}</span>
-                </NavLink>
-              )
-            )}
+                {isGamesOpen && (
+                  <div className="nav-dropdown-menu">
+                    {gamesModes.map((mode) => (
+                      <NavLink
+                        key={mode.path}
+                        to={mode.path}
+                        onClick={() => setIsGamesOpen(false)}
+                        className={({ isActive }) =>
+                          `nav-dropdown-item ${isActive ? 'nav-dropdown-item-active' : ''}`
+                        }
+                      >
+                        <mode.icon className="nav-icon" />
+                        <span>{mode.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Other nav items */}
+              {navItems.map((item) =>
+                item.onClick ? (
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    className="nav-button logout-button"
+                  >
+                    <item.icon className="nav-icon" />
+                    <span className="nav-label">{item.label}</span>
+                  </button>
+                ) : (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`
+                    }
+                  >
+                    <item.icon className="nav-icon" />
+                    <span className="nav-label">{item.label}</span>
+                  </NavLink>
+                )
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
-  );
+      </nav>
+    );
 };
 
