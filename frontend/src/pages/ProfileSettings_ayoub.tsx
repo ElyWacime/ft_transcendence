@@ -2,7 +2,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -187,13 +187,21 @@ const ProfileSettings = () => {
                 </h3>
               </div>
               <form onSubmit={handleSearch} className="profile-search-form">
-                <Input
+                {/* <Input
                   placeholder="Enter player name"
                   value={searchName}
                   onChange={(e) => setSearchName(e.target.value)}
                   disabled={searchLoading}
                   className="profile-search-input"
-                />
+                /> */}
+                <input 
+                  placeholder="Enter player name"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                  disabled={searchLoading}
+                  className="profile-search-input"
+                    >
+                </input>
                 <Button type="submit" disabled={searchLoading}>
                   {searchLoading ? "Searching..." : "Search"}
                 </Button>

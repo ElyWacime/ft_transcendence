@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { PongCanvasAI } from "@/components/PongCanvasAI";
 import { Bot } from "lucide-react";
 

@@ -18,6 +18,7 @@ let matches = new Map();
 const TICK_RATE = 60;
 const PADDLE_SPEED = 8;
 const MAX_Speed = 25;
+const MAX_Score = 5;
 await dbcnx.connect();
 
 function sendtoplayer(id, data) {
@@ -104,7 +105,7 @@ function tick(m,dt) {
     m.score1 += 1;
     resetBall(1, m);
   }
-  if (m.score2 == 5 || m.score1 == 5)
+  if (m.score2 == MAX_Score || m.score1 == MAX_Score)
     m.gameStatus = "FINISHED";
 }
 
@@ -137,10 +138,7 @@ fastify.get('/', async (request, reply) => {
 
 const interval = setInterval(() => {
   if (clients.size == 0 || matches.size == 0)
-  {
-    // clearInterval(interval);
     return;
-  }
   for (const [id, match] of matches) {
     match.now = Date.now();
     let delta = (((match.now - match.last)) * TICK_RATE) / 1000;

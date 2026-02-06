@@ -42,7 +42,7 @@ const BALL_SPEED = 5;
 const paddleSpeed = 10;
 const accelerateSpeed = 1.2;
 const max_Speed = 13;
-const angle = Math.PI / 8;
+
 const aiSpeedMultipliers: Record<Difficulty, number> = {
   [Difficulty.EASY]: 1,
   [Difficulty.MEDIUM]: 1,
@@ -68,8 +68,8 @@ export const PongCanvasAI = ({
     ball: {
       x: 400,
       y: 300,
-      dx: BALL_SPEED * Math.cos(angle),
-      dy: BALL_SPEED * Math.sin(angle),
+      dx: BALL_SPEED ,
+      dy: BALL_SPEED ,
       radius: 8,
     },
     paddle1: { x: 20, y: 250, width: 15, height: 100 },
@@ -83,8 +83,8 @@ export const PongCanvasAI = ({
     (dirx: number = 1) => ({
       x: 400,
       y: 300,
-      dx: dirx * BALL_SPEED * Math.cos(angle),
-      dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED * Math.sin(angle),
+      dx: dirx * BALL_SPEED ,
+      dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED,
       radius: 8,
     }),
     []
@@ -137,11 +137,11 @@ export const PongCanvasAI = ({
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "hsl(210 40% 98%)";
-    ctx.font = '48px "JetBrains Mono"';
-    ctx.textAlign = "center";
-    ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
-    ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
+    // ctx.fillStyle = "hsl(210 40% 98%)";
+    // ctx.font = '48px "JetBrains Mono"';
+    // ctx.textAlign = "center";
+    // ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
+    // ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, []);
 
   const mapGameStateToAI = useCallback(

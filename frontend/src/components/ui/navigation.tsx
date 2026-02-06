@@ -1,6 +1,5 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { Trophy, Gamepad2, MessageSquare, LogIn, LogOut, User, Bot, ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
