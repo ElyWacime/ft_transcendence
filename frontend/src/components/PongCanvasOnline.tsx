@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import React from "react";
-
-
 
 function usePongWebSocket(ws, mode, email, setGameState) {
     useEffect(() => {
-        if (!ws) return;
-
+      if (!ws) return;
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
             setGameState((prev) => ({
@@ -35,8 +31,8 @@ function usePongWebSocket(ws, mode, email, setGameState) {
             }));
         };
 
-        ws.addEventListener("message", handleMessage);
-        // start game automatically
+      ws.addEventListener("message", handleMessage);
+      if (ws &&  ws.readyState == WebSocket.OPEN)
         ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
@@ -149,13 +145,13 @@ function usePongRenderer(canvasRef, gameState) {
         ctx.shadowColor = 'hsl(217 91% 60%)';
         ctx.shadowBlur = 20;
         ctx.fill();
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle = 'hsl(210 40% 98%)';
-        ctx.font = '48px "JetBrains Mono"';
-        ctx.textAlign = 'center';
-        ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
-        ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
+        ctx.shadowBlur = 0; 
+       
+        // ctx.fillStyle = 'hsl(210 40% 98%)';
+        // ctx.font = '48px "JetBrains Mono"';
+        // ctx.textAlign = 'center';
+        // ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
+        // ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
     }, [gameState]);
 
     const loop = useCallback(() => {
@@ -188,7 +184,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         player4Name:  player4Name,
         gameStatus: "PENDING",
     });
-    // console.log("MODE === ", player1Name, player2Name, player3Name, player4Name);
     usePongWebSocket(ws, mode, email, setGameState);
     usePongControls(ws, mode, email);
     usePongRenderer(canvasRef, gameState);
@@ -202,7 +197,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
             <Card className="player-card player1-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
-                  {player1Name || "PLAYER1tmp"} {mode == 4 ? " // " : ""} {player3Name}
+                  {player1Name || "PLAYER1"} {mode == 4 ? " // " : ""} {player3Name}
                 </CardTitle>
               </CardHeader>
               <CardContent className="player-card-content">
@@ -210,7 +205,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                   {gameState.score.player1}
                 </div>
                 <div className="player-controls">
-                  W / S Keys
+                  Arrow Keys
                 </div>
               </CardContent>
             </Card>

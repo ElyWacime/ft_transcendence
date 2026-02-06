@@ -6,8 +6,7 @@ declare module "fastify" {
   }
 }
 
-// adding jwt property to req
-// authenticate property to FastifyInstance
+
 
 declare module "fastify" {
   interface FastifyRequest {

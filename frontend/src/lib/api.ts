@@ -36,7 +36,6 @@ export interface ChatMessage {
   type: "message" | "system";
 }
 
-// ---------------- MOCK TOURNAMENT API ---------------- //
 class TournamentAPI {
   private mockTournament: Tournament | null = null;
   private mockMessages: ChatMessage[] = [];
@@ -165,7 +164,6 @@ class TournamentAPI {
 
 export const api = new TournamentAPI();
 
-// ---------------- USER AUTH API ---------------- //
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
   private baseUrl = `${API_URL}/api/users`;
@@ -179,7 +177,6 @@ class UserAPI {
     const response = await res.json();
 
     if (res.ok) {
-      // Add user to chat after registration
       try {
         await fetch(`${API_URL}/api/chat/addUsers`, {
           method: 'POST',
@@ -189,7 +186,6 @@ class UserAPI {
         });
       } catch (err) {
         console.error('Failed to add user to chat:', err);
-        // Don't throw error here - registration was successful
       }
       
       return response;
@@ -203,7 +199,6 @@ class UserAPI {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-      credentials: "include",
     });
 
     return await res.json();
@@ -262,23 +257,22 @@ class UserAPI {
     return await res.json();
   }
   async update_image(imageData: { 
-    image: string;       // Base64 string (without data: prefix)
-    image_name: string;  // File name
-    file_type?: string;  // Optional
-    file_size?: number;  // Optional
+    image: string;      
+    image_name: string; 
+    file_type?: string;
+    file_size?: number;
   }) {
     const token = localStorage.getItem("token");
     
     const res = await fetch(`${this.baseUrl}/update_image`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",  // Important: JSON not FormData
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         image: imageData.image,
         image_name: imageData.image_name,
-        // Optionally include other fields if your backend accepts them
         ...(imageData.file_type && { file_type: imageData.file_type }),
         ...(imageData.file_size && { file_size: imageData.file_size }),
       }),
@@ -286,6 +280,63 @@ class UserAPI {
     });
 
     return await res.json();
+  }
+
+  async getUserById(userId: string) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Not logged in. Please log in first.");
+    }
+
+    const res = await fetch(`/api/dashboard/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Get user by ID error:", res.status, errorText);
+      throw new Error(`Failed to fetch user: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    return data.user;
+  }
+
+  async searchByName(name: string) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Not logged in. Please log in first to search for players.");
+    }
+
+
+    const res = await fetch(`${this.baseUrl}/search-this-name`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name }),
+      credentials: 'include',
+    });
+
+    console.log('[searchByName] Response status:', res.status);
+    const data = await res.json();
+    
+    if (!res.ok || data.valid === false) {
+      throw new Error(data?.error || "User not found");
+    }
+
+    return data as {
+      valid: true;
+      user_name: string;
+      user_email: string;
+      user_id: string;
+    };
   }
 }
 

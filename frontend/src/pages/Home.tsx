@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
-import { useEffect } from "react";
+
 const Home = () => {
   const navigate = useNavigate();
 
@@ -35,6 +35,7 @@ const Home = () => {
       icon: Zap,
       title: "1 vs AI",
       description: "Outsmart this AI ",
+      page: "/game-ai",
     }
   ];
   return (
@@ -45,10 +46,9 @@ const Home = () => {
         <div className="hero-content">
           <h1 className="hero-title animate-float">
             PONG
-            <span className="text-primary"> ARENA</span>
+            <span className="hero-title-accent"> ARENA</span>
           </h1>
           <p className="hero-subtitle">
-            The ultimate retro gaming tournament experience.
             The ultimate retro gaming tournament experience.
             Compete, dominate, and become the Pong champion!
           </p>
@@ -74,7 +74,7 @@ const Home = () => {
               <Card 
                 onClick={() => { navigate(feature.page) }}
                 key={index}
-                className="feature-card group"
+                className="feature-card"
               >
                 <div className="feature-card-content">
                   <div className="feature-icon-container">
@@ -86,33 +86,6 @@ const Home = () => {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
-  
-      {/* Quick Actions */}
-      <section className="quick-actions-section">
-        <div className="quick-actions-container">
-          <h2 className="quick-actions-title glow-text">Ready to Play?</h2>
-          {/* <div className="quick-actions-buttons">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => { navigate("/tournament") }}
-              className="quick-action-button"
-            >
-              <Users className="button-icon" />
-              Setup Tournament
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => { navigate("/game") }}
-              className="quick-action-button"
-            >
-              <Gamepad2 className="button-icon" />
-              Quick Game
-            </Button>
-          </div> */}
         </div>
       </section>
     </div>

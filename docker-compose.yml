@@ -1,5 +1,4 @@
 services:
-  # ---------- FRONTEND ----------
   frontend:
     build:
       context: ./frontend
@@ -14,7 +13,6 @@ services:
     networks:
       - transcendence
 
-  # ---------- AUTH SERVICE ----------
   auth-service:
     build:
       context: ./services/auth-service
@@ -49,14 +47,12 @@ services:
     networks:
       - transcendence      
 
-  # ---------- GATEWAY (NGINX) ----------
   gateway:
     image: nginx:stable-alpine
     depends_on:
       - frontend
       - auth-service
       - pong-server
-      # - tournament-service
     ports:
       - "80:80"
     volumes:
@@ -64,12 +60,10 @@ services:
     networks:
       - transcendence
 
-  # ---------- FASTIFY TYPESCRIPT BACKEND ----------
   pong-server:
     build:
-      context: ./services/fgame
+      context: ./services/game-service
       dockerfile: Dockerfile
-    # container_name: pong-game
     environment:
       - JWT_ACCESS_SECRET=supersecretkey
       - JWT_REFRESH_SECRET=superrefreshkey

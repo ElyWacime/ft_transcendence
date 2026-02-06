@@ -1,18 +1,16 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
+import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState } from "react";
 
 const MatchMacking = () => {
-    const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+    const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
     let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const [role, setRole] = useState<boolean>(true);
-    const mode = searchParams.get("mode"); // "4"
+    const mode = searchParams.get("mode");
     const email = localStorage.getItem("email");
     const [features, setFeatures] = useState(() => {
         return [
@@ -43,9 +41,9 @@ const MatchMacking = () => {
         ];
     });
     useEffect(() => {
-        if (!ws || !isReady) return;
-        
-        ws.send(JSON.stringify({
+      if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
+      
+      ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
             email,
@@ -57,29 +55,28 @@ const MatchMacking = () => {
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
-            console.log(data);
             setFeatures(() => {
                 return [
                     {
                         icon: Users,
-                        title: data.player1Name || "Player10",
+                        title: data.player1Name || "Player1",
                         description: mode === "4" ? "Team A" : "Player 1",
                     },
                     {
                         icon: Users,
-                        title: data.player2Name || "Player20",
+                        title: data.player2Name || "Player2",
                         description: mode === "4" ? "Team B" : "Player 2",
                     },
                     ...(mode === "4"
                         ? [
                             {
                                 icon: Users,
-                                title: data.player3Name || "Player30",
+                                title: data.player3Name || "Player3",
                                 description: "Team A",
                             },
                             {
                                 icon: Users,
-                                title: data.player4Name || "Player40",
+                                title: data.player4Name || "Player4",
                                 description: "Team B",
                             },
                         ]
@@ -100,7 +97,7 @@ const MatchMacking = () => {
         };
         ws.addEventListener("message", handleMessage);
         return () => {
-            if (ws.readyState === WebSocket.OPEN) {
+            if (ws && isReady && ws.readyState == WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                     token:localStorage.getItem("token"),
                     type: "DELETE",
@@ -131,12 +128,11 @@ const MatchMacking = () => {
                 </p>
               </div>
             </section>
-      
-            {/* Features Grid */}
+
             <section className="features-section">
               <div className="features-container">
                 <h2 className="features-title glow-text">
-                  Game Features
+                  Game's Waiting Room
                 </h2>
                 <div className="features-grid">
                   {features.map((feature, index) => (

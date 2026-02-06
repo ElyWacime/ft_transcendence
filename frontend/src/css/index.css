@@ -1,11 +1,11 @@
-/* -----Original Index.css adapted for a gaming-themed UI */
 
-/* Import component styles */
+
+
 @import './components.css';
 
-/* CSS Variables */
+
 :root {
-  /* Core colors */
+  
   --background: 222 47% 4%;
   --foreground: 210 40% 98%;
   --card: 222 47% 6%;
@@ -27,27 +27,27 @@
   --ring: 217 91% 60%;
   --radius: 0.75rem;
   
-  /* Gaming-specific colors */
+  
   --neon-blue: 217 91% 60%;
   --neon-green: 142 76% 36%;
   --neon-purple: 270 95% 75%;
   --electric: 195 100% 50%;
   
-  /* Gradients */
+  
   --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(195 100% 50%));
   --gradient-secondary: linear-gradient(135deg, hsl(222 47% 6%), hsl(222 47% 12%));
   --gradient-glow: linear-gradient(135deg, hsl(217 91% 60% / 0.2), hsl(217 50% 25% / 0.2));
   
-  /* Shadows and effects */
+  
   --shadow-neon: 0 0 20px hsl(217 91% 60% / 0.3);
   --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.2);
   --shadow-card: 0 8px 32px hsl(222 47% 4% / 0.8);
   
-  /* Animations */
+  
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   
-  /* Sidebar (for reference, not used in base styles) */
+  
   --sidebar-background: 0 0% 98%;
   --sidebar-foreground: 240 5.3% 26.1%;
   --sidebar-primary: 240 5.9% 10%;
@@ -58,7 +58,7 @@
   --sidebar-ring: 217.2 91.2% 59.8%;
 }
 
-/* Light mode override */
+
 .light {
   --background: 210 40% 98%;
   --foreground: 222 47% 11%;
@@ -66,7 +66,7 @@
   --primary-foreground: 210 40% 98%;
 }
 
-/* Base styles */
+
 * {
   border-color: hsl(var(--border));
   box-sizing: border-box;
@@ -86,7 +86,7 @@ body {
   margin: 0;
 }
 
-/* Container utility */
+
 .container {
   width: 100%;
   margin-right: auto;
@@ -101,7 +101,7 @@ body {
   }
 }
 
-/* Typography utilities */
+
 .font-game {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-weight: 600;
@@ -111,7 +111,7 @@ body {
   text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.5);
 }
 
-/* Color utilities */
+
 .border-border {
   border-color: hsl(var(--border));
 }
@@ -128,7 +128,7 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Background utilities */
+
 .bg-gradient-primary {
   background-image: var(--gradient-primary);
 }
@@ -141,7 +141,7 @@ body {
   background-image: var(--gradient-glow);
 }
 
-/* Color classes - Primary */
+
 .bg-primary {
   background-color: hsl(var(--primary));
 }
@@ -158,7 +158,7 @@ body {
   color: hsl(var(--primary-foreground));
 }
 
-/* Color classes - Secondary */
+
 .bg-secondary {
   background-color: hsl(var(--secondary));
 }
@@ -175,7 +175,7 @@ body {
   color: hsl(var(--secondary-foreground));
 }
 
-/* Color classes - Destructive */
+
 .bg-destructive {
   background-color: hsl(var(--destructive));
 }
@@ -192,7 +192,7 @@ body {
   color: hsl(var(--destructive-foreground));
 }
 
-/* Color classes - Muted */
+
 .bg-muted {
   background-color: hsl(var(--muted));
 }
@@ -209,7 +209,7 @@ body {
   color: hsl(var(--muted-foreground));
 }
 
-/* Color classes - Accent */
+
 .bg-accent {
   background-color: hsl(var(--accent));
 }
@@ -226,7 +226,7 @@ body {
   color: hsl(var(--accent-foreground));
 }
 
-/* Color classes - Card */
+
 .bg-card {
   background-color: hsl(var(--card));
 }
@@ -243,7 +243,7 @@ body {
   color: hsl(var(--card-foreground));
 }
 
-/* Color classes - Popover */
+
 .bg-popover {
   background-color: hsl(var(--popover));
 }
@@ -260,7 +260,7 @@ body {
   color: hsl(var(--popover-foreground));
 }
 
-/* Color classes - Border, Input, Ring */
+
 .border-border {
   border-color: hsl(var(--border));
 }
@@ -273,7 +273,7 @@ body {
   --tw-ring-color: hsl(var(--ring));
 }
 
-/* Gaming-specific color classes */
+
 .bg-neon-blue {
   background-color: hsl(var(--neon-blue));
 }
@@ -306,7 +306,7 @@ body {
   color: hsl(var(--electric));
 }
 
-/* Shadow utilities */
+
 .shadow-neon {
   box-shadow: var(--shadow-neon);
 }
@@ -323,7 +323,7 @@ body {
   box-shadow: var(--shadow-neon);
 }
 
-/* Border radius utilities */
+
 .rounded-lg {
   border-radius: var(--radius);
 }
@@ -336,7 +336,7 @@ body {
   border-radius: calc(var(--radius) - 4px);
 }
 
-/* Animation keyframes */
+
 @keyframes accordion-down {
   from {
     height: 0;
@@ -373,7 +373,7 @@ body {
   }
 }
 
-/* Animation utilities */
+
 .animate-accordion-down {
   animation: accordion-down 0.2s ease-out;
 }
@@ -390,7 +390,7 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
-/* Transition utilities */
+
 .transition-smooth {
   transition: var(--transition-smooth);
 }
@@ -399,7 +399,7 @@ body {
   transition: var(--transition-bounce);
 }
 
-/* Additional utilities for common patterns */
+
 .flex-center {
   display: flex;
   align-items: center;
@@ -428,7 +428,7 @@ body {
   border-radius: var(--radius);
 }
 
-/* Component-specific styles */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -450,7 +450,7 @@ body {
   background-color: hsl(var(--primary) / 0.9);
 }
 
-/* Avatar Profile Picture Styles */
+
 .avatar {
   width: 3rem;
   height: 3rem;

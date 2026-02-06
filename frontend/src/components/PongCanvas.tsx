@@ -38,17 +38,14 @@ interface GameState {
   gameStatus: "waiting" | "playing" | "paused" | "FINISHED";
 }
 
-const BALL_SPEED = 5;
+const BALL_SPEED = 2;
 const paddleSpeed = 10;
 const accelerateSpeed = 1.2;
 const max_Speed = 25;
-const angle = Math.PI / 8;
 
 export const PongCanvas = ({
+  player1Name = localStorage.getItem("name") || "Player 1",
   player2Name =  "Player 2",
-  player1Name = localStorage.getItem("email") || "Player 1",
-  player3Name = "Player 3",
-  player4Name = "Player 4",
   onGameEnd,
   maxScore = 5,
 }: PongCanvasProps) => {
@@ -62,8 +59,8 @@ export const PongCanvas = ({
     ball: {
       x: 400,
       y: 300,
-      dx: BALL_SPEED * Math.cos(angle),
-      dy: BALL_SPEED * Math.sin(angle),
+      dx: BALL_SPEED,
+      dy: BALL_SPEED,
       radius: 8,
     },
     paddle1: { x: 20, y: 250, width: 15, height: 100 },
@@ -79,8 +76,8 @@ export const PongCanvas = ({
     (dirx: number = 1) => ({
       x: 400,
       y: 300,
-      dx: dirx * BALL_SPEED * Math.cos(angle),
-      dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED * Math.sin(angle),
+      dx: dirx * BALL_SPEED ,
+      dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED,
       radius: 8,
     }),
     []
@@ -107,15 +104,11 @@ export const PongCanvas = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Clear
     ctx.fillStyle = "hsl(222 47% 4%)";
-    // Clear
     ctx.fillStyle = "hsl(222 47% 4%)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Center line
     ctx.strokeStyle = "hsl(222 47% 12%)";
-    // Center line
     ctx.strokeStyle = "hsl(222 47% 12%)";
     ctx.lineWidth = 2;
     ctx.setLineDash([10, 10]);
@@ -125,13 +118,10 @@ export const PongCanvas = ({
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Paddles
     ctx.fillStyle = "hsl(217 91% 60%)";
     ctx.fillRect(state.paddle1.x, state.paddle1.y, state.paddle1.width, state.paddle1.height);
     ctx.fillRect(state.paddle2.x, state.paddle2.y, state.paddle2.width, state.paddle2.height);
 
-    // Ball
-    // Ball
     ctx.beginPath();
     ctx.arc(state.ball.x, state.ball.y, state.ball.radius, 0, Math.PI * 2);
     ctx.fillStyle = "hsl(217 91% 60%)";
@@ -142,15 +132,13 @@ export const PongCanvas = ({
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Scores
-    ctx.fillStyle = "hsl(210 40% 98%)";
-    ctx.font = '48px "JetBrains Mono"';
-    ctx.textAlign = "center";
-    ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
-    ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
+    // ctx.fillStyle = "hsl(210 40% 98%)";
+    // ctx.font = '48px "JetBrains Mono"';
+    // ctx.textAlign = "center";
+    // ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
+    // ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, []);
 
-  // ADDED FROM SECOND FILE: AI state mapping
   const mapGameStateToAI = useCallback(
     (state: GameState, canvasHeight: number): AIGameState => ({
       ball: {
@@ -177,7 +165,6 @@ export const PongCanvas = ({
     []
   );
 
-  // MODIFIED updateGame to include AI from second file
   const updateGame = useCallback(
     (delta: number) => {
       setGameState((prev) => {
@@ -186,9 +173,6 @@ export const PongCanvas = ({
         const canvas = canvasRef.current;
         if (!canvas) return prev;
 
-        // Get AI action if enabled
-
-        // Paddle 1 (W/S) - unchanged
         if (keysPressed.current.has("KeyW") && newState.paddle1.y > 0)
           newState.paddle1.y -= paddleSpeed * delta;
         if (keysPressed.current.has("KeyS") && newState.paddle1.y < canvas.height - newState.paddle1.height)
@@ -199,11 +183,9 @@ export const PongCanvas = ({
           newState.paddle2.y += paddleSpeed * delta;
         
 
-        // Ball movement - unchanged
         newState.ball.x += newState.ball.dx * delta;
         newState.ball.y += newState.ball.dy * delta;
 
-        // Collision with top/bottom - unchanged
         if (newState.ball.y + newState.ball.radius >= canvas.height) {
           newState.ball.dy = -newState.ball.dy;
           newState.ball.y = canvas.height - newState.ball.radius;
@@ -212,7 +194,6 @@ export const PongCanvas = ({
           newState.ball.y = newState.ball.radius;
         }
 
-        // Paddle collisions (simple 2-player) - unchanged
         const ball = newState.ball;
         const p1 = newState.paddle1;
         const p2 = newState.paddle2;
@@ -226,7 +207,6 @@ export const PongCanvas = ({
         ) {
           ball.x = p1.x + p1.width + ball.radius;
           ball.dx = -ball.dx;
-          // Accelerate
           if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
             newState.ball.dx *= accelerateSpeed;
             newState.ball.dy *= accelerateSpeed;
@@ -242,14 +222,12 @@ export const PongCanvas = ({
         ) {
           ball.x = p2.x - ball.radius;
           ball.dx = -ball.dx;
-          // Accelerate
           if (newState.ball.dx * newState.ball.dx + newState.ball.dy * newState.ball.dy < max_Speed * max_Speed) {
             newState.ball.dx *= accelerateSpeed;
             newState.ball.dy *= accelerateSpeed;
           }
         }
 
-        // Scoring - unchanged
         if (ball.x < 0) {
           newState.score.player2++;
           newState.ball = createBall(-1);
@@ -258,13 +236,10 @@ export const PongCanvas = ({
           newState.ball = createBall(1);
         }
 
-        // Check end - unchanged
         if (newState.score.player1 >= maxScore || newState.score.player2 >= maxScore) {
           newState.gameStatus = "FINISHED";
-          onGameEnd?.(newState.score.player1, newState.score.player2);
         }
 
-        // ADDED: Update ref
         gameStateRef.current = newState;
         return newState;
       });
@@ -272,10 +247,8 @@ export const PongCanvas = ({
     [createBall, maxScore, onGameEnd]
   );
 
-  // MODIFIED useEffect to add AI initialization and proper cleanup
   useEffect(() => {
 
-    // Keyboard event handlers - unchanged
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLElement) {
         const tag = e.target.tagName;
@@ -283,7 +256,6 @@ export const PongCanvas = ({
       }
       if (["KeyW", "KeyS", "ArrowUp", "ArrowDown"].includes(e.code)) {
         keysPressed.current.add(e.code);
-        // prevent default scroll behavior for arrows
         if (gameState.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
           e.preventDefault();
       }
@@ -293,7 +265,6 @@ export const PongCanvas = ({
       }
       if (["KeyW", "KeyS", "ArrowUp", "ArrowDown"].includes(e.code)) {
         keysPressed.current.add(e.code);
-        // prevent default scroll behavior for arrows
         if (gameState.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
           e.preventDefault();
       }
@@ -305,7 +276,6 @@ export const PongCanvas = ({
     window.addEventListener("keydown", handleKeyDown, { passive: false });
     window.addEventListener("keyup", handleKeyUp);
 
-    // Game / render loop - unchanged
     const loop = (time: number) => {
       const last = lastTimeRef.current;
       const delta = last !== null ? (time - last) / 16.67 : 1;
@@ -318,7 +288,6 @@ export const PongCanvas = ({
     };
     animationRef.current = requestAnimationFrame(loop);
 
-    // Cleanup on unmount - MODIFIED to clean up AI
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
@@ -344,6 +313,12 @@ export const PongCanvas = ({
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
+
+  useEffect(() => {
+    if (gameState.gameStatus === "FINISHED" && onGameEnd) {
+      onGameEnd(gameState.score.player1, gameState.score.player2);
+    }
+  }, [gameState.gameStatus, gameState.score.player1, gameState.score.player2, onGameEnd]);
 
 
   return (
@@ -398,8 +373,7 @@ export const PongCanvas = ({
             <div className="player-score player2-score">
               {gameState.score.player2}
             </div>
-            <div className="player-control-hint">
-            </div>
+            <div className="player-control-hint">Arrow Keys</div>
           </CardContent>
         </Card>
       </div>

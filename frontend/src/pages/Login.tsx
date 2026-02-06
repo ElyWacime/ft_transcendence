@@ -14,8 +14,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 👇 Handle ?token=... redirect from GitHub OAuth
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
@@ -25,7 +23,6 @@ const Login = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("email", email);
 
-      // 👇 instantly update auth context
       login(token, email);
 
       toast.success("Successfully logged in with GitHub!");
@@ -34,7 +31,6 @@ const Login = () => {
   }, [navigate, login]);
 
 
-  // 👇 Standard login form
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -56,7 +52,6 @@ const Login = () => {
     }
   };
 
-  // 👇 GitHub OAuth redirect
   const handleGitHubLogin = () => {
     window.location.href = `${window.location.origin}/api/users/auth/github`;
   };

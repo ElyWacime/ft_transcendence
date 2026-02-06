@@ -8,7 +8,6 @@ import { oauthRoutes } from "./modules/user/oauth.route";
 
 const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 
-// --- CORS ---
 app.register(cors, {
   origin: [
     `http://${process.env.DOMAIN}`,
@@ -22,24 +21,26 @@ app.register(cors, {
   credentials: true,
 });
 
-// --- JWT ---
 app.register(fjwt, { secret: process.env.JWT_ACCESS_SECRET });
 app.addHook("preHandler", (req, _res, next) => {
   req.jwt = app.jwt;
   next();
 });
 
-// --- Cookies ---
 app.register(fCookie, {
   secret: process.env.COOKIE_SECRET,
   hook: "preHandler",
 });
 
-// --- Auth decorator ---
 app.decorate(
   "authenticate",
   async (req: FastifyRequest, reply: FastifyReply) => {
-    const token = req.cookies.access_token;
+    let token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      token = req.cookies.access_token;
+    }
+    
     if (!token) {
       return reply.status(401).send({ message: "Authentication required" });
     }
@@ -53,19 +54,12 @@ app.decorate(
   },
 );
 
-// --- Healthcheck ---
 app.get("/healthcheck", async () => ({ message: "Success" }));
 
-// --- Routes ---
-//  No prefix here — NGINX handles `/api/users/`
-
-// --- OAuth routes ---
 app.register(oauthRoutes, { prefix: "/auth" });
 
-// --- User routes ---
 app.register(userRoutes);
 
-// --- Graceful shutdown ---
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.on(signal, async () => {
     app.log.info(`Received ${signal}, closing Fastify...`);
@@ -74,7 +68,6 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
   });
 }
 
-// --- Start server ---
 async function main() {
   try {
     await app.listen({ port: 8000, host: "0.0.0.0" });

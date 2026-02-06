@@ -4,19 +4,16 @@ import jwt from "jsonwebtoken";
 import prisma from "../../utils/prisma";
 
 export async function oauthRoutes(app: FastifyInstance) {
-  // Redirect user to GitHub OAuth
   app.get("/github", async (_req, reply) => {
     const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email`;
     reply.redirect(redirectUrl);
   });
 
-  // Optional trailing slash route
   app.get("/github/", async (_req, reply) => {
     const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email`;
     reply.redirect(redirectUrl);
   });
 
-  // GitHub redirects here with ?code=
   app.get("/github/callback", async (req, reply) => {
     const code = (req.query as any).code;
 
@@ -38,20 +35,17 @@ export async function oauthRoutes(app: FastifyInstance) {
 
     if (!tokenRes.ok) {
       const text = await tokenRes.text();
-      console.error("GitHub token exchange failed:", text);
       return reply.status(500).send({ error: "GitHub token exchange failed" });
     }
 
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
 
-    // Fetch user info from GitHub
     const userRes = await fetch("https://api.github.com/user", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const user = await userRes.json();
 
-    // Fetch user’s email (GitHub may not include it in /user)
     let email = user.email;
     if (!email) {
       const emailsRes = await fetch("https://api.github.com/user/emails", {
@@ -68,7 +62,6 @@ export async function oauthRoutes(app: FastifyInstance) {
         .send({ error: "Email not found in GitHub account" });
     }
 
-    // Upsert user in Prisma
     const dbUser = await prisma.user.upsert({
       where: { email },
       update: {
@@ -83,19 +76,16 @@ export async function oauthRoutes(app: FastifyInstance) {
       },
     });
 
-    // Generate JWT
     const jwtToken = jwt.sign(
       { id: dbUser.id, username: dbUser.name, email: dbUser.email },
       process.env.JWT_ACCESS_SECRET,
       { expiresIn: "10h" },
     );
 
-    // Redirect to frontend with token
     const redirectUrl = new URL(`http://${process.env.DOMAIN}/login`);
     redirectUrl.searchParams.set("token", jwtToken);
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());
 
-    //reply.redirect(`http://10.30.238.84/login?token=${jwtToken}`);
   });
 }

@@ -5,15 +5,15 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   server: {
-    host: true, // Listen on all network interfaces inside Docker
+    host: true, 
     port: 8080,
     allowedHosts: [
-      "frontend", // container name inside Docker network
-      "10.30.238.84",
+      "frontend", 
+      "localhost",
       "127.0.0.1",
     ],
     watch: {
-      usePolling: true, // ensures hot reload works inside Docker volumes
+      usePolling: true,
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(

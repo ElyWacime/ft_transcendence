@@ -214,23 +214,49 @@ export async function userRoutes(app: FastifyInstance) {
     schema: {
       body: {
         type: "object",
-        required: ["token", "name"],
+        required: ["name"],
         properties: {
-          token: { type: "string" },
           name: { type: "string" },
         }
       }
     }
   }, async (req, reply) => {
-    const { token } = req.body;
-    m
     try {
-      const decoded = req.jwt.verify(token);
-      if (!decoded) {
-        throw new Error("Invalid token");
+      const authHeader = req.headers.authorization || '';
+      const parts = authHeader.split(' ');
+      const token = parts.length === 2 && parts[0].toLowerCase() === 'bearer' ? parts[1] : null;
+      
+      if (!token) {
+        console.log('[search-this-name] No authorization header:', authHeader);
+        return reply.status(401).send({
+          valid: false,
+          error: "Missing authorization token"
+        });
       }
-      const current_user = await prisma.user.findUnique({
-      where: { name: req.body.name }
+      
+      console.log('[search-this-name] Verifying token...');
+      let decoded;
+      try {
+        decoded = app.jwt.verify(token) as any;
+      } catch (verifyErr) {
+        console.log('[search-this-name] Token verification failed:', verifyErr);
+        return reply.status(401).send({
+          valid: false,
+          error: "Invalid or expired token"
+        });
+      }
+      
+      if (!decoded) {
+        console.log('[search-this-name] Token decoded to null');
+        return reply.status(401).send({
+          valid: false,
+          error: "Invalid token"
+        });
+      }
+      
+      console.log('[search-this-name] Token verified, searching for user:', req.body.name);
+      const current_user = await prisma.user.findFirst({
+        where: { name: req.body.name }
       });
       if (!current_user) {
         return reply.status(404).send({
@@ -245,64 +271,46 @@ export async function userRoutes(app: FastifyInstance) {
         user_email: current_user.email,
       });
     } catch (err) {
-      return reply.status(401).send({
+      console.log('[search-this-name] Unexpected error:', err);
+      return reply.status(500).send({
         valid: false,
-        error: "Invalid or expired token"
+        error: "Internal server error"
       });
     }
   });
-}
 
-      // // In your user controller
-      // app.post("/update_image", {
-      //   schema: {
-      //     body: {
-      //       type: "object",
-      //       required: ["image", "image_name"],
-      //       properties: {
-      //         image: { type: "string" }, // base64 string
-      //         image_name: { type: "string" }
-      //       }
-      //     }
-      //   }
-      // }, async (req, reply) => {
-      //   const { image, image_name } = req.body;
-      //   const token = req.headers.authorization?.split(' ')[1];
-        
-      //   if (!token) {
-      //     return reply.status(401).send({ success: false, message: "Unauthorized" });
-      //   }
-        
-      //   try {
-      //     // Verify token
-      //     const decoded = req.jwt.verify(token);
-          
-      //     // Convert base64 to Buffer for Prisma Bytes field
-      //     const imageBuffer = Buffer.from(image, 'base64');
-          
-      //     // Update user in database
-      //     const updatedUser = await prisma.user.update({
-      //       where: { id: decoded.id },
-      //       data: {
-      //         image: imageBuffer,
-      //         image_name: image_name
-      //       }
-      //     });
-          
-      //     // Optional: Generate a URL for the avatar (could be a data URL or stored file path)
-      //     const avatarUrl = `data:image/png;base64,${image}`;
-          
-      //     return reply.send({
-      //       success: true,
-      //       message: "Image updated successfully",
-      //       avatar_url: avatarUrl
-      //     });
-          
-      //   } catch (err) {
-      //     console.error(err);
-      //     return reply.status(500).send({
-      //       success: false,
-      //       message: "Failed to update image"
-      //     });
-      //   }
-      // });
+  app.get("/user-info/:userId", {
+    preHandler: app.authenticate,
+  }, async (req, reply) => {
+    try {
+      const { userId } = req.params as { userId: string };
+      
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+          loggedIn: true,
+          Auto_Match: true,
+          CreatedAt: true
+        }
+      });
+
+      if (!user) {
+        return reply.status(404).send({
+          error: "User not found"
+        });
+      }
+
+      return reply.send(user);
+    } catch (err) {
+      console.error('[user-info] Error:', err);
+      return reply.status(500).send({
+        error: "Internal server error"
+      });
+    }
+  });
+  
+}
