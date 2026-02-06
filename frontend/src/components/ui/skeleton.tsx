@@ -1,16 +1,16 @@
 
-import { cn } from "@/lib/utils"
+// import { cn } from "@/lib/utils"
 
-function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("skeleton", className)}
-      {...props}
-    />
-  )
-}
+// function Skeleton({
+//   className,
+//   ...props
+// }: React.HTMLAttributes<HTMLDivElement>) {
+//   return (
+//     <div
+//       className={cn("skeleton", className)}
+//       {...props}
+//     />
+//   )
+// }
 
-export { Skeleton }
+// export { Skeleton }

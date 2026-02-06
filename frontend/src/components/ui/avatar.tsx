@@ -1,43 +1,35 @@
-
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Root
-    ref={ref}
-    className={cn("avatar", className)}
-    {...props}
-  />
-))
-Avatar.displayName = AvatarPrimitive.Root.displayName
+type AvatarProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
+type AvatarImageProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+type AvatarFallbackProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
 
-const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("avatar-image", className)}
-    {...props}
-  />
-))
-AvatarImage.displayName = AvatarPrimitive.Image.displayName
+export function Avatar({ className, ...props }: AvatarProps) {
+  return (
+    <AvatarPrimitive.Root
+      className={cn("avatar", className)}
+      {...props}
+    />
+  )
+}
 
-const AvatarFallback = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn("avatar-fallback", className)}
-    {...props}
-  />
-))
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
+export function AvatarImage({ className, ...props }: AvatarImageProps) {
+  return (
+    <AvatarPrimitive.Image
+      className={cn("avatar-image", className)}
+      {...props}
+    />
+  )
+}
 
-export { Avatar, AvatarImage, AvatarFallback }
+export function AvatarFallback({ className, ...props }: AvatarFallbackProps) {
+  return (
+    <AvatarPrimitive.Fallback
+      className={cn("avatar-fallback", className)}
+      {...props}
+    />
+  )
+}

@@ -2,7 +2,7 @@
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+// import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
@@ -115,13 +115,13 @@ const router = createBrowserRouter(
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    {/* <TooltipProvider> */}
       <Toaster />
       <Sonner />
       <AuthProvider children={undefined}>
         <RouterProvider router={router} />
       </AuthProvider>
-    </TooltipProvider>
+    {/* </TooltipProvider> */}
   </QueryClientProvider>
 );
 
