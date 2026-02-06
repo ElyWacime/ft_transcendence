@@ -6,7 +6,9 @@ import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState } from "react";
 
 const MatchMacking = () => {
-    const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsHost = import.meta.env.VITE_DOMAIN || window.location.hostname;
+    const { ws, isReady } = useWebSocket(`${wsProtocol}://${wsHost}/ws`);
     let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();

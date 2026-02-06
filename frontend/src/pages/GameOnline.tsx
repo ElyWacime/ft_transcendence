@@ -18,7 +18,9 @@ const GameOnline = () => {
   const email = localStorage.getItem("email");
   const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
 
-  const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+  const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const wsHost = import.meta.env.VITE_DOMAIN || window.location.hostname;
+  const { ws, isReady } = useWebSocket(`${wsProtocol}://${wsHost}/ws`);
 
 
 
