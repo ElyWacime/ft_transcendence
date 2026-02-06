@@ -38,17 +38,14 @@ interface GameState {
   gameStatus: "waiting" | "playing" | "paused" | "FINISHED";
 }
 
-const BALL_SPEED = 5;
+const BALL_SPEED = 2;
 const paddleSpeed = 10;
 const accelerateSpeed = 1.2;
 const max_Speed = 25;
-const angle = Math.PI / 8;
 
 export const PongCanvas = ({
+  player1Name = localStorage.getItem("name") || "Player 1",
   player2Name =  "Player 2",
-  player1Name = localStorage.getItem("email") || "Player 1",
-  player3Name = "Player 3",
-  player4Name = "Player 4",
   onGameEnd,
   maxScore = 5,
 }: PongCanvasProps) => {
@@ -62,8 +59,8 @@ export const PongCanvas = ({
     ball: {
       x: 400,
       y: 300,
-      dx: BALL_SPEED * Math.cos(angle),
-      dy: BALL_SPEED * Math.sin(angle),
+      dx: BALL_SPEED,
+      dy: BALL_SPEED,
       radius: 8,
     },
     paddle1: { x: 20, y: 250, width: 15, height: 100 },
@@ -79,8 +76,8 @@ export const PongCanvas = ({
     (dirx: number = 1) => ({
       x: 400,
       y: 300,
-      dx: dirx * BALL_SPEED * Math.cos(angle),
-      dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED * Math.sin(angle),
+      dx: dirx * BALL_SPEED ,
+      dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED,
       radius: 8,
     }),
     []
@@ -135,11 +132,11 @@ export const PongCanvas = ({
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "hsl(210 40% 98%)";
-    ctx.font = '48px "JetBrains Mono"';
-    ctx.textAlign = "center";
-    ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
-    ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
+    // ctx.fillStyle = "hsl(210 40% 98%)";
+    // ctx.font = '48px "JetBrains Mono"';
+    // ctx.textAlign = "center";
+    // ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
+    // ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, []);
 
   const mapGameStateToAI = useCallback(

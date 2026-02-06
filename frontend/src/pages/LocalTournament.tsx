@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { PongCanvas } from "@/components/PongCanvas";
 import { ArrowLeft, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -45,7 +45,16 @@ const LocalTournament = () => {
       toast.error("All players must enter an alias!");
       return;
     }
+    let map = new Set<String>();
 
+    aliases.map((a) => {
+        map.add(a);
+    })
+    if (map.size < 4)
+     {
+        toast.error("All players must enter a Unique alias!");
+        return;
+     }
     const newPlayers: Player[] = aliases.map((alias, i) => ({
       id: i + 1,
       alias: alias.trim(),
@@ -209,7 +218,7 @@ const LocalTournament = () => {
             </div>
             <div className={`game-canvas-container`}>
               <PongCanvas
-                key={currentMatch.matchId}
+                // key={currentMatch.matchId}
                 player1Name={currentMatch.player1.alias}
                 player2Name={currentMatch.player2.alias}
                 onGameEnd={handleMatchEnd}

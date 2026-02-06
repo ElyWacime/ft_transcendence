@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import React from "react";
-
-
 
 function usePongWebSocket(ws, mode, email, setGameState) {
     useEffect(() => {
       if (!ws) return;
-
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
             setGameState((prev) => ({
@@ -149,13 +145,13 @@ function usePongRenderer(canvasRef, gameState) {
         ctx.shadowColor = 'hsl(217 91% 60%)';
         ctx.shadowBlur = 20;
         ctx.fill();
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle = 'hsl(210 40% 98%)';
-        ctx.font = '48px "JetBrains Mono"';
-        ctx.textAlign = 'center';
-        ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
-        ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
+        ctx.shadowBlur = 0; 
+       
+        // ctx.fillStyle = 'hsl(210 40% 98%)';
+        // ctx.font = '48px "JetBrains Mono"';
+        // ctx.textAlign = 'center';
+        // ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
+        // ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
     }, [gameState]);
 
     const loop = useCallback(() => {

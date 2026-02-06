@@ -26,12 +26,6 @@ export function useWebSocket(url: string) {
             ws.removeEventListener("close", handleClose);
         };
     }, [url]);
-
-    const send = (data: any) => {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-            wsRef.current.send(JSON.stringify(data));
-        }
-    };
-
-    return { ws: wsRef.current, send, isReady };
+    
+    return { ws: wsRef.current, isReady };
 }

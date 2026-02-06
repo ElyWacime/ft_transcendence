@@ -1,8 +1,5 @@
 
 import React from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-// import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { Navigation } from "@/components/ui/navigation";
@@ -10,8 +7,10 @@ import Home from "./pages/Home";
 import LocalTournament from "./pages/LocalTournament";
 import GameAI from "./pages/GameAI";
 import Game from "./pages/Game";
+// import { Toaster } from "@/components/ui/toaster";
+// import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "sonner"
 import GameOnline from "./pages/GameOnline";
-import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { AuthProvider } from "@/context/AuthContext";
@@ -89,7 +88,7 @@ const router = createBrowserRouter(
         { path: "game", element: <Game /> },
         { path: "game-online", element: <GameOnline /> },
         { path: "game-ai", element: <GameAI /> },
-        { path: "result", element: <Result /> },
+        // { path: "result", element: <Result /> },
         {
           path: "login",
           element: (
@@ -117,7 +116,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     {/* <TooltipProvider> */}
       <Toaster />
-      <Sonner />
+      {/* <Sonner /> */}
       <AuthProvider children={undefined}>
         <RouterProvider router={router} />
       </AuthProvider>

@@ -6,7 +6,7 @@ import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState } from "react";
 
 const MatchMacking = () => {
-    const { ws, send, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+    const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
     let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -41,10 +41,9 @@ const MatchMacking = () => {
         ];
     });
     useEffect(() => {
-      if (!ws || !isReady) return;
+      if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
       
-        if (ws &&  ws.readyState == WebSocket.OPEN)
-        ws.send(JSON.stringify({
+      ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
             email,
@@ -56,7 +55,6 @@ const MatchMacking = () => {
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
-            console.log(data);
             setFeatures(() => {
                 return [
                     {
@@ -99,7 +97,7 @@ const MatchMacking = () => {
         };
         ws.addEventListener("message", handleMessage);
         return () => {
-            if (ws && ws.readyState == WebSocket.OPEN) {
+            if (ws && isReady && ws.readyState == WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                     token:localStorage.getItem("token"),
                     type: "DELETE",
@@ -134,7 +132,7 @@ const MatchMacking = () => {
             <section className="features-section">
               <div className="features-container">
                 <h2 className="features-title glow-text">
-                  Game Features
+                  Game's Waiting Room
                 </h2>
                 <div className="features-grid">
                   {features.map((feature, index) => (
