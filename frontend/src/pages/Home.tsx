@@ -40,7 +40,6 @@ const Home = () => {
   ];
   return (
     <div className="page-container">
-      {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-glow-overlay"></div>
         <div className="hero-content">
@@ -62,8 +61,6 @@ const Home = () => {
           </Button>
         </div>
       </section>
-  
-      {/* Features Grid */}
       <section className="features-section">
         <div className="features-container">
           <h2 className="features-title glow-text">

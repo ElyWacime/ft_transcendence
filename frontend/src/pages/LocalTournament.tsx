@@ -216,7 +216,6 @@ const LocalTournament = () => {
             </div>
             <div className={`game-canvas-container`}>
               <PongCanvas
-                // key={currentMatch.matchId}
                 player1Name={currentMatch.player1.alias}
                 player2Name={currentMatch.player2.alias}
                 onGameEnd={handleMatchEnd}

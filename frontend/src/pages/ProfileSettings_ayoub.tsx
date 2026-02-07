@@ -175,8 +175,6 @@ const ProfileSettings = () => {
               </div>
             </div>
           </Card>
-
-          {/* Search other players */}
           <Card className="profile-card profile-search-card">
             <div className="profile-search-section">
               <div className="profile-search-header">
@@ -186,13 +184,6 @@ const ProfileSettings = () => {
                 </h3>
               </div>
               <form onSubmit={handleSearch} className="profile-search-form">
-                {/* <Input
-                  placeholder="Enter player name"
-                  value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
-                  disabled={searchLoading}
-                  className="profile-search-input"
-                /> */}
                 <input 
                   placeholder="Enter player name"
                   value={searchName}
