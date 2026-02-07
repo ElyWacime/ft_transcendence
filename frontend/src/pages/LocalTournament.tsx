@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Input } from "@/components/ui/input";
 import { PongCanvas } from "@/components/PongCanvas";
-import { ArrowLeft, Trophy, Users } from "lucide-react";
+import { ArrowLeft, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import "@/css/LocalTournament.css";
 
