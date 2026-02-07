@@ -2,7 +2,7 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import { Navigation } from "@/components/ui/navigation";
+import { Navigation } from "@/components/navigation";
 import Home from "./pages/Home";
 import LocalTournament from "./pages/LocalTournament";
 import GameAI from "./pages/GameAI";
