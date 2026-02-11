@@ -47,11 +47,7 @@ const MatchMacking = () => {
       ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
-            email,
-            tournement: false,
-            keys,
             mode,
-            id: email,
         }));
 
         const handleMessage = (event: MessageEvent) => {
@@ -102,11 +98,6 @@ const MatchMacking = () => {
                 ws.send(JSON.stringify({
                     token:localStorage.getItem("token"),
                     type: "DELETE",
-                    email,
-                    tournement: false,
-                    keys,
-                    mode,
-                    id: email,
                 }));
             }
             ws.removeEventListener("message", handleMessage);
