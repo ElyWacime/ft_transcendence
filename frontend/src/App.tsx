@@ -22,6 +22,7 @@ import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
 import Chat from "./pages/Chat";
+import { WebSocketProvider } from "./context/WebSocketContext";
 
 const queryClient = new QueryClient();
 
@@ -113,7 +114,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
       <Toaster />
       <AuthProvider children={undefined}>
+        <WebSocketProvider>
         <RouterProvider router={router} />
+        </WebSocketProvider>
       </AuthProvider>
   </QueryClientProvider>
 );

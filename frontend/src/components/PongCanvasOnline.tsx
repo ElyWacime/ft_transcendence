@@ -212,12 +212,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       
             {/* Center Controls */}
             <div className="game-controls-center">
-              {gameState.gameStatus == 'FINISHED' && (
-                <Button className="reset-button">
-                  <RotateCcw className="reset-icon" />
-                  Reset
-                </Button>
-              )}
             </div>
       
             {/* Player 2 Card */}

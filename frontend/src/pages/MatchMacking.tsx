@@ -2,8 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import { useWebSocket } from "../hooks/useWebSocket";
+// import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState } from "react";
+import { useWebSocket } from "@/context/WebSocketContext";
 
 const MatchMacking = () => {
     const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
@@ -109,7 +110,6 @@ const MatchMacking = () => {
                 }));
             }
             ws.removeEventListener("message", handleMessage);
-            ws.close();
         };
     }, [ws, isReady]);
     return (

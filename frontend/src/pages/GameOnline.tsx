@@ -1,8 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { PongCanvasOnline } from "@/components/PongCanvasOnline";
 import { useEffect } from "react";
-import { useWebSocket } from "../hooks/useWebSocket";
+// import { useWebSocket } from "../hooks/useWebSocket";
 import { toast } from "sonner";
+import { useWebSocket } from "@/context/WebSocketContext";
 
 interface GameOnlineProps {
   player1Name: string;
@@ -16,7 +17,10 @@ const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const email = localStorage.getItem("email");
-  const { player1Name, player2Name,player3Name, player4Name, mode } = location.state as GameOnlineProps;
+  const state = location.state as GameOnlineProps;
+  if(!state)
+      return null;
+  const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
 
