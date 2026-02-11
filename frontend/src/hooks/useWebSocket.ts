@@ -11,10 +11,12 @@ export function useWebSocket(url: string) {
         wsRef.current = ws;
 
         const handleOpen = () => {
+            console.log("ws Opened");
             setIsReady(true);
         };
 
         const handleClose = () => {
+            console.log("ws handleClose");
             setIsReady(false);
         };
 
@@ -22,6 +24,7 @@ export function useWebSocket(url: string) {
         ws.addEventListener("close", handleClose);
 
         return () => {
+            console.log("ws Closed");
             ws.removeEventListener("open", handleOpen);
             ws.removeEventListener("close", handleClose);
         };

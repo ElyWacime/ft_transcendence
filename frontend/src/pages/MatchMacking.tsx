@@ -115,6 +115,7 @@ const MatchMacking = () => {
     return (
         <>
           <div className="home-page">
+            {/* Hero Section */}
             <section className="hero-section">
               <div className="hero-glow-overlay"></div>
               <div className="hero-content">

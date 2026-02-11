@@ -40,11 +40,13 @@ const GameOnline = () => {
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
     
-      if (data.gameStatus == "FINISHED") {
+      if (data.score1  == 5 ||  data.score2  == 5) {
         const winner = data.score1  > data.score2 ? data.player1Name : data.player2Name;
-        toast.success(`${winner} wins the match!`);
         endGame();
-        navigate("/");
+        toast.success(`${winner} wins the match!`, {
+          duration: 2000,
+          onAutoClose: () => navigate("/"),
+        });
       }
     };
     ws.addEventListener("message", handleMessage);
@@ -52,22 +54,21 @@ const GameOnline = () => {
       ws.removeEventListener("message", handleMessage);
     };
   }, [ws]);
-
   return (
-    <div className="game-page">
-      <div className="game-container">
-        <div className="game-header">
-          <div style={{ paddingTop: "3rem" }} className="ai-game-title-container">
+    <div className="ai-game-page">
+      <div className="ai-game-container">
+        <div className="ai-game-header">
+          <div className="ai-game-title-container">
             <h1 className="ai-game-title glow-text">
               <span>PLAYER VS Player</span>
             </h1>
             <p className="ai-game-subtitle">
-              Challenge Other Players.
+            Challenge Other Players.
             </p>
           </div>
-          <div className="header-spacer"></div>
         </div>
-        <div className="game-canvas-container">
+  
+        <div className="ai-game-canvas-container">
         {isReady && (
             <PongCanvasOnline
               player1Name={player1Name}
@@ -79,7 +80,6 @@ const GameOnline = () => {
             />
           )}
         </div>
-
       </div>
     </div>
   );

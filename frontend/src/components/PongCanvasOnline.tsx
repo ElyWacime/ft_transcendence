@@ -190,7 +190,10 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
 
     return (
         <div className="pong-game-container">
+          {/* Player Info & Controls */}
           <div className="player-info-grid">
+      
+            {/* Player 1 Card */}
             <Card className="player-card player1-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
@@ -206,6 +209,8 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 </div>
               </CardContent>
             </Card>
+      
+            {/* Center Controls */}
             <div className="game-controls-center">
               {gameState.gameStatus == 'FINISHED' && (
                 <Button className="reset-button">
@@ -214,10 +219,12 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 </Button>
               )}
             </div>
+      
+            {/* Player 2 Card */}
             <Card className="player-card player2-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
-                  {player2Name|| "PLAYER2"} {mode == 4 ? " // " : ""} {player4Name}
+                  {player2Name|| "PLAYER2tmp"} {mode == 4 ? " // " : ""} {player4Name}
                 </CardTitle>
               </CardHeader>
               <CardContent className="player-card-content">
@@ -231,6 +238,8 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
             </Card>
       
           </div>
+      
+          {/* Game Canvas */}
           <div className="game-canvas-wrapper">
             <canvas
               ref={canvasRef}
