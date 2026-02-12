@@ -44,10 +44,8 @@ const GameOnline = () => {
       if (data.score1  == 5 ||  data.score2  == 5) {
         const winner = data.score1  > data.score2 ? (data.player1Name + " " + (data.player3Name|| "" )) : (data.player2Name + " " + data.player4Name || "") ;
         endGame(data.matchId);
-        toast.success(`${winner} wins the match!`, {
-          duration: 2000,
-          onAutoClose: () => navigate("/"),
-        });
+        toast.success(`${winner} wins the match!`);
+        navigate("/")
       }
     };
     ws.addEventListener("message", handleMessage);

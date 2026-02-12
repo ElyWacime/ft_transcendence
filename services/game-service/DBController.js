@@ -39,7 +39,7 @@ export class Participate_Tournament {
 
 export class GameState {
     constructor() {
-        this.id_Match = 0;
+        this.matchId = 0;
         this.now = Date.now();
         this.last = Date.now();
         this.P1_Id = null;

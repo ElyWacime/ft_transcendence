@@ -52,6 +52,7 @@ const MatchMacking = () => {
 
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
+            console.log("Server says ",data);
             setFeatures(() => {
                 return [
                     {
