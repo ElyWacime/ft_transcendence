@@ -88,6 +88,7 @@ const MatchMacking = () => {
                         player3Name: data.player3Name,
                         player4Name: data.player4Name,
                         mode,
+                        matchId:data.matchId
                     },
                 });
             }

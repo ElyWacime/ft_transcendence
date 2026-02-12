@@ -74,6 +74,10 @@ export class GameState {
         this.player2Name = null;
         this.player3Name = null;
         this.player4Name = null;
+        this.player1Email = null;
+        this.player2Email = null;
+        this.player3Email = null;
+        this.player4Email = null;
         this.p1UPkey = false;
         this.p1Downkey = false;
         this.p2UPkey = false;
@@ -104,6 +108,10 @@ export class Match {
         this.player2Name = null;
         this.player3Name = null;
         this.player4Name = null;
+        this.player1Email = null;
+        this.player2Email = null;
+        this.player3Email = null;
+        this.player4Email = null;
     }
 }
 
