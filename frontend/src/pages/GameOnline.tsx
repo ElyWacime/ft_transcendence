@@ -31,11 +31,7 @@ const GameOnline = () => {
       ws.send(JSON.stringify({
         token:localStorage.getItem("token"),
         type: "FINISHED",
-        email: email,
-        tournement: false,
-        keys: { ArrowUp: false, ArrowDown: false },
         mode: mode,
-        id: localStorage.getItem("email")
       }));
   };
 
