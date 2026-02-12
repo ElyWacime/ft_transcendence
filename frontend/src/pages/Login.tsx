@@ -58,7 +58,6 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      {/* Header */}
       <div className="login-header">
         <h1 className="login-title glow-text">
           <Trophy className="trophy-icon" />
@@ -68,8 +67,7 @@ const Login = () => {
           Log in to continue your journey 🕹️
         </p>
       </div>
-  
-      {/* Login Card */}
+
       <form
         onSubmit={handleLogin}
         className="login-form"
@@ -101,7 +99,6 @@ const Login = () => {
             placeholder="••••••••"
           />
         </div>
-  
         <Button
           type="submit"
           className="login-button"
@@ -109,15 +106,11 @@ const Login = () => {
         >
           {loading ? "Logging in..." : "Login"}
         </Button>
-  
-        {/* Divider */}
         <div className="form-divider">
           <div className="divider-line" />
           <span className="divider-text">or</span>
           <div className="divider-line" />
         </div>
-  
-        {/* GitHub OAuth Button */}
         <Button
           type="button"
           variant="outline"
@@ -128,8 +121,6 @@ const Login = () => {
           Continue with GitHub
         </Button>
       </form>
-  
-      {/* Footer */}
       <p className="login-footer">
         Don't have an account?{" "}
         <button

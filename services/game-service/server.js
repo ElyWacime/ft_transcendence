@@ -166,6 +166,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             try {
               if (clients.get(id) != connection) {
                 clients.get(id).close();
+                console.log("Server Closed Duplicate Socket for ",id);
               }
             }
             catch (e) {
@@ -352,12 +353,14 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     for (const [id, client] of clients) {
       if (client == connection) {
         clients.delete(id);
+        console.log("Server Closed Socket for ",id);
         break;
       }
     }
     
   });
 });
+
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);

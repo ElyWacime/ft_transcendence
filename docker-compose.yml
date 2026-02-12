@@ -52,7 +52,7 @@ services:
     depends_on:
       - frontend
       - auth-service
-      - pong-server
+      - game-server
     ports:
       - "80:80"
     volumes:
@@ -60,7 +60,7 @@ services:
     networks:
       - transcendence
 
-  pong-server:
+  game-server:
     build:
       context: ./services/game-service
       dockerfile: Dockerfile

@@ -18,28 +18,27 @@ const Game = () => {
     }
   };
   return (
-    <div className="game-page">
-      <div className="game-container">
-        <div className="game-header">
-          <div style={{ paddingTop: "3rem" }} className="ai-game-title-container">
+    <div className="ai-game-page">
+      <div className="ai-game-container">
+        <div className="ai-game-header">
+          <div className="ai-game-title-container">
             <h1 className="ai-game-title glow-text">
-              <span>PLAYER VS Freind</span>
+            <span>PLAYER VS Freind</span>
             </h1>
             <p className="ai-game-subtitle">
-              Challenge your Freind.
+            Challenge your Freind.
             </p>
           </div>
-          <div className="header-spacer"></div>
         </div>
-        <div className="game-canvas-container">
-          <PongCanvas
+  
+        <div className="ai-game-canvas-container">
+        <PongCanvas
             player1Name={player1}
             player2Name={player2}
             onGameEnd={handleGameEnd}
             maxScore={5}
           />
         </div>
-
       </div>
     </div>
   );

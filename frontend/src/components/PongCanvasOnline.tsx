@@ -36,11 +36,7 @@ function usePongWebSocket(ws, mode, email, setGameState) {
         ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
-            email,
             mode,
-            tournement: false,
-            keys: {},
-            id: email
         }));
 
         return () => ws.removeEventListener("message", handleMessage);
@@ -57,11 +53,8 @@ function usePongControls(ws, mode, email) {
             token:localStorage.getItem("token"),
             type: "MOVE",
             direction,
-            email,
-            tournement: false,
             keys: keys.current,
             mode,
-            id: email
         }));
     };
 
@@ -212,12 +205,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       
             {/* Center Controls */}
             <div className="game-controls-center">
-              {gameState.gameStatus == 'FINISHED' && (
-                <Button className="reset-button">
-                  <RotateCcw className="reset-icon" />
-                  Reset
-                </Button>
-              )}
             </div>
       
             {/* Player 2 Card */}

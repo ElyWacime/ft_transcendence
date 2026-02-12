@@ -2,9 +2,9 @@
   "name": "rvp-server",
   "version": "1.0.0",
   "description": "Simple Fastify server listening on port 3000",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "type": "module",
   "dependencies": {

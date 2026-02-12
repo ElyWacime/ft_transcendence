@@ -35,7 +35,6 @@ const Register = () => {
 
   return (
     <div className="register-page">
-      {/* Header */}
       <div className="register-header">
         <h1 className="register-title glow-text">
           <Trophy className="trophy-icon" />
@@ -45,8 +44,6 @@ const Register = () => {
           Create your account and join the arena 🕹️
         </p>
       </div>
-  
-      {/* Register Card */}
       <form
         onSubmit={handleRegister}
         className="register-form"
@@ -101,8 +98,6 @@ const Register = () => {
           {loading ? "Registering..." : "Sign Up"}
         </Button>
       </form>
-  
-      {/* Footer */}
       <p className="register-footer">
         Already have an account?{" "}
         <button

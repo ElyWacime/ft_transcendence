@@ -7,8 +7,6 @@ import Home from "./pages/Home";
 import LocalTournament from "./pages/LocalTournament";
 import GameAI from "./pages/GameAI";
 import Game from "./pages/Game";
-// import { Toaster } from "@/components/ui/toaster";
-// import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "sonner"
 import GameOnline from "./pages/GameOnline";
 import NotFound from "./pages/NotFound";
@@ -24,6 +22,7 @@ import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
 import Chat from "./pages/Chat";
+import { WebSocketProvider } from "./context/WebSocketContext";
 
 const queryClient = new QueryClient();
 
@@ -88,7 +87,6 @@ const router = createBrowserRouter(
         { path: "game", element: <Game /> },
         { path: "game-online", element: <GameOnline /> },
         { path: "game-ai", element: <GameAI /> },
-        // { path: "result", element: <Result /> },
         {
           path: "login",
           element: (
@@ -114,13 +112,12 @@ const router = createBrowserRouter(
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    {/* <TooltipProvider> */}
       <Toaster />
-      {/* <Sonner /> */}
       <AuthProvider children={undefined}>
+        <WebSocketProvider>
         <RouterProvider router={router} />
+        </WebSocketProvider>
       </AuthProvider>
-    {/* </TooltipProvider> */}
   </QueryClientProvider>
 );
 

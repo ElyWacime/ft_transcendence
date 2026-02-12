@@ -1,6 +1,5 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { Trophy, Gamepad2, MessageSquare, LogIn, LogOut, User, Bot, ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -63,7 +62,6 @@ export const Navigation = () => {
       <nav className="main-nav">
         <div className="nav-container">
           <div className="nav-content">
-            {/* Logo */}
             <button
               className="nav-logo"
               onClick={() => navigate("/")}
@@ -76,10 +74,7 @@ export const Navigation = () => {
                 PONG ARENA
               </span>
             </button>
-    
-            {/* Links */}
             <div className="nav-links">
-              {/* Games Dropdown */}
               <div className="nav-dropdown" ref={gamesDropdownRef}>
                 <button
                   className="nav-dropdown-button"
@@ -108,8 +103,6 @@ export const Navigation = () => {
                   </div>
                 )}
               </div>
-
-              {/* Other nav items */}
               {navItems.map((item) =>
                 item.onClick ? (
                   <button
