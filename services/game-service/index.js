@@ -306,7 +306,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             }
           }
           else if (request.type == "DELETE") {
-            await dbcnx.deletePendingMatchByPlayerID(id);
+            await dbcnx.deleteMatch(request.matchId);
           }
         }
 

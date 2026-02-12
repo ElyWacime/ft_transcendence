@@ -28,6 +28,7 @@ export const WebSocketProvider = ({ children }) => {
     };
 
     return () => {
+      console.log("WebSocket closing");
       socket.close();
     };
   }, []);
