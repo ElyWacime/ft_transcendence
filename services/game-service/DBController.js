@@ -1,6 +1,7 @@
 import { open } from "sqlite";
 import fs from "fs";
 import sqlite3 from "sqlite3";
+import { match } from "assert";
 
 export class Users {
     constructor() {
@@ -39,7 +40,7 @@ export class Participate_Tournament {
 
 export class GameState {
     constructor() {
-        this.id_Match = 0;
+        this.id = 0;
         this.now = Date.now();
         this.last = Date.now();
         this.P1_Id = null;
@@ -74,10 +75,6 @@ export class GameState {
         this.player2Name = null;
         this.player3Name = null;
         this.player4Name = null;
-        this.player1Email = null;
-        this.player2Email = null;
-        this.player3Email = null;
-        this.player4Email = null;
         this.p1UPkey = false;
         this.p1Downkey = false;
         this.p2UPkey = false;
@@ -104,14 +101,6 @@ export class Match {
         this.gameStatus = "PENDING";
         this.Winner_Id = null;
         this.T_Id = null;
-        this.player1Name = null;
-        this.player2Name = null;
-        this.player3Name = null;
-        this.player4Name = null;
-        this.player1Email = null;
-        this.player2Email = null;
-        this.player3Email = null;
-        this.player4Email = null;
     }
 }
 
@@ -124,6 +113,9 @@ export class SQLiteDB {
         this.db = await open({ filename: "database.sqlite", driver: sqlite3.Database, });
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
+        this.db.on("trace", (sql) => {
+            console.log("[SQL]:", sql);
+        });
         console.log("Database connected and table created!");
     }
 
@@ -163,7 +155,7 @@ export class SQLiteDB {
     async getMatchById(id) {
         return this.db.get(`SELECT * FROM Match WHERE id = ?`, [id]);
     }
-    async getMatchPlayerCanJoin(mode) {
+    async getOpenRoom(mode) {
         return this.db.get(`SELECT * FROM Match   
                             WHERE mode = ? and   
                             count_players <  mode   and 
@@ -171,6 +163,14 @@ export class SQLiteDB {
                             LIMIT 1;`, [mode]);
     }
     async deletePendingMatchByPlayerID(id) {
+        let x = -1;
+        let matchid = await this.db.get(`select id from 
+        Match 
+        where (P1_Id = ? or  P2_Id = ? or  P3_Id = ? or  P4_Id = ? )
+        AND 
+        gameStatus = 'PENDING';`, [id,id,id,id]);
+        if (matchid)
+            x = matchid.id;
         await this.db.get(`UPDATE
         Match 
         SET P1_Id = NULL , count_players = count_players - 1
@@ -195,7 +195,8 @@ export class SQLiteDB {
         WHERE P4_Id = ?
         AND 
         gameStatus = 'PENDING';`, [id]);
-        return await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
+        await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
+        return this.db.get(`select * from Match where id  = ?;`, [x]);
     }
 
     async deleteOngoingMatchByPlayerID(id) {
@@ -231,7 +232,7 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
-    async getOngoingMatchByPlayerID(id) {
+    async getOngoingMatch(id) {
         return this.db.get(`SELECT *
         FROM Match
         WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
@@ -322,7 +323,7 @@ export class SQLiteDB {
     async getUserss() {
         return this.db.all(`SELECT * FROM Users`);
     }
-    async getUserById(id) {
+    async getUser(id) {
         return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
     }
     async getUserByEmail(email) {

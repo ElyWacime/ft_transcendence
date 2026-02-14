@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { PongCanvasOnline } from "@/components/PongCanvasOnline";
-import { useEffect } from "react";
+import { useEffect ,useCallback} from "react";
 // import { useWebSocket } from "../hooks/useWebSocket";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
@@ -11,7 +11,6 @@ interface GameOnlineProps {
   player3Name: string;
   player4Name: string;
   mode: number;
-  matchId:number
 }
 
 const GameOnline = () => {
@@ -21,40 +20,47 @@ const GameOnline = () => {
   const state = location.state as GameOnlineProps;
   if(!state)
       return null;
-  const { player1Name, player2Name,player3Name, player4Name, mode,matchId } = state;
+  const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
 
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+    
+      if (data.score1  == 5 ||  data.score2  == 5) {
+        const winner = data.score1  > data.score2 ? data.player1Name : data.player2Name;
+        endGame(data.id);
+        toast.success(`${winner} wins the match!`);
+        navigate("/");
+        // toast.success(`${winner} wins the match!`, {
+        //   duration: 2000,
+        //   onAutoClose: () => navigate("/"),
+        // });
+      }
+    }
+  );
 
-
-  const endGame = (matchId) => {
+  const endGame = useCallback((id) => {
     if (ws && isReady && ws.readyState == WebSocket.OPEN)
       ws.send(JSON.stringify({
         token:localStorage.getItem("token"),
         type: "FINISHED",
         mode: mode,
-        matchId
+        matchId:id
       }));
-  };
+    }
+  );
 
   useEffect(() => {
-    if (!ws) return;
-    const handleMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      if (data.score1  == 5 ||  data.score2  == 5) {
-        const winner = data.score1  > data.score2 ? (data.player1Name + " " + (data.player3Name|| "" )) : (data.player2Name + " " + data.player4Name || "") ;
-        endGame(data.matchId);
-        toast.success(`${winner} wins the match!`, {
-          duration: 2000,
-          onAutoClose: () => navigate("/"),
-        });
-      }
-    };
+    if (!(ws && isReady && ws.readyState == WebSocket.OPEN)) return;
+
     ws.addEventListener("message", handleMessage);
     return () => {
       ws.removeEventListener("message", handleMessage);
     };
   }, [ws]);
+
   return (
     <div className="ai-game-page">
       <div className="ai-game-container">
@@ -78,7 +84,7 @@ const GameOnline = () => {
               player4Name={player4Name}
               ws={ws}
               mode={mode}
-              matchId={matchId}
+              isReady={isReady}
             />
           )}
         </div>
