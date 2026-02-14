@@ -389,6 +389,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
+fastify.get('/INVIT', async (request, reply) => {
+  console.log(request);
+  return { message: 'OK' };
+});
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
