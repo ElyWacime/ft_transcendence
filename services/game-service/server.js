@@ -6,10 +6,18 @@ import cors from "@fastify/cors";
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
+// await fastify.register(cors, {
+//   origin: true,
+//   credentials: true
+// });
+
 await fastify.register(cors, {
   origin: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "Cookie"],
   credentials: true
 });
+
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
 let dbcnx = new SQLiteDB();
@@ -337,7 +345,7 @@ const handelFinish = async (request) =>  {
   }
 };
 
-const handelDup = async (id) => {
+const handelDup = async (connection,id) => {
   if (clients.has(id)) 
   {
     try {
@@ -363,7 +371,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
-        await handelDup(id);
+        await handelDup(connection,id);
         clients.set(id, connection);
         if (request.type == "REGISTER") 
           await handelRegister(request,id,email,name);
@@ -389,8 +397,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
-fastify.get('/INVIT', async (request, reply) => {
-  console.log(request);
+fastify.post('/invite', async (request, reply) => {
+  console.log(request.body);
+  console.log("========================================================================================\n\n");
   return { message: 'OK' };
 });
 

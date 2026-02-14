@@ -114,7 +114,7 @@ export class SQLiteDB {
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
         this.db.on("trace", (sql) => {
-            console.log("[SQL]:", sql);
+            // console.log("[SQL]:", sql);
         });
         console.log("Database connected and table created!");
     }

@@ -20,6 +20,17 @@ export default function Chat() {
   const navigate = useNavigate()
 
 
+  async function invitehandel()
+  {
+     const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: localStorage.getItem("token") }),
+    });
+    return res;
+  }
+  
+  
   useEffect(() => {
     const te = async () => {
       const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' })
@@ -83,7 +94,8 @@ export default function Chat() {
 
       newSocket.on('gameInviteResponse', (data: any) => {
         if (data.accepted) {
-          navigate(`/loading?mode=2&users=${userId},${data.fromUserId}`)
+          invitehandel();
+          navigate(`/loading?mode=2`);
         }
       })
     }
@@ -138,9 +150,8 @@ export default function Chat() {
     setInvitePrompt(null)
     if (accepted) {
       //something
-      setTimeout(() => {
-        navigate(`/loading?mode=2&users=${invitePrompt.fromUserId},${currentUser.id}`)
-      }, 1500)
+      invitehandel();
+      navigate(`/loading?mode=2`);
     }
   }
 
