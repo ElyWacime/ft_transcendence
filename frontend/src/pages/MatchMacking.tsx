@@ -14,6 +14,7 @@ const MatchMacking = () => {
     const mode = searchParams.get("mode");
     const email = localStorage.getItem("email");
     let matchref = useRef(null);
+    let del = useRef(true);
     const [features, setFeatures] = useState(() => {
         return [
             {
@@ -54,6 +55,7 @@ const MatchMacking = () => {
         const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
             console.log("Server says ",data);
+            matchref.current = data.matchId;
             setFeatures(() => {
                 return [
                     {
@@ -83,6 +85,7 @@ const MatchMacking = () => {
                 ];
             });
             if (data.count_players == mode) {
+              del = false;
                 navigate("/game-online", {
                     state: {
                         player1Name: data.player1Name,
@@ -97,10 +100,11 @@ const MatchMacking = () => {
         };
         ws.addEventListener("message", handleMessage);
         return () => {
-            if (ws && isReady && ws.readyState == WebSocket.OPEN) {
+            if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                     token:localStorage.getItem("token"),
                     type: "DELETE",
+                    matchId:  matchref.current
                 }));
             }
             ws.removeEventListener("message", handleMessage);
