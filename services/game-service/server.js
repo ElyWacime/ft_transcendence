@@ -152,6 +152,206 @@ const interval = setInterval(() => {
   }
 }, 1000 / TICK_RATE);
 
+const handelQuiiting = async(id) => {
+  let m = await dbcnx.deletePendingMatchByPlayerID(id);
+  if (m)
+  {
+    let ngame = new GameState();
+    ngame.id = m.id;
+    ngame.P1_Id = m.P1_Id;
+    ngame.P2_Id = m.P2_Id;
+    ngame.P3_Id = m.P3_Id;
+    ngame.P4_Id = m.P4_Id;
+    let resuser = await dbcnx.getUser(m.P1_Id);
+    if (resuser)
+    {
+        ngame.player1Name = resuser.User_name;
+        ngame.player1Email = resuser.email;
+    }
+    resuser = await dbcnx.getUser(m.P2_Id);
+    if (resuser)
+    {
+      ngame.player2Name = resuser.User_name;
+      ngame.player2Email = resuser.email;
+    }
+    resuser = await dbcnx.getUser(m.P3_Id);
+    if (resuser)
+    {
+      ngame.player3Name = resuser.User_name;
+      ngame.player3Email = resuser.email;
+    }
+    resuser = await dbcnx.getUser(m.P4_Id);
+    if (resuser)
+    {
+      ngame.player4Name = resuser.User_name;
+      ngame.player4Email = resuser.email;
+    }
+    ngame.T_Id = m.T_Id;
+    ngame.count_players = m.count_players;
+    ngame.mode = m.mode;
+    ngame.id = m.id;
+    ngame.gameStatus = m.gameStatus;
+    let data = JSON.stringify(ngame);
+    sendtoplayer(ngame.P1_Id, data);
+    sendtoplayer(ngame.P2_Id, data);
+    sendtoplayer(ngame.P3_Id, data);
+    sendtoplayer(ngame.P4_Id, data);
+  }
+
+};
+
+const handelRegister = async(request,id,email,name) => {
+  let u = new Users();
+  let ngame = new GameState();
+  u.id = id; 
+  u.email = email;
+  u.User_name = name;
+  u.isOnline = true;
+  u.Auto_Match = true;
+  await dbcnx.createUsers(u);
+  let m = await dbcnx.getOngoingMatch(id);
+  if (!m) 
+  {
+    m = await dbcnx.getOpenRoom(request.mode);
+    if (!m) {
+      m = new Match();
+      m.P1_Id = id;
+      m.player1Name = name;
+      m.mode = request.mode;
+      if (!request.tournement) {
+        m.id = await dbcnx.createMatch_not(m);
+      }
+      else {
+        m.id = await dbcnx.createMatch(m);
+      }
+    }
+    else 
+    {
+      if (request.mode == 2) 
+       {
+        if (m.P1_Id == null) 
+          m.P1_Id = id;
+        else
+          m.P2_Id = id;
+       }
+      else
+      {
+        if (m.P1_Id == null) 
+          m.P1_Id = id;
+        else if (m.P2_Id == null) 
+          m.P2_Id = id;
+        else if (m.P3_Id == null) 
+          m.P3_Id = id;
+        else 
+          m.P4_Id = id;
+      }
+        m.count_players = m.count_players + 1;
+    }
+  }
+  ngame.id = m.id;
+  ngame.P1_Id = m.P1_Id;
+  ngame.P2_Id = m.P2_Id;
+  ngame.P3_Id = m.P3_Id;
+  ngame.P4_Id = m.P4_Id;
+  let resuser = await dbcnx.getUser(m.P1_Id);
+  if (resuser)
+  {
+      ngame.player1Name = resuser.User_name;
+      ngame.player1Email = resuser.email;
+  }
+  resuser = await dbcnx.getUser(m.P2_Id);
+  if (resuser)
+  {
+    ngame.player2Name = resuser.User_name;
+    ngame.player2Email = resuser.email;
+  }
+  resuser = await dbcnx.getUser(m.P3_Id);
+  if (resuser)
+  {
+    ngame.player3Name = resuser.User_name;
+    ngame.player3Email = resuser.email;
+  }
+  resuser = await dbcnx.getUser(m.P4_Id);
+  if (resuser)
+  {
+    ngame.player4Name = resuser.User_name;
+    ngame.player4Email = resuser.email;
+  }
+  ngame.T_Id = m.T_Id;
+  ngame.count_players = m.count_players;
+  ngame.mode = request.mode;
+  ngame.id = m.id;
+  if (ngame.count_players == request.mode) 
+  {
+      m.gameStatus = "PLAYING";
+      if(!matches.get(m.id))
+        matches.set(m.id, ngame);
+  }
+  ngame.gameStatus = m.gameStatus;
+  let data = JSON.stringify(ngame);
+  await dbcnx.updateMatch(m);
+  sendtoplayer(ngame.P1_Id, data);
+  sendtoplayer(ngame.P2_Id, data);
+  sendtoplayer(ngame.P3_Id, data);
+  sendtoplayer(ngame.P4_Id, data);
+
+
+};
+
+const handelMove = async (request,id) =>{
+  let match = matches.get(request.matchId);
+  if(match)
+  {
+    if (match.P1_Id == id) {
+      match.p1UPkey = request.keys.ArrowUp;
+      match.p1Downkey = request.keys.ArrowDown;
+    }
+    else if (match.P2_Id == id) {
+      match.p2UPkey = request.keys.ArrowUp;
+      match.p2Downkey = request.keys.ArrowDown;
+    }
+    else if (match.P3_Id && match.P3_Id == id) {
+      match.p3UPkey = request.keys.ArrowUp;
+      match.p3Downkey = request.keys.ArrowDown;
+    }
+    else if (match.P4_Id && match.P4_Id == id) {
+      match.p4UPkey = request.keys.ArrowUp;
+      match.p4Downkey = request.keys.ArrowDown;
+    }
+  }
+};
+
+const handelFinish = async (request) =>  {
+  let m = matches.get(request.matchId);
+  if (m) 
+  {
+    m.id = request.matchId;
+    m.id_Match = request.id_Match;
+    if (m.score1 >= m.score2)
+      m.Winner_Id = m.P1_Id;
+    else
+      m.Winner_Id = m.P2_Id;
+    m.gameStatus = "FINISHED";
+    await dbcnx.updateMatch(m);
+    matches.delete(m.id);
+  }
+};
+
+const handelDup = async (id) => {
+  if (clients.has(id)) 
+  {
+    try {
+      if (clients.get(id) != connection) 
+      {
+        clients.get(id).close();
+        console.log("Server Closed Duplicate Socket for ",id);
+      }
+    }
+    catch (e) {  console.log("Error Server Closed Duplicate Socket for ",id);
+
+    }
+  }
+};
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
@@ -163,196 +363,16 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
-          if (clients.has(id)) {
-            try {
-              if (clients.get(id) != connection) {
-                clients.get(id).close();
-                console.log("Server Closed Duplicate Socket for ",id);
-              }
-            }
-            catch (e) {
-            }
-          }
-          clients.set(id, connection);
-        let ngame = new GameState();
+        await handelDup(id);
+        clients.set(id, connection);
         if (request.type == "REGISTER") 
-        {
-          let u = new Users();
-          u.id = id; 
-          u.email = email;
-          u.User_name = name;
-          u.isOnline = true;
-          u.Auto_Match = true;
-          await dbcnx.createUsers(u);
-          let m = await dbcnx.getOngoingMatch(id);
-          if (!m) 
-          {
-            m = await dbcnx.getOpenRoom(request.mode);
-            if (!m) {
-              m = new Match();
-              m.P1_Id = id;
-              m.player1Name = name;
-              m.mode = request.mode;
-              if (!request.tournement) {
-                m.id = await dbcnx.createMatch_not(m);
-              }
-              else {
-                m.id = await dbcnx.createMatch(m);
-              }
-            }
-            else 
-            {
-              if (request.mode == 2) 
-               {
-                if (m.P1_Id == null) 
-                  m.P1_Id = id;
-                else
-                  m.P2_Id = id;
-               }
-              else
-              {
-                if (m.P1_Id == null) 
-                  m.P1_Id = id;
-                else if (m.P2_Id == null) 
-                  m.P2_Id = id;
-                else if (m.P3_Id == null) 
-                  m.P3_Id = id;
-                else 
-                  m.P4_Id = id;
-              }
-                m.count_players = m.count_players + 1;
-            }
-          }
-          ngame.id = m.id;
-          ngame.P1_Id = m.P1_Id;
-          ngame.P2_Id = m.P2_Id;
-          ngame.P3_Id = m.P3_Id;
-          ngame.P4_Id = m.P4_Id;
-          let resuser = await dbcnx.getUser(m.P1_Id);
-          if (resuser)
-          {
-              ngame.player1Name = resuser.User_name;
-              ngame.player1Email = resuser.email;
-          }
-          resuser = await dbcnx.getUser(m.P2_Id);
-          if (resuser)
-          {
-            ngame.player2Name = resuser.User_name;
-            ngame.player2Email = resuser.email;
-          }
-          resuser = await dbcnx.getUser(m.P3_Id);
-          if (resuser)
-          {
-            ngame.player3Name = resuser.User_name;
-            ngame.player3Email = resuser.email;
-          }
-          resuser = await dbcnx.getUser(m.P4_Id);
-          if (resuser)
-          {
-            ngame.player4Name = resuser.User_name;
-            ngame.player4Email = resuser.email;
-          }
-          ngame.T_Id = m.T_Id;
-          ngame.count_players = m.count_players;
-          ngame.mode = request.mode;
-          ngame.id = m.id;
-          if (ngame.count_players == request.mode) 
-          {
-              m.gameStatus = "PLAYING";
-              if(!matches.get(m.id))
-                matches.set(m.id, ngame);
-          }
-          ngame.gameStatus = m.gameStatus;
-          let data = JSON.stringify(ngame);
-          await dbcnx.updateMatch(m);
-          sendtoplayer(ngame.P1_Id, data);
-          sendtoplayer(ngame.P2_Id, data);
-          sendtoplayer(ngame.P3_Id, data);
-          sendtoplayer(ngame.P4_Id, data);
-        }
-        else if (request.type == "MOVE") {
-            let match = matches.get(request.matchId);
-            if(match)
-            {
-              if (match.P1_Id == id) {
-                match.p1UPkey = request.keys.ArrowUp;
-                match.p1Downkey = request.keys.ArrowDown;
-              }
-              else if (match.P2_Id == id) {
-                match.p2UPkey = request.keys.ArrowUp;
-                match.p2Downkey = request.keys.ArrowDown;
-              }
-              else if (match.P3_Id && match.P3_Id == id) {
-                match.p3UPkey = request.keys.ArrowUp;
-                match.p3Downkey = request.keys.ArrowDown;
-              }
-              else if (match.P4_Id && match.P4_Id == id) {
-                match.p4UPkey = request.keys.ArrowUp;
-                match.p4Downkey = request.keys.ArrowDown;
-              }
-            }
-            
-        }
-          else if (request.type == "FINISHED") {
-          let m = matches.get(request.matchId);
-          if (m) 
-          {
-            m.id = request.matchId;
-            m.id_Match = request.id_Match;
-            if (m.score1 >= m.score2)
-              m.Winner_Id = m.P1_Id;
-            else
-              m.Winner_Id = m.P2_Id;
-            m.gameStatus = "FINISHED";
-            await dbcnx.updateMatch(m);
-            matches.delete(m.id);
-          }
-        }
-        else if (request.type == "DELETE") {
-          let m = await dbcnx.deletePendingMatchByPlayerID(id);
-          if (m)
-          {
-            ngame.id = m.id;
-            ngame.P1_Id = m.P1_Id;
-            ngame.P2_Id = m.P2_Id;
-            ngame.P3_Id = m.P3_Id;
-            ngame.P4_Id = m.P4_Id;
-            let resuser = await dbcnx.getUser(m.P1_Id);
-            if (resuser)
-            {
-                ngame.player1Name = resuser.User_name;
-                ngame.player1Email = resuser.email;
-            }
-            resuser = await dbcnx.getUser(m.P2_Id);
-            if (resuser)
-            {
-              ngame.player2Name = resuser.User_name;
-              ngame.player2Email = resuser.email;
-            }
-            resuser = await dbcnx.getUser(m.P3_Id);
-            if (resuser)
-            {
-              ngame.player3Name = resuser.User_name;
-              ngame.player3Email = resuser.email;
-            }
-            resuser = await dbcnx.getUser(m.P4_Id);
-            if (resuser)
-            {
-              ngame.player4Name = resuser.User_name;
-              ngame.player4Email = resuser.email;
-            }
-            ngame.T_Id = m.T_Id;
-            ngame.count_players = m.count_players;
-            ngame.mode = m.mode;
-            ngame.id = m.id;
-            ngame.gameStatus = m.gameStatus;
-            let data = JSON.stringify(ngame);
-            sendtoplayer(ngame.P1_Id, data);
-            sendtoplayer(ngame.P2_Id, data);
-            sendtoplayer(ngame.P3_Id, data);
-            sendtoplayer(ngame.P4_Id, data);
-          }
-        }
+          await handelRegister(request,id,email,name);
+        else if (request.type == "MOVE") 
+          await handelMove(request,id);
+        else if (request.type == "FINISHED") 
+          await  handelFinish(request) ;
+        else if (request.type == "DELETE") 
+          await handelQuiiting(id);
         }
       else 
         console.log("No token provided, proceeding without authentication");
@@ -360,51 +380,8 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("close", async () => {
     for (const [id, client] of clients) {
       if (client == connection) {
+        await handelQuiiting(id);
         clients.delete(id);
-        let m = await dbcnx.deletePendingMatchByPlayerID(id);
-        if (m)
-        {
-          let ngame = new GameState();
-          ngame.id = m.id;
-          ngame.P1_Id = m.P1_Id;
-          ngame.P2_Id = m.P2_Id;
-          ngame.P3_Id = m.P3_Id;
-          ngame.P4_Id = m.P4_Id;
-          let resuser = await dbcnx.getUser(m.P1_Id);
-          if (resuser)
-          {
-              ngame.player1Name = resuser.User_name;
-              ngame.player1Email = resuser.email;
-          }
-          resuser = await dbcnx.getUser(m.P2_Id);
-          if (resuser)
-          {
-            ngame.player2Name = resuser.User_name;
-            ngame.player2Email = resuser.email;
-          }
-          resuser = await dbcnx.getUser(m.P3_Id);
-          if (resuser)
-          {
-            ngame.player3Name = resuser.User_name;
-            ngame.player3Email = resuser.email;
-          }
-          resuser = await dbcnx.getUser(m.P4_Id);
-          if (resuser)
-          {
-            ngame.player4Name = resuser.User_name;
-            ngame.player4Email = resuser.email;
-          }
-          ngame.T_Id = m.T_Id;
-          ngame.count_players = m.count_players;
-          ngame.mode = m.mode;
-          ngame.id = m.id;
-          ngame.gameStatus = m.gameStatus;
-          let data = JSON.stringify(ngame);
-          sendtoplayer(ngame.P1_Id, data);
-          sendtoplayer(ngame.P2_Id, data);
-          sendtoplayer(ngame.P3_Id, data);
-          sendtoplayer(ngame.P4_Id, data);
-        }
         console.log("Server OnClosed Socket for ",id);
         break;
       }
