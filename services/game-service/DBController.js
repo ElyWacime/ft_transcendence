@@ -162,6 +162,12 @@ export class SQLiteDB {
                             LIMIT 1;`, [mode]);
     }
     async deletePendingMatchByPlayerID(id) {
+        let matchid = await this.db.get(`select id from 
+        Match 
+        where (P1_Id = ? or  P2_Id = ? or  P3_Id = ? or  P4_Id = ? )
+        AND 
+        gameStatus = 'PENDING';`, [id,id,id,id]);
+
         await this.db.get(`UPDATE
         Match 
         SET P1_Id = NULL , count_players = count_players - 1
@@ -186,7 +192,8 @@ export class SQLiteDB {
         WHERE P4_Id = ?
         AND 
         gameStatus = 'PENDING';`, [id]);
-        return await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
+        await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
+        return this.db.get(`select * from Match where id  = ?;`, [matchid]);
     }
 
     async deleteOngoingMatchByPlayerID(id) {

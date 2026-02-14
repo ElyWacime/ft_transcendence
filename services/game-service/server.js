@@ -337,7 +337,21 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           }
         }
         else if (request.type == "DELETE") {
-          await dbcnx.deleteMatch(request.matchId);
+          // matches.delete(request.matchId);
+          let res = await dbcnx.deletePendingMatchByPlayerID(id);
+          if (res)
+          {
+            ngame = matches.get(res.id);
+            if (ngame)
+            {
+              let data = JSON.stringify(ngame);
+              sendtoplayer(ngame.P1_Id, data);
+              sendtoplayer(ngame.P2_Id, data);
+              sendtoplayer(ngame.P3_Id, data);
+              sendtoplayer(ngame.P4_Id, data);
+            }
+          }
+
         }
         }
         // else if(request.type == "ROOM_STATE" )
