@@ -46,15 +46,10 @@ export class GameState {
         this.P2_Id = null;
         this.P3_Id = null;
         this.P4_Id = null;
-        this.score1 = 0;
-        this.score2 = 0;
-        this.mode = 2;
-        this.count_players = 1;
-        this.CreatedAt = Date.now();
         this.gameStatus = "PENDING";
         this.T_Id = null;
-
-        this.matchId = 0;
+        this.count_players = 1;
+        this.mode = 2;
         this.Ball_x = 400;
         this.Ball_y = 300;
         this.Ball_dx = 2;
@@ -73,14 +68,12 @@ export class GameState {
         this.Player4_x = 725;
         this.Player4_y = 250;
         this.Winner_Id = null;
+        this.score1 = 0;
+        this.score2 = 0;
         this.player1Name = null;
         this.player2Name = null;
         this.player3Name = null;
         this.player4Name = null;
-        this.player1Email = null;
-        this.player2Email = null;
-        this.player3Email = null;
-        this.player4Email = null;
         this.p1UPkey = false;
         this.p1Downkey = false;
         this.p2UPkey = false;
@@ -107,14 +100,6 @@ export class Match {
         this.gameStatus = "PENDING";
         this.Winner_Id = null;
         this.T_Id = null;
-        this.player1Name = null;
-        this.player2Name = null;
-        this.player3Name = null;
-        this.player4Name = null;
-        this.player1Email = null;
-        this.player2Email = null;
-        this.player3Email = null;
-        this.player4Email = null;
     }
 }
 
@@ -128,7 +113,7 @@ export class SQLiteDB {
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
         this.db.on("trace", (sql) => {
-            // console.log("[SQL]:", sql);
+            console.log("[SQL]:", sql);
         });
         console.log("Database connected and table created!");
     }
@@ -169,7 +154,7 @@ export class SQLiteDB {
     async getMatchById(id) {
         return this.db.get(`SELECT * FROM Match WHERE id = ?`, [id]);
     }
-    async getMatchPlayerCanJoin(mode) {
+    async getOpenRoom(mode) {
         return this.db.get(`SELECT * FROM Match   
                             WHERE mode = ? and   
                             count_players <  mode   and 
@@ -237,7 +222,7 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
-    async getOngoingMatchByPlayerID(id) {
+    async getOngoingMatch(id) {
         return this.db.get(`SELECT *
         FROM Match
         WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
@@ -328,7 +313,7 @@ export class SQLiteDB {
     async getUserss() {
         return this.db.all(`SELECT * FROM Users`);
     }
-    async getUserById(id) {
+    async getUser(id) {
         return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
     }
     async getUserByEmail(email) {

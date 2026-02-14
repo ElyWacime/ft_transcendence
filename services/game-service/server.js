@@ -166,7 +166,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           if (clients.has(id)) {
             try {
               if (clients.get(id) != connection) {
-                clients.get(id).close();
+                // clients.get(id).close();
                 console.log("Server Closed Duplicate Socket for ",id);
               }
             }
@@ -174,6 +174,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             }
           }
           clients.set(id, connection);
+        let ngame = new GameState();
         if (request.type == "REGISTER") 
         {
           let u = new Users();
@@ -183,13 +184,12 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           u.isOnline = true;
           u.Auto_Match = true;
           await dbcnx.createUsers(u);
-          let m = await dbcnx.getOngoingMatchByPlayerID(id);
-            // console.log("getOngoingMatchByPlayerID :" , m);
-          let ngame = new GameState();
+          let m = await dbcnx.getOngoingMatch(id);
+            // console.log("getOngoingMatch :" , m);
           if (!m) 
           {
-            m = await dbcnx.getMatchPlayerCanJoin(request.mode);
-              // console.log("getMatchPlayerCanJoin :" , m);
+            m = await dbcnx.getOpenRoom(request.mode);
+              // console.log("getOpenRoom :" , m);
             if (!m) {
               m = new Match();
               m.P1_Id = id;
@@ -225,46 +225,47 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
                   m.P4_Id = id;
               }
                 m.count_players = m.count_players + 1;
-                
-                if (m.count_players == m.mode) 
-                {
-                    m.gameStatus = "PLAYING";
-                    matches.set(m.id, ngame);
-                }
             }
+            ngame.id = m.id;
             ngame.P1_Id = m.P1_Id;
             ngame.P2_Id = m.P2_Id;
             ngame.P3_Id = m.P3_Id;
             ngame.P4_Id = m.P4_Id;
-            let resuser = await dbcnx.getUserById(m.P1_Id);
+            let resuser = await dbcnx.getUser(m.P1_Id);
             if (resuser)
             {
                 ngame.player1Name = resuser.User_name;
                 ngame.player1Email = resuser.email;
             }
-            resuser = await dbcnx.getUserById(m.P2_Id);
+            resuser = await dbcnx.getUser(m.P2_Id);
             if (resuser)
             {
               ngame.player2Name = resuser.User_name;
               ngame.player2Email = resuser.email;
             }
-            resuser = await dbcnx.getUserById(m.P3_Id);
+            resuser = await dbcnx.getUser(m.P3_Id);
             if (resuser)
             {
               ngame.player3Name = resuser.User_name;
               ngame.player3Email = resuser.email;
             }
-            resuser = await dbcnx.getUserById(m.P4_Id);
+            resuser = await dbcnx.getUser(m.P4_Id);
             if (resuser)
             {
               ngame.player4Name = resuser.User_name;
               ngame.player4Email = resuser.email;
             }
-            ngame.gameStatus = m.gameStatus;
             ngame.T_Id = m.T_Id;
             ngame.count_players = m.count_players;
-            ngame.mode = m.mode;
-            ngame.matchId = m.id;
+            ngame.mode = request.mode;
+            ngame.id = m.id;
+            if (ngame.count_players == request.mode) 
+            {
+                m.gameStatus = "PLAYING";
+                if(!matches.get(m.id))
+                  matches.set(m.id, ngame);
+            }
+            ngame.gameStatus = m.gameStatus;
             let data = JSON.stringify(ngame);
             await dbcnx.updateMatch(m);
             // console.log("Server will sends", ngame);
@@ -275,24 +276,23 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             sendtoplayer(ngame.P3_Id, data);
             sendtoplayer(ngame.P4_Id, data);
           }
-        }
-        else if(request.type == "ROOM_STATE" )
-        {
-          let m = matches.get(request.matchId);
-          if(m)
-          {
-            m.id = request.matchId;
-            let data = JSON.stringify(m);
-            sendtoplayer(m.P1_Id, data);
-            sendtoplayer(m.P2_Id, data);
-            sendtoplayer(m.P3_Id, data);
-            sendtoplayer(m.P4_Id, data);
-          }
           else
           {
-            console.log("<<<<<<<request.matchId >>> ",request.matchId," Found :: ",m)
-          }
+            ngame = matches.get(m.id);
+            if (ngame)
+            {
+              let data = JSON.stringify(ngame);
+              sendtoplayer(ngame.P1_Id, data);
+              sendtoplayer(ngame.P2_Id, data);
+              sendtoplayer(ngame.P3_Id, data);
+              sendtoplayer(ngame.P4_Id, data);
+            }
+            else
+            {
+              console.log("Cant find m.id_Match == ",m.id)
+            }
 
+          }
         }
         else if (request.type == "MOVE") {
             let match = matches.get(request.matchId);
@@ -321,9 +321,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           else if (request.type == "FINISHED") {
           let m = matches.get(request.matchId);
           // console.log("request.matchId ===",request.matchId,"m.id === ",m.id); 
-          m.id = request.matchId;
           if (m) 
           {
+            m.id = request.matchId;
+            m.id_Match = request.id_Match;
             if (m.score1 >= m.score2)
               m.Winner_Id = m.P1_Id;
             else
@@ -339,7 +340,24 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           await dbcnx.deleteMatch(request.matchId);
         }
         }
+        // else if(request.type == "ROOM_STATE" )
+        // {
+        //   let m = matches.get(request.matchId);
+        //   if(m)
+        //   {
+        //     m.id = request.matchId;
+        //     let data = JSON.stringify(m);
+        //     sendtoplayer(m.P1_Id, data);
+        //     sendtoplayer(m.P2_Id, data);
+        //     sendtoplayer(m.P3_Id, data);
+        //     sendtoplayer(m.P4_Id, data);
+        //   }
+        //   else
+        //   {
+        //     console.log("<<<<<<<request.matchId >>> ",request.matchId," Found :: ",m)
+        //   }
 
+        // }
       else 
         console.log("No token provided, proceeding without authentication");
   });
@@ -347,7 +365,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     for (const [id, client] of clients) {
       if (client == connection) {
         clients.delete(id);
-        console.log("Server Closed Socket for ",id);
+        console.log("Server OnClosed Socket for ",id);
         break;
       }
     }

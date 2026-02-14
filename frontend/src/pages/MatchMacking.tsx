@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 // import { useWebSocket } from "../hooks/useWebSocket";
-import { useEffect, useState,useRef } from "react";
+import { useEffect, useState ,useRef, useCallback} from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
 
 const MatchMacking = () => {
@@ -13,8 +13,8 @@ const MatchMacking = () => {
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
     const email = localStorage.getItem("email");
-    let matchref = useRef(null);
     let del = useRef(true);
+    let matchref = useRef(true);
     const [features, setFeatures] = useState(() => {
         return [
             {
@@ -43,6 +43,53 @@ const MatchMacking = () => {
                 : []),
         ];
     });
+
+    const handleMessage = useCallback((event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      matchref.current = data.id;
+      setFeatures(() => {
+          return [
+              {
+                  icon: Users,
+                  title: data.player1Name || "Player1",
+                  description: mode === "4" ? "Team A" : "Player 1",
+              },
+              {
+                  icon: Users,
+                  title: data.player2Name || "Player2",
+                  description: mode === "4" ? "Team B" : "Player 2",
+              },
+              ...(mode === "4"
+                  ? [
+                      {
+                          icon: Users,
+                          title: data.player3Name || "Player3",
+                          description: "Team A",
+                      },
+                      {
+                          icon: Users,
+                          title: data.player4Name || "Player4",
+                          description: "Team B",
+                      },
+                  ]
+                  : []),
+          ];
+      });
+      if (data.count_players == mode) 
+      {
+        del.current = false;
+          navigate("/game-online", {
+              state: {
+                  player1Name: data.player1Name,
+                  player2Name: data.player2Name,
+                  player3Name: data.player3Name,
+                  player4Name: data.player4Name,
+                  mode
+              },
+          });
+      }
+    });
+
     useEffect(() => {
       if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
       
@@ -52,64 +99,20 @@ const MatchMacking = () => {
             mode,
         }));
 
-        const handleMessage = (event: MessageEvent) => {
-            const data = JSON.parse(event.data);
-            console.log("Server says ",data);
-            matchref.current = data.matchId;
-            setFeatures(() => {
-                return [
-                    {
-                        icon: Users,
-                        title: data.player1Name || "Player1",
-                        description: mode === "4" ? "Team A" : "Player 1",
-                    },
-                    {
-                        icon: Users,
-                        title: data.player2Name || "Player2",
-                        description: mode === "4" ? "Team B" : "Player 2",
-                    },
-                    ...(mode === "4"
-                        ? [
-                            {
-                                icon: Users,
-                                title: data.player3Name || "Player3",
-                                description: "Team A",
-                            },
-                            {
-                                icon: Users,
-                                title: data.player4Name || "Player4",
-                                description: "Team B",
-                            },
-                        ]
-                        : []),
-                ];
-            });
-            if (data.count_players == mode) {
-              del = false;
-                navigate("/game-online", {
-                    state: {
-                        player1Name: data.player1Name,
-                        player2Name: data.player2Name,
-                        player3Name: data.player3Name,
-                        player4Name: data.player4Name,
-                        mode,
-                        matchId:data.matchId
-                    },
-                });
-            }
-        };
+
         ws.addEventListener("message", handleMessage);
         return () => {
             if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                     token:localStorage.getItem("token"),
                     type: "DELETE",
-                    matchId:  matchref.current
+                    matchId: matchref.current 
                 }));
             }
             ws.removeEventListener("message", handleMessage);
         };
     }, [ws, isReady]);
+
     return (
         <>
           <div className="home-page">

@@ -1,5 +1,0 @@
-docker exec -it gtr-game-server-1 bash
-sqlite3 database.sqlite 
-.header on
-.mode column
-select * from match;

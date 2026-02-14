@@ -157,7 +157,6 @@
 //   connection.on("message", async (msg) => {
 //       const request = JSON.parse(msg);
 //       const token = request.token;
-//       console.log("This is index.js ");
 //       if (token) {
 //           const decoded = req.jwt.verify(token);
 //           const id = decoded.id;
@@ -167,16 +166,13 @@
 //             try {
 //               if (clients.get(id) != connection) {
 //                 clients.get(id).close();
-//                 console.log("Close Dup Conx for ",id);
 //               }
 //             }
 //             catch (e) {
-//               console.log("Error in Close Dup Conx for ",id);
 //             }
 //           }
 //           clients.set(id, connection);
-//           if (request.type == "REGISTER") 
-//           {
+//           if (request.type == "REGISTER") {
 //             let u = new Users();
 //             u.id = id; 
 //             u.email = email;
@@ -184,15 +180,16 @@
 //             u.isOnline = true;
 //             u.Auto_Match = true;
 //             await dbcnx.createUsers(u);
+//             u = await dbcnx.getUserById(u.id);
 //             let m = await dbcnx.getOngoingMatchByPlayerID(id);
-//             let ngame = new GameState();
-//             if (!m) 
-//             {
+//             if (!m) {
+
 //               m = await dbcnx.getMatchPlayerCanJoin(request.mode);
 //               if (!m) {
 //                 m = new Match();
 //                 m.P1_Id = u.id;
-//                 m.player1Name = u.User_name;
+//                 let resuser = await dbcnx.getUserById(u.id);
+//                 m.player1Name = resuser.User_name;
 //                 m.mode = request.mode;
 //                 if (!request.tournement) {
 //                   m.id = await dbcnx.createMatch_not(m);
@@ -201,59 +198,54 @@
 //                   m.id = await dbcnx.createMatch(m);
 //                 }
 //               }
-//               else 
-//               {
-//                 if (request.mode == 2) 
-//                  {
-//                   if (m.P1_Id == null) 
-//                     m.P1_Id = u.id;
-//                   else
-//                     m.P2_Id = u.id;
-//                  }
-//                 else
-//                 {
-//                   if (m.P1_Id == null) 
-//                     m.P1_Id = u.id;
-//                   else if (m.P2_Id == null) 
-//                     m.P2_Id = u.id;
-//                   else if (m.P3_Id == null) 
-//                     m.P3_Id = u.id;
-//                   else 
-//                     m.P4_Id = u.id;
+//               else {
+//                 if (request.mode == 2) {
+//                   m.P2_Id = u.id;
+//                   let resuser = await dbcnx.getUserById(u.id);
+//                   m.player2Name = resuser.User_name;
+//                   m.count_players = m.count_players + 1;
 //                 }
-//                 m.count_players = m.count_players + 1;
-//                 await dbcnx.updateMatch(m);
-//                 if (m.count_players == m.mode) 
-//                 {
+//                 else {
+//                   if (m.P2_Id == null) {
+//                     m.P2_Id = u.id;
+//                     let resuser = await dbcnx.getUserById(u.id);
+//                     m.player2Name = resuser.User_name;
+//                     m.count_players = m.count_players + 1;
+//                   }
+//                   else if (m.P3_Id == null) {
+//                     m.P3_Id = u.id;
+//                     let resuser = await dbcnx.getUserById(u.id);
+//                     m.player3Name = resuser.User_name;
+//                     m.count_players = m.count_players + 1;
+//                   }
+//                   else if (m.P4_Id == null) {
+//                     m.P4_Id = u.id;
+//                     let resuser = await dbcnx.getUserById(u.id);
+//                     m.player4Name = resuser.User_name;
+//                     m.count_players = m.count_players + 1;
+//                   }
+//                   await dbcnx.updateMatch(m);
+//                 }
+//                 if (m.count_players == m.mode) {
 //                   m.gameStatus = "PLAYING";
+//                   let ngame = new GameState();
+//                   ngame.id_Match = m.id;
 //                   ngame.P1_Id = m.P1_Id;
 //                   ngame.P2_Id = m.P2_Id;
 //                   ngame.P3_Id = m.P3_Id;
 //                   ngame.P4_Id = m.P4_Id;
 //                   let resuser = await dbcnx.getUserById(m.P1_Id);
 //                   if (resuser)
-//                   {
-//                       ngame.player1Name = resuser.User_name;
-//                       ngame.player1Email = resuser.email;
-//                   }
+//                   ngame.player1Name = resuser.User_name;
 //                   resuser = await dbcnx.getUserById(m.P2_Id);
 //                   if (resuser)
-//                   {
-//                     ngame.player2Name = resuser.User_name;
-//                     ngame.player2Email = resuser.email;
-//                   }
+//                   ngame.player2Name = resuser.User_name;
 //                   resuser = await dbcnx.getUserById(m.P3_Id);
 //                   if (resuser)
-//                   {
-//                     ngame.player3Name = resuser.User_name;
-//                     ngame.player3Email = resuser.email;
-//                   }
+//                   ngame.player3Name = resuser.User_name;
 //                   resuser = await dbcnx.getUserById(m.P4_Id);
 //                   if (resuser)
-//                   {
-//                     ngame.player4Name = resuser.User_name;
-//                     ngame.player4Email = resuser.email;
-//                   }
+//                   ngame.player4Name = resuser.User_name;
 //                   ngame.gameStatus = m.gameStatus;
 //                   ngame.T_Id = m.T_Id;
 //                   ngame.count_players = m.count_players;
@@ -262,19 +254,42 @@
 //                   await dbcnx.updateMatch(m);
 //                 }
 //               }
+//               let ngame = new GameState();
+
+//               let resuser = await dbcnx.getUserById(m.P1_Id);
+//               if (resuser)
+//                 ngame.player1Name = resuser.User_name;
+//               resuser = await dbcnx.getUserById(m.P2_Id);
+//               if (resuser)
+//                 ngame.player2Name = resuser.User_name;
+//               resuser = await dbcnx.getUserById(m.P3_Id);
+//               if (resuser)
+//                 ngame.player3Name = resuser.User_name;
+//               resuser = await dbcnx.getUserById(m.P4_Id);
+//               if (resuser)
+//                 ngame.player4Name = resuser.User_name;
+
 //               ngame.id_Match = m.id;
+//               ngame.P1_Id = m.P1_Id;
+//               ngame.P2_Id = m.P2_Id;
+//               ngame.P3_Id = m.P3_Id;
+//               ngame.P4_Id = m.P4_Id;
+              
+//               ngame.gameStatus = m.gameStatus;
+//               ngame.T_Id = m.T_Id;
+//               ngame.count_players = m.count_players;
+//               ngame.mode = m.mode;
+//               let data = JSON.stringify(ngame);
+//               sendtoplayer(ngame.P1_Id, data);
+//               sendtoplayer(ngame.P2_Id, data);
+//               sendtoplayer(ngame.P3_Id, data);
+//               sendtoplayer(ngame.P4_Id, data);
 //             }
-//             let data = JSON.stringify(ngame);
-//             console.log("Server will send ",data);
-//             sendtoplayer(ngame.P1_Id, data);
-//             sendtoplayer(ngame.P2_Id, data);
-//             sendtoplayer(ngame.P3_Id, data);
-//             sendtoplayer(ngame.P4_Id, data);
 //           }
 //           else if (request.type == "MOVE") {
-//             let match = matches.get(request.matchId);
-//             if(match)
-//             {
+//             let m = await dbcnx.getCurrentMatchByPlayerID(id);
+//             if (m) {
+//               let match = matches.get(m.id);
 //               if (match.P1_Id == id) {
 //                 match.p1UPkey = request.keys.ArrowUp;
 //                 match.p1Downkey = request.keys.ArrowDown;
@@ -292,12 +307,28 @@
 //                 match.p4Downkey = request.keys.ArrowDown;
 //               }
 //             }
-            
+//             else {
+//               m = await dbcnx.getLasttMatchByPlayerID(id);
+//               if (m) {
+//                 let tmp = matches.get(m.id);
+//                 let data = JSON.stringify(tmp);
+//                 sendtoplayer(m.P1_Id, data);
+//                 sendtoplayer(m.P2_Id, data);
+//                 sendtoplayer(m.P3_Id, data);
+//                 sendtoplayer(m.P4_Id, data);
+//               }
+//               else
+//                 console.log("getLasttMatchByPlayerID NOT FOUND",id);
+//             }
 //           }
 //           else if (request.type == "FINISHED") {
-//             let m = matches.get(request.matchId);
-//             if (m) 
-//             {
+//             let m = await dbcnx.getLasttMatchByPlayerID(id);
+//             if (m) {
+//               let tmp = matches.get(m.id);
+//               if (tmp) {
+//                 m.score1 = tmp.score1;
+//                 m.score2 = tmp.score2;
+//               }
 //               if (m.score1 >= m.score2)
 //                 m.Winner_Id = m.P1_Id;
 //               else
@@ -321,7 +352,6 @@
 //     for (const [id, client] of clients) {
 //       if (client == connection) {
 //         clients.delete(id);
-//         console.log("Close DisConx for ",id);
 //         break;
 //       }
 //     }
