@@ -6,12 +6,6 @@ import { setupDatabase } from './setup-db.js';
 let db;
 const DB_PATH = './dev.db';
 
-async function insertUsers(id, username) {
-    const insertStmt = `INSERT INTO users (id, username) VALUES (?, ?) ON CONFLICT(username) DO NOTHING`;
-
-    await db.run(insertStmt, [id, username]);
-}   
-
 async function initializeDb() {
     try {
         db = await open({
@@ -29,6 +23,12 @@ async function initializeDb() {
     }
 }
 
+async function insertUsers(id, username) {
+    const insertStmt = `INSERT INTO users (id, username) VALUES (?, ?) RETURNING *`;
+
+    return await db.get(insertStmt, [id, username])
+}   
+
 async function saveMessage(conversationId, senderId, content) {
     const stmt = `
         INSERT INTO messages (conversation_id, sender_id, body)
@@ -41,7 +41,7 @@ async function saveMessage(conversationId, senderId, content) {
     const row = await db.get(
         `SELECT m.id, m.conversation_id, m.sender_id, m.body, m.created_at, u.username AS sender_username
          FROM messages m
-         LEFT JOIN users u ON u.id = m.sender_id
+         JOIN users u ON u.id = m.sender_id
          WHERE m.id = ?`,
         [messageId]
     );
@@ -59,7 +59,7 @@ async function getChatHistory(conversationId) {
             m.created_at,
             u.username as sender_username
         FROM messages m
-        LEFT JOIN users u ON u.id = m.sender_id
+        JOIN users u ON u.id = m.sender_id
         WHERE m.conversation_id = ?
         ORDER BY m.created_at ASC
     `;
@@ -157,24 +157,8 @@ async function checkIfConvExist(senderId, receipentId)
 }
 
 async function createNewConversation(senderId, receipentId) {
-    async function conversationIdExists(id) {
-        const existing = await db.get('SELECT 1 FROM conversations WHERE id = ?', [id]);
-        return Boolean(existing);
-    }
-
-    async function generateUniqueConversationId() {
-        const maxAttempts = 5;
-        for (let i = 0; i < maxAttempts; i++) {
-            const candidate = crypto.randomInt(1_000_000_000, 9_000_000_000);
-            if (!(await conversationIdExists(candidate))) {
-                return candidate;
-            }
-        }
-        throw new Error('Failed to generate a unique conversation id');
-    }
-
     const now = new Date().toISOString();
-    const conversationId = await generateUniqueConversationId();
+    const conversationId = crypto.randomInt(1_000_000_000, 9_000_000_000);
 
     const insertConvStmt = `
         INSERT INTO conversations (id, created_at)
@@ -193,19 +177,32 @@ async function createNewConversation(senderId, receipentId) {
 
 async function getConversationsForUser(userId) {
     const stmt = `
-        SELECT c.id, c.created_at,
-        u.id as other_user_id,
-        u.username as other_user_username,
-        m.body as last_message_body,
-        m.created_at as last_message_created_at
+        SELECT 
+            c.id,
+            c.created_at,
+            u.id          AS other_user_id,
+            u.username    AS other_user_username,
+            m.body        AS last_message_body,
+            m.created_at  AS last_message_created_at
         FROM conversations c
-        JOIN conversation_participants cp ON cp.conversation_id = c.id
-        LEFT JOIN conversation_participants cp2 ON cp2.conversation_id = c.id AND cp2.user_id != cp.user_id
-        JOIN users u ON u.id = cp2.user_id
-        LEFT JOIN messages m ON m.conversation_id = c.id 
-        AND m.id = (SELECT MAX(id) FROM messages WHERE conversation_id = c.id)
-        WHERE cp.user_id = ?
-        ORDER BY m.created_at DESC, c.created_at DESC
+        JOIN conversation_participants mine 
+            ON mine.conversation_id = c.id
+        JOIN conversation_participants other 
+            ON other.conversation_id = c.id 
+            AND other.user_id != mine.user_id
+        JOIN users u 
+            ON u.id = other.user_id
+        LEFT JOIN messages m 
+            ON m.conversation_id = c.id
+            AND m.id = (
+                SELECT MAX(id) 
+                FROM messages 
+                WHERE conversation_id = c.id
+            )
+        WHERE mine.user_id = ?
+        ORDER BY 
+            m.created_at DESC,
+            c.created_at DESC
     `;                          
 
     const conversations = await db.all(stmt, [userId]);
