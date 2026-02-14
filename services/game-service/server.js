@@ -184,10 +184,12 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           u.Auto_Match = true;
           await dbcnx.createUsers(u);
           let m = await dbcnx.getOngoingMatchByPlayerID(id);
+            // console.log("getOngoingMatchByPlayerID :" , m);
           let ngame = new GameState();
           if (!m) 
           {
             m = await dbcnx.getMatchPlayerCanJoin(request.mode);
+              // console.log("getMatchPlayerCanJoin :" , m);
             if (!m) {
               m = new Match();
               m.P1_Id = id;
@@ -195,9 +197,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m.mode = request.mode;
               if (!request.tournement) {
                 m.id = await dbcnx.createMatch_not(m);
+                 //  console.log("createMatch_not :" , m.id);
               }
               else {
                 m.id = await dbcnx.createMatch(m);
+                // console.log("createMatch_not :" , m.id);
               }
             }
             else 
@@ -264,11 +268,31 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             let data = JSON.stringify(ngame);
             await dbcnx.updateMatch(m);
             // console.log("Server will sends", ngame);
+            // if(!matches.get(m.id))
+            //   matches.set(m.id, ngame);
             sendtoplayer(ngame.P1_Id, data);
             sendtoplayer(ngame.P2_Id, data);
             sendtoplayer(ngame.P3_Id, data);
             sendtoplayer(ngame.P4_Id, data);
           }
+        }
+        else if(request.type == "ROOM_STATE" )
+        {
+          let m = matches.get(request.matchId);
+          if(m)
+          {
+            m.id = request.matchId;
+            let data = JSON.stringify(m);
+            sendtoplayer(m.P1_Id, data);
+            sendtoplayer(m.P2_Id, data);
+            sendtoplayer(m.P3_Id, data);
+            sendtoplayer(m.P4_Id, data);
+          }
+          else
+          {
+            console.log("<<<<<<<request.matchId >>> ",request.matchId," Found :: ",m)
+          }
+
         }
         else if (request.type == "MOVE") {
             let match = matches.get(request.matchId);
@@ -293,30 +317,32 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               }
             }
             
+        }
+          else if (request.type == "FINISHED") {
+          let m = matches.get(request.matchId);
+          // console.log("request.matchId ===",request.matchId,"m.id === ",m.id); 
+          m.id = request.matchId;
+          if (m) 
+          {
+            if (m.score1 >= m.score2)
+              m.Winner_Id = m.P1_Id;
+            else
+              m.Winner_Id = m.P2_Id;
+            m.gameStatus = "FINISHED";
+            await dbcnx.updateMatch(m);
+            // console.log("Before :",matches.size);
+            matches.delete(m.id);
+            // console.log("After :",matches.size);
           }
-            else if (request.type == "FINISHED") {
-            let m = matches.get(request.matchId);
-            if (m) 
-            {
-              if (m.score1 >= m.score2)
-                m.Winner_Id = m.P1_Id;
-              else
-                m.Winner_Id = m.P2_Id;
-              m.gameStatus = "FINISHED";
-              await dbcnx.updateMatch(m);
-              matches.delete(m.id);
-            }
-          }
-          else if (request.type == "DELETE") {
-            await dbcnx.deleteMatch(request.matchId);
-          }
+        }
+        else if (request.type == "DELETE") {
+          await dbcnx.deleteMatch(request.matchId);
+        }
         }
 
       else 
         console.log("No token provided, proceeding without authentication");
   });
-
-
   connection.on("close", () => {
     for (const [id, client] of clients) {
       if (client == connection) {
@@ -325,7 +351,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         break;
       }
     }
-    
   });
 });
 

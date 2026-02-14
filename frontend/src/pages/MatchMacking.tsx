@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 // import { useWebSocket } from "../hooks/useWebSocket";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
 
 const MatchMacking = () => {
@@ -13,6 +13,7 @@ const MatchMacking = () => {
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
     const email = localStorage.getItem("email");
+    let matchref = useRef(null);
     const [features, setFeatures] = useState(() => {
         return [
             {

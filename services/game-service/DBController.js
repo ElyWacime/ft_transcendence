@@ -39,17 +39,22 @@ export class Participate_Tournament {
 
 export class GameState {
     constructor() {
-        this.matchId = 0;
+        this.id = 0;
         this.now = Date.now();
         this.last = Date.now();
         this.P1_Id = null;
         this.P2_Id = null;
         this.P3_Id = null;
         this.P4_Id = null;
+        this.score1 = 0;
+        this.score2 = 0;
+        this.mode = 2;
+        this.count_players = 1;
+        this.CreatedAt = Date.now();
         this.gameStatus = "PENDING";
         this.T_Id = null;
-        this.count_players = 1;
-        this.mode = 2;
+
+        this.matchId = 0;
         this.Ball_x = 400;
         this.Ball_y = 300;
         this.Ball_dx = 2;
@@ -68,8 +73,6 @@ export class GameState {
         this.Player4_x = 725;
         this.Player4_y = 250;
         this.Winner_Id = null;
-        this.score1 = 0;
-        this.score2 = 0;
         this.player1Name = null;
         this.player2Name = null;
         this.player3Name = null;
@@ -124,6 +127,9 @@ export class SQLiteDB {
         this.db = await open({ filename: "database.sqlite", driver: sqlite3.Database, });
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
+        this.db.on("trace", (sql) => {
+            // console.log("[SQL]:", sql);
+        });
         console.log("Database connected and table created!");
     }
 
