@@ -1,8 +1,8 @@
-import ChatSidebar from "./chat-sidebar"
-import ChatWindow from "./chat-window"
 import { useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { Socket } from 'socket.io-client'
+import ChatSidebar from "./chat-sidebar"
+import ChatWindow from "./chat-window"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -38,7 +38,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
     if (id) {
       setSelectedId(parseInt(id))
     }
-  }, [id, setSelectedId])
+  }, [id])
 
   const selectedConversation = conversations.find((c) => c.id === selectedId)
   const blockStatus = selectedConversation ? blockedConversations[selectedConversation.id] : null
@@ -63,6 +63,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
       })
       const data = await res.json()
       if (data.conversationId) {
+        socket.emit("newConversation", { userId })
         await onFetchConversations()
         setSelectedId(data.conversationId)
       }
