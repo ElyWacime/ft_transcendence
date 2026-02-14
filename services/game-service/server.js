@@ -166,7 +166,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           if (clients.has(id)) {
             try {
               if (clients.get(id) != connection) {
-                // clients.get(id).close();
+                clients.get(id).close();
                 console.log("Server Closed Duplicate Socket for ",id);
               }
             }
@@ -185,11 +185,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           u.Auto_Match = true;
           await dbcnx.createUsers(u);
           let m = await dbcnx.getOngoingMatch(id);
-            // console.log("getOngoingMatch :" , m);
           if (!m) 
           {
             m = await dbcnx.getOpenRoom(request.mode);
-              // console.log("getOpenRoom :" , m);
             if (!m) {
               m = new Match();
               m.P1_Id = id;
@@ -197,11 +195,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m.mode = request.mode;
               if (!request.tournement) {
                 m.id = await dbcnx.createMatch_not(m);
-                 //  console.log("createMatch_not :" , m.id);
               }
               else {
                 m.id = await dbcnx.createMatch(m);
-                // console.log("createMatch_not :" , m.id);
               }
             }
             else 
@@ -276,7 +272,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         }
         else if (request.type == "MOVE") {
             let match = matches.get(request.matchId);
-            // console.log("id match === ",match);
             if(match)
             {
               if (match.P1_Id == id) {
@@ -300,7 +295,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         }
           else if (request.type == "FINISHED") {
           let m = matches.get(request.matchId);
-          // console.log("request.matchId ===",request.matchId,"m.id === ",m.id); 
           if (m) 
           {
             m.id = request.matchId;
@@ -311,54 +305,106 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               m.Winner_Id = m.P2_Id;
             m.gameStatus = "FINISHED";
             await dbcnx.updateMatch(m);
-            // console.log("Before :",matches.size);
             matches.delete(m.id);
-            // console.log("After :",matches.size);
           }
         }
         else if (request.type == "DELETE") {
-          // matches.delete(request.matchId);
-          let res = await dbcnx.deletePendingMatchByPlayerID(id);
-          if (res)
+          let m = await dbcnx.deletePendingMatchByPlayerID(id);
+          if (m)
           {
-            ngame = matches.get(res.id);
-            if (ngame)
+            ngame.id = m.id;
+            ngame.P1_Id = m.P1_Id;
+            ngame.P2_Id = m.P2_Id;
+            ngame.P3_Id = m.P3_Id;
+            ngame.P4_Id = m.P4_Id;
+            let resuser = await dbcnx.getUser(m.P1_Id);
+            if (resuser)
             {
-              let data = JSON.stringify(ngame);
-              sendtoplayer(ngame.P1_Id, data);
-              sendtoplayer(ngame.P2_Id, data);
-              sendtoplayer(ngame.P3_Id, data);
-              sendtoplayer(ngame.P4_Id, data);
+                ngame.player1Name = resuser.User_name;
+                ngame.player1Email = resuser.email;
             }
+            resuser = await dbcnx.getUser(m.P2_Id);
+            if (resuser)
+            {
+              ngame.player2Name = resuser.User_name;
+              ngame.player2Email = resuser.email;
+            }
+            resuser = await dbcnx.getUser(m.P3_Id);
+            if (resuser)
+            {
+              ngame.player3Name = resuser.User_name;
+              ngame.player3Email = resuser.email;
+            }
+            resuser = await dbcnx.getUser(m.P4_Id);
+            if (resuser)
+            {
+              ngame.player4Name = resuser.User_name;
+              ngame.player4Email = resuser.email;
+            }
+            ngame.T_Id = m.T_Id;
+            ngame.count_players = m.count_players;
+            ngame.mode = m.mode;
+            ngame.id = m.id;
+            ngame.gameStatus = m.gameStatus;
+            let data = JSON.stringify(ngame);
+            sendtoplayer(ngame.P1_Id, data);
+            sendtoplayer(ngame.P2_Id, data);
+            sendtoplayer(ngame.P3_Id, data);
+            sendtoplayer(ngame.P4_Id, data);
           }
-
         }
         }
-        // else if(request.type == "ROOM_STATE" )
-        // {
-        //   let m = matches.get(request.matchId);
-        //   if(m)
-        //   {
-        //     m.id = request.matchId;
-        //     let data = JSON.stringify(m);
-        //     sendtoplayer(m.P1_Id, data);
-        //     sendtoplayer(m.P2_Id, data);
-        //     sendtoplayer(m.P3_Id, data);
-        //     sendtoplayer(m.P4_Id, data);
-        //   }
-        //   else
-        //   {
-        //     console.log("<<<<<<<request.matchId >>> ",request.matchId," Found :: ",m)
-        //   }
-
-        // }
       else 
         console.log("No token provided, proceeding without authentication");
   });
-  connection.on("close", () => {
+  connection.on("close", async () => {
     for (const [id, client] of clients) {
       if (client == connection) {
         clients.delete(id);
+        let m = await dbcnx.deletePendingMatchByPlayerID(id);
+        if (m)
+        {
+          let ngame = new GameState();
+          ngame.id = m.id;
+          ngame.P1_Id = m.P1_Id;
+          ngame.P2_Id = m.P2_Id;
+          ngame.P3_Id = m.P3_Id;
+          ngame.P4_Id = m.P4_Id;
+          let resuser = await dbcnx.getUser(m.P1_Id);
+          if (resuser)
+          {
+              ngame.player1Name = resuser.User_name;
+              ngame.player1Email = resuser.email;
+          }
+          resuser = await dbcnx.getUser(m.P2_Id);
+          if (resuser)
+          {
+            ngame.player2Name = resuser.User_name;
+            ngame.player2Email = resuser.email;
+          }
+          resuser = await dbcnx.getUser(m.P3_Id);
+          if (resuser)
+          {
+            ngame.player3Name = resuser.User_name;
+            ngame.player3Email = resuser.email;
+          }
+          resuser = await dbcnx.getUser(m.P4_Id);
+          if (resuser)
+          {
+            ngame.player4Name = resuser.User_name;
+            ngame.player4Email = resuser.email;
+          }
+          ngame.T_Id = m.T_Id;
+          ngame.count_players = m.count_players;
+          ngame.mode = m.mode;
+          ngame.id = m.id;
+          ngame.gameStatus = m.gameStatus;
+          let data = JSON.stringify(ngame);
+          sendtoplayer(ngame.P1_Id, data);
+          sendtoplayer(ngame.P2_Id, data);
+          sendtoplayer(ngame.P3_Id, data);
+          sendtoplayer(ngame.P4_Id, data);
+        }
         console.log("Server OnClosed Socket for ",id);
         break;
       }

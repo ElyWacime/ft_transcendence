@@ -1,6 +1,7 @@
 import { open } from "sqlite";
 import fs from "fs";
 import sqlite3 from "sqlite3";
+import { match } from "assert";
 
 export class Users {
     constructor() {
@@ -113,7 +114,7 @@ export class SQLiteDB {
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
         this.db.on("trace", (sql) => {
-            // console.log("[SQL]:", sql);
+            console.log("[SQL]:", sql);
         });
         console.log("Database connected and table created!");
     }
@@ -162,12 +163,14 @@ export class SQLiteDB {
                             LIMIT 1;`, [mode]);
     }
     async deletePendingMatchByPlayerID(id) {
+        let x = -1;
         let matchid = await this.db.get(`select id from 
         Match 
         where (P1_Id = ? or  P2_Id = ? or  P3_Id = ? or  P4_Id = ? )
         AND 
         gameStatus = 'PENDING';`, [id,id,id,id]);
-
+        if (matchid)
+            x = matchid.id;
         await this.db.get(`UPDATE
         Match 
         SET P1_Id = NULL , count_players = count_players - 1
@@ -193,7 +196,7 @@ export class SQLiteDB {
         AND 
         gameStatus = 'PENDING';`, [id]);
         await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
-        return this.db.get(`select * from Match where id  = ?;`, [matchid]);
+        return this.db.get(`select * from Match where id  = ?;`, [x]);
     }
 
     async deleteOngoingMatchByPlayerID(id) {
