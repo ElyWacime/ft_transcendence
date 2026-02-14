@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react"
-import "../components/chat/App.css"
 import { useNavigate } from "react-router-dom"
-import MessagesPageLayout from "../components/chat/MessagesPageLayout"
 import { io, Socket } from 'socket.io-client'
+import "../components/chat/App.css"
+import MessagesPageLayout from "../components/chat/MessagesPageLayout"
 
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
-
 
 export default function Chat() {
   const [socket, setSocket] = useState<Socket | null>(null)
@@ -19,6 +18,7 @@ export default function Chat() {
   const [blockedConversations, setBlockedConversations] = useState<any>({})
   const [invitePrompt, setInvitePrompt] = useState<any>(null)
   const navigate = useNavigate()
+
 
   useEffect(() => {
     const te = async () => {
@@ -40,6 +40,10 @@ export default function Chat() {
         setIsConnected(false)
       })
 
+      newSocket.on("newConversation", async () => {
+        await fetchConversations()
+      })
+
       newSocket.on('receiveMessage', (message: any) => {
         setMessages(prev => {
           return [...prev, message]
@@ -50,17 +54,13 @@ export default function Chat() {
             return {
               ...conv,
               last_message_body: message.body,
-              last_message_created_at: message.created_at || conv.last_message_created_at || conv.created_at,
+              last_message_created_at: message.created_at
             }
           }
           return conv
         }))
       })
-
-      newSocket.on('messageError', (errorData: any) => {
-        console.error('Message error:', errorData)
-      })
-
+  
       newSocket.on('blockStatusChanged', (data: any) => {
         const { conversationId, blockedBy } = data
         if (blockedBy === 'other') {
@@ -77,22 +77,23 @@ export default function Chat() {
         }
       })
 
-      newSocket.on('gameInvite', (data: any) => {
+      newSocket.on('gameInvite', (data: any) => {        
         setInvitePrompt(data)
       })
 
       newSocket.on('gameInviteResponse', (data: any) => {
-        console.log('Invite response:', data)
         if (data.accepted) {
-            navigate('/loading?mode=2')
+          navigate(`/loading?mode=2&users=${userId},${data.fromUserId}`)
         }
       })
-
-      return () => newSocket.close()
     }
-
     te()
   }, [])
+
+  useEffect(() => {
+    if (selectedId)
+      navigate(`/chat/${selectedId}`)
+  }, [selectedId, navigate])
 
   const fetchConversations = async () => {
     try {
@@ -103,11 +104,6 @@ export default function Chat() {
       console.error('Failed to fetch conversations:', error)
     }
   }
-
-  useEffect(() => {
-    if (selectedId)
-      navigate(`/chat/${selectedId}`)
-  }, [selectedId, navigate])
 
   const handleSendMessage = (content: string, conversationId: string) => {
     if (!socket || !isConnected) {
@@ -123,11 +119,11 @@ export default function Chat() {
 
   const sendInvite = (conversation: any) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
+
     socket.emit('gameInvite', {
       conversationId: conversation.id,
       toUserId: conversation.other_user_id,
       fromUserId: currentUser?.id,
-      fromUsername: currentUser?.username || 'Someone'
     })
   }
 
@@ -136,12 +132,14 @@ export default function Chat() {
     socket.emit('gameInviteResponse', {
       conversationId: invitePrompt.conversationId,
       toUserId: invitePrompt.fromUserId,
+      fromUserId: currentUser.id,
       accepted,
     })
     setInvitePrompt(null)
     if (accepted) {
+      //something
       setTimeout(() => {
-        navigate('/loading?mode=2')
+        navigate(`/loading?mode=2&users=${invitePrompt.fromUserId},${currentUser.id}`)
       }, 1500)
     }
   }
