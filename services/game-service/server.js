@@ -226,73 +226,53 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
               }
                 m.count_players = m.count_players + 1;
             }
-            ngame.id = m.id;
-            ngame.P1_Id = m.P1_Id;
-            ngame.P2_Id = m.P2_Id;
-            ngame.P3_Id = m.P3_Id;
-            ngame.P4_Id = m.P4_Id;
-            let resuser = await dbcnx.getUser(m.P1_Id);
-            if (resuser)
-            {
-                ngame.player1Name = resuser.User_name;
-                ngame.player1Email = resuser.email;
-            }
-            resuser = await dbcnx.getUser(m.P2_Id);
-            if (resuser)
-            {
-              ngame.player2Name = resuser.User_name;
-              ngame.player2Email = resuser.email;
-            }
-            resuser = await dbcnx.getUser(m.P3_Id);
-            if (resuser)
-            {
-              ngame.player3Name = resuser.User_name;
-              ngame.player3Email = resuser.email;
-            }
-            resuser = await dbcnx.getUser(m.P4_Id);
-            if (resuser)
-            {
-              ngame.player4Name = resuser.User_name;
-              ngame.player4Email = resuser.email;
-            }
-            ngame.T_Id = m.T_Id;
-            ngame.count_players = m.count_players;
-            ngame.mode = request.mode;
-            ngame.id = m.id;
-            if (ngame.count_players == request.mode) 
-            {
-                m.gameStatus = "PLAYING";
-                if(!matches.get(m.id))
-                  matches.set(m.id, ngame);
-            }
-            ngame.gameStatus = m.gameStatus;
-            let data = JSON.stringify(ngame);
-            await dbcnx.updateMatch(m);
-            // console.log("Server will sends", ngame);
-            // if(!matches.get(m.id))
-            //   matches.set(m.id, ngame);
-            sendtoplayer(ngame.P1_Id, data);
-            sendtoplayer(ngame.P2_Id, data);
-            sendtoplayer(ngame.P3_Id, data);
-            sendtoplayer(ngame.P4_Id, data);
           }
-          else
+          ngame.id = m.id;
+          ngame.P1_Id = m.P1_Id;
+          ngame.P2_Id = m.P2_Id;
+          ngame.P3_Id = m.P3_Id;
+          ngame.P4_Id = m.P4_Id;
+          let resuser = await dbcnx.getUser(m.P1_Id);
+          if (resuser)
           {
-            ngame = matches.get(m.id);
-            if (ngame)
-            {
-              let data = JSON.stringify(ngame);
-              sendtoplayer(ngame.P1_Id, data);
-              sendtoplayer(ngame.P2_Id, data);
-              sendtoplayer(ngame.P3_Id, data);
-              sendtoplayer(ngame.P4_Id, data);
-            }
-            else
-            {
-              console.log("Cant find m.id_Match == ",m.id)
-            }
-
+              ngame.player1Name = resuser.User_name;
+              ngame.player1Email = resuser.email;
           }
+          resuser = await dbcnx.getUser(m.P2_Id);
+          if (resuser)
+          {
+            ngame.player2Name = resuser.User_name;
+            ngame.player2Email = resuser.email;
+          }
+          resuser = await dbcnx.getUser(m.P3_Id);
+          if (resuser)
+          {
+            ngame.player3Name = resuser.User_name;
+            ngame.player3Email = resuser.email;
+          }
+          resuser = await dbcnx.getUser(m.P4_Id);
+          if (resuser)
+          {
+            ngame.player4Name = resuser.User_name;
+            ngame.player4Email = resuser.email;
+          }
+          ngame.T_Id = m.T_Id;
+          ngame.count_players = m.count_players;
+          ngame.mode = request.mode;
+          ngame.id = m.id;
+          if (ngame.count_players == request.mode) 
+          {
+              m.gameStatus = "PLAYING";
+              if(!matches.get(m.id))
+                matches.set(m.id, ngame);
+          }
+          ngame.gameStatus = m.gameStatus;
+          let data = JSON.stringify(ngame);
+          await dbcnx.updateMatch(m);
+          sendtoplayer(ngame.P1_Id, data);
+          sendtoplayer(ngame.P2_Id, data);
+          sendtoplayer(ngame.P3_Id, data);
+          sendtoplayer(ngame.P4_Id, data);
         }
         else if (request.type == "MOVE") {
             let match = matches.get(request.matchId);
