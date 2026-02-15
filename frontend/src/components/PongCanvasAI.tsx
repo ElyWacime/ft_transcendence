@@ -375,25 +375,24 @@ export const PongCanvasAI = ({
             {gameState.gameStatus === "waiting" && (
               <button onClick={startGame} className="game-control-button start-button">
                 <Play className="button-icon" />
-                Start Game
+                
               </button>
             )}
             {gameState.gameStatus === "playing" && (
               <button onClick={pauseGame} className="game-control-button pause-button">
                 <Pause className="button-icon" />
-                Pause
+                
               </button>
             )}
             {gameState.gameStatus === "paused" && (
               <button onClick={resumeGame} className="game-control-button resume-button">
                 <Play className="button-icon" />
-                Resume
               </button>
             )}
             <div className="additional-controls">
-              <button onClick={resetGame} className="reset-button-small">
+              <button onClick={resetGame} className="game-control-button reset-button">
                 <RotateCcw className="button-icon" />
-                Reset
+                
               </button>
             </div>
           </div>

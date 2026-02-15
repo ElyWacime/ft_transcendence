@@ -160,7 +160,7 @@ const ChangePicture = () => {
             className="back-link"
           >
             <ArrowLeft className="back-link-icon" />
-            <span> Back</span>
+            <span> </span>
           </button>
 
           <Card className="change-password-card">

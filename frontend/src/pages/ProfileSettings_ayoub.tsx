@@ -82,9 +82,9 @@ const ProfileSettings = () => {
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSearchLoading(true);
-    setSearchError(null);
-    setSearchResult(null);
+    // setSearchLoading(true);
+    // setSearchError(null);
+    // setSearchResult(null);
 
     const trimmed = searchName.trim();
     if (!trimmed) {
@@ -167,7 +167,7 @@ const ProfileSettings = () => {
                 <button
                   variant="outline"
                   onClick={() => navigate("/dashboard")}
-                  className="profile-dashboard-btn"
+                  className="profile-dashboard-btn dashboard-btn"
                 >
                   <User className="profile-dashboard-icon" />
                   View Dashboard
@@ -207,7 +207,7 @@ const ProfileSettings = () => {
                       <p className="profile-result-name">{searchResult.user_name}</p>
                       <p className="profile-result-email">{searchResult.user_email}</p>
                     </div>
-                    <button onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
+                    <button className="profile-dashboard-btn dashboard-btn" onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
                       View dashboard
                     </button>
                   </div>

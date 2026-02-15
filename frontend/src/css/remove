@@ -1,26 +1,29 @@
 
-/* tournament */
-.hero-button 
+// /* tournament */
+// .hero-button 
 
-.start-button
+// .start-button
 
-/* game */
-.game-control-button 
+// /* game */
+// .game-control-button 
 
-.start-button
+// .start-button
 
-.pause-button
+// .pause-button
 
-.resume-button
+// .resume-button
 
 
-/* profile */
-.profile-dashboard-btn
+// /* profile */
+// .profile-dashboard-btn
 
-.search-btn
+// .search-btn
 
-.profile-option-button
+// .profile-option-button
 
-.back-link
+// .back-link
 
-.submit-btn
+// .submit-btn
+
+// .reset-button-small
+// .reset-button
