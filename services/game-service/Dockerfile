@@ -21,8 +21,10 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
+RUN apt update
 RUN npm install
 RUN npm install -g nodemon
+RUN apt install sqlite3
 
 # Copy app code
 COPY . .

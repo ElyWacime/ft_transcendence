@@ -319,6 +319,10 @@ export class SQLiteDB {
     async getUserById(id) {
         return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
     }
+    async insertUser(u) {
+        return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
+        VALUES (?,?, ?, ?, ?, ?)`, [u.id, u.email, u.User_name, u.User_password, 1 , u.avatar]);
+    }
     async createUsers(t) {
         let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? `, [t.id]);
         if (a)
