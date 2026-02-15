@@ -114,7 +114,7 @@ export class SQLiteDB {
         const schema = fs.readFileSync("game.sql", "utf8");
         await this.db.exec(schema);
         this.db.on("trace", (sql) => {
-            // console.log("[SQL]:", sql);
+            console.log("[SQL]:", sql);
         });
         console.log("Database connected and table created!");
     }
@@ -123,40 +123,40 @@ export class SQLiteDB {
         let now = new Date();
         let nowf = now.toLocaleString("fr-FR");
         const result = await this.db.run(`INSERT INTO Tournament (Label, CreatedAt, result, Winner_Id)
-             VALUES (?, ?, ?, NULL)`, [t.Label, nowf, t.result]);
+             VALUES (?, ?, ?, NULL);`, [t.Label, nowf, t.result]);
         return result.lastID;
     }
     async getTournaments() {
-        return this.db.all(`SELECT * FROM Tournament`);
+        return this.db.all(`SELECT * FROM Tournament;`);
     }
     async getTournamentById(id) {
-        return this.db.get(`SELECT * FROM Tournament WHERE id = ?`, [id]);
+        return this.db.get(`SELECT * FROM Tournament WHERE id = ?;`, [id]);
     }
     async updateTournament(id, t) {
         await this.db.run(`UPDATE Tournament 
              SET Label=?, count_players=?, result=?, Winner_Id=? 
-             WHERE id = ?`, [t.Label, t.count_players, t.result, t.Winner_Id, id]);
+             WHERE id = ?;`, [t.Label, t.count_players, t.result, t.Winner_Id, id]);
     }
     async deleteTournament(id) {
-        await this.db.run(`DELETE FROM Tournament WHERE id = ?`, [id]);
+        await this.db.run(`DELETE FROM Tournament WHERE id = ?;`, [id]);
     }
     async createVIPMatch(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players) VALUES (?, ?)`, [m.P1_Id, m.P2_Id,2]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players) VALUES (?, ?,?);`, [m.P1_Id, m.P2_Id,2]);
         return result.lastID;
     }
     async createMatch(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode) VALUES (?, ?, ?)`, [m.P1_Id, m.T_Id, m.mode]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode) VALUES (?, ?, ?);`, [m.P1_Id, m.T_Id, m.mode]);
         return result.lastID;
     }
     async createMatch_not(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id, mode) VALUES (?, ?)`, [m.P1_Id, m.mode]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id, mode) VALUES (?, ?);`, [m.P1_Id, m.mode]);
         return result.lastID;
     }
     async getMatches() {
-        return this.db.all(`SELECT * FROM Match`);
+        return this.db.all(`SELECT * FROM Match;`);
     }
     async getMatchById(id) {
-        return this.db.get(`SELECT * FROM Match WHERE id = ?`, [id]);
+        return this.db.get(`SELECT * FROM Match WHERE id = ?;`, [id]);
     }
     async getOpenRoom(mode) {
         return this.db.get(`SELECT * FROM Match   
@@ -280,10 +280,10 @@ export class SQLiteDB {
     }
     async getAvaiable(id)
     {
-        return  await this.db.run(`SELECT *
+        return await this.db.get(`SELECT *
         FROM Match
         WHERE  gameStatus = 'PLAYING' and 
-        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)`, [id,id,id,id]);
+        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)  LIMIT 1;`, [id,id,id,id]);
     }
     async deleteMatch(id) {
         await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);

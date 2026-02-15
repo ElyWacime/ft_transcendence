@@ -424,24 +424,42 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 // });
 
 fastify.post('/invite', async (request, reply) => {
-  console.log("=======================================fastify.post=================================================\n\n");
+  console.log("=======================================fastify.post22233322=================================================\n\n");
   let P1 = request.body.P1;
   let P2 = request.body.P2;
   console.log(P1," vs ",P2);
   let m1 = await dbcnx.getAvaiable(P1);
   let m2 = await dbcnx.getAvaiable(P2);
   let m = null;
-  if (!m1 && !m2)
+  console.log(m1);
+  console.log("=====================");
+  console.log(m2);
+  if (m1 || m2)
   {
+    console.log("=====================================  Cant Start Match Try Again Later  ============================================\n\n");
+    return reply.code(201).send(JSON.stringify({ message: 'Cant Start Match Try Again Later' }));
+    return reply.code(404).send(JSON.stringify({message:'Cant Start Match Try Again Later'}))
+  }
+  else
+  {
+    let u = new Users();
+    u.id = P1; 
+    u.User_name = P1; 
+    u.email = P1; 
+    await dbcnx.createUsers(u);
+    u = new Users();
+    u.id = P2; 
+    u.User_name = P2; 
+    u.email = P2; 
+    await dbcnx.createUsers(u);
     m = new Match();
     m.P1_Id = P1;
     m.P2_Id = P2;
     m.count_players = 2;
     await  dbcnx.createVIPMatch(m);
+    console.log("=====================================  You Can Navigate  ============================================\n\n");
     return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
   }
-  else
-    return reply.code(404).send(JSON.stringify({message:'Cant Start Match Try Again Later'}))
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";

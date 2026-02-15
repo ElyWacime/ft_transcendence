@@ -146,19 +146,28 @@ export default function Chat() {
     //   fromUserId: currentUser.id,
     //   accepted,
     // })
-    setInvitePrompt(null)
+
     if (accepted) {
-      //something
-      socket.emit('gameInviteResponse', {
-        conversationId: invitePrompt.conversationId,
-        toUserId: invitePrompt.fromUserId,
-        fromUserId: currentUser.id,
-        accepted,
+
+      const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ P1: invitePrompt.fromUserId, P2: currentUser.id }),
       });
-      const res = await invitehandel( invitePrompt.fromUserId, currentUser.id);
+      console.log(res)
+
+      //something
+      // socket.emit('gameInviteResponse', {
+      //   conversationId: invitePrompt.conversationId,
+      //   toUserId: invitePrompt.fromUserId,
+      //   fromUserId: currentUser.id,
+      //   accepted,
+      // });
+      // setInvitePrompt(null)
+
       // if (res.ok)
       // {
-        navigate(`/loading?mode=2`);
+        // navigate(`/loading?mode=2`);
       // }
 
       // if ((await res).ok)
