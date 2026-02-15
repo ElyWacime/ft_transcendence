@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -164,14 +164,14 @@ const ProfileSettings = () => {
               <div className="profile-user-info">
                 <h2 className="profile-user-name">{userInfo.username}</h2>
                 <p className="profile-user-email">{userInfo.email}</p>
-                <Button
+                <button
                   variant="outline"
                   onClick={() => navigate("/dashboard")}
                   className="profile-dashboard-btn"
                 >
                   <User className="profile-dashboard-icon" />
                   View Dashboard
-                </Button>
+                </button>
               </div>
             </div>
           </Card>
@@ -192,9 +192,9 @@ const ProfileSettings = () => {
                   className="profile-search-input"
                     >
                 </input>
-                <Button type="submit" disabled={searchLoading}>
+                <button type="submit" disabled={searchLoading}>
                   {searchLoading ? "Searching..." : "Search"}
-                </Button>
+                </button>
               </form>
               {searchError && (
                 <p className="profile-error-text">{searchError}</p>
@@ -207,9 +207,9 @@ const ProfileSettings = () => {
                       <p className="profile-result-name">{searchResult.user_name}</p>
                       <p className="profile-result-email">{searchResult.user_email}</p>
                     </div>
-                    <Button onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
+                    <button onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
                       View dashboard
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}
@@ -236,9 +236,9 @@ const ProfileSettings = () => {
                     </div>
                     <h3 className="profile-option-title">{option.title}</h3>
                     <p className="profile-option-description">{option.description}</p>
-                    <Button variant="outline" className="profile-option-button">
+                    <button variant="outline" className="profile-option-button">
                       Update →
-                    </Button>
+                    </button>
                   </div>
                 </Card>
               );

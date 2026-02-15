@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Trophy } from "lucide-react";
@@ -90,13 +90,13 @@ const Register = () => {
           />
         </div>
   
-        <Button
+        <button
           type="submit"
           className="register-button"
           disabled={loading}
         >
           {loading ? "Registering..." : "Sign Up"}
-        </Button>
+        </button>
       </form>
       <p className="register-footer">
         Already have an account?{" "}

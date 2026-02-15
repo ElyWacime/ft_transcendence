@@ -1,35 +1,38 @@
-import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
-
-type AvatarProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
-type AvatarImageProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
-type AvatarFallbackProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
-
-export function Avatar({ className, ...props }: AvatarProps) {
-  return (
-    <AvatarPrimitive.Root
-      className={cn("avatar", className)}
-      {...props}
-    />
-  )
+interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
+  className?: string;
 }
 
-export function AvatarImage({ className, ...props }: AvatarImageProps) {
-  return (
-    <AvatarPrimitive.Image
-      className={cn("avatar-image", className)}
-      {...props}
-    />
-  )
+interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  className?: string;
+  src?: string;
+  alt?: string;
 }
 
-export function AvatarFallback({ className, ...props }: AvatarFallbackProps) {
+interface AvatarFallbackProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export function Avatar({ className, children, ...props }: AvatarProps) {
   return (
-    <AvatarPrimitive.Fallback
-      className={cn("avatar-fallback", className)}
-      {...props}
-    />
-  )
+    <div className={cn("avatar", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export function AvatarImage({ className, src, alt, ...props }: AvatarImageProps) {
+  return <img className={cn("avatar-image", className)} src={src} alt={alt} {...props} />;
+}
+
+export function AvatarFallback({ className, children, ...props }: AvatarFallbackProps) {
+  return (
+    <div className={cn("avatar-fallback", className)} {...props}>
+      {children}
+    </div>
+  );
 }

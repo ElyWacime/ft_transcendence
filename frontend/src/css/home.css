@@ -70,6 +70,7 @@
   font-size: 1.125rem; 
   padding: 1rem 2rem; 
   transition: transform 0.3s ease;
+  border-radius: 0.75rem;
 }
 
 .hero-button:hover {

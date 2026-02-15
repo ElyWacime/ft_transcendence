@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { AIOpponent, AIAction, AIGameState, Difficulty } from "@/lib/ai/AIOpponent";
@@ -373,28 +373,28 @@ export const PongCanvasAI = ({
         <div className="game-controls-center">
           <div className="game-controls-buttons">
             {gameState.gameStatus === "waiting" && (
-              <Button onClick={startGame} className="game-control-button start-button">
+              <button onClick={startGame} className="game-control-button start-button">
                 <Play className="button-icon" />
                 Start Game
-              </Button>
+              </button>
             )}
             {gameState.gameStatus === "playing" && (
-              <Button onClick={pauseGame} className="game-control-button pause-button">
+              <button onClick={pauseGame} className="game-control-button pause-button">
                 <Pause className="button-icon" />
                 Pause
-              </Button>
+              </button>
             )}
             {gameState.gameStatus === "paused" && (
-              <Button onClick={resumeGame} className="game-control-button resume-button">
+              <button onClick={resumeGame} className="game-control-button resume-button">
                 <Play className="button-icon" />
                 Resume
-              </Button>
+              </button>
             )}
             <div className="additional-controls">
-              <Button onClick={resetGame} className="reset-button-small">
+              <button onClick={resetGame} className="reset-button-small">
                 <RotateCcw className="button-icon" />
                 Reset
-              </Button>
+              </button>
             </div>
           </div>
         </div>

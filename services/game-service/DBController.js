@@ -141,7 +141,7 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Tournament WHERE id = ?;`, [id]);
     }
     async createVIPMatch(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players) VALUES (?, ?,?);`, [m.P1_Id, m.P2_Id,2]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players,T_Id) VALUES (?, ?,?,?);`, [m.P1_Id, m.P2_Id,2,m.T_Id]);
         return result.lastID;
     }
     async createMatch(m) {

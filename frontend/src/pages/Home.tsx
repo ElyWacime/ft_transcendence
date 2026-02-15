@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 
@@ -51,14 +51,14 @@ const Home = () => {
             The ultimate retro gaming tournament experience.
             Compete, dominate, and become the Pong champion!
           </p>
-          <Button
+          <button
             size="lg"
             onClick={() => { navigate("/tournament") }}
             className="hero-button animate-pulse-glow"
           >
             <Trophy className="button-icon" />
             START TOURNAMENT
-          </Button>
+          </button>
         </div>
       </section>
       <section className="features-section">

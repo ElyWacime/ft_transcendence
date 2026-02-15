@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
@@ -154,14 +154,14 @@ const ChangePicture = () => {
         </div>
       ) : (
         <div className="change-password-shell">
-          <Button
+          <button
             variant="ghost"
             onClick={() => navigate("/profile")}
             className="back-link"
           >
             <ArrowLeft className="back-link-icon" />
             <span>Back to Settings</span>
-          </Button>
+          </button>
 
           <Card className="change-password-card">
             <div className="change-password-header">
@@ -203,13 +203,13 @@ const ChangePicture = () => {
                 />
               </div>
 
-              <Button
+              <button
                 type="submit"
                 className="submit-btn"
                 disabled={loading}
               >
                 {loading ? "Uploading..." : "Update Picture"}
-              </Button>
+              </button>
             </form>
           </Card>
         </div>

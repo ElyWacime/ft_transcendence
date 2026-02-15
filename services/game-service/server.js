@@ -460,6 +460,45 @@ fastify.post('/invite', async (request, reply) => {
   return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
 });
 
+fastify.post('/tournament', async (request, reply) => {
+
+  let P1 = request.body.P1;
+  let P2 = request.body.P2;
+  let tournement = request.body.tournement;
+  let m1 = await dbcnx.getAvaiable(P1);
+  let m2 = await dbcnx.getAvaiable(P2);
+  let m = null;
+  if (!(m1 || m2))
+  {
+    let u = new Users();
+    let res = await dbcnx.getUser(P1);
+    if (!res)
+    {
+      u.id = P1; 
+      u.User_name = P1; 
+      u.email = P1; 
+      await dbcnx.insertUser(u);
+    }
+    res = await dbcnx.getUser(P2);
+    if (!res)
+    {
+      u = new Users();
+      u.id = P2; 
+      u.User_name = P2; 
+      u.email = P2; 
+      await dbcnx.insertUser(u);
+    }
+    m = new Match();
+    m.P1_Id = P1;
+    m.P2_Id = P2;
+    m.T_Id = tournement;
+    m.count_players = 2;
+    await  dbcnx.createVIPMatch(m);
+    return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+  }
+  return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
+});
+
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
 // console.log("Dashboard routes registered!");
