@@ -20,6 +20,17 @@ export default function Chat() {
   const navigate = useNavigate()
 
 
+  async function invitehandel(P1,P2)
+  {
+     const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: localStorage.getItem("token"), P1 ,P2 }),
+    });
+    return res;
+  }
+  
+  
   useEffect(() => {
     const te = async () => {
       const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' })
@@ -83,7 +94,7 @@ export default function Chat() {
 
       newSocket.on('gameInviteResponse', (data: any) => {
         if (data.accepted) {
-          navigate(`/loading?mode=2&users=${userId},${data.fromUserId}`)
+          navigate(`/loading?mode=2`);
         }
       })
     }
@@ -127,20 +138,36 @@ export default function Chat() {
     })
   }
 
-  const respondInvite = (accepted: boolean) => {
+  const respondInvite = async (accepted: boolean) => {
     if (!socket || !invitePrompt) return
-    socket.emit('gameInviteResponse', {
-      conversationId: invitePrompt.conversationId,
-      toUserId: invitePrompt.fromUserId,
-      fromUserId: currentUser.id,
-      accepted,
-    })
-    setInvitePrompt(null)
-    if (accepted) {
-      //something
-      setTimeout(() => {
-        navigate(`/loading?mode=2&users=${invitePrompt.fromUserId},${currentUser.id}`)
-      }, 1500)
+    try 
+    {
+      if (accepted) {
+        const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ P1: invitePrompt.fromUserId, P2: currentUser.id }),
+        });
+        if (res.ok)
+        {
+          socket.emit('gameInviteResponse', {
+            conversationId: invitePrompt.conversationId,
+            toUserId: invitePrompt.fromUserId,
+            fromUserId: currentUser.id,
+            accepted,
+          });
+          setInvitePrompt(null)
+          navigate(`/loading?mode=2`);
+        }
+        else
+        {
+          console.log("Error");
+        }
+      }
+    }
+    catch (e)
+    {
+      console.log("catch Error" ,e);
     }
   }
 

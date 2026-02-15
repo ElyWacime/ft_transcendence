@@ -6,10 +6,18 @@ import cors from "@fastify/cors";
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
+// await fastify.register(cors, {
+//   origin: true,
+//   credentials: true
+// });
+
 await fastify.register(cors, {
   origin: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "Cookie"],
   credentials: true
 });
+
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
 let dbcnx = new SQLiteDB();
@@ -337,7 +345,7 @@ const handelFinish = async (request) =>  {
   }
 };
 
-const handelDup = async (id) => {
+const handelDup = async (connection,id) => {
   if (clients.has(id)) 
   {
     try {
@@ -363,7 +371,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
-        await handelDup(id);
+        await handelDup(connection,id);
         clients.set(id, connection);
         if (request.type == "REGISTER") 
           await handelRegister(request,id,email,name);
@@ -390,8 +398,69 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 });
 
 
+// fastify.post('/invite', async (request, reply) => {
+//   try {
+//     console.log("=======================================fastify.post=================================================\n\n");
+//     let { P1, P2 } = request.body || {};
+//     if (!P1 || !P2) return reply.code(400).send({ message: 'Missing P1 or P2' });
+
+//     let m1 = await dbcnx.getAvaiable(P1);
+//     let m2 = await dbcnx.getAvaiable(P2);
+
+//     if (!m1 && !m2) {
+//       let m = new Match();
+//       m.P1_Id = P1;
+//       m.P2_Id = P2;
+//       m.count_players = 2;
+//       await dbcnx.createVIPMatch(m);
+//       return reply.code(201).send({ message: 'You Can Navigate' });
+//     } else {
+//       return reply.code(404).send({ message: 'Cant Start Match Try Again Later' });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     return reply.code(500).send({ message: 'Internal Server Error' });
+//   }
+// });
+
+fastify.post('/invite', async (request, reply) => {
+
+  let P1 = request.body.P1;
+  let P2 = request.body.P2;
+  let m1 = await dbcnx.getAvaiable(P1);
+  let m2 = await dbcnx.getAvaiable(P2);
+  let m = null;
+  if (!(m1 || m2))
+  {
+    let u = new Users();
+    let res = await dbcnx.getUser(P1);
+    if (!res)
+    {
+      u.id = P1; 
+      u.User_name = P1; 
+      u.email = P1; 
+      await dbcnx.insertUser(u);
+    }
+    res = await dbcnx.getUser(P2);
+    if (!res)
+    {
+      u = new Users();
+      u.id = P2; 
+      u.User_name = P2; 
+      u.email = P2; 
+      await dbcnx.insertUser(u);
+    }
+    m = new Match();
+    m.P1_Id = P1;
+    m.P2_Id = P2;
+    m.count_players = 2;
+    await  dbcnx.createVIPMatch(m);
+    return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+  }
+  return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
+});
+
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
-console.log("Dashboard routes registered!");
-
+// console.log("Dashboard routes registered!");
 fastify.listen({ port: 3000, host: "0.0.0.0" });
