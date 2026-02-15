@@ -1,18 +1,3 @@
-# FROM node:20 AS build
-# WORKDIR /app
-# COPY package*.json ./
-# COPY DBController.js ./DBController.js
-# COPY game.sql ./game.sql
-# COPY database.sqlite ./database.sqlite
-# RUN apt update
-# RUN npm install
-# RUN apt install sqlite3
-# COPY . .
-# EXPOSE 3000
-# CMD ["node", "server.js"]
-
-
-
 FROM node:20
 
 WORKDIR /app
@@ -30,9 +15,10 @@ RUN apt install sqlite3
 COPY . .
 
 # Make SQLite file writable
-RUN  chmod 666 database.sqlite
+RUN  chmod 777 database.sqlite
 
 EXPOSE 3000
 
 # Start server with nodemon for live reload
 CMD ["nodemon", "server.js"]
+# CMD ["node", "server.js"]

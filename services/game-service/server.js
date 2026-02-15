@@ -430,9 +430,7 @@ fastify.post('/invite', async (request, reply) => {
   let m1 = await dbcnx.getAvaiable(P1);
   let m2 = await dbcnx.getAvaiable(P2);
   let m = null;
-  if (m1 || m2)
-     return reply.code(404).send(JSON.stringify({ message: 'Cant Start Match Try Again Later' }));
-  else
+  if (!(m1 || m2))
   {
     let u = new Users();
     let res = await dbcnx.getUser(P1);
@@ -459,6 +457,7 @@ fastify.post('/invite', async (request, reply) => {
     await  dbcnx.createVIPMatch(m);
     return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
   }
+  return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";

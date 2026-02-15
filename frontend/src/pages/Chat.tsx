@@ -140,23 +140,34 @@ export default function Chat() {
 
   const respondInvite = async (accepted: boolean) => {
     if (!socket || !invitePrompt) return
-    if (accepted) {
-      const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ P1: invitePrompt.fromUserId, P2: currentUser.id }),
-      });
-      if (res.ok)
-      {
-        socket.emit('gameInviteResponse', {
-          conversationId: invitePrompt.conversationId,
-          toUserId: invitePrompt.fromUserId,
-          fromUserId: currentUser.id,
-          accepted,
+    try 
+    {
+      if (accepted) {
+        const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ P1: invitePrompt.fromUserId, P2: currentUser.id }),
         });
-        setInvitePrompt(null)
-        navigate(`/loading?mode=2`);
+        if (res.ok)
+        {
+          socket.emit('gameInviteResponse', {
+            conversationId: invitePrompt.conversationId,
+            toUserId: invitePrompt.fromUserId,
+            fromUserId: currentUser.id,
+            accepted,
+          });
+          setInvitePrompt(null)
+          navigate(`/loading?mode=2`);
+        }
+        else
+        {
+          console.log("Error");
+        }
       }
+    }
+    catch (e)
+    {
+      console.log("catch Error" ,e);
     }
   }
 
