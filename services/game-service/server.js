@@ -398,9 +398,26 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 });
 
 fastify.post('/invite', async (request, reply) => {
-  console.log(request.body);
   console.log("========================================================================================\n\n");
-  return { message: 'OK' };
+  console.log(P1," vs ",P2);
+  let P1 = request.body.P1;
+  let P2 = request.body.P2;
+  let m1 = await dbcnx.getAvaiable(P1);
+  let m2 = await dbcnx.getAvaiable(P2);
+  let m = null;
+  if (!m1 && !m2)
+  {
+    m = new Match();
+    m.P1_Id = P1;
+    m.P2_Id = P2;
+    m.count_players = 2;
+    await  dbcnx.createVIPMatch(m);
+    return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+  }
+  else
+    reply.code(404).send(JSON.stringify({message:'Cant Start Match Try Again Later'}))
+  console.log("========================================================================================\n\n");
+ 
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";

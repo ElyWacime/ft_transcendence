@@ -140,7 +140,10 @@ export class SQLiteDB {
     async deleteTournament(id) {
         await this.db.run(`DELETE FROM Tournament WHERE id = ?`, [id]);
     }
-
+    async createVIPMatch(m) {
+        const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players) VALUES (?, ?)`, [m.P1_Id, m.P2_Id,2]);
+        return result.lastID;
+    }
     async createMatch(m) {
         const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode) VALUES (?, ?, ?)`, [m.P1_Id, m.T_Id, m.mode]);
         return result.lastID;
@@ -275,7 +278,13 @@ export class SQLiteDB {
             m.id]
         );
     }
-
+    async getAvaiable(id)
+    {
+        return  await this.db.run(`SELECT *
+        FROM Match
+        WHERE  gameStatus = 'PLAYING' and 
+        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)`, [id,id,id,id]);
+    }
     async deleteMatch(id) {
         await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
     }

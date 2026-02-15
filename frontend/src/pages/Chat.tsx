@@ -20,12 +20,12 @@ export default function Chat() {
   const navigate = useNavigate()
 
 
-  async function invitehandel()
+  async function invitehandel(P1,P2)
   {
      const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: localStorage.getItem("token") }),
+        body: JSON.stringify({ token: localStorage.getItem("token"), P1 ,P2 }),
     });
     return res;
   }
@@ -94,7 +94,6 @@ export default function Chat() {
 
       newSocket.on('gameInviteResponse', (data: any) => {
         if (data.accepted) {
-          invitehandel();
           navigate(`/loading?mode=2`);
         }
       })
@@ -139,19 +138,33 @@ export default function Chat() {
     })
   }
 
-  const respondInvite = (accepted: boolean) => {
+  const respondInvite = async (accepted: boolean) => {
     if (!socket || !invitePrompt) return
-    socket.emit('gameInviteResponse', {
-      conversationId: invitePrompt.conversationId,
-      toUserId: invitePrompt.fromUserId,
-      fromUserId: currentUser.id,
-      accepted,
-    })
+    // socket.emit('gameInviteResponse', {
+    //   conversationId: invitePrompt.conversationId,
+    //   toUserId: invitePrompt.fromUserId,
+    //   fromUserId: currentUser.id,
+    //   accepted,
+    // })
     setInvitePrompt(null)
     if (accepted) {
       //something
-      invitehandel();
-      navigate(`/loading?mode=2`);
+      socket.emit('gameInviteResponse', {
+        conversationId: invitePrompt.conversationId,
+        toUserId: invitePrompt.fromUserId,
+        fromUserId: currentUser.id,
+        accepted,
+      });
+      const res = await invitehandel( invitePrompt.fromUserId, currentUser.id);
+      // if (res.ok)
+      // {
+        navigate(`/loading?mode=2`);
+      // }
+
+      // if ((await res).ok)
+      // const ress = (await res).ok
+
+      // navigate(`/loading?mode=2`);
     }
   }
 
