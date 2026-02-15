@@ -43,7 +43,7 @@ const ChangeEmail = () => {
           className="back-link"
         >
           <ArrowLeft className="back-link-icon" />
-          <span>Back to Settings</span>
+          <span> Back</span>
         </button>
 
         <Card className="change-password-card">

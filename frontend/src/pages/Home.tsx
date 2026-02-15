@@ -57,7 +57,7 @@ const Home = () => {
             className="hero-button animate-pulse-glow"
           >
             <Trophy className="button-icon" />
-            START TOURNAMENT
+            Create Tournament
           </button>
         </div>
       </section>

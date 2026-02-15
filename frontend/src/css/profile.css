@@ -520,7 +520,6 @@
 .profile-dashboard-btn 
 {
   width: 40%;
-  background: linear-gradient(135deg, #16c482 0%, #1d4ed8 50%, #1e40af 100%);
   color: white;
   font-weight: 800;
   font-size: 0.75rem;
@@ -532,9 +531,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
-  /* text-transform: uppercase; */
+  /* box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4); */
+  /*  */
   letter-spacing: 0.1em;
+  background: hsl(217, 73%, 46%);
   /* width: 100%;
   margin-top: 0.5rem;
   color: hsl(var(--primary));
@@ -707,7 +707,6 @@
 .search-btn 
 {
   width: 100%;
-  background: linear-gradient(135deg, #16c482 0%, #1d4ed8 50%, #1e40af 100%);
   color: white;
   font-weight: 800;
   font-size: 0.75rem;
@@ -719,9 +718,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
-  /* text-transform: uppercase; */
+  /* box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4); */
+  /*  */
   letter-spacing: 0.1em;
+  background: hsl(217, 73%, 46%);
   /* width: 100%;
   margin-top: 0.5rem;
   color: hsl(var(--primary));
@@ -729,7 +729,6 @@
 }
 .profile-option-button {
   width: 100%;
-  background: linear-gradient(135deg, #16c482 0%, #1d4ed8 50%, #1e40af 100%);
   color: white;
   font-weight: 800;
   font-size: 0.75rem;
@@ -741,8 +740,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
-  /* text-transform: uppercase; */
+  /* box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4); */
+  /*  */
+  background: hsl(217, 73%, 46%);
   letter-spacing: 0.1em;
   /* width: 100%;
   margin-top: 0.5rem;
@@ -751,7 +751,7 @@
 }
 
 .profile-option-button:hover {
-  background-color: hsla(var(--primary) / 0.1);
+  /* background-color: hsla(var(--primary) / 0.1); */
 }
 
 .text-green-500 {

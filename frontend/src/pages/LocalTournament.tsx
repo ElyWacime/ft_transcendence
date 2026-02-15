@@ -186,7 +186,7 @@ const LocalTournament = () => {
                   className="start-button"
                 >
                   <Trophy style={{ width: '20px', height: '20px' }} />
-                  START TOURNAMENT
+                  Sart Tournament
                 </button>
               </div>
             </div>

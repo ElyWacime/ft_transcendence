@@ -31,6 +31,7 @@ export default function Chat() {
   }
   
   useEffect(() => {
+    const newSocket = io(SERVER_URL);
     const te = async () => {
       const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' })
       const usercookie = await res.json()
@@ -38,15 +39,17 @@ export default function Chat() {
       const userId = usercookie.user_id
       setCurrentUser({ id: userId })
 
-      const newSocket = io(SERVER_URL)
+     
       setSocket(newSocket)
 
       newSocket.on('connect', () => {
-        setIsConnected(true)
+        setIsConnected(true);
+        console.log("connected");
         newSocket.emit('authenticate', userId)
       })
 
       newSocket.on('disconnect', () => {
+        console.log("disconnected");
         setIsConnected(false)
       })
 
@@ -97,7 +100,11 @@ export default function Chat() {
         }
       })
     }
-    te()
+    te();
+    return ()=>{
+      if (newSocket)
+      newSocket.close();
+    }
   }, [])
 
   useEffect(() => {

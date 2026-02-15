@@ -22,7 +22,7 @@ const GameOnline = () => {
       return null;
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
-  const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+  const { ws, isReady } = useWebSocket();
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
