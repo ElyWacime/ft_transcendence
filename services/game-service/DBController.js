@@ -316,7 +316,9 @@ export class SQLiteDB {
              WHERE id = ?`, [u.email, u.User_name, u.User_password, u.loggedIn, u.Auto_Match, u.isOnline, u.avatar, u.id]);
     }
     
-
+    async getUserById(id) {
+        return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
+    }
     async createUsers(t) {
         let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? `, [t.id]);
         if (a)
@@ -332,6 +334,7 @@ export class SQLiteDB {
     async getUserss() {
         return this.db.all(`SELECT * FROM Users`);
     }
+
     async getUser(id) {
         return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
     }

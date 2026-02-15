@@ -397,11 +397,37 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
+
+// fastify.post('/invite', async (request, reply) => {
+//   try {
+//     console.log("=======================================fastify.post=================================================\n\n");
+//     let { P1, P2 } = request.body || {};
+//     if (!P1 || !P2) return reply.code(400).send({ message: 'Missing P1 or P2' });
+
+//     let m1 = await dbcnx.getAvaiable(P1);
+//     let m2 = await dbcnx.getAvaiable(P2);
+
+//     if (!m1 && !m2) {
+//       let m = new Match();
+//       m.P1_Id = P1;
+//       m.P2_Id = P2;
+//       m.count_players = 2;
+//       await dbcnx.createVIPMatch(m);
+//       return reply.code(201).send({ message: 'You Can Navigate' });
+//     } else {
+//       return reply.code(404).send({ message: 'Cant Start Match Try Again Later' });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     return reply.code(500).send({ message: 'Internal Server Error' });
+//   }
+// });
+
 fastify.post('/invite', async (request, reply) => {
-  console.log("========================================================================================\n\n");
-  console.log(P1," vs ",P2);
+  console.log("=======================================fastify.post=================================================\n\n");
   let P1 = request.body.P1;
   let P2 = request.body.P2;
+  console.log(P1," vs ",P2);
   let m1 = await dbcnx.getAvaiable(P1);
   let m2 = await dbcnx.getAvaiable(P2);
   let m = null;
@@ -415,9 +441,7 @@ fastify.post('/invite', async (request, reply) => {
     return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
   }
   else
-    reply.code(404).send(JSON.stringify({message:'Cant Start Match Try Again Later'}))
-  console.log("========================================================================================\n\n");
- 
+    return reply.code(404).send(JSON.stringify({message:'Cant Start Match Try Again Later'}))
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
