@@ -46,9 +46,9 @@ const ChangePassword = () => {
     <div className="change-password-page">
       <div className="change-password-shell">
         <button
+          className="back-link"
           variant="ghost"
           onClick={() => navigate("/profile")}
-          className="back-link"
         >
           <ArrowLeft className="back-link-icon" />
           <span>Back to Settings</span>

@@ -192,7 +192,7 @@ const ProfileSettings = () => {
                   className="profile-search-input"
                     >
                 </input>
-                <button type="submit" disabled={searchLoading}>
+                <button type="submit" disabled={searchLoading} className="search-btn">
                   {searchLoading ? "Searching..." : "Search"}
                 </button>
               </form>

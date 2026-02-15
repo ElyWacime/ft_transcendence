@@ -121,6 +121,7 @@
 .start-button,
 .resume-button {
   background-image: var(--gradient-primary);
+  background: linear-gradient(135deg, #16c482 0%, #1d4ed8 50%, #1e40af 100%);
   color: hsl(var(--primary-foreground));
   font-weight: 600;
 }

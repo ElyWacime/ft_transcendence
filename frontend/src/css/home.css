@@ -65,12 +65,13 @@
 }
 
 .hero-button {
-  background-image: var(--gradient-primary);
+  /* background-image: var(--gradient-primary); */
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 1.125rem; 
   padding: 1rem 2rem; 
   transition: transform 0.3s ease;
   border-radius: 0.75rem;
+  background: linear-gradient(135deg, #16c482 0%, #1d4ed8 50%, #1e40af 100%);
 }
 
 .hero-button:hover {
