@@ -116,7 +116,8 @@ const Home = () => {
                     else
                       navigate(feature.page);
                   }
-                  
+                  else
+                    navigate(feature.page);
                 }}
                 key={index}
                 className="feature-card"
