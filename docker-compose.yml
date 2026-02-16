@@ -52,17 +52,15 @@ services:
     depends_on:
       - frontend
       - auth-service
-      - pong-server
+      - game-server
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./services/gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./services/gateway/certs:/etc/nginx/certs:ro
     networks:
       - transcendence
 
-  pong-server:
+  game-server:
     build:
       context: ./services/game-service
       dockerfile: Dockerfile

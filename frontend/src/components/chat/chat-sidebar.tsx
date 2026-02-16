@@ -2,7 +2,7 @@
 import { useState } from "react"
 import type { KeyboardEvent } from 'react'
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
 type ChatSidebarProps = {

@@ -7,7 +7,8 @@ const Home = () => {
 
   let checkhandel = async (mode) => 
   {
-    const res = await fetch("/api/check", {
+    
+    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
@@ -18,7 +19,7 @@ const Home = () => {
 
   let endmatchhandel = async () => 
   {
-    const res = await fetch("/api/endmatch", {
+    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/endmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token") }),

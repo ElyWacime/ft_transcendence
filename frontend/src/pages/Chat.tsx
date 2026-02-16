@@ -5,7 +5,7 @@ import "../components/chat/App.css"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
 export default function Chat() {
@@ -22,7 +22,7 @@ export default function Chat() {
 
   let invitehandel = async (P1,P2) => 
   {
-    const res = await fetch(`https://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: localStorage.getItem("token"), P1 ,P2 }),

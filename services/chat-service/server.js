@@ -24,42 +24,26 @@ const io = new Server(fastify.server, {
   }
 });
 
-async function desToken(request) {
-  try {
-    if (!request.cookies.access_token) {
-      throw new Error("Missing access_token cookie");
-    }
-
-    const res = await fetch('https://auth-service:8000/validate_token', {
+async function desToken(request)
+{
+   const res = await fetch('http://auth-service:8000/validate_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: request.cookies.access_token }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Token validation failed: ${res.status}`);
-    }
-
-    const data = await res.json(); // parse JSON here
-    return data; // ✅ now token object, not Response
-  } catch (err) {
-    throw fastify.httpErrors.unauthorized(err.message);
-  }
+  });
+  return res;
 }
 
-fastify.get("/getCookieValue", async (request, reply) => {
-  try {
-    const token = await desToken(request);
+fastify.get("/getCookieValue", async (request) => {
+    const res =  await desToken(request);
+    const token = await res.json();
     return token;
-  } catch (err) {
-    return reply.code(err.statusCode || 500).send({ error: err.message });
-  }
-});
-
+})  
 
 fastify.post("/conversation/start", async (request) => { 
-  const token = await desToken(request);  
+  const res = await desToken(request);  
 
+  const token = await res.json();
   const senderId = token.user_id;
   const receipentId = request.body.receipentId;
 
@@ -74,18 +58,14 @@ fastify.post("/conversation/start", async (request) => {
 })
 
 fastify.get("/conversations", async (request) => {
-    try {
-      const token = await desToken(request);
-      const userId = token.user_id;
-      const conv = await getConversationsForUser(userId);
+    const res = await desToken(request);
+    const token = await res.json();
+    const senderId = token.user_id;
 
-      console.log("Conversations fetched:", conv); // 🔍 check the output
+    const userId = senderId;   
+    const conv = await getConversationsForUser(userId);
 
-      return Array.isArray(conv) ? conv : [];
-    } catch (err) {
-      console.error("Error fetching conversations:", err);
-      return reply.code(500).send({ error: err.message });
-    }
+    return conv;
 })
 
 fastify.get("/conversations/:id/messages", async (request) => {
@@ -100,7 +80,9 @@ fastify.get("/conversations/:id/messages", async (request) => {
 })
 
 fastify.post("/getUser", async (request, reply) => {
-    const token = await desToken(request);
+    const res = await desToken(request);
+    const token = await res.json();
+
     const currentUsername = token.user_name;
     const searchUsername = request.body.username;
 
@@ -129,8 +111,8 @@ fastify.post("/addUsers", async (request) => {
 })
 
 fastify.post("/block", async (request) => {
-  const token = await desToken(request);
-
+  const res = await desToken(request);
+  const token = await res.json();
   const blockerId = token.user_id;
   const blockedId = request.body.user_id;
 
@@ -146,8 +128,8 @@ fastify.post("/block", async (request) => {
 });
 
 fastify.post("/unblock", async (request, reply) => {
-  const token = await desToken(request);
-
+  const res = await desToken(request);
+  const token = await res.json();
   const blockerId = token.user_id;
   const unblockedId = request.body.user_id;
 
@@ -167,8 +149,9 @@ fastify.post("/unblock", async (request, reply) => {
 });
 
 fastify.post("/block/status", async (request, reply) => {
-  const token = await desToken(request);
+  const res = await desToken(request);
 
+  const token = await res.json();
   const requesterId = token.user_id;
   const otherUserId = request.body.user_id;
 

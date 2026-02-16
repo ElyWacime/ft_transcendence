@@ -366,7 +366,7 @@ const handelDup = async (connection,id) => {
   }
 };
 
-fastify.get("/game", { websocket: true }, async (connection, req) => {
+fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
       const request = JSON.parse(msg);
       const token = request.token;
@@ -481,25 +481,35 @@ fastify.post('/tournament', async (request, reply) => {
 fastify.post('/check', async (request, reply) => {
 
   let token = request.body.token;
+  console.log("token  ",token);
   if (!token)
-    return reply.code(403).send(JSON.stringify({ message: 'Not Log in' }));
-  const decoded = request.jwt.verify(token);
-  const id = decoded.id;
-  let m = await dbcnx.getAvaiable(id);
+  return reply.code(403).send(JSON.stringify({ message: 'Not Log in' }));
+const decoded = request.jwt.verify(token);
+const id = decoded.id;
+console.log("id  ",id);
+let m = await dbcnx.getAvaiable(id);
+
   if (m && m.mode != request.body.mode)
+  {
+    console.log("if  ====== ",m);
     return reply.code(409).send(JSON.stringify({ message: 'Not Available' }));
+  }
+  console.log("else  ====== ");
   return reply.code(201).send(JSON.stringify({ message: 'Available' }));
 });
 
 fastify.post('/endmatch', async (request, reply) => {
 
   let token = request.body.token;
+  console.log("token  ",token);
   const decoded = request.jwt.verify(token);
   const id = decoded.id;
+  console.log("id  ",id);
   let m = await dbcnx.getcurrentmatch(id);
 
   if (m)
   {
+    console.log("if  =2===== ",m);
     let ngame =  matches.get(m.id);
 
     ngame.score1 = 5;

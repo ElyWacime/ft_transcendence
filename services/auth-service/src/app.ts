@@ -10,11 +10,11 @@ const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 
 app.register(cors, {
   origin: [
-    `https://${process.env.DOMAIN}`,
-    `https://${process.env.DOMAIN}:8080`,
-    "https://127.0.0.1:8080",
-    "https://frontend:8080",
-    "https://0.0.0.0",
+    `http://${process.env.DOMAIN}`,
+    `http://${process.env.DOMAIN}:8080`,
+    "http://127.0.0.1:8080",
+    "http://frontend:8080",
+    "http://0.0.0.0",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
