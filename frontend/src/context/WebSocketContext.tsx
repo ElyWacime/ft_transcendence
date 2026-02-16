@@ -8,7 +8,7 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const socket = new WebSocket(`${wsProtocol}://${import.meta.env.VITE_DOMAIN}:3000/game`);
+    const socket = new WebSocket(`${wsProtocol}://${import.meta.env.VITE_DOMAIN}/game`);
 
     wsRef.current = socket;
 

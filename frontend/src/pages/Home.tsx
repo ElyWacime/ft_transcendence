@@ -7,20 +7,22 @@ const Home = () => {
 
   let checkhandel = async (mode) => 
   {
-    const res = await fetch(`https://${import.meta.env.VITE_DOMAIN}/check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: localStorage.getItem("token"),mode }),
+    const res = await fetch("/api/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
+      credentials: "include"
     });
     return res;
   }
 
   let endmatchhandel = async () => 
   {
-    const res = await fetch(`https://${import.meta.env.VITE_DOMAIN}/endmatch`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: localStorage.getItem("token") }),
+    const res = await fetch("/api/endmatch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: localStorage.getItem("token") }),
+      credentials: "include"
     });
     return res;
   }
