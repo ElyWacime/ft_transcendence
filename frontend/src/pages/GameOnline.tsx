@@ -24,15 +24,14 @@ const GameOnline = () => {
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady } = useWebSocket();
+  let token = localStorage.getItem("token");
+  const decoded = decodeJWT(token);
+  const id = decoded.id;
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-    
       if (data.score1  == 5 ||  data.score2  == 5) {
-        let token = localStorage.getItem("token");
-        const decoded = decodeJWT(token);
-        const id = decoded.id;
         endGame(data.id);
         if (data.score1  > data.score2 )
         {
@@ -41,6 +40,13 @@ const GameOnline = () => {
           else
             toast.success(`You Lost the match!`);
         } 
+        else
+        {
+          if (data.P2_Id == id || data.P4_Id == id)
+            toast.success(`You win the match!`);
+          else
+            toast.success(`You Lost the match!`);
+        }
         navigate("/");
         // toast.success(`${winner} wins the match!`, {
         //   duration: 2000,
