@@ -47,7 +47,10 @@ const MatchMacking = () => {
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
       matchref.current = data.id;
-      setFeatures(() => {
+      // console.log("Server says :",data);
+      if (data.gameStatus != 'FINISHED')
+      {
+        setFeatures(() => {
           return [
               {
                   icon: Users,
@@ -88,6 +91,8 @@ const MatchMacking = () => {
               },
           });
       }
+      }
+
     });
 
     useEffect(() => {

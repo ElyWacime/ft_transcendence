@@ -6,18 +6,13 @@ import cors from "@fastify/cors";
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
-// await fastify.register(cors, {
-//   origin: true,
-//   credentials: true
-// });
 
 await fastify.register(cors, {
-  origin: true,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "Cookie"],
-  credentials: true
+  origin: true, // allow all origins, or list your frontend
+  credentials: true,
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
 });
-
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
 let dbcnx = new SQLiteDB();
@@ -486,23 +481,35 @@ fastify.post('/tournament', async (request, reply) => {
 fastify.post('/check', async (request, reply) => {
 
   let token = request.body.token;
-  const decoded = request.jwt.verify(token);
-  const id = decoded.id;
-  let m = await dbcnx.getAvaiable(id);
+  console.log("token  ",token);
+  if (!token)
+  return reply.code(403).send(JSON.stringify({ message: 'Not Log in' }));
+const decoded = request.jwt.verify(token);
+const id = decoded.id;
+console.log("id  ",id);
+let m = await dbcnx.getAvaiable(id);
+
   if (m && m.mode != request.body.mode)
+  {
+    console.log("if  ====== ",m);
     return reply.code(409).send(JSON.stringify({ message: 'Not Available' }));
+  }
+  console.log("else  ====== ");
   return reply.code(201).send(JSON.stringify({ message: 'Available' }));
 });
 
 fastify.post('/endmatch', async (request, reply) => {
 
   let token = request.body.token;
+  console.log("token  ",token);
   const decoded = request.jwt.verify(token);
   const id = decoded.id;
+  console.log("id  ",id);
   let m = await dbcnx.getcurrentmatch(id);
 
   if (m)
   {
+    console.log("if  =2===== ",m);
     let ngame =  matches.get(m.id);
 
     ngame.score1 = 5;

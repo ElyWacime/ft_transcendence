@@ -7,10 +7,12 @@ const Home = () => {
 
   let checkhandel = async (mode) => 
   {
+    
     const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: localStorage.getItem("token"),mode }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
+      credentials: "include"
     });
     return res;
   }
@@ -18,9 +20,10 @@ const Home = () => {
   let endmatchhandel = async () => 
   {
     const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/endmatch`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: localStorage.getItem("token") }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: localStorage.getItem("token") }),
+      credentials: "include"
     });
     return res;
   }
@@ -103,18 +106,22 @@ const Home = () => {
                   if(feature.type == "onlinegame")
                   {
                     let res = await checkhandel(feature.mode);
-                    if (!res.ok)
+                    if (res.status != 403)
                     {
-                      const proceed = confirm("You have an ongoing match. You will LOSE it if you Continue !");
-                      if (proceed) {
-                        await endmatchhandel();
-                        navigate(feature.page);
-                        // navigate("/profile");
+                      if (!res.ok)
+                      {
+                        const proceed = confirm("You have an ongoing match. You will LOSE it if you Continue !");
+                        if (proceed) 
+                        {
+                          await endmatchhandel();
+                          navigate(feature.page);
+                        }
                       }
-                      
+                      else
+                        navigate(feature.page);
                     }
                     else
-                      navigate(feature.page);
+                     navigate(feature.page);
                   }
                   else
                     navigate(feature.page);

@@ -7,9 +7,7 @@ export const WebSocketProvider = ({ children }) => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const socket = new WebSocket(
-      `ws://${import.meta.env.VITE_DOMAIN}:3000/ws`
-    );
+    const socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
 
     wsRef.current = socket;
 
