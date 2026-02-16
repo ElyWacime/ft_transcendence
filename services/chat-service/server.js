@@ -26,7 +26,7 @@ const io = new Server(fastify.server, {
 
 async function desToken(request)
 {
-   const res = await fetch('http://auth-service:8000/validate_token', {
+   const res = await fetch('https://auth-service:8000/validate_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: request.cookies.access_token }),

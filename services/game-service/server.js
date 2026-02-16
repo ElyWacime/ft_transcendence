@@ -6,18 +6,13 @@ import cors from "@fastify/cors";
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
-// await fastify.register(cors, {
-//   origin: true,
-//   credentials: true
-// });
 
 await fastify.register(cors, {
-  origin: true,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "Cookie"],
-  credentials: true
+  origin: true, // allow all origins, or list your frontend
+  credentials: true,
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
 });
-
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
 let dbcnx = new SQLiteDB();
@@ -371,7 +366,7 @@ const handelDup = async (connection,id) => {
   }
 };
 
-fastify.get("/ws", { websocket: true }, async (connection, req) => {
+fastify.get("/game", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
       const request = JSON.parse(msg);
       const token = request.token;

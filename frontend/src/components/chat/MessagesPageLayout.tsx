@@ -4,7 +4,7 @@ import { Socket } from 'socket.io-client'
 import ChatSidebar from "./chat-sidebar"
 import ChatWindow from "./chat-window"
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
+const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
 const SERVER_URL = API_URL
 
 type MessagesPageLayoutProps = {

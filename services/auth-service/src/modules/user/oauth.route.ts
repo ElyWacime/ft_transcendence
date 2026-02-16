@@ -82,7 +82,7 @@ export async function oauthRoutes(app: FastifyInstance) {
       { expiresIn: "10h" },
     );
 
-    const redirectUrl = new URL(`http://${process.env.DOMAIN}/login`);
+    const redirectUrl = new URL(`https://${process.env.DOMAIN}/login`);
     redirectUrl.searchParams.set("token", jwtToken);
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());
