@@ -4,40 +4,70 @@ import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 
 const Home = () => {
+
+  let checkhandel = async (mode) => 
+  {
+    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: localStorage.getItem("token"),mode }),
+    });
+    return res;
+  }
+
+  let endmatchhandel = async () => 
+  {
+    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/endmatch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: localStorage.getItem("token") }),
+    });
+    return res;
+  }
   const navigate = useNavigate();
 
   const features = [
     {
       icon: Trophy,
       title: "Tournament Mode",
+      type:"page",
       description: "Compete in elimination tournaments with dynamic brackets",
       page: "/tournament",
     },
     {
       icon: Users,
       title: "1 vs 1",
+      type:"page",
+      mode:0,
       description: "Play with a friend on the same keyboard",
       page: "/game"
     },
     {
       icon: Gamepad2,
       title: "1 vs 1 Online",
+      type:"onlinegame",
+      mode:2,
       description: "Play with players online",
       page: "/loading?mode=2",
     },
     {
       icon: Gamepad2,
       title: "2 vs 2 Online",
+      type:"onlinegame",
+      mode:4,
       description: "Team up and play against another team",
       page: "/loading?mode=4",
     },
     {
       icon: Zap,
       title: "1 vs AI",
+      type:"page",
+      mode:0,
       description: "Outsmart this AI ",
       page: "/game-ai",
     }
   ];
+
   return (
     <div className="page-container">
       <section className="hero-section">
@@ -69,7 +99,25 @@ const Home = () => {
           <div className="features-grid">
             {features.map((feature, index) => (
               <Card 
-                onClick={() => { navigate(feature.page) }}
+                onClick={async () => { 
+                  if(feature.type == "onlinegame")
+                  {
+                    let res = await checkhandel(feature.mode);
+                    if (!res.ok)
+                    {
+                      const proceed = confirm("You have an ongoing match. You will LOSE it if you Continue !");
+                      if (proceed) {
+                        await endmatchhandel();
+                        navigate(feature.page);
+                        // navigate("/profile");
+                      }
+                      
+                    }
+                    else
+                      navigate(feature.page);
+                  }
+                  
+                }}
                 key={index}
                 className="feature-card"
               >

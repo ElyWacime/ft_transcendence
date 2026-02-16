@@ -92,14 +92,12 @@ const MatchMacking = () => {
 
     useEffect(() => {
       if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
-      
+
       ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
             mode,
         }));
-
-
         ws.addEventListener("message", handleMessage);
         return () => {
             if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {

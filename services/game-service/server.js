@@ -200,6 +200,7 @@ const handelQuiiting = async(id) => {
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
     let data = JSON.stringify(ngame);
+
     sendtoplayer(ngame.P1_Id, data);
     sendtoplayer(ngame.P2_Id, data);
     sendtoplayer(ngame.P3_Id, data);
@@ -217,92 +218,101 @@ const handelRegister = async(request,id,email,name) => {
   u.isOnline = true;
   u.Auto_Match = true;
   await dbcnx.createUsers(u);
-  let m = await dbcnx.getOngoingMatch(id);
-  if (!m) 
+  let av = await dbcnx.getAvaiable(id);
+  if (av)
   {
-    m = await dbcnx.getOpenRoom(request.mode);
-    if (!m) {
-      m = new Match();
-      m.P1_Id = id;
-      m.player1Name = name;
-      m.mode = request.mode;
-      if (!request.tournement) {
-        m.id = await dbcnx.createMatch_not(m);
-      }
-      else {
-        m.id = await dbcnx.createMatch(m);
-      }
-    }
-    else 
+    ngame.flag = 0;
+    let data = JSON.stringify(ngame);
+    sendtoplayer(id, data);
+  }
+  else
+  {
+    let m = await dbcnx.getOngoingMatch(id);
+    if (!m) 
     {
-      if (request.mode == 2) 
-       {
-        if (m.P1_Id == null) 
-          m.P1_Id = id;
-        else
-          m.P2_Id = id;
-       }
-      else
-      {
-        if (m.P1_Id == null) 
-          m.P1_Id = id;
-        else if (m.P2_Id == null) 
-          m.P2_Id = id;
-        else if (m.P3_Id == null) 
-          m.P3_Id = id;
-        else 
-          m.P4_Id = id;
+      m = await dbcnx.getOpenRoom(request.mode);
+      if (!m) {
+        m = new Match();
+        m.P1_Id = id;
+        m.player1Name = name;
+        m.mode = request.mode;
+        if (!request.tournement) {
+          m.id = await dbcnx.createMatch_not(m);
+        }
+        else {
+          m.id = await dbcnx.createMatch(m);
+        }
       }
-        m.count_players = m.count_players + 1;
+      else 
+      {
+        if (request.mode == 2) 
+         {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else
+            m.P2_Id = id;
+         }
+        else
+        {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else if (m.P2_Id == null) 
+            m.P2_Id = id;
+          else if (m.P3_Id == null) 
+            m.P3_Id = id;
+          else 
+            m.P4_Id = id;
+        }
+          m.count_players = m.count_players + 1;
+      }
     }
+    ngame.id = m.id;
+    ngame.P1_Id = m.P1_Id;
+    ngame.P2_Id = m.P2_Id;
+    ngame.P3_Id = m.P3_Id;
+    ngame.P4_Id = m.P4_Id;
+    let resuser = await dbcnx.getUser(m.P1_Id);
+    if (resuser)
+    {
+        ngame.player1Name = resuser.User_name;
+        ngame.player1Email = resuser.email;
+    }
+    resuser = await dbcnx.getUser(m.P2_Id);
+    if (resuser)
+    {
+      ngame.player2Name = resuser.User_name;
+      ngame.player2Email = resuser.email;
+    }
+    resuser = await dbcnx.getUser(m.P3_Id);
+    if (resuser)
+    {
+      ngame.player3Name = resuser.User_name;
+      ngame.player3Email = resuser.email;
+    }
+    resuser = await dbcnx.getUser(m.P4_Id);
+    if (resuser)
+    {
+      ngame.player4Name = resuser.User_name;
+      ngame.player4Email = resuser.email;
+    }
+    ngame.T_Id = m.T_Id;
+    ngame.count_players = m.count_players;
+    ngame.mode = request.mode;
+    ngame.id = m.id;
+    if (ngame.count_players == request.mode) 
+    {
+        m.gameStatus = "PLAYING";
+        if(!matches.get(m.id))
+          matches.set(m.id, ngame);
+    }
+    ngame.gameStatus = m.gameStatus;
+    let data = JSON.stringify(ngame);
+    await dbcnx.updateMatch(m);
+    sendtoplayer(ngame.P1_Id, data);
+    sendtoplayer(ngame.P2_Id, data);
+    sendtoplayer(ngame.P3_Id, data);
+    sendtoplayer(ngame.P4_Id, data);
   }
-  ngame.id = m.id;
-  ngame.P1_Id = m.P1_Id;
-  ngame.P2_Id = m.P2_Id;
-  ngame.P3_Id = m.P3_Id;
-  ngame.P4_Id = m.P4_Id;
-  let resuser = await dbcnx.getUser(m.P1_Id);
-  if (resuser)
-  {
-      ngame.player1Name = resuser.User_name;
-      ngame.player1Email = resuser.email;
-  }
-  resuser = await dbcnx.getUser(m.P2_Id);
-  if (resuser)
-  {
-    ngame.player2Name = resuser.User_name;
-    ngame.player2Email = resuser.email;
-  }
-  resuser = await dbcnx.getUser(m.P3_Id);
-  if (resuser)
-  {
-    ngame.player3Name = resuser.User_name;
-    ngame.player3Email = resuser.email;
-  }
-  resuser = await dbcnx.getUser(m.P4_Id);
-  if (resuser)
-  {
-    ngame.player4Name = resuser.User_name;
-    ngame.player4Email = resuser.email;
-  }
-  ngame.T_Id = m.T_Id;
-  ngame.count_players = m.count_players;
-  ngame.mode = request.mode;
-  ngame.id = m.id;
-  if (ngame.count_players == request.mode) 
-  {
-      m.gameStatus = "PLAYING";
-      if(!matches.get(m.id))
-        matches.set(m.id, ngame);
-  }
-  ngame.gameStatus = m.gameStatus;
-  let data = JSON.stringify(ngame);
-  await dbcnx.updateMatch(m);
-  sendtoplayer(ngame.P1_Id, data);
-  sendtoplayer(ngame.P2_Id, data);
-  sendtoplayer(ngame.P3_Id, data);
-  sendtoplayer(ngame.P4_Id, data);
-
 
 };
 
@@ -497,6 +507,45 @@ fastify.post('/tournament', async (request, reply) => {
     return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
   }
   return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
+});
+
+fastify.post('/check', async (request, reply) => {
+
+  let token = request.body.token;
+  const decoded = request.jwt.verify(token);
+  const id = decoded.id;
+  let m = await dbcnx.getAvaiable(id);
+  // (!m || (m &&  m.mode == request.body.mode))
+  // (!m || (m.mode == request.body.mode))
+  if (m && m.mode != request.body.mode)
+    return reply.code(409).send(JSON.stringify({ message: 'Not Available' }));
+  return reply.code(201).send(JSON.stringify({ message: 'Available' }));
+});
+
+
+fastify.post('/endmatch', async (request, reply) => {
+
+  let token = request.body.token;
+  const decoded = request.jwt.verify(token);
+  const id = decoded.id;
+  let m = await dbcnx.getcurrentmatch(id);
+  if(m)
+  {
+    let ngame =  matches.get(m.id);
+
+    if (ngame.P1_Id == id || ngame.P3_Id == id)
+    {
+      ngame.score1 = 0;
+      ngame.score2 = 5;
+    }
+
+    if (ngame.P2_Id == id || ngame.P4_Id == id)
+    {
+      ngame.score1 = 5;
+      ngame.score2 = 0;
+    }
+  }
+  return reply.code(201).send(JSON.stringify({ message: 'Good' }));
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
