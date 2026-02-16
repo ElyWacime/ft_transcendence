@@ -40,6 +40,7 @@ export class Participate_Tournament {
 
 export class GameState {
     constructor() {
+        this.flag = 1;
         this.id = 0;
         this.now = Date.now();
         this.last = Date.now();
@@ -141,7 +142,7 @@ export class SQLiteDB {
         await this.db.run(`DELETE FROM Tournament WHERE id = ?;`, [id]);
     }
     async createVIPMatch(m) {
-        const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players) VALUES (?, ?,?);`, [m.P1_Id, m.P2_Id,2]);
+        const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players,T_Id) VALUES (?, ?,?,?);`, [m.P1_Id, m.P2_Id,2,m.T_Id]);
         return result.lastID;
     }
     async createMatch(m) {
@@ -278,13 +279,36 @@ export class SQLiteDB {
             m.id]
         );
     }
+    async getcurrentmatch(id)
+    {
+        return await  this.db.get(`SELECT * FROM Match WHERE gameStatus = 'PLAYING' and (P1_Id = ? OR P3_Id = ? OR P2_Id = ? OR P4_Id = ?)`, [id,id,id,id]);
+    }
+    
+    async endmatch(id)
+    {
+        let m = await  this.db.get(`SELECT * FROM Match WHERE gameStatus = 'PLAYING' and (P1_Id = ? OR P3_Id = ? OR P2_Id = ? OR P4_Id = ?)`, [id,id,id,id]);
+        await this.db.run(`update 
+        Match
+        set score1 = 5, score2 = 0, gameStatus = 'FINISHED'
+        WHERE
+        (P1_Id = ? OR P3_Id = ?);`, [id,id]);
+
+        await this.db.run(`update 
+        Match
+        set score2 = 5, score1 = 0, gameStatus = 'FINISHED'
+        WHERE
+        ( P2_Id = ? OR P4_Id = ?);`, [id,id]);
+
+        return m;
+    }
     async getAvaiable(id)
     {
         return await this.db.get(`SELECT *
         FROM Match
         WHERE  gameStatus = 'PLAYING' and 
-        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)  LIMIT 1;`, [id,id,id,id]);
+        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [id,id,id,id]);
     }
+
     async deleteMatch(id) {
         await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
     }

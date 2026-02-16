@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { PongCanvas } from "@/components/PongCanvas";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { toast } from "sonner";
@@ -123,14 +123,14 @@ const LocalTournament = () => {
         {phase === "setup" ? (
           <div className="tournament-setup">
             <div className="game-header">
-              <Button
+              <button
                 onClick={() => navigate(-1)}
                 variant="outline"
                 className="back-button"
               >
                 <ArrowLeft className="back-icon" />
                 <span>Back</span>
-              </Button>
+              </button>
               <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
                 <h1 className="ai-game-title glow-text">
                   <Trophy className="title-icon" />
@@ -186,7 +186,7 @@ const LocalTournament = () => {
                   className="start-button"
                 >
                   <Trophy style={{ width: '20px', height: '20px' }} />
-                  START TOURNAMENT
+                  Sart Tournament
                 </button>
               </div>
             </div>
@@ -194,14 +194,14 @@ const LocalTournament = () => {
         ) : currentMatch ? (
           <div className="tournament-match">
             <div className="game-header">
-              <Button
+              <button
                 onClick={handleBackToSetup}
                 variant="outline"
                 className="back-button"
               >
                 <ArrowLeft className="back-icon" />
                 <span>Back</span>
-              </Button>
+              </button>
               <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
                 <h1 className="ai-game-title glow-text">
                   {currentMatch.round === 1
@@ -226,14 +226,14 @@ const LocalTournament = () => {
         ) : phase === "completed" ? (
           <div className="tournament-match">
             <div className="game-header">
-              <Button
+              <button
                 onClick={handleBackToSetup}
                 variant="outline"
                 className="back-button"
               >
                 <ArrowLeft className="back-icon" />
                 <span>Back</span>
-              </Button>
+              </button>
               <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
                 <h1 className="ai-game-title glow-text">
                   🏆 Tournament Winner 🏆

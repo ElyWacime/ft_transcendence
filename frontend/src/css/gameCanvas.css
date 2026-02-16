@@ -99,7 +99,7 @@
   }
 }
 
-.reset-button {
+/* .reset-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -113,13 +113,8 @@
   transition: all 0.3s ease;
   gap: 0.5rem; 
   white-space: nowrap;
-}
+} */
 
-.reset-button:hover {
-  background-color: hsl(var(--accent) / 0.1);
-  border-color: hsl(var(--accent));
-  transform: translateY(-1px);
-}
 
 .reset-icon {
   width: 1rem; 
@@ -237,10 +232,6 @@
   outline-offset: 3px;
 }
 
-.reset-button:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
-}
 
 
 .pong-game-container.loading .player-card,

@@ -65,15 +65,21 @@
 }
 
 .hero-button {
-  background-image: var(--gradient-primary);
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 1.125rem; 
-  padding: 1rem 2rem; 
-  transition: transform 0.3s ease;
+  /* background-image: var(--gradient-primary); */
+  /* font-family: 'JetBrains Mono', 'Fira Code', monospace; */
+  font-size: 1.25rem;
+  padding: 1.5rem;
+  /* transition: transform 0.3s ease; */
+  border-radius: 0.75rem;
+  background: hsl(217, 73%, 46%);
+  color:#f5f5f5;
+  letter-spacing: 0.1em;
+  font-weight: 600;
 }
 
 .hero-button:hover {
   transform: scale(1.05); 
+  cursor: pointer;
 }
 
 
@@ -260,9 +266,9 @@
   animation: float 3s ease-in-out infinite;
 }
 
-.animate-pulse-glow {
+/* .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
-}
+} */
 
 .transition-all {
   transition: all 0.3s ease;

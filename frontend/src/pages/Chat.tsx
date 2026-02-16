@@ -20,9 +20,9 @@ export default function Chat() {
   const navigate = useNavigate()
 
 
-  async function invitehandel(P1,P2)
+  let invitehandel = async (P1,P2) => 
   {
-     const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: localStorage.getItem("token"), P1 ,P2 }),
@@ -30,8 +30,8 @@ export default function Chat() {
     return res;
   }
   
-  
   useEffect(() => {
+    const newSocket = io(SERVER_URL);
     const te = async () => {
       const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' })
       const usercookie = await res.json()
@@ -39,15 +39,17 @@ export default function Chat() {
       const userId = usercookie.user_id
       setCurrentUser({ id: userId })
 
-      const newSocket = io(SERVER_URL)
+     
       setSocket(newSocket)
 
       newSocket.on('connect', () => {
-        setIsConnected(true)
+        setIsConnected(true);
+        console.log("connected");
         newSocket.emit('authenticate', userId)
       })
 
       newSocket.on('disconnect', () => {
+        console.log("disconnected");
         setIsConnected(false)
       })
 
@@ -98,7 +100,11 @@ export default function Chat() {
         }
       })
     }
-    te()
+    te();
+    return ()=>{
+      if (newSocket)
+      newSocket.close();
+    }
   }, [])
 
   useEffect(() => {
@@ -143,11 +149,7 @@ export default function Chat() {
     try 
     {
       if (accepted) {
-        const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ P1: invitePrompt.fromUserId, P2: currentUser.id }),
-        });
+        let res = await invitehandel(invitePrompt.fromUserId,  currentUser.id );
         if (res.ok)
         {
           socket.emit('gameInviteResponse', {

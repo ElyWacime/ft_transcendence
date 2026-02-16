@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Trophy, Github } from "lucide-react";
@@ -99,19 +99,19 @@ const Login = () => {
             placeholder="••••••••"
           />
         </div>
-        <Button
+        <button
           type="submit"
           className="login-button"
           disabled={loading}
         >
           {loading ? "Logging in..." : "Login"}
-        </Button>
+        </button>
         <div className="form-divider">
           <div className="divider-line" />
           <span className="divider-text">or</span>
           <div className="divider-line" />
         </div>
-        <Button
+        <button
           type="button"
           variant="outline"
           className="github-login-button"
@@ -119,7 +119,7 @@ const Login = () => {
         >
           <Github className="github-icon" />
           Continue with GitHub
-        </Button>
+        </button>
       </form>
       <p className="login-footer">
         Don't have an account?{" "}

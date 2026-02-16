@@ -7,7 +7,7 @@ import { useEffect, useState ,useRef, useCallback} from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
 
 const MatchMacking = () => {
-    const { ws, isReady } = useWebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+    const { ws, isReady } = useWebSocket();
     let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -92,14 +92,12 @@ const MatchMacking = () => {
 
     useEffect(() => {
       if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
-      
+
       ws.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
             mode,
         }));
-
-
         ws.addEventListener("message", handleMessage);
         return () => {
             if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {

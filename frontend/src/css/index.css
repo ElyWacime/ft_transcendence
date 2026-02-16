@@ -5,7 +5,9 @@
 
 
 :root {
-  
+  --back1:hsl(217,91%,60%,1);
+  --back2:linear-gradient(135deg, #8e0f22 0%, #240f0f 50%, #1e40af 100%);
+  --btxt:rgb();
   --background: 222 47% 4%;
   --foreground: 210 40% 98%;
   --card: 222 47% 6%;
@@ -382,9 +384,9 @@ body {
   animation: accordion-up 0.2s ease-out;
 }
 
-.animate-pulse-glow {
+/* .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
-}
+} */
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
