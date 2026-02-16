@@ -4,6 +4,7 @@ import { useEffect ,useCallback} from "react";
 // import { useWebSocket } from "../hooks/useWebSocket";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
+import { decodeJWT } from "@/lib/jwt-utils";
 
 interface GameOnlineProps {
   player1Name: string;
@@ -29,9 +30,17 @@ const GameOnline = () => {
       const data = JSON.parse(event.data);
     
       if (data.score1  == 5 ||  data.score2  == 5) {
-        const winner = data.score1  > data.score2 ? data.player1Name : data.player2Name;
+        let token = localStorage.getItem("token");
+        const decoded = decodeJWT(token);
+        const id = decoded.id;
         endGame(data.id);
-        toast.success(`${winner} wins the match!`);
+        if (data.score1  > data.score2 )
+        {
+          if (data.P1_Id == id || data.P3_Id == id)
+            toast.success(`You win the match!`);
+          else
+            toast.success(`You Lost the match!`);
+        } 
         navigate("/");
         // toast.success(`${winner} wins the match!`, {
         //   duration: 2000,

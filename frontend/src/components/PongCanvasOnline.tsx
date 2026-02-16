@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RotateCcw } from "lucide-react";
 import React from "react";
+import { decodeJWT } from "@/lib/jwt-utils";
 
 
 export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode,isReady }) => {
@@ -24,8 +25,15 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       player2Name:  player2Name,
       player3Name:  player3Name,
       player4Name:  player4Name,
+      P1_Id:  "",
+      P2_Id:  "",
+      P3_Id:  "",
+      P4_Id:  "",
       gameStatus: "PENDING",
     });
+    let token = localStorage.getItem("token");
+    const decoded = decodeJWT(token);
+    const id = decoded.id;
 
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -43,32 +51,30 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
     ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
     ctx.setLineDash([]);
-
-    if (gameState.player1Name == localStorage.getItem("email"))
-        ctx.fillStyle = 'hsl(0 50% 80%)';
-    else
-        ctx.fillStyle = "hsl(217 91% 60%)";
-    ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
-
-    if (gameState.player2Name == localStorage.getItem("email"))
-        ctx.fillStyle = 'hsl(60 50% 80%)';
-    else
-        ctx.fillStyle = "hsl(217 91% 60%)";
-    ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
-
     if (gameState.Mode == 4) {
- 
-        if (gameState.player3Name == localStorage.getItem("email"))
+        ctx.fillStyle = "hsl(217 91% 60%)";
+        if (gameState.P1_Id == id)
+          ctx.fillStyle = 'hsl(0 50% 80%)';
+        ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+        ctx.fillStyle = "hsl(217 91% 60%)";
+        if (gameState.P2_Id == id)
+            ctx.fillStyle = 'hsl(60 50% 80%)';
+        ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+        ctx.fillStyle = "hsl(217 91% 60%)";
+        if (gameState.P3_Id == id)
             ctx.fillStyle = 'hsl(120 50% 80%)';
-        else
-            ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle3.x, gameState.paddle3.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
-
-        if (gameState.player4Name == localStorage.getItem("email"))
+        ctx.fillStyle = "hsl(217 91% 60%)";
+        if (gameState.P4_Id == id)
             ctx.fillStyle = 'hsl(300 50% 80%)';
-        else
-            ctx.fillStyle = "hsl(217 91% 60%)";
         ctx.fillRect(gameState.paddle4.x, gameState.paddle4.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+    }
+    else
+    {
+      ctx.fillStyle = "hsl(217 91% 60%)";
+      ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
+      ctx.fillStyle = "hsl(217 91% 60%)";
+      ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.sizePaddle.width, gameState.sizePaddle.height);
     }
 
     ctx.beginPath();
@@ -128,7 +134,12 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
             player1Name: data.player1Name,
             player2Name: data.player2Name,
             player3Name: data.player3Name || "",
-            player4Name: data.player4Name || ""
+            player4Name: data.player4Name || "",
+            P1_Id: data.P1_Id,
+            P2_Id: data.P2_Id,
+            P3_Id: data.P3_Id,
+            P4_Id: data.P4_Id,
+            Mode:data.mode
         }));
     }
     );

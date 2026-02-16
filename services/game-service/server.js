@@ -113,7 +113,7 @@ function tick(m,dt) {
     m.score1 += 1;
     resetBall(1, m);
   }
-  if (m.score2 == MAX_Score || m.score1 == MAX_Score)
+  if (m.score2 >= MAX_Score || m.score1 >= MAX_Score)
     m.gameStatus = "FINISHED";
 }
 
@@ -407,32 +407,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
-
-// fastify.post('/invite', async (request, reply) => {
-//   try {
-//     console.log("=======================================fastify.post=================================================\n\n");
-//     let { P1, P2 } = request.body || {};
-//     if (!P1 || !P2) return reply.code(400).send({ message: 'Missing P1 or P2' });
-
-//     let m1 = await dbcnx.getAvaiable(P1);
-//     let m2 = await dbcnx.getAvaiable(P2);
-
-//     if (!m1 && !m2) {
-//       let m = new Match();
-//       m.P1_Id = P1;
-//       m.P2_Id = P2;
-//       m.count_players = 2;
-//       await dbcnx.createVIPMatch(m);
-//       return reply.code(201).send({ message: 'You Can Navigate' });
-//     } else {
-//       return reply.code(404).send({ message: 'Cant Start Match Try Again Later' });
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     return reply.code(500).send({ message: 'Internal Server Error' });
-//   }
-// });
-
 fastify.post('/invite', async (request, reply) => {
 
   let P1 = request.body.P1;
@@ -515,13 +489,10 @@ fastify.post('/check', async (request, reply) => {
   const decoded = request.jwt.verify(token);
   const id = decoded.id;
   let m = await dbcnx.getAvaiable(id);
-  // (!m || (m &&  m.mode == request.body.mode))
-  // (!m || (m.mode == request.body.mode))
   if (m && m.mode != request.body.mode)
     return reply.code(409).send(JSON.stringify({ message: 'Not Available' }));
   return reply.code(201).send(JSON.stringify({ message: 'Available' }));
 });
-
 
 fastify.post('/endmatch', async (request, reply) => {
 
@@ -529,20 +500,17 @@ fastify.post('/endmatch', async (request, reply) => {
   const decoded = request.jwt.verify(token);
   const id = decoded.id;
   let m = await dbcnx.getcurrentmatch(id);
-  if(m)
+
+  if (m)
   {
     let ngame =  matches.get(m.id);
 
+    ngame.score1 = 5;
+    ngame.score2 = 0;
     if (ngame.P1_Id == id || ngame.P3_Id == id)
     {
       ngame.score1 = 0;
       ngame.score2 = 5;
-    }
-
-    if (ngame.P2_Id == id || ngame.P4_Id == id)
-    {
-      ngame.score1 = 5;
-      ngame.score2 = 0;
     }
   }
   return reply.code(201).send(JSON.stringify({ message: 'Good' }));
