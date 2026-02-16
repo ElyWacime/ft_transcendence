@@ -48,7 +48,7 @@ const MatchMacking = () => {
       const data = JSON.parse(event.data);
       matchref.current = data.id;
       // console.log("Server says :",data);
-      if (data.gameStatus != '"FINISHED"')
+      if (data.gameStatus != 'FINISHED')
       {
         setFeatures(() => {
           return [
