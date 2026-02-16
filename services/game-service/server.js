@@ -481,6 +481,8 @@ fastify.post('/tournament', async (request, reply) => {
 fastify.post('/check', async (request, reply) => {
 
   let token = request.body.token;
+  if (!token)
+    return reply.code(403).send(JSON.stringify({ message: 'Not Log in' }));
   const decoded = request.jwt.verify(token);
   const id = decoded.id;
   let m = await dbcnx.getAvaiable(id);
