@@ -119,8 +119,6 @@ function resetBall(direction = 1, m) {
   m.Ball_dy = 2;
 }
 
-
-
 fastify.register(fjwt, { 
   secret: process.env.JWT_ACCESS_SECRET
 });
@@ -139,51 +137,35 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
-const interval = setInterval(() => {
-  if (clients.size == 0 || matches.size == 0)
-    return;
-  for (const [id, match] of matches) {
-    match.now = Date.now();
-    let delta = (((match.now - match.last)) * TICK_RATE) / 1000;
-    match.last = match.now;
-    tick(match,delta);
-    let data = JSON.stringify(match);
-    sendtoplayer(match.P1_Id, data);
-    sendtoplayer(match.P2_Id, data);
-    sendtoplayer(match.P3_Id, data);
-    sendtoplayer(match.P4_Id, data);
-  }
-}, 1000 / TICK_RATE);
-
 const handelQuiiting = async(id) => {
   let m = await dbcnx.deletePendingMatchByPlayerID(id);
   if (m)
   {
     let ngame = new GameState();
     ngame.id = m.id;
-    ngame.P1_Id = m.P1_Id;
-    ngame.P2_Id = m.P2_Id;
-    ngame.P3_Id = m.P3_Id;
-    ngame.P4_Id = m.P4_Id;
-    let resuser = await dbcnx.getUser(m.P1_Id);
+    ngame.P1_Id = m.P1_Id == id ? null : id;
+    ngame.P2_Id = m.P2_Id == id ? null : id;
+    ngame.P3_Id = m.P3_Id == id ? null : id;
+    ngame.P4_Id = m.P4_Id == id ? null : id;
+    let resuser = await dbcnx.getUser(ngame.P1_Id);
     if (resuser)
     {
         ngame.player1Name = resuser.User_name;
         ngame.player1Email = resuser.email;
     }
-    resuser = await dbcnx.getUser(m.P2_Id);
+    resuser = await dbcnx.getUser(ngame.P2_Id);
     if (resuser)
     {
       ngame.player2Name = resuser.User_name;
       ngame.player2Email = resuser.email;
     }
-    resuser = await dbcnx.getUser(m.P3_Id);
+    resuser = await dbcnx.getUser(ngame.P3_Id);
     if (resuser)
     {
       ngame.player3Name = resuser.User_name;
       ngame.player3Email = resuser.email;
     }
-    resuser = await dbcnx.getUser(m.P4_Id);
+    resuser = await dbcnx.getUser(ngame.P4_Id);
     if (resuser)
     {
       ngame.player4Name = resuser.User_name;
@@ -195,7 +177,6 @@ const handelQuiiting = async(id) => {
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
     let data = JSON.stringify(ngame);
-
     sendtoplayer(ngame.P1_Id, data);
     sendtoplayer(ngame.P2_Id, data);
     sendtoplayer(ngame.P3_Id, data);
@@ -359,12 +340,29 @@ const handelDup = async (connection,id) => {
         clients.get(id).close();
         console.log("Server Closed Duplicate Socket for ",id);
       }
+      
     }
     catch (e) {  console.log("Error Server Closed Duplicate Socket for ",id);
 
     }
   }
 };
+
+const interval = setInterval(() => {
+  if (matches.size == 0)
+    return;
+  for (const [id, match] of matches) {
+    match.now = Date.now();
+    let delta = (((match.now - match.last)) * TICK_RATE) / 1000;
+    match.last = match.now;
+    tick(match,delta);
+    let data = JSON.stringify(match);
+    sendtoplayer(match.P1_Id, data);
+    sendtoplayer(match.P2_Id, data);
+    sendtoplayer(match.P3_Id, data);
+    sendtoplayer(match.P4_Id, data);
+  }
+}, 1000 / TICK_RATE);
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
@@ -481,47 +479,44 @@ fastify.post('/tournament', async (request, reply) => {
 fastify.post('/check', async (request, reply) => {
 
   let token = request.body.token;
-  console.log("post :  check ");
   if (!token)
-  return reply.code(403).send(JSON.stringify({ message: 'Not Log in' }));
-const decoded = request.jwt.verify(token);
-const id = decoded.id;
-// console.log("id  ",id);
-let m = await dbcnx.getAvaiable(id);
+    return reply.code(403).send({ message: 'Not Log in' });
+  const decoded = request.jwt.verify(token);
+  const id = decoded.id;
+  let m = await dbcnx.getAvaiable(id);
 
   if (m && m.mode != request.body.mode)
   {
-    console.log("if  ====== ");
-    return reply.code(409).send(JSON.stringify({ message: 'Not Available' }));
+    return reply.code(409).send({ message: 'Not Available' });
   }
-  console.log("else  ====== ");
-  return reply.code(201).send(JSON.stringify({ message: 'Available' }));
+  return reply.code(201).send({ message: 'Available' });
 });
 
 fastify.post('/endmatch', async (request, reply) => {
 
   let token = request.body.token;
-  console.log("endmatch  ");
+  if (!token)
+    return reply.code(403).send({ message: 'Not Log in' });
   const decoded = request.jwt.verify(token);
   const id = decoded.id;
-  console.log("id  ",id);
   let m = await dbcnx.getcurrentmatch(id);
-
   if (m)
   {
-    console.log("if  =2===== ");
     let ngame =  matches.get(m.id);
-
     ngame.score1 = 5;
     ngame.score2 = 0;
+    ngame.Winner_Id = ngame.P1_Id;
     if (ngame.P1_Id == id || ngame.P3_Id == id)
     {
       ngame.score1 = 0;
       ngame.score2 = 5;
+      ngame.Winner_Id = ngame.P2_Id;
     }
+    ngame.gameStatus = 'FINISHED';
+    await dbcnx.updateMatch(ngame);
+    matches.delete(m.id);
   }
-  console.log("else  =2===== ");
-  return reply.code(201).send(JSON.stringify({ message: 'Good' }));
+  return reply.code(201).send({ message: 'Good' });
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";

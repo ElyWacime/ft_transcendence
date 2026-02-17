@@ -56,7 +56,6 @@ const GameOnline = () => {
            {
             toast.success(`You win the match!`);
             x = `You win the match!`;
-
            }
           else
           {

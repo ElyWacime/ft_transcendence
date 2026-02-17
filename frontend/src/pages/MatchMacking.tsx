@@ -17,66 +17,127 @@ const MatchMacking = () => {
     let matchref = useRef(true);
     const [features, setFeatures] = useState(() => {
         return [
-            {
-                icon: Users,
-                title: "Player 1",
-                description: mode === "4" ? "Team A" : "Player 1",
-            },
-            {
-                icon: Users,
-                title: "Player 2",
-                description: mode === "4" ? "Team B" : "Player 2",
-            },
-            ...(mode === "4"
-                ? [
-                    {
-                        icon: Users,
-                        title: "Player 3",
-                        description: "Team A",
-                    },
-                    {
-                        icon: Users,
-                        title: "Player 4",
-                        description: "Team B",
-                    },
-                ]
-                : []),
-        ];
+          {
+            icon: Users,
+            title:  null,
+            description: "waiting" ,
+            color: "feature-icon-container-color-red"
+        },
+        {
+            icon: Users,
+            title:  null,
+            description: "waiting" ,
+            color: "feature-icon-container-color-red"
+        },
+        {
+            icon: Users,
+            title:  null,
+            description:  "waiting" ,
+            color: "feature-icon-container-color-red"
+        },
+        {
+            icon: Users,
+            title:  null,
+            description:   "waiting" ,
+            color: "feature-icon-container-color-red"
+        }];
     });
 
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
       matchref.current = data.id;
-      // console.log("Server says :",data);
-      if (data.gameStatus != 'FINISHED')
+      console.log("Server says :",data, typeof(data.mode));
+      // if (data.gameStatus != 'FINISHED')
       {
         setFeatures(() => {
-          return [
+          if (mode == "4")
+          {
+            return [
+                {
+                    icon: Users,
+                    title: data.player1Name || "Player1",
+                    description: data.player1Name != null ? "ready"  : "waiting" ,
+                    color: "feature-icon-container-color-red"
+                },
+                {
+                    icon: Users,
+                    title: data.player2Name || "Player2",
+                    description:data.player2Name != null ? "ready"  : "waiting" ,
+                    color: "feature-icon-container"
+                },
+                {
+                    icon: Users,
+                    title: data.player3Name || "Player3",
+                    description: data.player3Name != null ? "ready"  : "waiting" ,
+                    color: "feature-icon-container-color-red"
+                },
+                {
+                    icon: Users,
+                    title: data.player4Name || "Player4",
+                    description: data.player4Name != null ? "ready"  : "waiting" ,
+                    color: "feature-icon-container"
+                },
+            ];
+          }
+          else
+          {
+            return [
               {
                   icon: Users,
                   title: data.player1Name || "Player1",
-                  description: mode === "4" ? "Team A" : "Player 1",
+                  description:  data.player1Name != null ? "ready"  : "waiting" ,
+                  color: "feature-icon-container"
               },
               {
                   icon: Users,
                   title: data.player2Name || "Player2",
-                  description: mode === "4" ? "Team B" : "Player 2",
-              },
-              ...(mode === "4"
-                  ? [
-                      {
-                          icon: Users,
-                          title: data.player3Name || "Player3",
-                          description: "Team A",
-                      },
-                      {
-                          icon: Users,
-                          title: data.player4Name || "Player4",
-                          description: "Team B",
-                      },
-                  ]
-                  : []),
-          ];
+                  description:  data.player2Name != null ? "ready"  : "waiting" ,
+                  color: "feature-icon-container"
+              }];
+          }
+
+          // if (mode === "4")
+          // {
+          //   return [
+          //     {
+          //       icon: Users,
+          //       title: data.player1Name || "Player10",
+          //       description:  "Team A",
+          //     },
+          //     {
+          //       icon: Users,
+          //       title: data.player3Name || "Player30",
+          //       description: "Team A",
+          //     },
+          //     {
+          //       icon: Users,
+          //       title: data.player2Name || "Player20",
+          //       description: "Team B",
+          //     },
+          //     {
+          //         icon: Users,
+          //         title: data.player4Name || "Player40",
+          //         description: "Team B",
+          //     }
+          //   ];
+          // }
+          // else if (mode === "2")
+          // {
+          //   return [
+          //     {
+          //       icon: Users,
+          //       title: data.player1Name || "Player1",
+          //       description: "Player 1",
+          //     },
+          //     {
+          //         icon: Users,
+          //         title: data.player2Name || "Player2",
+          //         description: "Player 2",
+          //     }
+          //   ];
+          // }
+          // else
+          //   return [];
       });
       if (data.count_players == mode) 
       {
@@ -145,8 +206,8 @@ const MatchMacking = () => {
                       className="feature-card"
                     >
                       <div className="feature-card-content">
-                        <div className="feature-icon-container">
-                          <feature.icon className="feature-icon" />
+                        <div className={feature.color}>
+                          <feature.icon className="feature-icon"  />
                         </div>
                         <h3 className="feature-card-title">{feature.title}</h3>
                         <p className="feature-card-description">{feature.description}</p>
