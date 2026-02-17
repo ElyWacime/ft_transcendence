@@ -1,11 +1,48 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect,useState,useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
-
+import { useWebSocket } from "@/context/WebSocketContext";
+import { toast } from "sonner";
+import { decodeJWT } from "@/lib/jwt-utils";
 const Home = () => {
 
   const navigate = useNavigate();
+
+  const { ws, isReady } = useWebSocket();
+  let token = localStorage.getItem("token");
+  const decoded = decodeJWT(token);
+  const id = decoded.id;
+  const handleMessage = useCallback((event: MessageEvent) => 
+  {
+    const data = JSON.parse(event.data);
+    if (data.gameStatus == "FINISHED")
+    {
+      if (data.score1 >= 5)
+      {
+        if (data.P1_Id == id || data.P3_Id == id )
+          toast.success(`You win the match!`);
+        else
+          toast.error(`You Lost the match!`);
+      }
+      else if (data.score2 >= 5)
+      {
+        if (data.P2_Id == id || data.P4_Id == id )
+          toast.success(`You win the match!`);
+        else
+          toast.error(`You Lost the match!`);
+      }
+    }
+  });
+  useEffect(() => {
+    if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
+
+      ws.addEventListener("message", handleMessage);
+      return () => {
+          ws.removeEventListener("message", handleMessage);
+      };
+  }, [ws, isReady]);
+
 
   const [confirmState, setConfirmState] = useState<{
     open: boolean;

@@ -19,11 +19,9 @@ const MatchMacking = () => {
 
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      // console.log(data);
       matchref.current = data.id;
-      // console.log("Server says :",data, typeof(data.mode));
-      // if (data.gameStatus != 'FINISHED')
-      {
-        setFeatures(() => {
+      setFeatures(() => {
           if (mode == "4")
           {
             return [
@@ -126,8 +124,6 @@ const MatchMacking = () => {
               },
           });
       }
-      }
-
     });
 
     useEffect(() => {
