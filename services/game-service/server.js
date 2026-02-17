@@ -372,26 +372,50 @@ const interval = setInterval(() => {
   }
 }, 1000 / TICK_RATE);
 
+const route = async (id) => {
+  try {
+    const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log(response);
+    console.log("===========================");
+    if (!response.ok) {
+      console.error(`Auth service returned status ${response.status}`);
+      return null;
+    }
+
+    const user = await response.json();
+    return user ? user.name : null;
+  } catch (error) {
+    console.error(`Error fetching user ${id} from auth service:, error`);
+    return null;
+  }
+};
+
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
       const request = JSON.parse(msg);
       const token = request.token;
       console.log("This is server.js >> ",request.type);
       if (token) {
+   
           const decoded = req.jwt.verify(token);
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
-        await handelDup(connection,id);
-        clients.set(id, connection);
-        if (request.type == "REGISTER") 
-          await handelRegister(request,id,email,name);
-        else if (request.type == "MOVE") 
-          await handelMove(request,id);
-        else if (request.type == "FINISHED") 
-          await  handelFinish(request) ;
-        else if (request.type == "DELETE") 
-          await handelQuiiting(id);
+          await handelDup(connection,id);
+          clients.set(id, connection);
+          if (request.type == "REGISTER") 
+            await handelRegister(request,id,email,name);
+          else if (request.type == "MOVE") 
+            await handelMove(request,id);
+          else if (request.type == "FINISHED") 
+            await  handelFinish(request) ;
+          else if (request.type == "DELETE") 
+            await handelQuiiting(id);
         }
       else 
         console.log("No token provided, proceeding without authentication");
@@ -415,9 +439,7 @@ fastify.post('/invite', async (request, reply) => {
   let m1 = await dbcnx.getAvaiable(P1);
   let m2 = await dbcnx.getAvaiable(P2);
 
-  let name1 = await route(P1);
-  let name2 = await route(P1);
-  console.log(name1,name2);
+
   let m = null;
   if (!(m1 || m2))
   {
@@ -426,7 +448,7 @@ fastify.post('/invite', async (request, reply) => {
     if (!res)
     {
       u.id = P1; 
-      u.User_name = P1; 
+      u.User_name = await route(P1); 
       u.email = P1; 
       await dbcnx.insertUser(u);
     }
@@ -435,7 +457,7 @@ fastify.post('/invite', async (request, reply) => {
     {
       u = new Users();
       u.id = P2; 
-      u.User_name = P2; 
+      u.User_name = await route(P2); 
       u.email = P2; 
       await dbcnx.insertUser(u);
     }
@@ -464,7 +486,7 @@ fastify.post('/tournament', async (request, reply) => {
     if (!res)
     {
       u.id = P1; 
-      u.User_name = P1; 
+      u.User_name = await route(P1); 
       u.email = P1; 
       await dbcnx.insertUser(u);
     }
@@ -473,7 +495,7 @@ fastify.post('/tournament', async (request, reply) => {
     {
       u = new Users();
       u.id = P2; 
-      u.User_name = P2; 
+      u.User_name = await route(P2); 
       u.email = P2; 
       await dbcnx.insertUser(u);
     }

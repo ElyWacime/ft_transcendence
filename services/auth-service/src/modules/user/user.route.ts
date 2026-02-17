@@ -3,6 +3,34 @@ import { createUser, login, logout, update_email, update_password, update_image}
 import prisma from "../../utils/prisma";
 
 export async function userRoutes(app: FastifyInstance) {
+
+  app.get("/get-user/:userId", async (req:any, reply:any) => {
+    try {
+      const { userId } = req.params as { userId: string };
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          name: true
+        }
+      });
+      
+      if (!user) {
+        return reply.status(404).send({
+          error: "User not found"
+        });
+      }
+
+      return reply.send(user);
+    } catch (err) {
+      // console.error('[get-user] Error:', err);
+      return reply.status(500).send({
+        error: "My Internal server error"
+      });
+    }
+  });
+
+
   app.get("/", { preHandler: [app.authenticate] }, async () => {
     return { message: "ok" };
   });
