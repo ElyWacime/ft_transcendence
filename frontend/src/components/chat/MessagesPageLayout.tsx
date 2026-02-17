@@ -24,10 +24,12 @@ type MessagesPageLayoutProps = {
   invitePrompt?: any
   onInvite: (conversation: any) => void
   onRespondInvite: (accepted: boolean) => void
+  oncancelInvite: (conversation: any) => void
+  pendingInvite: boolean
   socket?: Socket | null
 }
 
-export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
+export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket, pendingInvite }: MessagesPageLayoutProps) {
   const { id } = useParams()
 
   useEffect(() => {
@@ -96,7 +98,9 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           onRespondInvite={onRespondInvite}
           onBlockConversation={onBlockConversation}
           onUnblockConversation={onUnblockConversation}
+          pendingInvite={pendingInvite}
           socket={socket}
+          onCancelInvite={onCancelInvite}
         />
       </div>
     </div>

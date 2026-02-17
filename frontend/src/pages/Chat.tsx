@@ -17,8 +17,13 @@ export default function Chat() {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [blockedConversations, setBlockedConversations] = useState<any>({})
   const [invitePrompt, setInvitePrompt] = useState<any>(null)
+  const [pendingInvite, setPerndingInvite] = useState<boolean>(false)
   const navigate = useNavigate()
 
+
+  useEffect(() => {
+    console.log({conversations})
+  }, [conversations])
 
   let invitehandel = async (P1,P2) => 
   {
@@ -31,7 +36,7 @@ export default function Chat() {
   }
   
   useEffect(() => {
-    const newSocket = io(SERVER_URL);
+    let newSocket: Socket | null = null;
     const te = async () => {
       const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' })
       const usercookie = await res.json()
@@ -39,17 +44,15 @@ export default function Chat() {
       const userId = usercookie.user_id
       setCurrentUser({ id: userId })
 
-     
+      newSocket = io(SERVER_URL);     
       setSocket(newSocket)
 
       newSocket.on('connect', () => {
         setIsConnected(true);
-        console.log("connected");
         newSocket.emit('authenticate', userId)
       })
 
       newSocket.on('disconnect', () => {
-        console.log("disconnected");
         setIsConnected(false)
       })
 
@@ -88,16 +91,23 @@ export default function Chat() {
             return updated
           })
         }
+        setInvitePrompt(null)
+        setPerndingInvite(false)
       })
 
       newSocket.on('gameInvite', (data: any) => {        
         setInvitePrompt(data)
       })
 
+      newSocket.on('cancelInvite', () => {
+        setInvitePrompt(null)
+      })
+
       newSocket.on('gameInviteResponse', (data: any) => {
         if (data.accepted) {
           navigate(`/loading?mode=2`);
         }
+        setPerndingInvite(false)
       })
     }
     te();
@@ -142,35 +152,39 @@ export default function Chat() {
       toUserId: conversation.other_user_id,
       fromUserId: currentUser?.id,
     })
+    setPerndingInvite(true);
+  }
+
+  const cancelInvite = (conversation: any) => {
+    if (!socket || !isConnected || !conversation?.other_user_id) return
+
+    socket.emit('cancelInvite', {
+      toUserId: conversation.other_user_id,
+    })
+    setPerndingInvite(false);
   }
 
   const respondInvite = async (accepted: boolean) => {
     if (!socket || !invitePrompt) return
     try 
     {
-      if (accepted) {
-        let res = await invitehandel(invitePrompt.fromUserId,  currentUser.id );
-        if (res.ok)
-        {
-          socket.emit('gameInviteResponse', {
+      let res = await invitehandel(invitePrompt.fromUserId,  currentUser.id );
+      socket.emit('gameInviteResponse', {
             conversationId: invitePrompt.conversationId,
             toUserId: invitePrompt.fromUserId,
             fromUserId: currentUser.id,
             accepted,
-          });
-          setInvitePrompt(null)
+      })
+
+      if (accepted && res.ok) {
           navigate(`/loading?mode=2`);
-        }
-        else
-        {
-          console.log("Error");
-        }
       }
     }
     catch (e)
     {
       console.log("catch Error" ,e);
     }
+    setInvitePrompt(null)
   }
 
   const getChatHistory = async (conversationId: number) => {
@@ -189,6 +203,8 @@ export default function Chat() {
 
   const handleBlockConversation = (conversationId: number) => {
     setBlockedConversations((prev: any) => ({ ...prev, [conversationId]: { blocked: true, blockedBy: 'you' } }))
+    setInvitePrompt(null)
+    setPerndingInvite(false)
   }
 
   const handleUnblockConversation = (conversationId: number) => {
@@ -245,7 +261,9 @@ export default function Chat() {
       onCheckBlockStatus={checkBlockStatus}
       invitePrompt={invitePrompt}
       onInvite={sendInvite}
+      onCancelInvite={cancelInvite}
       onRespondInvite={respondInvite}
+      pendingInvite={pendingInvite}
       socket={socket}
     />
   )

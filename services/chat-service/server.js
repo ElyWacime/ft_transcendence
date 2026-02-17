@@ -225,6 +225,10 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('cancelInvite', ({ toUserId  }) => {
+    socket.to(`user:${toUserId}`).emit('cancelInvite', {});
+  });
+
   socket.on('gameInviteResponse', ({ conversationId, toUserId, fromUserId, accepted }) => {
     socket.to(`user:${toUserId}`).emit('gameInviteResponse', {
       conversationId,
