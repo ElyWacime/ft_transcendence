@@ -58,7 +58,7 @@ const Dashboard_ayoub = () => {
   const [avatarKey, setAvatarKey] = useState(Date.now());
   const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
 ? dashboardData?.user.avatar
-: `${dashboardData?.user.avatar || "https://www.gravatar.com/avatar/"}?t=${avatarKey}`;
+: `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
 
   useEffect(() => {
     if (!identifier && !isLoggedIn) {

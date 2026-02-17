@@ -51,7 +51,7 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
                 id: newUser.id,
                 email: newUser.email,
                 User_name: newUser.User_name,
-                avatar: 'https://www.gravatar.com/avatar/',
+                avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
                 isOnline: true,
                 Auto_Match: true,
                 CreatedAt: new Date().toISOString()
@@ -97,7 +97,7 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
                 id: newUser.id,
                 email: newUser.email,
                 User_name: newUser.User_name,
-                avatar: 'https://www.gravatar.com/avatar/',
+                avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
                 isOnline: false,
                 Auto_Match: true,
                 CreatedAt: new Date().toISOString()

@@ -8,11 +8,11 @@ export class Users {
         this.id = "email@email.email";
         this.email = "email@email.email";
         this.User_name = "User_name";
-        this.User_password = "qwerty";
+        this.User_password = null;
         this.loggedIn = true;
         this.Auto_Match = true;
         this.isOnline = true;
-        this.avatar = 'https://www.gravatar.com/avatar/';
+        this.avatar = 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg';
         this.CreatedAt = new Date();
     }
 }

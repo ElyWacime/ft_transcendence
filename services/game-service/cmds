@@ -3,3 +3,4 @@ sqlite3 database.sqlite
 .header on
 .mode column
 select * from match;
+select * from users;

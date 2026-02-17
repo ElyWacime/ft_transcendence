@@ -30,9 +30,10 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       gameStatus: "PENDING",
     });
     let token = localStorage.getItem("token");
+    if(!token)
+      return;
     const decoded = decodeJWT(token);
     const id = decoded.id;
-
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");

@@ -11,8 +11,12 @@ const Home = () => {
 
   const { ws, isReady } = useWebSocket();
   let token = localStorage.getItem("token");
-  const decoded = decodeJWT(token);
-  const id = decoded.id;
+  let id = null;
+  if (token)
+  {
+    const decoded = decodeJWT(token);
+    let id = decoded.id;
+  }
   const handleMessage = useCallback((event: MessageEvent) => 
   {
     const data = JSON.parse(event.data);

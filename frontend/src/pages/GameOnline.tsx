@@ -26,8 +26,11 @@ const GameOnline = () => {
 
   const { ws, isReady } = useWebSocket();
   let token = localStorage.getItem("token");
-  const decoded = decodeJWT(token);
-  const id = decoded.id;
+  if (token)
+  {
+    const decoded = decodeJWT(token);
+    const id = decoded.id;
+  }
   let [message,setmessage] =  useState();
   const handleMessage = useCallback(
     (event: MessageEvent) => {
