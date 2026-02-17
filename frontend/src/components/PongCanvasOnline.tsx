@@ -217,7 +217,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
             <Card className="player-card player2-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
-                  {player2Name|| "PLAYER2tmp"} {mode == 4 ? " // " : ""} {player4Name}
+                  {player2Name|| "PLAYER2"} {mode == 4 ? " // " : ""} {player4Name}
                 </CardTitle>
               </CardHeader>
               <CardContent className="player-card-content">

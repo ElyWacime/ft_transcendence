@@ -1,33 +1,37 @@
 import { useNavigate } from "react-router-dom";
-// import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 
 const Home = () => {
 
-  let checkhandel = async (mode) => 
-  {
-    
-    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/check`, {
+  const navigate = useNavigate();
+
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    action: null | (() => Promise<void>);
+  }>({
+    open: false,
+    action: null
+  });
+
+  const checkhandel = async (mode: number) => {
+    return await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
       credentials: "include"
     });
-    return res;
-  }
+  };
 
-  let endmatchhandel = async () => 
-  {
-    const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/endmatch`, {
+  const endmatchhandel = async () => {
+    return await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/endmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token") }),
       credentials: "include"
     });
-    return res;
-  }
-  const navigate = useNavigate();
+  };
 
   const features = [
     {
@@ -66,27 +70,55 @@ const Home = () => {
       title: "1 vs AI",
       type:"page",
       mode:0,
-      description: "Outsmart this AI ",
+      description: "Outsmart this AI",
       page: "/game-ai",
     }
   ];
 
+  const handleFeatureClick = async (feature: any) => {
+
+    if (feature.type !== "onlinegame") {
+      navigate(feature.page);
+      return;
+    }
+
+    let res = await checkhandel(feature.mode);
+
+    if (res.status === 403) {
+      navigate(feature.page);
+      return;
+    }
+
+    if (!res.ok) {
+      setConfirmState({
+        open: true,
+        action: async () => {
+          await endmatchhandel();
+          navigate(feature.page);
+        }
+      });
+    } else {
+      navigate(feature.page);
+    }
+  };
+
   return (
     <div className="page-container">
+
+      {/* HERO */}
       <section className="hero-section">
         <div className="hero-glow-overlay"></div>
         <div className="hero-content">
           <h1 className="hero-title animate-float">
-            PONG
-            <span className="hero-title-accent"> ARENA</span>
+            PONG <span className="hero-title-accent">ARENA</span>
           </h1>
           <p className="hero-subtitle">
             The ultimate retro gaming tournament experience.
             Compete, dominate, and become the Pong champion!
           </p>
+
           <button
-            size="lg"
-            onClick={() => { navigate("/tournament") }}
+            onClick={() => navigate("/tournament")}
             className="hero-button animate-pulse-glow"
           >
             <Trophy className="button-icon" />
@@ -94,40 +126,20 @@ const Home = () => {
           </button>
         </div>
       </section>
+
+      {/* FEATURES */}
       <section className="features-section">
         <div className="features-container">
           <h2 className="features-title glow-text">
             Game Features
           </h2>
+
           <div className="features-grid">
             {features.map((feature, index) => (
               <Card 
-                onClick={async () => { 
-                  if(feature.type == "onlinegame")
-                  {
-                    let res = await checkhandel(feature.mode);
-                    if (res.status != 403)
-                    {
-                      if (!res.ok)
-                      {
-                        const proceed = confirm("You have an ongoing match. You will LOSE it if you Continue !");
-                        if (proceed) 
-                        {
-                          await endmatchhandel();
-                          navigate(feature.page);
-                        }
-                      }
-                      else
-                        navigate(feature.page);
-                    }
-                    else
-                     navigate(feature.page);
-                  }
-                  else
-                    navigate(feature.page);
-                }}
                 key={index}
                 className="feature-card"
+                onClick={() => handleFeatureClick(feature)}
               >
                 <div className="feature-card-content">
                   <div className="feature-icon-container">
@@ -141,6 +153,39 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* CONFIRM MODAL */}
+      {confirmState.open && (
+        <div className="confirm-overlay">
+          <div className="confirm-modal">
+
+            <h2>Ongoing Match</h2>
+            <p>You already have an ongoing match.</p>
+            <p>If you continue, you will lose it.</p>
+
+            <div className="confirm-actions">
+              <button
+                className="confirm-cancel"
+                onClick={() => setConfirmState({ open: false, action: null })}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="confirm-continue"
+                onClick={async () => {
+                  await confirmState.action?.();
+                  setConfirmState({ open: false, action: null });
+                }}
+              >
+                Continue
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
