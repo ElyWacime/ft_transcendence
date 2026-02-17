@@ -481,17 +481,17 @@ fastify.post('/tournament', async (request, reply) => {
 fastify.post('/check', async (request, reply) => {
 
   let token = request.body.token;
-  console.log("token  ",token);
+  console.log("post :  check ");
   if (!token)
   return reply.code(403).send(JSON.stringify({ message: 'Not Log in' }));
 const decoded = request.jwt.verify(token);
 const id = decoded.id;
-console.log("id  ",id);
+// console.log("id  ",id);
 let m = await dbcnx.getAvaiable(id);
 
   if (m && m.mode != request.body.mode)
   {
-    console.log("if  ====== ",m);
+    console.log("if  ====== ");
     return reply.code(409).send(JSON.stringify({ message: 'Not Available' }));
   }
   console.log("else  ====== ");
@@ -501,7 +501,7 @@ let m = await dbcnx.getAvaiable(id);
 fastify.post('/endmatch', async (request, reply) => {
 
   let token = request.body.token;
-  console.log("token  ",token);
+  console.log("endmatch  ");
   const decoded = request.jwt.verify(token);
   const id = decoded.id;
   console.log("id  ",id);
@@ -509,7 +509,7 @@ fastify.post('/endmatch', async (request, reply) => {
 
   if (m)
   {
-    console.log("if  =2===== ",m);
+    console.log("if  =2===== ");
     let ngame =  matches.get(m.id);
 
     ngame.score1 = 5;
@@ -520,6 +520,7 @@ fastify.post('/endmatch', async (request, reply) => {
       ngame.score2 = 5;
     }
   }
+  console.log("else  =2===== ");
   return reply.code(201).send(JSON.stringify({ message: 'Good' }));
 });
 
