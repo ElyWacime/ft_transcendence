@@ -414,6 +414,10 @@ fastify.post('/invite', async (request, reply) => {
   let P2 = request.body.P2;
   let m1 = await dbcnx.getAvaiable(P1);
   let m2 = await dbcnx.getAvaiable(P2);
+
+  let name1 = await route(P1);
+  let name2 = await route(P1);
+  console.log(name1,name2);
   let m = null;
   if (!(m1 || m2))
   {
