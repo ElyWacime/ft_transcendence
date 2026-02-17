@@ -8,7 +8,7 @@ const fastify = Fastify({ logger: false });
 await fastify.register(websocket);
 
 await fastify.register(cors, {
-  origin: true, // allow all origins, or list your frontend
+  origin: true, 
   credentials: true,
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
@@ -182,7 +182,6 @@ const handelQuiiting = async(id) => {
       ngame.player4Email = resuser.email;
     }
     let data = JSON.stringify(ngame);
-    // console.log("server will send :: ",data);
     sendtoplayer(ngame.P1_Id, data);
     sendtoplayer(ngame.P2_Id, data);
     sendtoplayer(ngame.P3_Id, data);
@@ -542,5 +541,4 @@ fastify.post('/endmatch', async (request, reply) => {
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
-// console.log("Dashboard routes registered!");
 fastify.listen({ port: 3000, host: "0.0.0.0" });

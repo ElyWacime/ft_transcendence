@@ -1,11 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { PongCanvasOnline } from "@/components/PongCanvasOnline";
 import { useEffect ,useCallback,useRef,useState} from "react";
-// import { useWebSocket } from "../hooks/useWebSocket";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
 import { decodeJWT } from "@/lib/jwt-utils";
-import { ArrowLeft, Trophy ,RotateCcw} from "lucide-react";
+import { RotateCcw} from "lucide-react";
 
 interface GameOnlineProps {
   player1Name: string;
@@ -64,11 +63,6 @@ const GameOnline = () => {
         }
         setmessage(x);
         setflag(false);
-        // navigate("/");
-        // toast.success(`${winner} wins the match!`, {
-        //   duration: 2000,
-        //   onAutoClose: () => navigate("/"),
-        // });
       }
     }
   );

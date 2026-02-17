@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-// import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState ,useRef, useCallback} from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
 
@@ -19,7 +18,6 @@ const MatchMacking = () => {
 
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      // console.log(data);
       matchref.current = data.id;
       setFeatures(() => {
           if (mode == "4")
@@ -67,49 +65,6 @@ const MatchMacking = () => {
                   color: "feature-icon-container"
               }];
           }
-
-          // if (mode === "4")
-          // {
-          //   return [
-          //     {
-          //       icon: Users,
-          //       title: data.player1Name || "Player10",
-          //       description:  "Team A",
-          //     },
-          //     {
-          //       icon: Users,
-          //       title: data.player3Name || "Player30",
-          //       description: "Team A",
-          //     },
-          //     {
-          //       icon: Users,
-          //       title: data.player2Name || "Player20",
-          //       description: "Team B",
-          //     },
-          //     {
-          //         icon: Users,
-          //         title: data.player4Name || "Player40",
-          //         description: "Team B",
-          //     }
-          //   ];
-          // }
-          // else if (mode === "2")
-          // {
-          //   return [
-          //     {
-          //       icon: Users,
-          //       title: data.player1Name || "Player1",
-          //       description: "Player 1",
-          //     },
-          //     {
-          //         icon: Users,
-          //         title: data.player2Name || "Player2",
-          //         description: "Player 2",
-          //     }
-          //   ];
-          // }
-          // else
-          //   return [];
       });
       if (data.count_players == mode) 
       {

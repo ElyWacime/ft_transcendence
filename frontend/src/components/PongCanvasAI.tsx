@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
-// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { AIOpponent, AIAction, AIGameState, Difficulty } from "@/lib/ai/AIOpponent";
