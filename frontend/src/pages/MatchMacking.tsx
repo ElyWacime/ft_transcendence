@@ -15,38 +15,12 @@ const MatchMacking = () => {
     const email = localStorage.getItem("email");
     let del = useRef(true);
     let matchref = useRef(true);
-    const [features, setFeatures] = useState(() => {
-        return [
-          {
-            icon: Users,
-            title:  null,
-            description: "waiting" ,
-            color: "feature-icon-container-color-red"
-        },
-        {
-            icon: Users,
-            title:  null,
-            description: "waiting" ,
-            color: "feature-icon-container-color-red"
-        },
-        {
-            icon: Users,
-            title:  null,
-            description:  "waiting" ,
-            color: "feature-icon-container-color-red"
-        },
-        {
-            icon: Users,
-            title:  null,
-            description:   "waiting" ,
-            color: "feature-icon-container-color-red"
-        }];
-    });
+    const [features, setFeatures] = useState([]);
 
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
       matchref.current = data.id;
-      console.log("Server says :",data, typeof(data.mode));
+      // console.log("Server says :",data, typeof(data.mode));
       // if (data.gameStatus != 'FINISHED')
       {
         setFeatures(() => {
