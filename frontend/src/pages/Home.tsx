@@ -1,11 +1,33 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect,useState,useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
-
+import { useWebSocket } from "@/context/WebSocketContext";
+import { toast } from "sonner";
+import { decodeJWT } from "@/lib/jwt-utils";
 const Home = () => {
 
   const navigate = useNavigate();
+  const { ws, isReady } = useWebSocket();
+  let token = localStorage.getItem("token");
+  const decoded = decodeJWT(token);
+  const id = decoded.id;
+  const handleMessage = useCallback((event: MessageEvent) => 
+  {
+    const data = JSON.parse(event.data);
+    // toast.success(data.message);
+    console.log(data.message);
+  });
+
+  useEffect(() => {
+    if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
+
+      ws.addEventListener("message", handleMessage);
+      return () => {
+          ws.removeEventListener("message", handleMessage);
+      };
+  }, [ws, isReady]);
+
 
   const [confirmState, setConfirmState] = useState<{
     open: boolean;

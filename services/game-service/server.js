@@ -514,6 +514,19 @@ fastify.post('/endmatch', async (request, reply) => {
     }
     ngame.gameStatus = 'FINISHED';
     await dbcnx.updateMatch(ngame);
+    if (ngame.P1_Id == id )
+      ngame.P1_Id = null;
+    if (ngame.P2_Id == id )
+      ngame.P2_Id = null;
+    if (ngame.P3_Id == id )
+      ngame.P3_Id = null;
+    if (ngame.P4_Id == id )
+      ngame.P4_Id = null;
+    let data = JSON.stringify(ngame);
+    sendtoplayer(ngame.P1_Id, data);
+    sendtoplayer(ngame.P2_Id, data);
+    sendtoplayer(ngame.P3_Id, data);
+    sendtoplayer(ngame.P4_Id, data);
     matches.delete(m.id);
   }
   return reply.code(201).send({ message: 'Good' });

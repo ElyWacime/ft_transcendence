@@ -33,7 +33,6 @@ const GameOnline = () => {
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-
       if (data.score1  >= 5 ||  data.score2  >= 5) {
         endGame(data.id);
         let x = "";
@@ -46,7 +45,7 @@ const GameOnline = () => {
             }
           else
             {
-              toast.success(`You Lost the match!`);
+              toast.error(`You Lost the match!`);
               x = `You Lost the match!`;
             }
         } 
@@ -59,7 +58,7 @@ const GameOnline = () => {
            }
           else
           {
-            toast.success(`You Lost the match!`);
+            toast.error(`You Lost the match!`);
             x = `You Lost the match!`;
           }
         }
