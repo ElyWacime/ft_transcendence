@@ -19,6 +19,7 @@ const MatchMacking = () => {
 
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      // console.log(data);
       matchref.current = data.id;
       setFeatures(() => {
           if (mode == "4")

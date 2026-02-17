@@ -143,45 +143,53 @@ const handelQuiiting = async(id) => {
   {
     let ngame = new GameState();
     ngame.id = m.id;
-    ngame.P1_Id = m.P1_Id == id ? null : id;
-    ngame.P2_Id = m.P2_Id == id ? null : id;
-    ngame.P3_Id = m.P3_Id == id ? null : id;
-    ngame.P4_Id = m.P4_Id == id ? null : id;
-    let resuser = await dbcnx.getUser(ngame.P1_Id);
-    if (resuser)
-    {
-        ngame.player1Name = resuser.User_name;
-        ngame.player1Email = resuser.email;
-    }
-    resuser = await dbcnx.getUser(ngame.P2_Id);
-    if (resuser)
-    {
-      ngame.player2Name = resuser.User_name;
-      ngame.player2Email = resuser.email;
-    }
-    resuser = await dbcnx.getUser(ngame.P3_Id);
-    if (resuser)
-    {
-      ngame.player3Name = resuser.User_name;
-      ngame.player3Email = resuser.email;
-    }
-    resuser = await dbcnx.getUser(ngame.P4_Id);
-    if (resuser)
-    {
-      ngame.player4Name = resuser.User_name;
-      ngame.player4Email = resuser.email;
-    }
+    ngame.P1_Id = m.P1_Id;
+    ngame.P2_Id = m.P2_Id;
+    ngame.P3_Id = m.P3_Id;
+    ngame.P4_Id = m.P4_Id;
     ngame.T_Id = m.T_Id;
     ngame.count_players = m.count_players;
     ngame.mode = m.mode;
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
+
+    let resuser = null;
+    if (m.P1_Id && m.P1_Id != id )
+    {
+        resuser = await dbcnx.getUser(m.P1_Id);
+        ngame.player1Name = resuser.User_name;
+        ngame.player1Email = resuser.email;
+    }
+    
+    if (m.P2_Id  && m.P2_Id != id )
+    {
+      resuser = await dbcnx.getUser(m.P2_Id);
+      ngame.player2Name = resuser.User_name;
+      ngame.player2Email = resuser.email;
+    }
+   
+    if (m.P3_Id  &&m.P3_Id != id )
+    {
+      resuser = await dbcnx.getUser(m.P3_Id);
+      ngame.player3Name = resuser.User_name;
+      ngame.player3Email = resuser.email;
+    }
+    
+    if (m.P4_Id  && m.P4_Id != id )
+    {
+      resuser = await dbcnx.getUser(m.P4_Id);
+      ngame.player4Name = resuser.User_name;
+      ngame.player4Email = resuser.email;
+    }
     let data = JSON.stringify(ngame);
+    // console.log("server will send :: ",data);
     sendtoplayer(ngame.P1_Id, data);
     sendtoplayer(ngame.P2_Id, data);
     sendtoplayer(ngame.P3_Id, data);
     sendtoplayer(ngame.P4_Id, data);
   }
+  else
+    console.log("coudnt find this match");
 
 };
 
