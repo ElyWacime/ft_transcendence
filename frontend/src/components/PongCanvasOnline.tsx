@@ -112,13 +112,12 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         matchId: matchref.current
       }));
     }, [ws, isReady]);
+    
     let navigate = useNavigate();
     const handleMessage = useCallback(
       (event: MessageEvent) => {
         const data = JSON.parse(event.data);
         console.log(data);
-        if (data && data.gameStatus == 'REFRESH')
-          navigate("/");
         if (data)
         {
           matchref.current = data.id;
@@ -148,7 +147,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
               Mode:data.mode
           }));
         }
-
     }
     );
 

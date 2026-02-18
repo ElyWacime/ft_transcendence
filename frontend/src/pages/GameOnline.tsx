@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
 import { decodeJWT } from "@/lib/jwt-utils";
 import { ArrowLeft, Trophy ,RotateCcw} from "lucide-react";
+import Home from "./Home";
 
 interface GameOnlineProps {
   player1Name: string;
@@ -23,7 +24,13 @@ const GameOnline = () => {
 
   const state = location.state as GameOnlineProps;
   if(!state)
-      return null;
+  {
+      useEffect(()=>{
+          navigate("/");
+      },[]);
+      return <Home></Home>;
+  }
+  
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady } = useWebSocket();
@@ -38,13 +45,24 @@ const GameOnline = () => {
       console.log(e);
    }
   }
-  let [message,setmessage] =  useState();
+  // let [message,setmessage] =  useState();
+  const endGame = useCallback((id) => {
+    if (ws && isReady && ws.readyState == WebSocket.OPEN)
+      ws.send(JSON.stringify({
+        token:localStorage.getItem("token"),
+        type: "FINISHED",
+        mode: mode,
+        matchId:id
+      }));
+    }
+  );
+
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       // console.log("Server says  ",data);
       if (data.score1  >= 5 ||  data.score2  >= 5) {
-        endGame(data.id);
+        
         let x = "";
         if (data.score1  > data.score2 )
         {
@@ -72,8 +90,14 @@ const GameOnline = () => {
             x = `You Lost the match!`;
           }
         }
-        setmessage(x);
-        setflag(false);
+        // setmessage(x);
+        // setflag(false);
+        endGame(data.id);
+        navigate("/result", { 
+          state: { 
+            message: x, 
+          } 
+        });
         // navigate("/");
         // toast.success(`${winner} wins the match!`, {
         //   duration: 2000,
@@ -83,16 +107,7 @@ const GameOnline = () => {
     }
   );
 
-  const endGame = useCallback((id) => {
-    if (ws && isReady && ws.readyState == WebSocket.OPEN)
-      ws.send(JSON.stringify({
-        token:localStorage.getItem("token"),
-        type: "FINISHED",
-        mode: mode,
-        matchId:id
-      }));
-    }
-  );
+
   const resetGame = useCallback(() => {
     navigate("/loading?mode=2");
   }, []);
@@ -120,7 +135,7 @@ const GameOnline = () => {
         </div>
   
         <div className="ai-game-canvas-container">
-        {isReady && flag && (
+        {isReady  && (
             <PongCanvasOnline
               player1Name={player1Name}
               player2Name={player2Name}
@@ -131,7 +146,7 @@ const GameOnline = () => {
               isReady={isReady}
             />
           )}
-          {!flag && (
+          {/* {!flag && (
               <div className="tournament-match">
               <div className="game-header">
                 {/* <button
@@ -140,14 +155,14 @@ const GameOnline = () => {
                 >
                   <ArrowLeft className="back-icon" />
                   <span>Back</span>
-                </button> */}
+                </button> }
                 <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
                   <h1 className="ai-game-title glow-text">
                     🏆 Result 🏆
                   </h1>
-                  {/* <p className="ai-game-subtitle">
+                  {<p className="ai-game-subtitle">
                     {message} 
-                  </p> */}
+                  </p> }
                               <div className="additional-controls">
               <button onClick={resetGame} className="game-control-button2">
                 <RotateCcw className="button-icon" />
@@ -171,7 +186,7 @@ const GameOnline = () => {
                  {message} 
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
