@@ -1,14 +1,21 @@
+import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import fs from "fs";
-import sqlite3 from "sqlite3";
-import { match } from "assert";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DB_FOLDER = path.resolve(__dirname, "./db");
+const DB_PATH = path.join(DB_FOLDER, "database.sqlite");
+const SCHEMA_FILE = path.join(__dirname, "game.sql");
 
 export class Users {
     constructor() {
-        this.id = "email@email.email";
-        this.email = "email@email.email";
-        this.User_name = "User_name";
-        this.User_password = "qwerty";
+        this.id = null;
+        this.email = null;
+        this.User_name = null;
+        this.User_password = null;
         this.loggedIn = true;
         this.Auto_Match = true;
         this.isOnline = true;
@@ -110,15 +117,35 @@ export class SQLiteDB {
         this.db = null;
     }
     async connect() {
-        this.db = await open({ filename: "database.sqlite", driver: sqlite3.Database, });
-        const schema = fs.readFileSync("game.sql", "utf8");
-        await this.db.exec(schema);
-        this.db.on("trace", (sql) => {
-            console.log("[SQL]:", sql);
-        });
-        console.log("Database connected and table created!");
-    }
+        try {
+            if (!fs.existsSync(DB_FOLDER)) {
+                fs.mkdirSync(DB_FOLDER, { recursive: true });
+                console.log(`[DB] Created folder: ${DB_FOLDER}`);
+            }
+            this.db = await open({
+                filename: DB_PATH,
+                driver: sqlite3.Database,
+            });
+            const tables = await this.db.all(`SELECT name FROM sqlite_master WHERE type='table';`);
+            if (!tables.length) {
+                console.log("[DB] No tables found. Initializing schema...");
+                const schema = fs.readFileSync(SCHEMA_FILE, "utf8");
+                await this.db.exec(schema);
+                console.log("[DB] Schema created!");
+            } else {
+                console.log("[DB] Tables already exist:", tables.map(t => t.name).join(", "));
+            }
+            this.db.on("trace", sql => {
+                // console.log("[SQL]:", sql);
+            });
 
+            console.log(`[DB] Connected successfully at ${DB_PATH}`);
+
+        } catch (err) {
+            console.error("[DB] Failed to initialize database:", err);
+            throw err;
+        }
+    }
     async createTournament(t) {
         let now = new Date();
         let nowf = now.toLocaleString("fr-FR");
@@ -429,5 +456,5 @@ export class SQLiteDB {
             LIMIT 1;
             `, [id, id, id, id]);
         }
-    }
+}
 

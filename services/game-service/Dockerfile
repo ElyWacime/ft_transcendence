@@ -1,24 +1,24 @@
+# Use official Node.js LTS
 FROM node:20
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy only package.json & package-lock.json first
 COPY package*.json ./
 
-# Install dependencies
-RUN apt update
+# Install dependencies first (Docker layer caching)
 RUN npm install
 RUN npm install -g nodemon
-RUN apt install sqlite3
 
-# Copy app code
+# Then copy the rest of the project
 COPY . .
 
-# Make SQLite file writable
-RUN  chmod 777 database.sqlite
+# Install sqlite3 binary (if needed for CLI tools)
+RUN apt update && apt install -y sqlite3
 
+# Expose port
 EXPOSE 3000
 
-# Start server with nodemon for live reload
-CMD ["nodemon", "server.js"]
-# CMD ["node", "server.js"]
+# Start the app
+CMD ["node", "server.js"]
