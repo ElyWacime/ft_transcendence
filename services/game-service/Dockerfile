@@ -15,8 +15,7 @@ RUN apt install sqlite3
 COPY . .
 
 # Make SQLite file writable
-# RUN  sqlite3 database.sqlite < game.sql
-RUN chmod 777 database.sqlite
+RUN  chmod 777 database.sqlite
 
 EXPOSE 3000
 

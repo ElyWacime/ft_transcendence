@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -155,7 +156,6 @@ const ProfileSettings = () => {
           <Card className="profile-card">
             <div className="profile-user-card">
               <Avatar key={avatarKey} className="profile-avatar">
-              {/*  */}
                 <AvatarImage src={userInfo.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"} />
                 <AvatarFallback className="profile-avatar-fallback">
                   {userInfo.username?.charAt(0)?.toUpperCase() || "U"}

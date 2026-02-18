@@ -5,7 +5,6 @@ import { decodeJWT } from "@/lib/jwt-utils";
 
 
 export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode,isReady }) => {
-    const email = localStorage.getItem("email");
     const canvasRef = useRef(null);
     const keys = useRef({ ArrowUp: false, ArrowDown: false });
     let matchref = useRef(null);
@@ -30,10 +29,13 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       gameStatus: "PENDING",
     });
     let token = localStorage.getItem("token");
-    if(!token)
-      return;
-    const decoded = decodeJWT(token);
-    const id = decoded.id;
+    let id = null;
+    if (token)
+    {
+      const decoded = decodeJWT(token);
+      id = decoded.id;
+    }
+    
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -41,7 +43,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
 
     ctx.fillStyle = 'hsl(222 47% 4%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     ctx.strokeStyle = 'hsl(222 47% 12%)';
     ctx.lineWidth = 2;
     ctx.setLineDash([10, 10]);
@@ -86,11 +87,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
     ctx.fill();
     ctx.shadowBlur = 0; 
    
-    // ctx.fillStyle = 'hsl(210 40% 98%)';
-    // ctx.font = '48px "JetBrains Mono"';
-    // ctx.textAlign = 'center';
-    // ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
-    // ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
     }, [gameState]);
 
     const loop = useCallback(() => {
@@ -110,36 +106,40 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         matchId: matchref.current
       }));
     }, [ws, isReady]);
-    
+
     const handleMessage = useCallback(
       (event: MessageEvent) => {
         const data = JSON.parse(event.data);
-        matchref.current = data.id;
-        setGameState((prev) => ({
-            ...prev,
-            ball: {
-                x: data.Ball_x,
-                y: data.Ball_y,
-                dx: data.ball_dx,
-                dy: data.ball_dy,
-                radius: data.ball_radius
-            },
-            paddle1: { x: data.Player1_x, y: data.Player1_y },
-            paddle2: { x: data.Player2_x, y: data.Player2_y },
-            paddle3: { x: data.Player3_x, y: data.Player3_y },
-            paddle4: { x: data.Player4_x, y: data.Player4_y },
-            score: { player1: data.score1, player2: data.score2 },
-            gameStatus: data.gameStatus,
-            player1Name: data.player1Name,
-            player2Name: data.player2Name,
-            player3Name: data.player3Name || "",
-            player4Name: data.player4Name || "",
-            P1_Id: data.P1_Id,
-            P2_Id: data.P2_Id,
-            P3_Id: data.P3_Id,
-            P4_Id: data.P4_Id,
-            Mode:data.mode
-        }));
+        console.log(data);
+        if (data)
+        {
+          matchref.current = data.id;
+          setGameState((prev) => ({
+              ...prev,
+              ball: {
+                  x: data.Ball_x,
+                  y: data.Ball_y,
+                  dx: data.ball_dx,
+                  dy: data.ball_dy,
+                  radius: data.ball_radius
+              },
+              paddle1: { x: data.Player1_x, y: data.Player1_y },
+              paddle2: { x: data.Player2_x, y: data.Player2_y },
+              paddle3: { x: data.Player3_x, y: data.Player3_y },
+              paddle4: { x: data.Player4_x, y: data.Player4_y },
+              score: { player1: data.score1, player2: data.score2 },
+              gameStatus: data.gameStatus,
+              player1Name: data.player1Name,
+              player2Name: data.player2Name,
+              player3Name: data.player3Name || "",
+              player4Name: data.player4Name || "",
+              P1_Id: data.P1_Id,
+              P2_Id: data.P2_Id,
+              P3_Id: data.P3_Id,
+              P4_Id: data.P4_Id,
+              Mode:data.mode
+          }));
+        }
     }
     );
 
@@ -148,12 +148,16 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
 
       ws.addEventListener("message", handleMessage);
       if (ws && isReady && ws.readyState == WebSocket.OPEN)
-        ws.send(JSON.stringify({
+      {
+          ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
-            mode,
-            matchId: matchref.current 
-        }));
+            matchId: matchref.current }));
+          if (!matchref.current)
+          {
+            // navigate("/");
+          }
+      }
         return () => ws.removeEventListener("message", handleMessage);
     }, [ws, isReady]);
 
@@ -188,10 +192,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
 
     return (
         <div className="pong-game-container">
-          {/* Player Info & Controls */}
           <div className="player-info-grid">
-      
-            {/* Player 1 Card */}
             <Card className="player-card player1-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
@@ -207,12 +208,8 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 </div>
               </CardContent>
             </Card>
-      
-            {/* Center Controls */}
             <div className="game-controls-center">
             </div>
-      
-            {/* Player 2 Card */}
             <Card className="player-card player2-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
@@ -228,10 +225,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 </div>
               </CardContent>
             </Card>
-      
           </div>
-      
-          {/* Game Canvas */}
           <div className="game-canvas-wrapper">
             <canvas
               ref={canvasRef}

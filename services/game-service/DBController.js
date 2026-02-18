@@ -8,7 +8,7 @@ export class Users {
         this.id = "email@email.email";
         this.email = "email@email.email";
         this.User_name = "User_name";
-        this.User_password = null;
+        this.User_password = "qwerty";
         this.loggedIn = true;
         this.Auto_Match = true;
         this.isOnline = true;
@@ -40,7 +40,6 @@ export class Participate_Tournament {
 
 export class GameState {
     constructor() {
-        this.flag = 1;
         this.id = 0;
         this.now = Date.now();
         this.last = Date.now();

@@ -8,7 +8,7 @@ const fastify = Fastify({ logger: false });
 await fastify.register(websocket);
 
 await fastify.register(cors, {
-  origin: true, 
+  origin: true,
   credentials: true,
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
@@ -183,6 +183,7 @@ const handelQuiiting = async(id) => {
       ngame.player4Email = resuser.email;
     }
     let data = JSON.stringify(ngame);
+    // console.log("server will send :: ",data);
     sendtoplayer(ngame.P1_Id, data);
     sendtoplayer(ngame.P2_Id, data);
     sendtoplayer(ngame.P3_Id, data);
@@ -198,10 +199,14 @@ const handelRegister = async(request,id,email,name) => {
   let ngame = new GameState();
   u.id = id; 
   u.email = email;
-  u.User_name = name;
+  u.User_name = await route(id);
+  if (!u.User_name)
+    u.User_name = name;
+  if (!u.User_name)
+    u.User_name = id;
   u.isOnline = true;
   u.Auto_Match = true;
-  clients_info.set(id, name);
+  clients_info.set(id, u.User_name);
   await dbcnx.createUsers(u);
   let m = await dbcnx.getOngoingMatch(id);
   if (!m) 
@@ -210,7 +215,7 @@ const handelRegister = async(request,id,email,name) => {
     if (!m) {
       m = new Match();
       m.P1_Id = id;
-      m.player1Name = name;
+      m.player1Name = u.User_name;
       m.mode = request.mode;
       if (!request.tournement) {
         m.id = await dbcnx.createMatch_not(m);
@@ -247,19 +252,18 @@ const handelRegister = async(request,id,email,name) => {
   ngame.P2_Id = m.P2_Id;
   ngame.P3_Id = m.P3_Id;
   ngame.P4_Id = m.P4_Id;
-  // let resuser = await dbcnx.getUser(m.P1_Id);
   let resuser = clients_info.get(m.P1_Id);
   if (resuser)
-    ngame.player1Name = resuser.name;
-  resuser = clients_info.get(m.P2_Id);
+      ngame.player1Name = resuser;
+  resuser =clients_info.get(m.P2_Id);
   if (resuser)
-    ngame.player2Name = resuser.name;
-  resuser = clients_info.get(m.P3_Id);
+    ngame.player2Name = resuser;
+  resuser =clients_info.get(m.P3_Id);
   if (resuser)
-    ngame.player3Name = resuser.name;
-  resuser = clients_info.get(m.P4_Id);
+    ngame.player3Name = resuser;
+  resuser =clients_info.get(m.P4_Id);
   if (resuser)
-    ngame.player4Name = resuser.name;
+    ngame.player4Name = resuser;
   ngame.T_Id = m.T_Id;
   ngame.count_players = m.count_players;
   ngame.mode = request.mode;
@@ -271,9 +275,7 @@ const handelRegister = async(request,id,email,name) => {
         matches.set(m.id, ngame);
   }
   ngame.gameStatus = m.gameStatus;
-  console.log("Server will send :: ",ngame);
   let data = JSON.stringify(ngame);
-  // console.log("Server will send :: ",data);
   await dbcnx.updateMatch(m);
   sendtoplayer(ngame.P1_Id, data);
   sendtoplayer(ngame.P2_Id, data);
@@ -353,16 +355,38 @@ const interval = setInterval(() => {
   }
 }, 1000 / TICK_RATE);
 
+const route = async (id) => {
+  try {
+    const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      console.error(`Auth service returned status ${response.status}`);
+      return null;
+    }
+    const user = await response.json();
+    return user ? user.name : null;
+  } catch (error) {
+    console.error(`Error fetching user ${id} from auth service: `,error);
+    return null;
+  }
+};
+
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
-      const request = JSON.parse(msg);
-      const token = request.token;
-      console.log("This is server.js >> ",request.type);
-      if (token) {
-          const decoded = req.jwt.verify(token);
-          const id = decoded.id;
-          const email = decoded.email;
-          const name = decoded.name;
+   try
+   {
+    const request = JSON.parse(msg);
+    let token = request.token;
+    console.log("This is server.js >> ",request.type);
+    if (token) {
+        const decoded = req.jwt.verify(token);
+        const id = decoded.id;
+        const email = decoded.email;
+        const name = decoded.name;
         await handelDup(connection,id);
         clients.set(id, connection);
         if (request.type == "REGISTER") 
@@ -373,170 +397,183 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           await  handelFinish(request) ;
         else if (request.type == "DELETE") 
           await handelQuiiting(id);
-        }
-      else 
-        console.log("No token provided, proceeding without authentication");
+      }
+    else 
+      console.log("No token provided, proceeding without authentication");
+   }
+   catch (e)
+   {
+      console.log("Error :",e);
+   }
   });
   connection.on("close", async () => {
     for (const [id, client] of clients) {
       if (client == connection) {
+       try {
         await handelQuiiting(id);
         clients.delete(id);
         console.log("Server OnClosed Socket for ",id);
         break;
+       } catch (e) {
+        return reply.code(404).send({ message: e });
+       }
       }
     }
   });
 });
 
 fastify.post('/invite', async (request, reply) => {
-  let token = request.body.token;
-  if (!token)
-    return reply.code(403).send({ message: 'Not Log in' });
-
-  let P1 = request.body.P1;
-  let P2 = request.body.P2;
-
-  let Name1 = request.body.Name1 || P1;
-  let Name2 = request.body.Name2 || P2;
-
-  let m1 = await dbcnx.getAvaiable(P1);
-  let m2 = await dbcnx.getAvaiable(P2);
-  let m = null;
-  clients_info.set(P1, Name1);
-  clients_info.set(P2, Name2);
-
-  if (!(m1 || m2))
-  {
-    let u = new Users();
-    let res = await dbcnx.getUser(P1);
-    if (!res)
+  try {
+    let P1 = request.body.P1;
+    let P2 = request.body.P2;
+    let m1 = await dbcnx.getAvaiable(P1);
+    let m2 = await dbcnx.getAvaiable(P2);
+  
+  
+    let m = null;
+    if (!(m1 || m2))
     {
-      u.id = P1; 
-      u.User_name = Name1; 
-      u.email = Name1; 
-      await dbcnx.insertUser(u);
+      let u = new Users();
+      let res = clients_info.get(P1);
+      if (!res)
+      {
+        u.id = P1; 
+        u.User_name = await route(P1); 
+        u.email = P1; 
+        clients_info.set(P1,u.User_name);
+        await dbcnx.insertUser(u);
+      }
+      res = clients_info.get(P1);
+      if (!res)
+      {
+        u = new Users();
+        u.id = P2; 
+        u.User_name = await route(P2); 
+        u.email = P2; 
+        clients_info.set(P2,u.User_name);
+        await dbcnx.insertUser(u);
+      }
+      m = new Match();
+      m.P1_Id = P1;
+      m.P2_Id = P2;
+      m.count_players = 2;
+      await  dbcnx.createVIPMatch(m);
+      return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
     }
-    res = await dbcnx.getUser(P2);
-    if (!res)
-    {
-      u = new Users();
-      u.id = P2; 
-      u.User_name = Name2; 
-      u.email = Name2; 
-      await dbcnx.insertUser(u);
-    }
-    m = new Match();
-    m.P1_Id = P1;
-    m.P2_Id = P2;
-    m.count_players = 2;
-    await  dbcnx.createVIPMatch(m);
-    return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+    return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
+  } catch (e) {
+    return reply.code(404).send({ message: e });
   }
-  return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
 });
 
 fastify.post('/tournament', async (request, reply) => {
-  let token = request.body.token;
-  if (!token)
-    return reply.code(403).send({ message: 'Not Log in' });
-  let P1 = request.body.P1;
-  let P2 = request.body.P2;
-  let Name1 = request.body.Name1 || P1;
-  let Name2 = request.body.Name2 || P2;
-  clients_info.set(P1, Name1);
-  clients_info.set(P2, Name2);
-  let tournement = request.body.tournement;
-  let m1 = await dbcnx.getAvaiable(P1);
-  let m2 = await dbcnx.getAvaiable(P2);
-  let m = null;
-  if (!(m1 || m2))
+  try 
   {
-    let u = new Users();
-    let res = await dbcnx.getUser(P1);
-    if (!res)
+    let P1 = request.body.P1;
+    let P2 = request.body.P2;
+    let tournement = request.body.tournement;
+    let m1 = await dbcnx.getAvaiable(P1);
+    let m2 = await dbcnx.getAvaiable(P2);
+    let m = null;
+    if (!(m1 || m2))
     {
-      u.id = P1; 
-      u.User_name = P1; 
-      u.email = P1; 
-      await dbcnx.insertUser(u);
+      let u = new Users();
+      let res = await dbcnx.getUser(P1);
+      if (!res)
+      {
+        u.id = P1; 
+        u.User_name = await route(P1); 
+        u.email = P1; 
+        await dbcnx.insertUser(u);
+      }
+      res = await dbcnx.getUser(P2);
+      if (!res)
+      {
+        u = new Users();
+        u.id = P2; 
+        u.User_name = await route(P2); 
+        u.email = P2; 
+        await dbcnx.insertUser(u);
+      }
+      m = new Match();
+      m.P1_Id = P1;
+      m.P2_Id = P2;
+      m.T_Id = tournement;
+      m.count_players = 2;
+      await  dbcnx.createVIPMatch(m);
+      return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
     }
-    res = await dbcnx.getUser(P2);
-    if (!res)
-    {
-      u = new Users();
-      u.id = P2; 
-      u.User_name = P2; 
-      u.email = P2; 
-      await dbcnx.insertUser(u);
-    }
-    m = new Match();
-    m.P1_Id = P1;
-    m.P2_Id = P2;
-    m.T_Id = tournement;
-    m.count_players = 2;
-    await  dbcnx.createVIPMatch(m);
-    return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+    return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
+  } 
+  catch (e) 
+  {
+    return reply.code(404).send({ message: e });
   }
-  return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
 });
 
 fastify.post('/check', async (request, reply) => {
-
-  let token = request.body.token;
-  if (!token)
-    return reply.code(403).send({ message: 'Not Log in' });
-  const decoded = request.jwt.verify(token);
-  const id = decoded.id;
-  let m = await dbcnx.getAvaiable(id);
-
-  if (m && m.mode != request.body.mode)
-  {
-    return reply.code(409).send({ message: 'Not Available' });
+  try {
+    let token = request.body.token;
+    if (!token)
+      return reply.code(403).send({ message: 'Not Log in' });
+    const decoded = request.jwt.verify(token);
+    const id = decoded.id;
+    let m = await dbcnx.getAvaiable(id);
+  
+    if (m && m.mode != request.body.mode)
+    {
+      return reply.code(409).send({ message: 'Not Available' });
+    }
+    return reply.code(201).send({ message: 'Available' });
+  } catch (e) {
+    return reply.code(404).send({ message: e });
   }
-  return reply.code(201).send({ message: 'Available' });
 });
 
 fastify.post('/endmatch', async (request, reply) => {
-
-  let token = request.body.token;
-  if (!token)
-    return reply.code(403).send({ message: 'Not Log in' });
-  const decoded = request.jwt.verify(token);
-  const id = decoded.id;
-  let m = await dbcnx.getcurrentmatch(id);
-  if (m)
-  {
-    let ngame =  matches.get(m.id);
-    ngame.score1 = 5;
-    ngame.score2 = 0;
-    ngame.Winner_Id = ngame.P1_Id;
-    if (ngame.P1_Id == id || ngame.P3_Id == id)
+  try {
+    let token = request.body.token;
+    if (!token)
+      return reply.code(403).send({ message: 'Not Log in' });
+    const decoded = request.jwt.verify(token);
+    const id = decoded.id;
+    let m = await dbcnx.getcurrentmatch(id);
+    if (m)
     {
-      ngame.score1 = 0;
-      ngame.score2 = 5;
-      ngame.Winner_Id = ngame.P2_Id;
+      let ngame =  matches.get(m.id);
+      ngame.score1 = 5;
+      ngame.score2 = 0;
+      ngame.Winner_Id = ngame.P1_Id;
+      if (ngame.P1_Id == id || ngame.P3_Id == id)
+      {
+        ngame.score1 = 0;
+        ngame.score2 = 5;
+        ngame.Winner_Id = ngame.P2_Id;
+      }
+      ngame.gameStatus = 'FINISHED';
+      await dbcnx.updateMatch(ngame);
+      if (ngame.P1_Id == id )
+        ngame.P1_Id = null;
+      if (ngame.P2_Id == id )
+        ngame.P2_Id = null;
+      if (ngame.P3_Id == id )
+        ngame.P3_Id = null;
+      if (ngame.P4_Id == id )
+        ngame.P4_Id = null;
+      let data = JSON.stringify(ngame);
+      sendtoplayer(ngame.P1_Id, data);
+      sendtoplayer(ngame.P2_Id, data);
+      sendtoplayer(ngame.P3_Id, data);
+      sendtoplayer(ngame.P4_Id, data);
+      matches.delete(m.id);
     }
-    ngame.gameStatus = 'FINISHED';
-    await dbcnx.updateMatch(ngame);
-    if (ngame.P1_Id == id )
-      ngame.P1_Id = null;
-    if (ngame.P2_Id == id )
-      ngame.P2_Id = null;
-    if (ngame.P3_Id == id )
-      ngame.P3_Id = null;
-    if (ngame.P4_Id == id )
-      ngame.P4_Id = null;
-    let data = JSON.stringify(ngame);
-    sendtoplayer(ngame.P1_Id, data);
-    sendtoplayer(ngame.P2_Id, data);
-    sendtoplayer(ngame.P3_Id, data);
-    sendtoplayer(ngame.P4_Id, data);
-    matches.delete(m.id);
+    return reply.code(201).send({ message: 'Good' });
+  } catch (e) {
+      return reply.code(404).send({ message: e });
   }
-  return reply.code(201).send({ message: 'Good' });
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
+// console.log("Dashboard routes registered!");
 fastify.listen({ port: 3000, host: "0.0.0.0" });

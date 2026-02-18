@@ -8,14 +8,13 @@ import { decodeJWT } from "@/lib/jwt-utils";
 const Home = () => {
 
   const navigate = useNavigate();
-
   const { ws, isReady } = useWebSocket();
+  let  id =null;
   let token = localStorage.getItem("token");
-  let id = null;
   if (token)
   {
     const decoded = decodeJWT(token);
-    let id = decoded.id;
+    id = decoded.id;
   }
   const handleMessage = useCallback((event: MessageEvent) => 
   {
@@ -38,6 +37,7 @@ const Home = () => {
       }
     }
   });
+
   useEffect(() => {
     if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
 
@@ -46,7 +46,6 @@ const Home = () => {
           ws.removeEventListener("message", handleMessage);
       };
   }, [ws, isReady]);
-
 
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
@@ -145,8 +144,6 @@ const Home = () => {
 
   return (
     <div className="page-container">
-
-      {/* HERO */}
       <section className="hero-section">
         <div className="hero-glow-overlay"></div>
         <div className="hero-content">
@@ -157,7 +154,6 @@ const Home = () => {
             The ultimate retro gaming tournament experience.
             Compete, dominate, and become the Pong champion!
           </p>
-
           <button
             onClick={() => navigate("/tournament")}
             className="hero-button animate-pulse-glow"
@@ -167,14 +163,11 @@ const Home = () => {
           </button>
         </div>
       </section>
-
-      {/* FEATURES */}
       <section className="features-section">
         <div className="features-container">
           <h2 className="features-title glow-text">
             Game Features
           </h2>
-
           <div className="features-grid">
             {features.map((feature, index) => (
               <Card 
@@ -194,16 +187,12 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* CONFIRM MODAL */}
       {confirmState.open && (
         <div className="confirm-overlay">
           <div className="confirm-modal">
-
             <h2>Ongoing Match</h2>
             <p>You already have an ongoing match.</p>
             <p>If you continue, you will lose it.</p>
-
             <div className="confirm-actions">
               <button
                 className="confirm-cancel"
@@ -211,7 +200,6 @@ const Home = () => {
               >
                 Cancel
               </button>
-
               <button
                 className="confirm-continue"
                 onClick={async () => {
@@ -222,11 +210,9 @@ const Home = () => {
                 Continue
               </button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 };
