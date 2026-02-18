@@ -20,6 +20,7 @@ const GameOnline = () => {
   const navigate = useNavigate();
   const email = localStorage.getItem("email");
   let [flag,setflag] = useState(true);
+
   const state = location.state as GameOnlineProps;
   if(!state)
       return null;
@@ -27,12 +28,21 @@ const GameOnline = () => {
 
   const { ws, isReady } = useWebSocket();
   let token = localStorage.getItem("token");
-  const decoded = decodeJWT(token);
-  const id = decoded.id;
+  let id = null;
+  if (token)
+  {
+   try {
+    const decoded = decodeJWT(token);
+    id = decoded.id;
+   } catch (e) {
+      console.log(e);
+   }
+  }
   let [message,setmessage] =  useState();
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      console.log("Server says  ",data);
       if (data.score1  >= 5 ||  data.score2  >= 5) {
         endGame(data.id);
         let x = "";

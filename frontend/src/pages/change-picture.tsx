@@ -177,7 +177,7 @@ const ChangePicture = () => {
             <form onSubmit={updateImage} className="change-password-form" style={{ gap: "18px" }}>
               <div className="avatar-center">
                 <Avatar className="avatar-large">
-                  <AvatarImage src={previewUrl || "https://www.gravatar.com/avatar/"} />
+                  <AvatarImage src={previewUrl || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"} />
                   <AvatarFallback className="avatar-fallback-large">
                     {username?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>

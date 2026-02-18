@@ -67,49 +67,6 @@ const MatchMacking = () => {
                   color: "feature-icon-container"
               }];
           }
-
-          // if (mode === "4")
-          // {
-          //   return [
-          //     {
-          //       icon: Users,
-          //       title: data.player1Name || "Player10",
-          //       description:  "Team A",
-          //     },
-          //     {
-          //       icon: Users,
-          //       title: data.player3Name || "Player30",
-          //       description: "Team A",
-          //     },
-          //     {
-          //       icon: Users,
-          //       title: data.player2Name || "Player20",
-          //       description: "Team B",
-          //     },
-          //     {
-          //         icon: Users,
-          //         title: data.player4Name || "Player40",
-          //         description: "Team B",
-          //     }
-          //   ];
-          // }
-          // else if (mode === "2")
-          // {
-          //   return [
-          //     {
-          //       icon: Users,
-          //       title: data.player1Name || "Player1",
-          //       description: "Player 1",
-          //     },
-          //     {
-          //         icon: Users,
-          //         title: data.player2Name || "Player2",
-          //         description: "Player 2",
-          //     }
-          //   ];
-          // }
-          // else
-          //   return [];
       });
       if (data.count_players == mode) 
       {

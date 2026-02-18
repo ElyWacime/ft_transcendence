@@ -16,7 +16,7 @@ model User {
   loggedIn  Boolean @default(false)
 
   Auto_Match Boolean   @default(false)
-  avatar     String?   @default("https://www.avatar.com/avatar")
+  avatar     String?   @default("https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg")
   CreatedAt  DateTime  @default(now())
 
   image_name String? @default("No image")

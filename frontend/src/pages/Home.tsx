@@ -10,9 +10,13 @@ const Home = () => {
   const navigate = useNavigate();
 
   const { ws, isReady } = useWebSocket();
+  let  id =null;
   let token = localStorage.getItem("token");
-  const decoded = decodeJWT(token);
-  const id = decoded.id;
+  if (token)
+  {
+    const decoded = decodeJWT(token);
+    id = decoded.id;
+  }
   const handleMessage = useCallback((event: MessageEvent) => 
   {
     const data = JSON.parse(event.data);

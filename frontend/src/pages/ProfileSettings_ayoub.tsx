@@ -156,7 +156,7 @@ const ProfileSettings = () => {
           <Card className="profile-card">
             <div className="profile-user-card">
               <Avatar key={avatarKey} className="profile-avatar">
-                <AvatarImage src={userInfo.avatar || "https://www.gravatar.com/avatar/"} />
+                <AvatarImage src={userInfo.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"} />
                 <AvatarFallback className="profile-avatar-fallback">
                   {userInfo.username?.charAt(0)?.toUpperCase() || "U"}
                 </AvatarFallback>

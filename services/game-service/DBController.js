@@ -12,7 +12,7 @@ export class Users {
         this.loggedIn = true;
         this.Auto_Match = true;
         this.isOnline = true;
-        this.avatar = 'https://www.gravatar.com/avatar/';
+        this.avatar = 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg';
         this.CreatedAt = new Date();
     }
 }
@@ -40,7 +40,6 @@ export class Participate_Tournament {
 
 export class GameState {
     constructor() {
-        this.flag = 1;
         this.id = 0;
         this.now = Date.now();
         this.last = Date.now();

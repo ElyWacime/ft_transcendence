@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS Users (
     loggedIn INTEGER  DEFAULT 0,
     Auto_Match INTEGER  DEFAULT 0,
     isOnline INTEGER  DEFAULT 0,
-    avatar TEXT DEFAULT 'https://www.gravatar.com/avatar/',
+    avatar TEXT DEFAULT 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
     CreatedAt DATETIME  DEFAULT CURRENT_TIMESTAMP
 );
 
