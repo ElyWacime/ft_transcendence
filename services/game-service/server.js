@@ -424,36 +424,41 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
 fastify.post('/invite', async (request, reply) => {
   try {
+    let token = request.body.token;
+    if (!token)
+      return reply.code(403).send({ message: 'Not Log in' });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
     let m1 = await dbcnx.getAvaiable(P1);
     let m2 = await dbcnx.getAvaiable(P2);
-  
-  
-    let m = null;
+    const decoded = request.jwt.verify(token);
+    const id = decoded.id;
     if (!(m1 || m2))
     {
       let u = new Users();
+      u.id = P1; 
+      u.User_name = await route(P1); 
+      u.email = P1; 
       let res = clients_info.get(P1);
-      if (!res)
+      if(!res)
       {
-        u.id = P1; 
-        u.User_name = await route(P1); 
-        u.email = P1; 
         clients_info.set(P1,u.User_name);
         await dbcnx.insertUser(u);
       }
-      res = clients_info.get(P1);
       if (!res)
       {
         u = new Users();
         u.id = P2; 
         u.User_name = await route(P2); 
         u.email = P2; 
-        clients_info.set(P2,u.User_name);
-        await dbcnx.insertUser(u);
+        res = clients_info.get(P2);
+        if (!res)
+        {
+          clients_info.set(P2,u.User_name);
+          await dbcnx.insertUser(u);
+        }
       }
-      m = new Match();
+      let m = new Match();
       m.P1_Id = P1;
       m.P2_Id = P2;
       m.count_players = 2;
@@ -469,6 +474,11 @@ fastify.post('/invite', async (request, reply) => {
 fastify.post('/tournament', async (request, reply) => {
   try 
   {
+    let token = request.body.token;
+    if (!token)
+      return reply.code(403).send({ message: 'Not Log in' });
+    const decoded = request.jwt.verify(token);
+    const id = decoded.id;
     let P1 = request.body.P1;
     let P2 = request.body.P2;
     let tournement = request.body.tournement;

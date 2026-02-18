@@ -110,7 +110,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
     const handleMessage = useCallback(
       (event: MessageEvent) => {
         const data = JSON.parse(event.data);
-        console.log(data);
+        // console.log(data);
         if (data)
         {
           matchref.current = data.id;
