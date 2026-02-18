@@ -3,6 +3,9 @@ import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
+import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
+
+
 const fastify = Fastify({ logger: false });
 
 await fastify.register(websocket);
@@ -13,7 +16,6 @@ await fastify.register(cors, {
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
 });
-import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
 let dbcnx = new SQLiteDB();
 let clients = new Map();
@@ -23,7 +25,9 @@ const TICK_RATE = 60;
 const PADDLE_SPEED = 8;
 const MAX_Speed = 25;
 const MAX_Score = 5;
+
 await dbcnx.connect();
+
 
 function sendtoplayer(id, data) {
   if (id) {
@@ -183,7 +187,6 @@ const handelQuiiting = async(id) => {
       ngame.player4Email = resuser.email;
     }
     let data = JSON.stringify(ngame);
-    // console.log("server will send :: ",data);
     sendtoplayer(ngame.P1_Id, data);
     sendtoplayer(ngame.P2_Id, data);
     sendtoplayer(ngame.P3_Id, data);
