@@ -251,20 +251,19 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
             <div className="player-info-grid">
                 <Card className="player-card player1-card">
                     <CardHeader className="player-card-header">
-                        <CardTitle className="player-card-title">
-                            {gameState.player1Name || "PLAYER1"} {mode == 4 ? " // " : ""} {gameState.player3Name}
-                        </CardTitle>
+                    <CardTitle className="player-card-title">
+                      <span style={gameState.P1_Id === id || gameState.P3_Id === id ? 
+                          { color: 'hsl(217 91% 60%)', fontWeight: 'bold' } :  {}}>
+                          {gameState.player1Name || "PLAYER1"} {mode == 4 ? " // " : ""} {gameState.player3Name}
+                      </span>
+                  </CardTitle>
                     </CardHeader>
                     <CardContent className="player-card-content">
                         <div className="player-score">
                             {gameState.score.player1}
                         </div>
                         <div className="player-controls">
-                            {gameState.P1_Id === id || gameState.P3_Id === id ? (
-                                <span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' }}>Your Paddle</span>
-                            ) : (
-                                "Arrow Keys"
-                            )}
+                            {gameState.P1_Id === id || gameState.P3_Id === id ? (<span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' }}>Arrow Keys</span>) : ("Arrow Keys")}
                         </div>
                     </CardContent>
                 </Card>
@@ -282,20 +281,19 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 
                 <Card className="player-card player2-card">
                     <CardHeader className="player-card-header">
-                        <CardTitle className="player-card-title">
-                            {gameState.player2Name || "PLAYER2"} {mode == 4 ? " // " : ""} {gameState.player4Name}
-                        </CardTitle>
+                    <CardTitle className="player-card-title">
+                      <span style={gameState.P2_Id === id || gameState.P4_Id === id ? 
+                          { color: 'hsl(217 91% 60%)', fontWeight: 'bold' } :  {}}>
+                          {gameState.player2Name || "PLAYER1"} {mode == 4 ? " // " : ""} {gameState.player4Name}
+                      </span>
+                  </CardTitle>
                     </CardHeader>
                     <CardContent className="player-card-content">
                         <div className="player-score">
                             {gameState.score.player2}
                         </div>
                         <div className="player-controls">
-                            {gameState.P2_Id === id || gameState.P4_Id === id ? (
-                                <span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' }}>Arrow Keys</span>
-                            ) : (
-                                "Arrow Keys"
-                            )}
+                            {gameState.P2_Id === id || gameState.P4_Id === id ? (  <span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' }}>Arrow Keys</span> ) : ( "Arrow Keys" )}
                         </div>
                     </CardContent>
                 </Card>
