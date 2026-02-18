@@ -42,7 +42,7 @@ const GameOnline = () => {
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      console.log("Server says  ",data);
+      // console.log("Server says  ",data);
       if (data.score1  >= 5 ||  data.score2  >= 5) {
         endGame(data.id);
         let x = "";

@@ -80,7 +80,7 @@ const Dashboard_ayoub = () => {
       }
 
       try {
-        console.log("Fetching dashboard for user:", userIdentifier);
+        // console.log("Fetching dashboard for user:", userIdentifier);
         const data = await playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier);
         
         setDashboardData(data);

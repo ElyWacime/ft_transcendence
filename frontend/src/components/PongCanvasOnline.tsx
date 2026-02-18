@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RotateCcw } from "lucide-react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { decodeJWT } from "@/lib/jwt-utils";
 
 
@@ -111,36 +112,43 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         matchId: matchref.current
       }));
     }, [ws, isReady]);
-    
+    let navigate = useNavigate();
     const handleMessage = useCallback(
       (event: MessageEvent) => {
         const data = JSON.parse(event.data);
-        matchref.current = data.id;
-        setGameState((prev) => ({
-            ...prev,
-            ball: {
-                x: data.Ball_x,
-                y: data.Ball_y,
-                dx: data.ball_dx,
-                dy: data.ball_dy,
-                radius: data.ball_radius
-            },
-            paddle1: { x: data.Player1_x, y: data.Player1_y },
-            paddle2: { x: data.Player2_x, y: data.Player2_y },
-            paddle3: { x: data.Player3_x, y: data.Player3_y },
-            paddle4: { x: data.Player4_x, y: data.Player4_y },
-            score: { player1: data.score1, player2: data.score2 },
-            gameStatus: data.gameStatus,
-            player1Name: data.player1Name,
-            player2Name: data.player2Name,
-            player3Name: data.player3Name || "",
-            player4Name: data.player4Name || "",
-            P1_Id: data.P1_Id,
-            P2_Id: data.P2_Id,
-            P3_Id: data.P3_Id,
-            P4_Id: data.P4_Id,
-            Mode:data.mode
-        }));
+        console.log(data);
+        if (data && data.gameStatus == 'REFRESH')
+          navigate("/");
+        if (data)
+        {
+          matchref.current = data.id;
+          setGameState((prev) => ({
+              ...prev,
+              ball: {
+                  x: data.Ball_x,
+                  y: data.Ball_y,
+                  dx: data.ball_dx,
+                  dy: data.ball_dy,
+                  radius: data.ball_radius
+              },
+              paddle1: { x: data.Player1_x, y: data.Player1_y },
+              paddle2: { x: data.Player2_x, y: data.Player2_y },
+              paddle3: { x: data.Player3_x, y: data.Player3_y },
+              paddle4: { x: data.Player4_x, y: data.Player4_y },
+              score: { player1: data.score1, player2: data.score2 },
+              gameStatus: data.gameStatus,
+              player1Name: data.player1Name,
+              player2Name: data.player2Name,
+              player3Name: data.player3Name || "",
+              player4Name: data.player4Name || "",
+              P1_Id: data.P1_Id,
+              P2_Id: data.P2_Id,
+              P3_Id: data.P3_Id,
+              P4_Id: data.P4_Id,
+              Mode:data.mode
+          }));
+        }
+
     }
     );
 
@@ -149,12 +157,16 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
 
       ws.addEventListener("message", handleMessage);
       if (ws && isReady && ws.readyState == WebSocket.OPEN)
-        ws.send(JSON.stringify({
+      {
+          ws.send(JSON.stringify({
             token: localStorage.getItem("token"),
             type: "START",
-            mode,
-            matchId: matchref.current 
-        }));
+            matchId: matchref.current }));
+          if (!matchref.current)
+          {
+            // navigate("/");
+          }
+      }
         return () => ws.removeEventListener("message", handleMessage);
     }, [ws, isReady]);
 

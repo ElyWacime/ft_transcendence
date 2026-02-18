@@ -324,7 +324,7 @@ class UserAPI {
       credentials: 'include',
     });
 
-    console.log('[searchByName] Response status:', res.status);
+    // console.log('[searchByName] Response status:', res.status);
     const data = await res.json();
     
     if (!res.ok || data.valid === false) {

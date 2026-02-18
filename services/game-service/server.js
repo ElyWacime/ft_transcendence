@@ -200,6 +200,10 @@ const handelRegister = async(request,id,email,name) => {
   u.id = id; 
   u.email = email;
   u.User_name = await route(id);
+  if (!u.User_name)
+    u.User_name = name;
+  if (!u.User_name)
+    u.User_name = id;
   u.isOnline = true;
   u.Auto_Match = true;
   clients_info.set(id, u.User_name);
@@ -374,8 +378,8 @@ const route = async (id) => {
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
-   try
-   {
+  //  try
+  //  {
     const request = JSON.parse(msg);
     let token = request.token;
     console.log("This is server.js >> ",request.type);
@@ -397,23 +401,23 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
     else 
       console.log("No token provided, proceeding without authentication");
-   }
-   catch (e)
-   {
-      console.log("Error :",e);
-   }
+  //  }
+  //  catch (e)
+  //  {
+  //     console.log("Error :",e);
+  //  }
   });
   connection.on("close", async () => {
     for (const [id, client] of clients) {
       if (client == connection) {
-       try {
+      //  try {
         await handelQuiiting(id);
         clients.delete(id);
         console.log("Server OnClosed Socket for ",id);
         break;
-       } catch (e) {
-        return reply.code(404).send({ message: e });
-       }
+      //  } catch (e) {
+      //   return reply.code(404).send({ message: e });
+      //  }
       }
     }
   });
