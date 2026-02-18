@@ -8,7 +8,7 @@ const fastify = Fastify({ logger: false });
 await fastify.register(websocket);
 
 await fastify.register(cors, {
-  origin: true, // allow all origins, or list your frontend
+  origin: true,
   credentials: true,
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
@@ -275,7 +275,6 @@ const handelRegister = async(request,id,email,name) => {
         matches.set(m.id, ngame);
   }
   ngame.gameStatus = m.gameStatus;
-  // console.log("Server will Send" , ngame);
   let data = JSON.stringify(ngame);
   await dbcnx.updateMatch(m);
   sendtoplayer(ngame.P1_Id, data);
@@ -378,8 +377,8 @@ const route = async (id) => {
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
-  //  try
-  //  {
+   try
+   {
     const request = JSON.parse(msg);
     let token = request.token;
     console.log("This is server.js >> ",request.type);
@@ -401,23 +400,23 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       }
     else 
       console.log("No token provided, proceeding without authentication");
-  //  }
-  //  catch (e)
-  //  {
-  //     console.log("Error :",e);
-  //  }
+   }
+   catch (e)
+   {
+      console.log("Error :",e);
+   }
   });
   connection.on("close", async () => {
     for (const [id, client] of clients) {
       if (client == connection) {
-      //  try {
+       try {
         await handelQuiiting(id);
         clients.delete(id);
         console.log("Server OnClosed Socket for ",id);
         break;
-      //  } catch (e) {
-      //   return reply.code(404).send({ message: e });
-      //  }
+       } catch (e) {
+        return reply.code(404).send({ message: e });
+       }
       }
     }
   });

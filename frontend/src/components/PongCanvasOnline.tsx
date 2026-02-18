@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RotateCcw } from "lucide-react";
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { decodeJWT } from "@/lib/jwt-utils";
 
 
 export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode,isReady }) => {
-    const email = localStorage.getItem("email");
     const canvasRef = useRef(null);
     const keys = useRef({ ArrowUp: false, ArrowDown: false });
     let matchref = useRef(null);
@@ -33,9 +29,13 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       gameStatus: "PENDING",
     });
     let token = localStorage.getItem("token");
-    const decoded = decodeJWT(token);
-    const id = decoded.id;
-
+    let id = null;
+    if (token)
+    {
+      const decoded = decodeJWT(token);
+      id = decoded.id;
+    }
+    
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -43,7 +43,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
 
     ctx.fillStyle = 'hsl(222 47% 4%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     ctx.strokeStyle = 'hsl(222 47% 12%)';
     ctx.lineWidth = 2;
     ctx.setLineDash([10, 10]);
@@ -88,11 +87,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
     ctx.fill();
     ctx.shadowBlur = 0; 
    
-    // ctx.fillStyle = 'hsl(210 40% 98%)';
-    // ctx.font = '48px "JetBrains Mono"';
-    // ctx.textAlign = 'center';
-    // ctx.fillText(gameState.score.player1.toString(), canvas.width / 4, 60);
-    // ctx.fillText(gameState.score.player2.toString(), (canvas.width * 3) / 4, 60);
     }, [gameState]);
 
     const loop = useCallback(() => {
@@ -112,8 +106,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
         matchId: matchref.current
       }));
     }, [ws, isReady]);
-    
-    let navigate = useNavigate();
+
     const handleMessage = useCallback(
       (event: MessageEvent) => {
         const data = JSON.parse(event.data);
@@ -199,10 +192,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
 
     return (
         <div className="pong-game-container">
-          {/* Player Info & Controls */}
           <div className="player-info-grid">
-      
-            {/* Player 1 Card */}
             <Card className="player-card player1-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
@@ -218,12 +208,8 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 </div>
               </CardContent>
             </Card>
-      
-            {/* Center Controls */}
             <div className="game-controls-center">
             </div>
-      
-            {/* Player 2 Card */}
             <Card className="player-card player2-card">
               <CardHeader className="player-card-header">
                 <CardTitle className="player-card-title">
@@ -239,10 +225,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                 </div>
               </CardContent>
             </Card>
-      
           </div>
-      
-          {/* Game Canvas */}
           <div className="game-canvas-wrapper">
             <canvas
               ref={canvasRef}

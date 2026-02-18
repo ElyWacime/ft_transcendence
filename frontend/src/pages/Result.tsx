@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
-
 import {useCallback,useEffect} from "react";
-import { ArrowLeft, Trophy ,RotateCcw} from "lucide-react";
+import {RotateCcw} from "lucide-react";
 import Home from "./Home";
 
 
@@ -9,7 +8,6 @@ const Result = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const stat = location.state ;
-
     if(!stat)
     {
         useEffect(()=>{
@@ -34,24 +32,13 @@ const Result = () => {
         </div>
             <div className="tournament-match">
               <div className="game-header">
-                {/* <button
-                  variant="outline"
-                  className="back-button"
-                >
-                  <ArrowLeft className="back-icon" />
-                  <span>Back</span>
-                </button> */}
                 <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
                   <h1 className="ai-game-title glow-text">
                     🏆 Result 🏆
                   </h1>
-                  {/* <p className="ai-game-subtitle">
-                    {message} 
-                  </p> */}
-                              <div className="additional-controls">
+                <div className="additional-controls">
               <button onClick={resetGame} className="game-control-button2">
                 <RotateCcw className="button-icon" />
-                
               </button>
             </div>
                 </div>

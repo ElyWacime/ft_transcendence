@@ -1,11 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { PongCanvasOnline } from "@/components/PongCanvasOnline";
-import { useEffect ,useCallback,useRef,useState} from "react";
-// import { useWebSocket } from "../hooks/useWebSocket";
+import { useEffect ,useCallback} from "react";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
 import { decodeJWT } from "@/lib/jwt-utils";
-import { ArrowLeft, Trophy ,RotateCcw} from "lucide-react";
 import Home from "./Home";
 
 interface GameOnlineProps {
@@ -19,9 +17,6 @@ interface GameOnlineProps {
 const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const email = localStorage.getItem("email");
-  let [flag,setflag] = useState(true);
-
   const state = location.state as GameOnlineProps;
   if(!state)
   {
@@ -45,7 +40,7 @@ const GameOnline = () => {
       console.log(e);
    }
   }
-  // let [message,setmessage] =  useState();
+
   const endGame = useCallback((id) => {
     if (ws && isReady && ws.readyState == WebSocket.OPEN)
       ws.send(JSON.stringify({
@@ -107,10 +102,6 @@ const GameOnline = () => {
     }
   );
 
-
-  const resetGame = useCallback(() => {
-    navigate("/loading?mode=2");
-  }, []);
   useEffect(() => {
     if (!(ws && isReady && ws.readyState == WebSocket.OPEN)) return;
 
@@ -146,47 +137,6 @@ const GameOnline = () => {
               isReady={isReady}
             />
           )}
-          {/* {!flag && (
-              <div className="tournament-match">
-              <div className="game-header">
-                {/* <button
-                  variant="outline"
-                  className="back-button"
-                >
-                  <ArrowLeft className="back-icon" />
-                  <span>Back</span>
-                </button> }
-                <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
-                  <h1 className="ai-game-title glow-text">
-                    🏆 Result 🏆
-                  </h1>
-                  {<p className="ai-game-subtitle">
-                    {message} 
-                  </p> }
-                              <div className="additional-controls">
-              <button onClick={resetGame} className="game-control-button2">
-                <RotateCcw className="button-icon" />
-                
-              </button>
-            </div>
-                </div>
-                <div className="header-spacer"></div>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '60vh',
-                fontSize: '4rem',
-                fontWeight: 'bold',
-                color: '#3b82f6',
-                textShadow: '0 0 30px rgba(59, 130, 246, 0.6)',
-                fontFamily: 'monospace'
-              }}>
-                 {message} 
-              </div>
-            </div>
-          )} */}
         </div>
       </div>
     </div>
