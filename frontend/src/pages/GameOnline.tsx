@@ -63,12 +63,12 @@ const GameOnline = () => {
         {
           if (data.P1_Id == id || data.P3_Id == id)
             {
-              toast.success(`You win the match!`);
+              // toast.success(`You win the match!`);
               x = `You win the match!`;
             }
           else
             {
-              toast.error(`You Lost the match!`);
+              // toast.error(`You Lost the match!`);
               x = `You Lost the match!`;
             }
         } 
@@ -76,12 +76,12 @@ const GameOnline = () => {
         {
           if (data.P2_Id == id || data.P4_Id == id)
            {
-            toast.success(`You win the match!`);
+            // toast.success(`You win the match!`);
             x = `You win the match!`;
            }
           else
           {
-            toast.error(`You Lost the match!`);
+            // toast.error(`You Lost the match!`);
             x = `You Lost the match!`;
           }
         }
