@@ -88,6 +88,7 @@ const GameOnline = () => {
         // setmessage(x);
         // setflag(false);
         endGame(data.id);
+        console.log("Server Should end this >>>>>>>>>>>>>>>>>>>>",data.id);
         navigate("/result", { 
           state: { 
             message: x, 
