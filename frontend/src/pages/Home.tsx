@@ -11,14 +11,17 @@ const Home = () => {
   const { ws, isReady } = useWebSocket();
   let  id =null;
   let token = localStorage.getItem("token");
+
   if (token)
   {
     const decoded = decodeJWT(token);
     id = decoded.id;
   }
+
   const handleMessage = useCallback((event: MessageEvent) => 
   {
     const data = JSON.parse(event.data);
+    console.log(data);
     if (data.gameStatus == "FINISHED")
     {
       if (data.score1 >= 5)

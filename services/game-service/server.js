@@ -193,7 +193,7 @@ const handelQuiiting = async(id) => {
     sendtoplayer(ngame.P4_Id, data);
   }
   else
-    console.log("coudnt find this match");
+    console.log("coudnt find this match :: ",id);
 
 };
 
@@ -323,6 +323,8 @@ const handelFinish = async (request) =>  {
     await dbcnx.updateMatch(m);
     matches.delete(m.id);
   }
+  else
+    console.log("Couldsnt end request.matchId ",request.matchId)
 };
 
 const handelDup = async (connection,id) => {
