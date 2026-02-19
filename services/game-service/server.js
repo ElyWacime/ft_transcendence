@@ -432,6 +432,8 @@ fastify.post('/invite', async (request, reply) => {
       return reply.code(403).send({ message: 'Not Log in' });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
+    let name1 = await route(P1); 
+    let name2 = await route(P2); 
     let m1 = await dbcnx.getAvaiable(P1);
     let m2 = await dbcnx.getAvaiable(P2);
     const decoded = request.jwt.verify(token);
@@ -440,24 +442,24 @@ fastify.post('/invite', async (request, reply) => {
     {
       let u = new Users();
       u.id = P1; 
-      u.User_name = await route(P1); 
+      u.User_name = name1;
       u.email = P1; 
       let res = clients_info.get(P1);
       if(!res)
       {
-        clients_info.set(P1,u.User_name);
+        clients_info.set(P1,name1);
         await dbcnx.insertUser(u);
       }
       if (!res)
       {
         u = new Users();
         u.id = P2; 
-        u.User_name = await route(P2); 
+        u.User_name = name2
         u.email = P2; 
         res = clients_info.get(P2);
         if (!res)
         {
-          clients_info.set(P2,u.User_name);
+          clients_info.set(P2,name2);
           await dbcnx.insertUser(u);
         }
       }
@@ -470,7 +472,7 @@ fastify.post('/invite', async (request, reply) => {
     }
     return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
   } catch (e) {
-    return reply.code(404).send({ message: e });
+    return reply.code(405).send({ message: 'Error ' + e });
   }
 });
 
