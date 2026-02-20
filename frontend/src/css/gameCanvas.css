@@ -53,6 +53,11 @@
   margin: 0;
   line-height: 1.4;
 }
+.styling
+{
+  color: 'hsl(217 91% 60%)';
+  font-size: 'bold';
+}
 
 .player-card-content {
   text-align: center;

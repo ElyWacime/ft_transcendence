@@ -114,7 +114,11 @@ function tick(m,dt) {
     resetBall(1, m);
   }
   if (m.score2 >= MAX_Score || m.score1 >= MAX_Score)
+  {
     m.gameStatus = "FINISHED";
+    dbcnx.updateMatch(m);
+    matches.delete(m.id);
+  }
 }
 
 function resetBall(direction = 1, m) {
@@ -193,7 +197,7 @@ const handelQuiiting = async(id) => {
     sendtoplayer(ngame.P4_Id, data);
   }
   else
-    console.log("coudnt find this match");
+    console.log("coudnt find this match :: ",id);
 
 };
 
@@ -309,12 +313,12 @@ const handelMove = async (request,id) =>{
   }
 };
 
-const handelFinish = async (request) =>  {
-  let m = matches.get(request.matchId);
+const handelFinish = async (ID) =>  {
+  let m = matches.get(ID);
   if (m) 
   {
-    m.id = request.matchId;
-    m.id_Match = request.id_Match;
+    m.id = ID;
+    m.id_Match = ID;
     if (m.score1 >= m.score2)
       m.Winner_Id = m.P1_Id;
     else
@@ -323,6 +327,8 @@ const handelFinish = async (request) =>  {
     await dbcnx.updateMatch(m);
     matches.delete(m.id);
   }
+  else
+    console.log("Couldsnt end request.matchId ",ID);
 };
 
 const handelDup = async (connection,id) => {
@@ -334,15 +340,15 @@ const handelDup = async (connection,id) => {
         clients.get(id).close();
         console.log("Server Closed Duplicate Socket for ",id);
       }
-      
     }
-    catch (e) {  console.log("Error Server Closed Duplicate Socket for ",id);
-
+    catch (e) 
+    {  
+      console.log("Error Server Closed Duplicate Socket for ",id);
     }
   }
 };
 
-const interval = setInterval(() => {
+const interval = setInterval(async () => {
   if (matches.size == 0)
     return;
   for (const [id, match] of matches) {
@@ -382,27 +388,27 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
    try
    {
-    const request = JSON.parse(msg);
-    let token = request.token;
-    console.log("This is server.js >> ",request.type);
-    if (token) {
-        const decoded = req.jwt.verify(token);
-        const id = decoded.id;
-        const email = decoded.email;
-        const name = decoded.name;
-        await handelDup(connection,id);
-        clients.set(id, connection);
-        if (request.type == "REGISTER") 
-          await handelRegister(request,id,email,name);
-        else if (request.type == "MOVE") 
-          await handelMove(request,id);
-        else if (request.type == "FINISHED") 
-          await  handelFinish(request) ;
-        else if (request.type == "DELETE") 
-          await handelQuiiting(id);
-      }
-    else 
-      console.log("No token provided, proceeding without authentication");
+      const request = JSON.parse(msg);
+      let token = request.token;
+      console.log("This is server.js >> ",request.type);
+      if (token) {
+          const decoded = req.jwt.verify(token);
+          const id = decoded.id;
+          const email = decoded.email;
+          const name = decoded.name;
+          await handelDup(connection,id);
+          clients.set(id, connection);
+          if (request.type == "REGISTER") 
+            await handelRegister(request,id,email,name);
+          else if (request.type == "MOVE") 
+            await handelMove(request,id);
+          else if (request.type == "FINISHED") 
+            await  handelFinish(request.matchId) ;
+          else if (request.type == "DELETE") 
+            await handelQuiiting(id);
+        }
+      else 
+        console.log("No token provided, proceeding without authentication");
    }
    catch (e)
    {
@@ -432,6 +438,8 @@ fastify.post('/invite', async (request, reply) => {
       return reply.code(403).send({ message: 'Not Log in' });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
+    let name1 = await route(P1); 
+    let name2 = await route(P2); 
     let m1 = await dbcnx.getAvaiable(P1);
     let m2 = await dbcnx.getAvaiable(P2);
     const decoded = request.jwt.verify(token);
@@ -440,26 +448,22 @@ fastify.post('/invite', async (request, reply) => {
     {
       let u = new Users();
       u.id = P1; 
-      u.User_name = await route(P1); 
+      u.User_name = name1;
       u.email = P1; 
       let res = clients_info.get(P1);
       if(!res)
-      {
-        clients_info.set(P1,u.User_name);
         await dbcnx.insertUser(u);
-      }
+      clients_info.set(P1,name1);
       if (!res)
       {
         u = new Users();
         u.id = P2; 
-        u.User_name = await route(P2); 
+        u.User_name = name2
         u.email = P2; 
         res = clients_info.get(P2);
         if (!res)
-        {
-          clients_info.set(P2,u.User_name);
           await dbcnx.insertUser(u);
-        }
+        clients_info.set(P2,name2);
       }
       let m = new Match();
       m.P1_Id = P1;
@@ -470,7 +474,7 @@ fastify.post('/invite', async (request, reply) => {
     }
     return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
   } catch (e) {
-    return reply.code(404).send({ message: e });
+    return reply.code(405).send({ message: 'Error ' + e });
   }
 });
 
@@ -539,7 +543,7 @@ fastify.post('/check', async (request, reply) => {
     }
     return reply.code(201).send({ message: 'Available' });
   } catch (e) {
-    return reply.code(404).send({ message: e });
+    return reply.code(405).send({ message: e });
   }
 });
 
@@ -582,7 +586,7 @@ fastify.post('/endmatch', async (request, reply) => {
     }
     return reply.code(201).send({ message: 'Good' });
   } catch (e) {
-      return reply.code(404).send({ message: e });
+      return reply.code(405).send({ message: e });
   }
 });
 

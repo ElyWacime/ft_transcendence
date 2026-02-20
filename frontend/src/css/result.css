@@ -90,6 +90,12 @@
   gap: 1.5rem;
 }
 
+.styling
+{
+  color: 'hsl(217 91% 60%)';
+  font-size: 'bold';
+}
+
 .player-card-content {
   display: flex;
   flex-direction: column;
