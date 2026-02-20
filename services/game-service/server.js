@@ -570,22 +570,6 @@ fastify.post('/endmatch', async (request, reply) => {
         ngame.score2 = 5;
         ngame.Winner_Id = ngame.P2_Id;
       }
-      ngame.gameStatus = 'FINISHED';
-      await dbcnx.updateMatch(ngame);
-      if (ngame.P1_Id == id )
-        ngame.P1_Id = null;
-      if (ngame.P2_Id == id )
-        ngame.P2_Id = null;
-      if (ngame.P3_Id == id )
-        ngame.P3_Id = null;
-      if (ngame.P4_Id == id )
-        ngame.P4_Id = null;
-      let data = JSON.stringify(ngame);
-      sendtoplayer(ngame.P1_Id, data);
-      sendtoplayer(ngame.P2_Id, data);
-      sendtoplayer(ngame.P3_Id, data);
-      sendtoplayer(ngame.P4_Id, data);
-      matches.delete(m.id);
     }
     return reply.code(201).send({ message: 'Good' });
   } catch (e) {
@@ -595,7 +579,7 @@ fastify.post('/endmatch', async (request, reply) => {
 
 
 fastify.post('/allmatch', async (request, reply) => {
-  // try {
+  try {
     let matches = await dbcnx.getPlayerMatches(request.body.id);
     if (matches) {
       matches = await Promise.all(matches.map(async (m) => {
@@ -611,10 +595,10 @@ fastify.post('/allmatch', async (request, reply) => {
     }
 
     return reply.code(201).send({ matches });
-  // } 
-  // catch (e) {
-  //   return reply.code(500).send({ message: e.toString() });
-  // }
+  } 
+  catch (e) {
+    return reply.code(500).send({ message: e.toString() });
+  }
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";

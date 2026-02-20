@@ -21,6 +21,7 @@ export const WebSocketProvider = ({ children }) => {
 
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
+        console.log(data);
         let vs = "";
         if (data.score1 > data.score2) 
         {
@@ -42,8 +43,8 @@ export const WebSocketProvider = ({ children }) => {
           toast.success(message + vs);
         else
           toast.error(message + vs);
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN)
-          wsRef.current.send(JSON.stringify({ token, type: "FINISHED", mode: data.mode,  matchId: data.id}));
+        // if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN)
+        //   wsRef.current.send(JSON.stringify({ token, type: "FINISHED", mode: data.mode,  matchId: data.id}));
       }
     },
     [id, token]
