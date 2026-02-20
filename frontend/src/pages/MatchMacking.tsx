@@ -2,24 +2,19 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-// import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState ,useRef, useCallback} from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
 
 const MatchMacking = () => {
     const { ws, isReady } = useWebSocket();
-    let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
-    const email = localStorage.getItem("email");
     let del = useRef(true);
     let matchref = useRef(true);
     const [features, setFeatures] = useState([]);
-
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      // console.log(data);
       matchref.current = data.id;
       setFeatures(() => {
           if (mode == "4")

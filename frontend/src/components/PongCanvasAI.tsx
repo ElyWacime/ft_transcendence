@@ -360,13 +360,21 @@ export const PongCanvasAI = ({
       <div className="player-controls-grid">
         <Card className="player-card player1-card">
           <CardHeader className="player-card-header">
-            <CardTitle className="player-card-title">{player1Name}</CardTitle>
+            <CardTitle className="player-card-title">
+            <span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' } }>
+                  {player1Name}
+                </span>
+                </CardTitle>
           </CardHeader>
-          <CardContent className="player-card-content">
+          <CardContent className="player-card-content styling" >
             <div className="player-score player1-score">
               {gameState.score.player1}
             </div>
-            <div className="player-control-hint">W/S Keys</div>
+            <div className="player-control-hint">
+            <span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' } }>
+                   W/S Keys
+                </span>
+              </div>
           </CardContent>
         </Card>
   

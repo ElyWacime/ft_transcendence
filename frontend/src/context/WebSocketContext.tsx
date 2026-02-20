@@ -21,28 +21,30 @@ export const WebSocketProvider = ({ children }) => {
 
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
-
+        let vs = "";
         if (data.score1 > data.score2) 
+        {
           message = data.P1_Id === id || data.P3_Id === id ? "You win the match!" : "You lost the match!";
-        else 
-          message = data.P2_Id === id || data.P4_Id === id ? "You win the match!" : "You lost the match!";
-
-        toast[message.includes("win") ? "success" : "error"](message);
-
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(
-            JSON.stringify({
-              token,
-              type: "FINISHED",
-              mode: data.mode,
-              matchId: data.id,
-            })
-          );
+          if (data.P1_Id === id || data.P3_Id === id)
+            vs =  " vs " + data.player2Name + " " + (data.player4Name || "");
+         else
+            vs =  " vs " + data.player1Name + " " + (data.player3Name || "");
         }
-
-        console.log("Server Should end this >>>", data.id);
+        else 
+        {
+          message = data.P2_Id === id || data.P4_Id === id ? "You win the match!" : "You lost the match!";
+          if (data.P2_Id === id || data.P4_Id === id)
+            vs =  " vs " + data.player1Name + " " + (data.player3Name || "");
+          else 
+            vs =  " vs " + data.player2Name + " " + (data.player4Name || "");
+        }
+        if (message.includes("win"))
+          toast.success(message + vs);
+        else
+          toast.error(message + vs);
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN)
+          wsRef.current.send(JSON.stringify({ token, type: "FINISHED", mode: data.mode,  matchId: data.id}));
       }
-      // console.log("Message:", data);
     },
     [id, token]
   );
