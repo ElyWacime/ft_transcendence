@@ -23,6 +23,7 @@ import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
 import Chat from "./pages/Chat";
 import { WebSocketProvider } from "./context/WebSocketContext";
+import { ChatSocketProvider } from "./context/ChatSocketContext";
 
 const queryClient = new QueryClient();
 
@@ -115,7 +116,9 @@ const App = () => (
       <Toaster />
       <AuthProvider children={undefined}>
         <WebSocketProvider>
+        <ChatSocketProvider>
         <RouterProvider router={router} />
+        </ChatSocketProvider>
         </WebSocketProvider>
       </AuthProvider>
   </QueryClientProvider>

@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import cookie from "@fastify/cookie"
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
-import { initializeDb, saveMessage, getChatHistory, insertUsers, getUsers, checkIfConvExist, createNewConversation, getConversationsForUser, getConversationParticipantIds, blockUser, getBlockingStatus, unblockUser, getUserByUsername } from './sqlite_chat_logic.js';
+import { initializeDb, saveMessage, getChatHistory, insertUsers, cancelInvitation, getUsers, createInvitation,  checkIfConvExist, createNewConversation, getConversationsForUser, getConversationParticipantIds, blockUser, getBlockingStatus, getInvitationStatus, unblockUser, getUserByUsername } from './sqlite_chat_logic.js';
 
 const fastify = Fastify();
 
@@ -127,6 +127,22 @@ fastify.post("/block", async (request) => {
   };
 });
 
+fastify.post("/invite", async (request) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const inviterId = token.user_id;
+  const inviteeId = request.body.user_id;
+
+  await createInvitation(inviterId, inviteeId);
+  
+  return {
+    pending: true,
+    inviterId,
+    inviteeId,
+    message: 'Game invitation sent successfully'
+  };
+});
+
 fastify.post("/unblock", async (request, reply) => {
   const res = await desToken(request);
   const token = await res.json();
@@ -145,6 +161,24 @@ fastify.post("/unblock", async (request, reply) => {
     unblocked: true,
     unblockedId,
     message: 'User unblocked successfully'
+  };
+});
+
+fastify.post("/deleteInvite", async (request, reply) => {        
+  const res = await desToken(request);
+  const token = await res.json();
+  const inviterId = token.user_id;
+  const inviteeId = request.body.user_id;
+
+  await cancelInvitation(inviterId, inviteeId);
+
+  console.log("delete invite hit", inviterId, inviteeId)
+
+  return {
+    pending: false,
+    inviterId,
+    inviteeId,
+    message: 'Game invitation cancelled successfully'
   };
 });
 
@@ -171,6 +205,30 @@ fastify.post("/block/status", async (request, reply) => {
     blockedId: status.blockedId,
     message
   };
+});
+
+fastify.post("/invitation/status", async (request, reply) => {
+  const res = await desToken(request);
+
+  const token = await res.json();
+  const requesterId = token.user_id;
+  const otherUserId = request.body.user_id;
+
+
+  const status = await getInvitationStatus(requesterId, otherUserId);
+
+  if (!status.pending) {
+    return { pending: false };
+  }
+
+  const invitedBy = status.inviterId === requesterId ? 'you' : 'other';
+
+  return {
+      pending: true,
+      invitedBy,
+      inviterId: status.inviterId,
+      inviteeId: status.inviteeId
+    };
 });
 
 io.on('connection', (socket) => {

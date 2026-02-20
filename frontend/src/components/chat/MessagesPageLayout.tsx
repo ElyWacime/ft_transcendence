@@ -21,15 +21,16 @@ type MessagesPageLayoutProps = {
   onBlockConversation: (conversationId: number) => void
   onUnblockConversation: (conversationId: number) => void
   onCheckBlockStatus: (conversation: any) => void
+  onCheckInvitationStatus: (conversation: any) => void
   invitePrompt?: any
   onInvite: (conversation: any) => void
   onRespondInvite: (accepted: boolean) => void
-  oncancelInvite: (conversation: any) => void
+  onCancelInvite: (conversation: any) => void
   pendingInvite: boolean
   socket?: Socket | null
 }
 
-export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket, pendingInvite }: MessagesPageLayoutProps) {
+export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket, pendingInvite }: MessagesPageLayoutProps) {
   const { id } = useParams()
 
   useEffect(() => {
@@ -50,10 +51,15 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
   const incomingInvite = selectedConversation && invitePrompt?.conversationId === selectedConversation.id ? invitePrompt : null
 
   useEffect(() => {
-    if (selectedConversation && onCheckBlockStatus) {
+    if (!selectedConversation || !onCheckBlockStatus) return
+    const cachedBlockingStatus = blockedConversations?.[selectedConversation.id]
+    
+    if (!cachedBlockingStatus) {
       onCheckBlockStatus(selectedConversation)
     }
-  }, [selectedConversation])
+    onCheckInvitationStatus(selectedConversation)
+  }, [selectedConversation, blockedConversations])
+
 
   const handleStartConversation = async (userId: number) => {
     try {

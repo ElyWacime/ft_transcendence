@@ -19,7 +19,6 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
   const [searchResult, setSearchResult] = useState<any>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
 
-
   const searchUser = async () => {
     if (!searchInput.trim()) {
       setSearchResult(null)

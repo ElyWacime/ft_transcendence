@@ -34,7 +34,6 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
   const activeConversationId = id ? parseInt(id, 10) : null
 
   useEffect(() => {
-
     if (activeConversationId) {
       onGetHistory(activeConversationId)
     }
@@ -58,7 +57,6 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
       })
 
       const res = await response.json()
-      // console.log(res)
       
       if (response.ok) {
         if (canUnblock) {
@@ -83,6 +81,10 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
     } catch (error) {
       console.error('Error toggling block status:', error)
     }
+  }
+
+  const handleSendInvite = () => {
+
   }
 
   const handleSend = () => {
@@ -155,9 +157,9 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
               disabled={!isConnected || isBlocked || pendingInvite}
               onClick={() => conversation && onInvite?.(conversation)}
             >
-              {pendingInvite ? "Pending Invite.." : "Invite to Play"}
+              {(pendingInvite)? "Pending Invite.." : "Invite to Play"}
             </button>
-            {pendingInvite && <button onClick={() => onCancelInvite?.(conversation)} className="block-button blocked">cancel</button>}
+            {(pendingInvite )&& <button onClick={() => onCancelInvite?.(conversation)} className="block-button blocked">cancel</button>}
           </>
         )}
       </div>}
@@ -194,7 +196,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="input-area">
+      <div className="input-area"  >
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -202,9 +204,9 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
           placeholder="Type a message..."
           className="message-input"
           rows={1}
-          disabled={!isConnected || isBlocked}
+          disabled={isBlocked}
         />
-        <button onClick={handleSend} className="send-button" disabled={!isConnected || isBlocked}>
+        <button onClick={handleSend} className="send-button" disabled={isBlocked}>
           Send
         </button>
       </div>
