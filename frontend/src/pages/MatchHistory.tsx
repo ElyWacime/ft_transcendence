@@ -7,20 +7,20 @@ import { decodeJWT } from "@/lib/jwt-utils";
 const MatchHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const stat = location.state;
+  const stat = location.state || "";
 
   const [features, setFeatures] = useState([]);
-  let  id = "cmlu028wl0000vy36ja1gbxf7";
+  let  {id} = stat;
   let token = localStorage.getItem("token");
 
   if (token)
   {
     const decoded = decodeJWT(token);
-    id = decoded.id;
+    if(id == "" || id == null || id == undefined)
+      id = decoded.id;
   }
 
   const getall = async () => {
-    console.log(id);
     let matchess =  await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/allmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -29,8 +29,6 @@ const MatchHistory = () => {
     });
     const data = await matchess.json();  
     let res = data.matches;
-    console.log(res);
-    console.log(id);
     setFeatures(res);
   };
 
@@ -50,7 +48,7 @@ useEffect(() => {
             else if ((feature.Winner_Id == feature.P2_Id  || feature.Winner_Id == feature.P4_Id ) && feature.Winner_Id == id) cardClass += " match-win";
             else if (feature.gameStatus == 'FINISHED') cardClass += " match-loss";
             else
-            cardClass += " match-pend";
+              cardClass += " match-pend";
             return (
               <Card key={feature.id} className={cardClass}>
                 <div className="feature-card-content">

@@ -202,8 +202,8 @@ const ProfileSettings = () => {
                       <p className="profile-result-name">{searchResult.user_name}</p>
                       <p className="profile-result-email">{searchResult.user_email}</p>
                     </div>
-                    <button className="profile-dashboard-btn dashboard-btn" onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
-                      View dashboard
+                    <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user_name}`, {state : {id : searchResult.user_id}})}}>
+                      View dashboard2
                     </button>
                   </div>
                 </div>
