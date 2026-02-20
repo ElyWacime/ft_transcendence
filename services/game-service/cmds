@@ -1,5 +1,5 @@
 docker exec -it gtr-game-server-1 bash
-sqlite3 database.sqlite 
+sqlite3 db/database.sqlite 
 .header on
 .mode column
 select * from Users;

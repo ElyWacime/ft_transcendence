@@ -61,7 +61,7 @@ export const WebSocketProvider = ({ children }) => {
       return;
     }
 
-    if (wsRef.current) return; // already connected
+    if (wsRef.current) return; 
 
     const socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
     wsRef.current = socket;

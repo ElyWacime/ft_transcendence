@@ -179,8 +179,9 @@ export class SQLiteDB {
         const result = await this.db.run(`INSERT INTO Match (P1_Id, mode) VALUES (?, ?);`, [m.P1_Id, m.mode]);
         return result.lastID;
     }
-    async getMatches() {
-        return this.db.all(`SELECT * FROM Match;`);
+
+    async getPlayerMatches(id) {
+        return this.db.all(`SELECT * FROM Match  WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [id, id, id, id]);
     }
     async getMatchById(id) {
         return this.db.get(`SELECT * FROM Match WHERE id = ?;`, [id]);

@@ -81,8 +81,6 @@ export async function login(
     secure: false,
     sameSite: "lax",
   });
-  // console.log("\n\n\nreply from cookies: ", replay);
-  // console.log("\n\n\naccess_token cookie set", token);
   return { accessToken: token };
 }
 
@@ -286,8 +284,6 @@ export const update_image = async (
       }
     });
     
-    // console.log(`[update_image] Updated avatar for user ${userId}, MIME type: ${mimeType}`);
-    
     return reply.send({
       success: true,
       message: "Image updated successfully",
@@ -296,7 +292,7 @@ export const update_image = async (
     });
     
   } catch (err) {
-    // console.error('[update_image] Error:', err);
+
 
     if (err.code === 'P2025') {
       return reply.status(404).send({

@@ -116,6 +116,9 @@ function tick(m,dt) {
   if (m.score2 >= MAX_Score || m.score1 >= MAX_Score)
   {
     m.gameStatus = "FINISHED";
+    m.Winner_Id = m.P2_Id;
+    if (m.score1 >= m.score2)
+    m.Winner_Id = m.P1_Id;
     dbcnx.updateMatch(m);
     matches.delete(m.id);
   }
@@ -590,7 +593,30 @@ fastify.post('/endmatch', async (request, reply) => {
   }
 });
 
+
+fastify.post('/allmatch', async (request, reply) => {
+  // try {
+    let matches = await dbcnx.getPlayerMatches(request.body.id);
+    if (matches) {
+      matches = await Promise.all(matches.map(async (m) => {
+        const [P1, P2, P3, P4, Winner] = await Promise.all([
+          route(m.P1_Id),
+          route(m.P2_Id),
+          route(m.P3_Id),
+          route(m.P4_Id),
+          route(m.Winner_Id),
+        ]);
+        return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
+      }));
+    }
+
+    return reply.code(201).send({ matches });
+  // } 
+  // catch (e) {
+  //   return reply.code(500).send({ message: e.toString() });
+  // }
+});
+
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
-// console.log("Dashboard routes registered!");
 fastify.listen({ port: 3000, host: "0.0.0.0" });

@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
-// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { AIOpponent, AIAction, AIGameState, Difficulty } from "@/lib/ai/AIOpponent";
@@ -136,12 +135,6 @@ export const PongCanvasAI = ({
     ctx.shadowBlur = 20;
     ctx.fill();
     ctx.shadowBlur = 0;
-
-    // ctx.fillStyle = "hsl(210 40% 98%)";
-    // ctx.font = '48px "JetBrains Mono"';
-    // ctx.textAlign = "center";
-    // ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
-    // ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, []);
 
   const mapGameStateToAI = useCallback(

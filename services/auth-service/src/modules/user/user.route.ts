@@ -23,7 +23,6 @@ export async function userRoutes(app: FastifyInstance) {
 
       return reply.send(user);
     } catch (err) {
-      // console.error('[get-user] Error:', err);
       return reply.status(500).send({
         error: "My Internal server error"
       });
@@ -255,19 +254,16 @@ export async function userRoutes(app: FastifyInstance) {
       const token = parts.length === 2 && parts[0].toLowerCase() === 'bearer' ? parts[1] : null;
       
       if (!token) {
-        // console.log('[search-this-name] No authorization header:', authHeader);
         return reply.status(401).send({
           valid: false,
           error: "Missing authorization token"
         });
       }
       
-      // console.log('[search-this-name] Verifying token...');
       let decoded;
       try {
         decoded = app.jwt.verify(token) as any;
       } catch (verifyErr) {
-        // console.log('[search-this-name] Token verification failed:', verifyErr);
         return reply.status(401).send({
           valid: false,
           error: "Invalid or expired token"
@@ -275,14 +271,11 @@ export async function userRoutes(app: FastifyInstance) {
       }
       
       if (!decoded) {
-        // console.log('[search-this-name] Token decoded to null');
         return reply.status(401).send({
           valid: false,
           error: "Invalid token"
         });
       }
-      
-      // console.log('[search-this-name] Token verified, searching for user:', req.body.name);
       const current_user = await prisma.user.findFirst({
         where: { name: req.body.name }
       });
@@ -299,7 +292,6 @@ export async function userRoutes(app: FastifyInstance) {
         user_email: current_user.email,
       });
     } catch (err) {
-      // console.log('[search-this-name] Unexpected error:', err);
       return reply.status(500).send({
         valid: false,
         error: "Internal server error"

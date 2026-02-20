@@ -130,7 +130,7 @@
   background-image: var(--gradient-secondary);
   border: 1px solid hsl(var(--border));
   padding: 1.5rem; 
-  border-radius: calc(var(--radius) - 2px);
+  border-radius: 4rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   height: 100%;
