@@ -68,7 +68,11 @@ export const WebSocketProvider = ({ children }) => {
     wsRef.current = socket;
     setWs(socket);
 
-    socket.onopen = () => setIsReady(true);
+    socket.onopen = () => 
+    {
+      setIsReady(true);
+      console.log("WebSocket connected");
+    };
     socket.onclose = () => {
       console.log("WebSocket disconnected");
       setIsReady(false);
