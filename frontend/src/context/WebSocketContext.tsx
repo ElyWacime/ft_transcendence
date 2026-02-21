@@ -21,7 +21,7 @@ export const WebSocketProvider = ({ children }) => {
 
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
-        console.log(data);
+        // console.log(data);
         let vs = "";
         if (data.score1 > data.score2) 
         {

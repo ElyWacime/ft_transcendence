@@ -82,7 +82,7 @@ services:
       - auth-service
     networks:
       - transcendence
-    # restart: always
+    restart: always
 
 networks:
   transcendence:

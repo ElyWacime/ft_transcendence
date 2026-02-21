@@ -37,7 +37,7 @@ const GameOnline = () => {
     const decoded = decodeJWT(token);
     id = decoded.id;
    } catch (e) {
-      console.log(e);
+      console.log("ERROR :: ",e);
    }
   }
 

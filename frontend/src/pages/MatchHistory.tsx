@@ -42,7 +42,7 @@ useEffect(() => {
         <div className="features-container">
           <h2 className="features-title glow-text">Matches</h2>
           <div className="features-grid1">
-          {features.map((feature) => {
+          {features.length > 0 ?  (features.map((feature) => {
             let cardClass = "feature-card1"; 
             if ((feature.Winner_Id == feature.P1_Id  || feature.Winner_Id == feature.P3_Id ) && feature.Winner_Id == id) cardClass += " match-win";
             else if ((feature.Winner_Id == feature.P2_Id  || feature.Winner_Id == feature.P4_Id ) && feature.Winner_Id == id) cardClass += " match-win";
@@ -58,7 +58,8 @@ useEffect(() => {
                 </div>
               </Card>
             );
-          })}
+          })):   <h3 className="features-title glow-text">No Matches Yet</h3>
+          } 
           </div>
 
         </div>
