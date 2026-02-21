@@ -553,9 +553,15 @@
   box-shadow: var(--shadow-neon);
 }
 
-.send-button:hover {
+
+.send-button:hover:not(:disabled) {
   background: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
+}
+
+.send-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .send-button:active {

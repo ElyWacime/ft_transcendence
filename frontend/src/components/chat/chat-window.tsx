@@ -20,19 +20,20 @@ type ChatWindowProps = {
   incomingInvite?: any
   onInvite?: (conversation: any) => void
   onRespondInvite?: (accepted: boolean) => void
+  onCancelInvite?: (conversation: any) => void
   onBlockConversation?: (conversationId: number) => void
   onUnblockConversation?: (conversationId: number) => void
+  pendingInvite: boolean
   socket?: Socket | null
 }
 
-export default function ChatWindow({ conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onBlockConversation, onUnblockConversation, socket }: ChatWindowProps) {
+export default function ChatWindow({ conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, socket, pendingInvite}: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { id } = useParams()
   const activeConversationId = id ? parseInt(id, 10) : null
 
   useEffect(() => {
-
     if (activeConversationId) {
       onGetHistory(activeConversationId)
     }
@@ -56,7 +57,6 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
       })
 
       const res = await response.json()
-      console.log(res)
       
       if (response.ok) {
         if (canUnblock) {
@@ -77,9 +77,14 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
       } else {
         console.error('Failed to block/unblock user')
       }
+      
     } catch (error) {
       console.error('Error toggling block status:', error)
     }
+  }
+
+  const handleSendInvite = () => {
+
   }
 
   const handleSend = () => {
@@ -133,12 +138,12 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
             onClick={handleBlockToggle}
             disabled={!activeConversationId || (isBlocked && !canUnblock)}
           >
-            {canUnblock ? "Unblock" : "Block"}
+            {canUnblock  ? "Unblock" : "Block"}
           </button>
         </div>
       </div>
 
-      <div className="invite-bar">
+      {!isBlocked &&  <div className="invite-bar">
         {incomingInvite ? (
           <div className="invite-actions">
             <span className="invite-text-inline">ready to play!</span>
@@ -146,15 +151,19 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
             <button className="invite-deny" onClick={() => onRespondInvite?.(false)}>Deny</button>
           </div>
         ) : (
-          <button
-            className="invite-button"
-            disabled={!isConnected || isBlocked}
-            onClick={() => conversation && onInvite?.(conversation)}
-          >
-            Invite to Play
-          </button>
+          <>
+            <button
+              className="invite-button"
+              disabled={!isConnected || isBlocked || pendingInvite}
+              onClick={() => conversation && onInvite?.(conversation)}
+            >
+              {(pendingInvite)? "Pending Invite.." : "Invite to Play"}
+            </button>
+            {(pendingInvite )&& <button onClick={() => onCancelInvite?.(conversation)} className="block-button blocked">cancel</button>}
+          </>
         )}
-      </div>
+      </div>}
+      
 
       {isBlocked && blockedBy === 'you' && (
         <div className="blocked-banner">
@@ -187,7 +196,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="input-area">
+      <div className="input-area"  >
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -195,9 +204,9 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
           placeholder="Type a message..."
           className="message-input"
           rows={1}
-          disabled={!isConnected || isBlocked}
+          disabled={isBlocked}
         />
-        <button onClick={handleSend} className="send-button" disabled={!isConnected || isBlocked}>
+        <button onClick={handleSend} className="send-button" disabled={isBlocked}>
           Send
         </button>
       </div>

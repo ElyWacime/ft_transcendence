@@ -19,7 +19,6 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
   const [searchResult, setSearchResult] = useState<any>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
 
-
   const searchUser = async () => {
     if (!searchInput.trim()) {
       setSearchResult(null)
@@ -128,19 +127,21 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
         </div>
       ) : (
         <div className="conversations-list">
-          {conversations.map((conversation) => (
-            <div
-              key={conversation.id}
-              className={`conversation-item ${selectedId === conversation.id ? "active" : ""}`}
-              onClick={() =>  setSelectedId(conversation.id)}
-            >
-              <div className="conversation-info">
-                <div className="conversation-name">{conversation.other_user_username}</div>
-                <div className="conversation-preview">{conversation.last_message_body}</div>
+          {conversations.map((conversation) => {
+              return conversation.last_message_body &&  
+              <div
+                key={conversation.id}
+                className={`conversation-item ${selectedId === conversation.id ? "active" : ""}`}
+                onClick={() =>  setSelectedId(conversation.id)}
+              >
+                <div className="conversation-info">
+                  <div className="conversation-name">{conversation.other_user_username}</div>
+                  <div className="conversation-preview">{conversation.last_message_body}</div>
+                </div>
+                <div className="conversation-time">{formatTime(conversation.last_message_created_at || conversation.created_at)}</div>
               </div>
-              <div className="conversation-time">{formatTime(conversation.last_message_created_at || conversation.created_at)}</div>
-            </div>
-          ))}
+            }   
+          )}
         </div>
       )}
     </div>
