@@ -16,8 +16,12 @@ clean:
 	docker system prune -f
 	
 rm:
-	(rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite && docker stop $$(docker ps -qa) &&  docker rm $$(docker ps -qa) &&  docker rmi -f $$(docker images -qa) &&  docker volume rm $$(docker volume ls -q) &&  docker system prune -a --volumes -f &&  docker network rm $$(docker network ls -q)) 2>/dev/null || true
+	(docker compose down -v --rmi all --remove-orphans && \
+	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite) 2>/dev/null || true
 
+nk:
+	docker  system prune -a --volumes -f &&  docker network rm $$(docker network ls -q)
+	
 re: rm up
 
 
