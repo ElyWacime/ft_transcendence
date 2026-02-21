@@ -29,6 +29,7 @@ export default function Chat() {
     if (!socket) return
 
     const handleNewConversation = async () => {
+      console.log("new conversation arrived")
       await fetchConversations()
     }
 
@@ -65,11 +66,12 @@ export default function Chat() {
     }
 
     const handleGameInviteResponse = (data: any) => {
+      setPendingInvite(false)
       if (data.accepted) {
         navigate(`/loading?mode=2`);
       }
-      setPendingInvite(false)
     }
+
 
     socket.on("newConversation", handleNewConversation)
     socket.on('receiveMessage', handleReceiveMessage)
@@ -166,19 +168,16 @@ export default function Chat() {
 
       if (res.ok)
       {
-        if (accepted) {
-          navigate(`/loading?mode=2`);
-        } else {
           const response = await fetch(`${SERVER_URL}/api/chat/deleteInvite`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: invitePrompt.fromUserId })
-    })
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: invitePrompt.fromUserId })
+          })
     
-    const re = await response.json()    
-          setInvitePrompt(null)
-        }
+          if (accepted) {
+            navigate(`/loading?mode=2`);
+          }
       }
     }
     catch (e)

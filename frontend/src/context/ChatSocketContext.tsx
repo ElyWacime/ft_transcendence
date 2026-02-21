@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
+import { useAuth } from "./AuthContext";
 
 type ChatSocketContextValue = {
   socket: Socket | null;
@@ -21,12 +22,17 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     const [invitePrompt, setInvitePrompt] = useState<any>(null);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [pendingInvite, setPendingInvite] = useState<boolean>(false)
+    const { isLoggedIn } = useAuth();
 
 
   useEffect(() => {
-    const chatSocket = io(SERVER_URL, { autoConnect: true });
+    if (!isLoggedIn) {
+      return;
+    }
+    const chatSocket = io(SERVER_URL, {
+      autoConnect: true,
+    });
     setSocket(chatSocket);
-
     chatSocket.on("connect", async () => {
         try {
           const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' });
@@ -56,7 +62,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       chatSocket.disconnect();
     };
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <ChatSocketContext.Provider value={{ socket, isConnected, invitePrompt, setInvitePrompt, currentUser, pendingInvite, setPendingInvite }}>

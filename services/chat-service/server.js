@@ -172,8 +172,6 @@ fastify.post("/deleteInvite", async (request, reply) => {
 
   await cancelInvitation(inviterId, inviteeId);
 
-  console.log("delete invite hit", inviterId, inviteeId)
-
   return {
     pending: false,
     inviterId,
