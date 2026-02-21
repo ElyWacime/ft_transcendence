@@ -12,7 +12,7 @@ let inviteHandle = async (P1, P2) =>
   const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ P1 ,P2 }),
+      body: JSON.stringify({token:localStorage.getItem("token") , P1 ,P2 }),
   });
   return res;
 }

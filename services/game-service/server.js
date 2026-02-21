@@ -262,18 +262,11 @@ const handelRegister = async(request,id,email,name) => {
   ngame.P2_Id = m.P2_Id;
   ngame.P3_Id = m.P3_Id;
   ngame.P4_Id = m.P4_Id;
-  let resuser = clients_info.get(m.P1_Id);
-  if (resuser)
-      ngame.player1Name = resuser;
-  resuser =clients_info.get(m.P2_Id);
-  if (resuser)
-    ngame.player2Name = resuser;
-  resuser =clients_info.get(m.P3_Id);
-  if (resuser)
-    ngame.player3Name = resuser;
-  resuser =clients_info.get(m.P4_Id);
-  if (resuser)
-    ngame.player4Name = resuser;
+  let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+  ngame.player1Name = name1;
+  ngame.player2Name = name2;
+  ngame.player3Name = name3;
+  ngame.player4Name = name4;
   ngame.T_Id = m.T_Id;
   ngame.count_players = m.count_players;
   ngame.mode = request.mode;
@@ -369,6 +362,8 @@ const interval = setInterval(async () => {
 
 const route = async (id) => {
   try {
+    if(!id)
+      return null;
     const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
       method: 'GET',
       headers: {
@@ -393,7 +388,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    {
       const request = JSON.parse(msg);
       let token = request.token;
-      console.log("This is server.js >> ",request.type);
+      console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
           const decoded = req.jwt.verify(token);
           const id = decoded.id;
@@ -436,38 +431,32 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
 fastify.post('/invite', async (request, reply) => {
   try {
-    // let token = request.body.token;
-    // if (!token)
-    //   return reply.code(403).send({ message: 'Not Log in' });
+    // console.log(" --- invite --- ");
+    let token = request.body.token;
+    if (!token)
+      return reply.code(403).send({ message: 'Not Log in' });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
-    let name1 = await route(P1); 
-    let name2 = await route(P2); 
-    let m1 = await dbcnx.getAvaiable(P1);
-    let m2 = await dbcnx.getAvaiable(P2);
-    // const decoded = request.jwt.verify(token);
-    // const id = decoded.id;
+    let [name1, name2, m1, m2]= await Promise.all([ route(P1), route(P2), dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
+    // console.log(name1," ---Name--- ",name2);
+    // console.log(P1," --ID---- ",P2);
+    // console.log(m1," ---AVAIL--- ",m2);
     if (!(m1 || m2))
     {
       let u = new Users();
       u.id = P1; 
       u.User_name = name1;
       u.email = P1; 
-      let res = clients_info.get(P1);
-      if(!res)
-        await dbcnx.insertUser(u);
+      await dbcnx.createUsers(u);
       clients_info.set(P1,name1);
-      if (!res)
-      {
-        u = new Users();
-        u.id = P2; 
-        u.User_name = name2
-        u.email = P2; 
-        res = clients_info.get(P2);
-        if (!res)
-          await dbcnx.insertUser(u);
-        clients_info.set(P2,name2);
-      }
+
+      u = new Users();
+      u.id = P2; 
+      u.User_name = name2;
+      u.email = P2; 
+      await dbcnx.createUsers(u);
+      clients_info.set(P2,name2);
+
       let m = new Match();
       m.P1_Id = P1;
       m.P2_Id = P2;
