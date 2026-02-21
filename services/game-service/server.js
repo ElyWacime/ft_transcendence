@@ -436,17 +436,17 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
 fastify.post('/invite', async (request, reply) => {
   try {
-    let token = request.body.token;
-    if (!token)
-      return reply.code(403).send({ message: 'Not Log in' });
+    // let token = request.body.token;
+    // if (!token)
+    //   return reply.code(403).send({ message: 'Not Log in' });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
     let name1 = await route(P1); 
     let name2 = await route(P2); 
     let m1 = await dbcnx.getAvaiable(P1);
     let m2 = await dbcnx.getAvaiable(P2);
-    const decoded = request.jwt.verify(token);
-    const id = decoded.id;
+    // const decoded = request.jwt.verify(token);
+    // const id = decoded.id;
     if (!(m1 || m2))
     {
       let u = new Users();
