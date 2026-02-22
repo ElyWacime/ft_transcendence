@@ -4,7 +4,7 @@ import { userApi } from "@/lib/api";
 
 interface AuthContextType {
   isLoggedIn: boolean;
-  login: (token: string, email: string) => void;
+  login: (token: string, email: string, refreshToken?: string) => void;
   logout: () => Promise<void>;
 }
 
@@ -19,9 +19,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return !!localStorage.getItem("token");
   });
 
-  const login = (token: string, email: string) => {
+  const login = (token: string, email: string, refreshToken?: string) => {
     localStorage.setItem("token", token);
     localStorage.setItem("email", email);
+    if (refreshToken) {
+      localStorage.setItem("refreshToken", refreshToken);
+    }
     setIsLoggedIn(true);
   };
 
@@ -33,6 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Logout failed", e);
     }
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("email");
     setIsLoggedIn(false);
   };

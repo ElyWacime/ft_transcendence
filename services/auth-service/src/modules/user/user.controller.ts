@@ -62,10 +62,6 @@ export async function login(
       message: "Invalid email or password",
     });
   }
-  await prisma.user.update({
-    where: { email },
-    data: { loggedIn: true },
-  });
 
   const payload = {
     id: user.id,
@@ -73,15 +69,30 @@ export async function login(
     name: user.name,
   };
   
-  const token = req.jwt.sign(payload);
+  const accessToken = req.jwt.sign(payload, { expiresIn: "15m" });
+  
+  const refreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
 
-  const replay = reply.setCookie("access_token", token, {
+  await prisma.user.update({
+    where: { email },
+    data: { loggedIn: true, refreshToken },
+  });
+
+  reply.setCookie("access_token", accessToken, {
     path: "/",
     httpOnly: true,
     secure: false,
     sameSite: "lax",
   });
-  return { accessToken: token };
+  
+  reply.setCookie("refresh_token", refreshToken, {
+    path: "/",
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+  
+  return { accessToken, refreshToken };
 }
 
 export async function update_email(
@@ -220,10 +231,80 @@ export async function logout(
   const { email } = req.body;
   const user = await prisma.user.update({
     where: { email },
-    data: { loggedIn: false },
+    data: { loggedIn: false, refreshToken: null },
   });
   reply.clearCookie("access_token");
+  reply.clearCookie("refresh_token");
   return reply.send({ message: "Logout successful" });
+}
+
+export async function refreshToken(
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  let refreshToken = req.cookies.refresh_token;
+  
+  if (!refreshToken) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      refreshToken = authHeader.substring(7);
+    }
+  }
+
+  if (!refreshToken) {
+    return reply.code(401).send({ message: "Refresh token required" });
+  }
+
+  try {
+    const decoded = req.jwt.verify(refreshToken) as {
+      id: string;
+      email: string;
+      name: string;
+    };
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return reply.code(401).send({ message: "Invalid refresh token" });
+    }
+
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    };
+
+    const newAccessToken = req.jwt.sign(payload, { expiresIn: "15m" });
+    
+    await new Promise(resolve => setTimeout(resolve, 1));
+    
+    const newRefreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: newRefreshToken },
+    });
+
+    reply.setCookie("access_token", newAccessToken, {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    reply.setCookie("refresh_token", newRefreshToken, {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+  } catch (err) {
+    return reply.code(401).send({ message: "Invalid or expired refresh token" });
+  }
 }
 
 
