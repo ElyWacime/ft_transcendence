@@ -29,7 +29,7 @@ const MAX_Score = 5;
 await dbcnx.connect();
 
 
-function sendtoplayer(id, data) {
+const sendtoplayer = async (id, data) => {
   if (id) {
     let socket = (clients.get(id));
     if (socket && socket.readyState === 1)
@@ -149,7 +149,7 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
-const handelQuiiting = async(id) => {
+const handelRoomQuiiting = async(id) => {
   let m = await dbcnx.deletePendingMatchByPlayerID(id);
   if (m)
   {
@@ -165,39 +165,26 @@ const handelQuiiting = async(id) => {
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
 
-    let resuser = null;
-    if (m.P1_Id && m.P1_Id != id )
-    {
-        resuser = await dbcnx.getUser(m.P1_Id);
-        ngame.player1Name = resuser.User_name;
-        ngame.player1Email = resuser.email;
-    }
-    
-    if (m.P2_Id  && m.P2_Id != id )
-    {
-      resuser = await dbcnx.getUser(m.P2_Id);
-      ngame.player2Name = resuser.User_name;
-      ngame.player2Email = resuser.email;
-    }
-   
-    if (m.P3_Id  &&m.P3_Id != id )
-    {
-      resuser = await dbcnx.getUser(m.P3_Id);
-      ngame.player3Name = resuser.User_name;
-      ngame.player3Email = resuser.email;
-    }
-    
-    if (m.P4_Id  && m.P4_Id != id )
-    {
-      resuser = await dbcnx.getUser(m.P4_Id);
-      ngame.player4Name = resuser.User_name;
-      ngame.player4Email = resuser.email;
-    }
-    let data = JSON.stringify(ngame);
-    sendtoplayer(ngame.P1_Id, data);
-    sendtoplayer(ngame.P2_Id, data);
-    sendtoplayer(ngame.P3_Id, data);
-    sendtoplayer(ngame.P4_Id, data);
+    let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+    ngame.player1Name = name1;
+    ngame.player2Name = name2;
+    ngame.player3Name = name3;
+    ngame.player4Name = name4;
+
+  if (!ngame.player1Name && (ngame.P1_Id != id))
+    ngame.player1Name = clients_info.get(ngame.P1_Id);
+  if (!ngame.player2Name && (ngame.P2_Id != id))
+    ngame.player2Name = clients_info.get(ngame.P2_Id);
+  if (!ngame.player3Name && (ngame.P3_Id != id))
+    ngame.player3Name = clients_info.get(ngame.P3_Id);
+  if (!ngame.player4Name && (ngame.P4_Id != id))
+    ngame.player4Name = clients_info.get(ngame.P4_Id);
+
+  let data = JSON.stringify(ngame);
+  sendtoplayer(ngame.P1_Id, data);
+  sendtoplayer(ngame.P2_Id, data);
+  sendtoplayer(ngame.P3_Id, data);
+  sendtoplayer(ngame.P4_Id, data);
   }
   else
     console.log("coudnt find this match :: ",id);
@@ -210,13 +197,14 @@ const handelRegister = async(request,id,email,name) => {
   u.id = id; 
   u.email = email;
   u.User_name = await route(id);
+  clients_info.set(id, u.User_name);
   if (!u.User_name)
-    u.User_name = name;
-  if (!u.User_name)
+  {
     u.User_name = id;
+    clients_info.set(id, null);
+  }
   u.isOnline = true;
   u.Auto_Match = true;
-  clients_info.set(id, u.User_name);
   await dbcnx.createUsers(u);
   let m = await dbcnx.getOngoingMatch(id);
   if (!m) 
@@ -225,7 +213,6 @@ const handelRegister = async(request,id,email,name) => {
     if (!m) {
       m = new Match();
       m.P1_Id = id;
-      m.player1Name = u.User_name;
       m.mode = request.mode;
       if (!request.tournement) {
         m.id = await dbcnx.createMatch_not(m);
@@ -237,12 +224,12 @@ const handelRegister = async(request,id,email,name) => {
     else 
     {
       if (request.mode == 2) 
-        {
+      {
         if (m.P1_Id == null) 
           m.P1_Id = id;
         else
           m.P2_Id = id;
-        }
+      }
       else
       {
         if (m.P1_Id == null) 
@@ -254,7 +241,7 @@ const handelRegister = async(request,id,email,name) => {
         else 
           m.P4_Id = id;
       }
-        m.count_players = m.count_players + 1;
+      m.count_players = m.count_players + 1;
     }
   }
   ngame.id = m.id;
@@ -267,6 +254,25 @@ const handelRegister = async(request,id,email,name) => {
   ngame.player2Name = name2;
   ngame.player3Name = name3;
   ngame.player4Name = name4;
+
+  // if ( ngame.P1_Id == id)
+  //   ngame.player1Name = u.User_name;
+  // if ( ngame.P2_Id == id)
+  //   ngame.player2Name = u.User_name;
+  // if ( ngame.P3_Id == id)
+  //   ngame.player3Name = u.User_name;
+  // if ( ngame.P4_Id == id)
+  //   ngame.player4Name = u.User_name;
+
+  if (!ngame.player1Name)
+    ngame.player1Name = clients_info.get(ngame.P1_Id);
+  if (!ngame.player2Name)
+    ngame.player2Name = clients_info.get(ngame.P2_Id);
+  if (!ngame.player3Name)
+    ngame.player3Name = clients_info.get(ngame.P3_Id);
+  if (!ngame.player4Name)
+    ngame.player4Name = clients_info.get(ngame.P4_Id);
+
   ngame.T_Id = m.T_Id;
   ngame.count_players = m.count_players;
   ngame.mode = request.mode;
@@ -280,6 +286,7 @@ const handelRegister = async(request,id,email,name) => {
   ngame.gameStatus = m.gameStatus;
   let data = JSON.stringify(ngame);
   await dbcnx.updateMatch(m);
+  // console.log("Server wiill send ::: ",ngame);
   sendtoplayer(ngame.P1_Id, data);
   sendtoplayer(ngame.P2_Id, data);
   sendtoplayer(ngame.P3_Id, data);
@@ -324,7 +331,7 @@ const handelFinish = async (ID) =>  {
     matches.delete(m.id);
   }
   else
-    console.log("Couldsnt end request.matchId ",ID);
+    console.log("Couldnt end request.matchId ",ID);
 };
 
 const handelDup = async (connection,id) => {
@@ -403,7 +410,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           else if (request.type == "FINISHED") 
             await  handelFinish(request.matchId) ;
           else if (request.type == "DELETE") 
-            await handelQuiiting(id);
+            await handelRoomQuiiting(id);
         }
       else 
         console.log("No token provided, proceeding without authentication");
@@ -417,7 +424,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     for (const [id, client] of clients) {
       if (client == connection) {
        try {
-        await handelQuiiting(id);
+        await handelRoomQuiiting(id);
         clients.delete(id);
         console.log("Server OnClosed Socket for ",id);
         break;
@@ -431,16 +438,12 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
 fastify.post('/invite', async (request, reply) => {
   try {
-    // console.log(" --- invite --- ");
     let token = request.body.token;
     if (!token)
       return reply.code(403).send({ message: 'Not Log in' });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
     let [name1, name2, m1, m2]= await Promise.all([ route(P1), route(P2), dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
-    // console.log(name1," ---Name--- ",name2);
-    // console.log(P1," --ID---- ",P2);
-    // console.log(m1," ---AVAIL--- ",m2);
     if (!(m1 || m2))
     {
       let u = new Users();
@@ -591,5 +594,6 @@ fastify.post('/allmatch', async (request, reply) => {
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
+import { userInfo } from "os";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
 fastify.listen({ port: 3000, host: "0.0.0.0" });

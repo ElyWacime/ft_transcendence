@@ -187,7 +187,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                     <CardTitle className="player-card-title">
                       <span style={gameState.P1_Id === id || gameState.P3_Id === id ? 
                           { color: 'hsl(217 91% 60%)', fontWeight: 'bold' } :  {}}>
-                          {gameState.player1Name || "PLAYER1"} {mode == 4 ? " and " : ""} {gameState.player3Name}
+                          {gameState.player1Name || "PLAYER1"} {mode == 4 ? " and " : ""} {gameState.player3Name|| (mode == 4 ? "PLAYER3" : "")}
                       </span>
                   </CardTitle>
                     </CardHeader>
@@ -216,7 +216,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
                     <CardTitle className="player-card-title">
                       <span style={gameState.P2_Id === id || gameState.P4_Id === id ? 
                           { color: 'hsl(217 91% 60%)', fontWeight: 'bold' } :  {}}>
-                          {gameState.player2Name || "PLAYER1"} {mode == 4 ? " and " : ""} {gameState.player4Name}
+                          {gameState.player2Name || "PLAYER2"} {mode == 4 ? " and " : ""} {gameState.player4Name || (mode == 4 ? "PLAYER4" : "") } 
                       </span>
                   </CardTitle>
                     </CardHeader>

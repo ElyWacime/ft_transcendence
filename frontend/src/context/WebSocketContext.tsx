@@ -18,26 +18,26 @@ export const WebSocketProvider = ({ children }) => {
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      // console.log(data);
 
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
-        // console.log(data);
         let vs = "";
         if (data.score1 > data.score2) 
         {
           message = data.P1_Id === id || data.P3_Id === id ? "You win the match!" : "You lost the match!";
           if (data.P1_Id === id || data.P3_Id === id)
-            vs =  " vs " + data.player2Name + " " + (data.player4Name || "");
+            vs =  " vs " + (data.player2Name || "PLAYER 2") + " " + (data.player4Name || "");
          else
-            vs =  " vs " + data.player1Name + " " + (data.player3Name || "");
+            vs =  " vs " + (data.player1Name || "PLAYER 1") + " " + (data.player3Name || "");
         }
         else 
         {
           message = data.P2_Id === id || data.P4_Id === id ? "You win the match!" : "You lost the match!";
           if (data.P2_Id === id || data.P4_Id === id)
-            vs =  " vs " + data.player1Name + " " + (data.player3Name || "");
+            vs =  " vs " + (data.player1Name || "PLAYER 1") + " " + (data.player3Name || "");
           else 
-            vs =  " vs " + data.player2Name + " " + (data.player4Name || "");
+            vs =  " vs " + (data.player2Name  || "PLAYER 2")+ " " + (data.player4Name || "");
         }
         if (message.includes("win"))
           toast.success(message + vs);

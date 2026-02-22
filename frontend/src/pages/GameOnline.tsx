@@ -41,16 +41,16 @@ const GameOnline = () => {
    }
   }
 
-  const endGame = useCallback((id) => {
-    if (ws && isReady && ws.readyState == WebSocket.OPEN)
-      ws.send(JSON.stringify({
-        token:localStorage.getItem("token"),
-        type: "FINISHED",
-        mode: mode,
-        matchId:id
-      }));
-    }
-  );
+  // const endGame = useCallback((id) => {
+  //   if (ws && isReady && ws.readyState == WebSocket.OPEN)
+  //     ws.send(JSON.stringify({
+  //       token:localStorage.getItem("token"),
+  //       type: "FINISHED",
+  //       mode: mode,
+  //       matchId:id
+  //     }));
+  //   }
+  // );
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
@@ -72,7 +72,7 @@ const GameOnline = () => {
           else
             x = `You Lost the match!`;
         }
-        endGame(data.id);
+        // endGame(data.id);
         navigate("/result", {state: { message: x}});
       }
     }
