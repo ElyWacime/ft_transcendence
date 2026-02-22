@@ -1,3 +1,5 @@
+import { fetchWithAuth } from './tokenRefresh';
+
 export interface Player {
   id: string;
   alias: string;
@@ -205,13 +207,8 @@ class UserAPI {
   }
 
   async logout(email: string) {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${this.baseUrl}/logout`, {
+    const res = await fetchWithAuth(`${this.baseUrl}/logout`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({ email }),
     });
 
@@ -219,9 +216,8 @@ class UserAPI {
   }
 
   async update_email(new_email: string, password: string) {
-    const res = await fetch(`${this.baseUrl}/update_email`, {
+    const res = await fetchWithAuth(`${this.baseUrl}/update_email`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_email, password }),
       credentials: 'include',
     });
@@ -230,14 +226,8 @@ class UserAPI {
   }
 
   async update_password(current_password: string, new_password: string) {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(`${this.baseUrl}/update_password`, {
+    const res = await fetchWithAuth(`${this.baseUrl}/update_password`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({
         current_password,
         new_password,
@@ -249,9 +239,8 @@ class UserAPI {
   }
 
   async me() {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${this.baseUrl}/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const res = await fetchWithAuth(`${this.baseUrl}/me`, {
+      method: "GET",
     });
 
     return await res.json();
@@ -262,14 +251,8 @@ class UserAPI {
     file_type?: string;
     file_size?: number;
   }) {
-    const token = localStorage.getItem("token");
-    
-    const res = await fetch(`${this.baseUrl}/update_image`, {
+    const res = await fetchWithAuth(`${this.baseUrl}/update_image`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({
         image: imageData.image,
         image_name: imageData.image_name,
@@ -283,17 +266,8 @@ class UserAPI {
   }
 
   async getUserById(userId: string) {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("Not logged in. Please log in first.");
-    }
-
-    const res = await fetch(`/api/dashboard/${userId}`, {
+    const res = await fetchWithAuth(`/api/dashboard/${userId}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
       credentials: 'include',
     });
 
@@ -308,18 +282,8 @@ class UserAPI {
   }
 
   async searchByName(name: string) {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("Not logged in. Please log in first to search for players.");
-    }
-
-
-    const res = await fetch(`${this.baseUrl}/search-this-name`, {
+    const res = await fetchWithAuth(`${this.baseUrl}/search-this-name`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({ name }),
       credentials: 'include',
     });

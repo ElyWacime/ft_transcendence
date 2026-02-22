@@ -11,7 +11,6 @@ export async function refreshToken(): Promise<{ accessToken: string; refreshToke
     const res = await fetch(`${API_URL}/api/users/refresh`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${refreshToken}`,
       },
       credentials: "include",
@@ -35,11 +34,20 @@ export async function refreshToken(): Promise<{ accessToken: string; refreshToke
 export async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
   const token = localStorage.getItem("token");
   
-  const headers = {
-    "Content-Type": "application/json",
+  // Build headers - only add Content-Type if body exists
+  const headers: HeadersInit = {
     ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
+
+  // Add Content-Type only for requests with body and if not already set
+  if (options.body) {
+    const hasContentType = options.headers && 
+      Object.keys(options.headers).some(key => key.toLowerCase() === 'content-type');
+    if (!hasContentType) {
+      headers['Content-Type'] = 'application/json';
+    }
+  }
 
   let response = await fetch(url, { ...options, headers });
 
@@ -56,8 +64,11 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}): Pro
 
     if (refreshResult) {
       // Retry the original request with new token
-      headers.Authorization = `Bearer ${refreshResult.accessToken}`;
-      response = await fetch(url, { ...options, headers });
+      const retryHeaders: HeadersInit = {
+        ...headers,
+        Authorization: `Bearer ${refreshResult.accessToken}`,
+      };
+      response = await fetch(url, { ...options, headers: retryHeaders });
     } else {
       // Refresh failed, clear tokens and redirect to login
       localStorage.removeItem("token");

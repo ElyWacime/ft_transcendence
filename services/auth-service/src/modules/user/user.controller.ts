@@ -92,7 +92,15 @@ export async function login(
     sameSite: "lax",
   });
   
-  return { accessToken, refreshToken };
+  return { 
+    accessToken, 
+    refreshToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    }
+  };
 }
 
 export async function update_email(
@@ -103,13 +111,19 @@ export async function update_email(
 ) {
   const { new_email, password } = req.body;
 
-  const cookieToken = req.cookies.access_token;
+  let token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) {
+    token = req.cookies.access_token;
+  }
+
+  if (!token) {
+    return reply.code(401).send({ message: "Authentication required" });
+  }
 
   try {
-    const decoded = req.jwt.verify(cookieToken);
-    const decoded_email = decoded.email;
+    const decoded = req.jwt.verify(token) as { id: string; email: string; name: string };
     const user = await prisma.user.findUnique({ 
-      where: { email: decoded_email } 
+      where: { email: decoded.email } 
     });
     
     if (!user) {
@@ -130,17 +144,52 @@ export async function update_email(
     }
   
     const updatedUser = await prisma.user.update({
-      where: { email: decoded_email },
+      where: { email: decoded.email },
       data: { email: new_email },
     });
   
-    const token = req.jwt.sign({
+    try {
+      const gameServiceUrl = process.env.GAME_SERVICE_URL || 'http://game-server:3000';
+      const gameServiceResponse = await fetch(`${gameServiceUrl}/sync-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: updatedUser.id,
+          email: new_email,
+        }),
+      });
+
+      if (!gameServiceResponse.ok) {
+        console.error('Failed to sync email with game service:', await gameServiceResponse.text());
+      }
+    } catch (syncError) {
+      console.error('Error syncing email with game service:', syncError);
+    }
+
+    const payload = {
       id: updatedUser.id,
       email: updatedUser.email,
       name: updatedUser.name,
+    };
+
+    const accessToken = req.jwt.sign(payload, { expiresIn: "15m" });
+    const refreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
+
+    await prisma.user.update({
+      where: { id: updatedUser.id },
+      data: { refreshToken },
     });
   
-    reply.setCookie("access_token", token, {
+    reply.setCookie("access_token", accessToken, {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    reply.setCookie("refresh_token", refreshToken, {
       path: "/",
       httpOnly: true,
       secure: false,
@@ -150,7 +199,9 @@ export async function update_email(
     return {
       success: true,
       message: "Email updated successfully",
-      accessToken: token,
+      accessToken,
+      refreshToken,
+      newEmail: updatedUser.email,
     };
      
   } catch (error) {

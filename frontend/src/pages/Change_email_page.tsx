@@ -20,7 +20,12 @@ const ChangeEmail = () => {
       const res = await userApi.update_email(newEmail, password);
       if (res.success) {
         toast.success("Email updated successfully!");
-        localStorage.setItem("email", newEmail);
+        // Update stored credentials with new email and tokens
+        localStorage.setItem("email", res.newEmail);
+        localStorage.setItem("token", res.accessToken);
+        if (res.refreshToken) {
+          localStorage.setItem("refreshToken", res.refreshToken);
+        }
         navigate("/profile");
       } else {
         toast.error(res.message || "Email update failed.");

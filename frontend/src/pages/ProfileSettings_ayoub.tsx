@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -29,6 +29,7 @@ function getUserInfoFromToken() {
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [userInfo, setUserInfo] = useState({
     email: "",
     username: "",
@@ -61,6 +62,7 @@ const ProfileSettings = () => {
           });
           setAvatarKey(Date.now());
         } else {
+          // Always get email from localStorage first (most up-to-date after email change)
           const email = localStorage.getItem("email") || tokenData?.email || "";
           const username = localStorage.getItem("username") || tokenData?.username || "Player";
           setUserInfo({ email, username, avatar: "" });
@@ -68,6 +70,7 @@ const ProfileSettings = () => {
       } catch (error) {
         console.error("Failed to fetch user data:", error);
         const tokenData = getUserInfoFromToken();
+        // Always get email from localStorage first (most up-to-date after email change)
         const email = localStorage.getItem("email") || tokenData?.email || "";
         const username = localStorage.getItem("username") || tokenData?.username || "Player";
         setUserInfo({ email, username, avatar: "" });
@@ -77,7 +80,7 @@ const ProfileSettings = () => {
     };
     
     fetchUserData();
-  }, []);
+  }, [location.pathname]); // Re-fetch when route changes
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

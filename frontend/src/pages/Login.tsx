@@ -35,7 +35,9 @@ const Login = () => {
     try {
       const res = await userApi.login(email, password);
       if (res.accessToken) {
-        login(res.accessToken, email, res.refreshToken);
+        // Use email from server response, not from form input
+        const userEmail = res.user?.email || email;
+        login(res.accessToken, userEmail, res.refreshToken);
         toast.success("Welcome back!");
         navigate("/");
       } else {
