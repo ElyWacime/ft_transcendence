@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createUser, login, logout, update_email, update_password, update_image} from "./user.controller";
+import { createUser, login, logout, update_email, update_password, update_image, refreshToken} from "./user.controller";
 import prisma from "../../utils/prisma";
 
 export async function userRoutes(app: FastifyInstance) {
@@ -92,6 +92,21 @@ export async function userRoutes(app: FastifyInstance) {
       },
     },
     handler: logout,
+  });
+
+  app.post("/refresh", {
+    schema: {
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            accessToken: { type: "string" },
+            refreshToken: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: refreshToken,
   });
 
   app.put("/update_email", {

@@ -436,6 +436,32 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
+fastify.post('/sync-email', async (request, reply) => {
+  try {
+    const { userId, email } = request.body;
+    
+    if (!userId || !email) {
+      return reply.code(400).send({ message: 'userId and email are required' });
+    }
+
+    const existingUser = await dbcnx.getUserById(userId);
+    
+    if (existingUser) {
+      await dbcnx.db.run(
+        `UPDATE Users SET email = ? WHERE id = ?`, 
+        [email, userId]
+      );
+      
+      return reply.send({ success: true, message: 'Email synced successfully' });
+    } else {
+      return reply.send({ success: true, message: 'User not in game service yet' });
+    }
+  } catch (error) {
+    console.error('Error syncing email:', error);
+    return reply.code(500).send({ message: 'Failed to sync email' });
+  }
+});
+
 fastify.post('/invite', async (request, reply) => {
   try {
     let token = request.body.token;

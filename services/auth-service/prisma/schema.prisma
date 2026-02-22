@@ -21,4 +21,6 @@ model User {
 
   image_name String? @default("No image")
   image Bytes?
+  
+  refreshToken String?
 }
