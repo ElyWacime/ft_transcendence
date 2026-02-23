@@ -18,6 +18,8 @@ export const Navigation = () => {
   };
 
   const gamesModes = [
+    // expose online tournament entry in the Games dropdown, hitting the new websocket-driven page
+    { path: "/tournament-online", label: "Online Tournament", icon: Trophy },
     { path: "/tournament", label: "Tournament", icon: Trophy },
     { path: "/game-ai", label: "VS AI", icon: Bot },
     { path: "/game", label: "Local Game", icon: Gamepad2 },

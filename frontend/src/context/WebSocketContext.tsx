@@ -11,7 +11,8 @@ export const WebSocketProvider = ({ children }) => {
 
     wsRef.current = socket;
 
-    socket.onopen = () => {
+    socket.onopen = () => 
+      {
       console.log("WebSocket connected");
       setIsReady(true);
     };

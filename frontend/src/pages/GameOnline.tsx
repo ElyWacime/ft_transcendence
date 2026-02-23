@@ -88,6 +88,8 @@ const GameOnline = () => {
         // setmessage(x);
         // setflag(false);
         endGame(data.id);
+
+        // if its a match tournament navigate back to tournament page.
         navigate("/result", { 
           state: { 
             message: x, 

@@ -48,6 +48,7 @@ export class Participate_Tournament {
 export class GameState {
     constructor() {
         this.id = 0;
+        this.intour = false;
         this.now = Date.now();
         this.last = Date.now();
         this.P1_Id = null;

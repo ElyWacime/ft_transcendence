@@ -12,7 +12,7 @@ app.register(cors, {
   origin: [
     `http://${process.env.DOMAIN}`,
     `http://${process.env.DOMAIN}:8080`,
-    "http://127.0.0.1:8080",
+    "http://10.30.233.136:8080",
     "http://frontend:8080",
     "http://0.0.0.0",
   ],

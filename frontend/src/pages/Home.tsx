@@ -82,6 +82,14 @@ const Home = () => {
       page: "/tournament",
     },
     {
+      // entry point into the new websocket-backed online tournament lobby
+      icon: Trophy,
+      title: "Online Tournament",
+      type:"page",
+      description: "Join live brackets with other players",
+      page: "/tournament-online",
+    },
+    {
       icon: Users,
       title: "1 vs 1",
       type:"page",
