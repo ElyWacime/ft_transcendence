@@ -64,44 +64,16 @@ export default function Chat() {
       }
     }
 
-    // const handleGameInviteResponse = (data: any) => {
-    //   if (data.invitationType === "game_request") {
-    //     setPendingInvite(false)
-    //     if (data.accepted) {
-    //       navigate(`/loading?mode=2`);
-    //     }
-    //   } else if (data.invitationType === "friend_request") {
-    //     console.log("here")
-    //     setPendingAddFriend(false)
-    //     if (data.accepted) {
-    //       setFriendsList((prev: any) => ({
-    //         ...prev,
-    //         [data.fromUserId]: { isFriend: true }
-    //       }))
-    //     }
-    //   }
-    // }
 
-    const handleUnfriend = ({ userId }: any) => {
-      console.log("Unfriended userId:", userId)
-      setFriendsList((prev: any) => ({
-        ...prev,
-        [userId]: { isFriend: false }
-      }))
-    }   
 
     socket.on("newConversation", handleNewConversation)
     socket.on('receiveMessage', handleReceiveMessage)
     socket.on('blockStatusChanged', handleBlockStatusChanged)
-    // socket.on('gameInviteResponse', handleGameInviteResponse)
-    socket.on('unfriend', handleUnfriend)
 
     return () => {
       socket.off("newConversation", handleNewConversation)
       socket.off('receiveMessage', handleReceiveMessage)
       socket.off('blockStatusChanged', handleBlockStatusChanged)
-      // socket.off('gameInviteResponse', handleGameInviteResponse)
-      socket.off('unfriend', handleUnfriend)
     }
 
   }, [socket, navigate])
@@ -237,9 +209,6 @@ export default function Chat() {
                   [invitePrompt.fromUserId]: { isFriend: true }
                 }))
               }
-
-              
-              // console.log("Add Friend response:", res)
             }              
           }
       }
@@ -275,8 +244,6 @@ export default function Chat() {
 
   const handleBlockConversation = (conversationId: number) => {
     setBlockedConversations((prev: any) => ({ ...prev, [conversationId]: { blocked: true, blockedBy: 'you' } }))
-    setInvitePrompt(null)
-    setPendingInvite(false)
   }
 
 
@@ -289,14 +256,15 @@ export default function Chat() {
         body: JSON.stringify({ user_id: other_user_id })
       })
       const data = await res.json()
-      console.log("Remove Friend response:", data)
+      // console.log("Remove Friend response:", data)
       
       if (res.ok) {
         setFriendsList((prev: any) => ({
           ...prev,
           [other_user_id]: { isFriend: false }
         }))
-        setPendingAddFriend(false)
+        respondInvite(false, "game_request")
+        cancelInvite({ other_user_id }, "game_request")
         socket?.emit('unfriend', {
           userId: other_user_id,
           toUnfriend: currentUser?.id
@@ -364,7 +332,7 @@ export default function Chat() {
         body: JSON.stringify({ user_id: conversation.other_user_id })
       })
       const data = await res.json()
-      console.log("Friendship status:", data)
+      // console.log("Friendship status:", data)
       if (res.ok) {
         if (data.friends) {
           setFriendsList((prev: any) => ({

@@ -58,7 +58,6 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     chatSocket.on("disconnect", () => setIsConnected(false));
     
     chatSocket.on("gameInvite", (data: any) => {
-      console.log("Received game invite:", data);
       setInvitePrompt(data);
     });
 
@@ -70,7 +69,6 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
           navigate(`/loading?mode=2`);
         }
       } else if (data.invitationType === "friend_request") {
-        console.log("here")
         setPendingAddFriend(false)
         if (data.accepted) {
           setFriendsList((prev: any) => ({
@@ -95,8 +93,21 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
+    const handleUnfriend = ({ userId }: any) => {
+      // console.log("Unfriended userId:", userId)
+      setFriendsList((prev: any) => ({
+        ...prev,
+        [userId]: { isFriend: false }
+      }))
+    }   
+    
+    chatSocket.on('unfriend', handleUnfriend)
+
+
     return () => {
       chatSocket.disconnect();
+      chatSocket.off('unfriend', handleUnfriend)
+
     };
   }, [isLoggedIn]);
 

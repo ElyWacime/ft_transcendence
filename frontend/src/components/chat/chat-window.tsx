@@ -154,7 +154,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
             <button 
               className="add-friend-button warning-button" 
               onClick={() => conversation?.other_user_id && onUnfriend?.(conversation.other_user_id)}
-              disabled={!activeConversationId}
+              disabled={!activeConversationId || isBlocked}
             >
               Unfriend
             </button>
