@@ -137,7 +137,6 @@ export default function Chat() {
   const cancelInvite = async (conversation: any, invitationType: string) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
 
-
     const response = await fetch(`${SERVER_URL}/api/chat/deleteInvite`, {
         method: 'POST',
         credentials: 'include',
@@ -150,10 +149,13 @@ export default function Chat() {
 
     if (re.invitationType === "game_request")
     {
+      console.log("Canceling game invite")
       setPendingInvite(false)
+      setInvitePrompt(null)
     } else if (re.invitationType === "friend_request")
     {
       setPendingAddFriend(false)
+      setInvitePrompt(null)
     }          
 
     socket.emit('cancelInvite', {
@@ -263,7 +265,8 @@ export default function Chat() {
           ...prev,
           [other_user_id]: { isFriend: false }
         }))
-        respondInvite(false, "game_request")
+        // respondInvite(false, "game_request")
+
         cancelInvite({ other_user_id }, "game_request")
         socket?.emit('unfriend', {
           userId: other_user_id,
@@ -323,7 +326,7 @@ export default function Chat() {
   }
 
   const checkFriendshipStatus = async (conversation: any) => {
-    console.log("hit")
+    // console.log("hit")
     try {
       const res = await fetch(`${SERVER_URL}/api/chat/friends/status`, {
         method: 'POST',

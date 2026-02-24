@@ -95,6 +95,8 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
 
     const handleUnfriend = ({ userId }: any) => {
       // console.log("Unfriended userId:", userId)
+      setPendingInvite(false)
+      setInvitePrompt(null)
       setFriendsList((prev: any) => ({
         ...prev,
         [userId]: { isFriend: false }
