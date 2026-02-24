@@ -15,19 +15,23 @@ type ChatWindowProps = {
   isConnected: boolean
   currentUser?: any
   isBlocked: boolean
+  isFriend: boolean
   blockedBy?: string | null
   canUnblock: boolean
   incomingInvite?: any
-  onInvite?: (conversation: any) => void
-  onRespondInvite?: (accepted: boolean) => void
-  onCancelInvite?: (conversation: any) => void
+  onInvite?: (conversation: any, invitationType: string) => void
+  onRespondInvite?: (accepted: boolean, invitationType: string) => void
+  onCancelInvite?: (conversation: any, invitationType: string) => void
   onBlockConversation?: (conversationId: number) => void
   onUnblockConversation?: (conversationId: number) => void
+  onAddFriend?: (userId: number) => void
+  onUnfriend?: (userId: number) => void
   pendingInvite: boolean
+  pendingAddFriend: boolean
   socket?: Socket | null
 }
 
-export default function ChatWindow({ conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, socket, pendingInvite}: ChatWindowProps) {
+export default function ChatWindow({ conversation, messages, onSendMessage,  isFriend, pendingAddFriend, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, onAddFriend, onUnfriend, socket, pendingInvite}: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { id } = useParams()
@@ -83,10 +87,6 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
     }
   }
 
-  const handleSendInvite = () => {
-
-  }
-
   const handleSend = () => {
     if (isBlocked) return
     if (inputValue.trim() && id && isConnected) {
@@ -133,33 +133,69 @@ export default function ChatWindow({ conversation, messages, onSendMessage, onGe
           </div>
         </div>
         <div className="header-actions">
+          {incomingInvite?.invitationType === "friend_request" ? (
+            <>
+              <button 
+                className="add-friend-button" 
+                onClick={() => onRespondInvite(true, "friend_request")}
+                disabled={!activeConversationId || isBlocked}
+              >
+                Accept
+              </button> 
+              <button 
+                className="add-friend-button warning-button" 
+                onClick={() => onRespondInvite(false, "friend_request")}
+                disabled={!activeConversationId || isBlocked}
+              >
+                Deny
+              </button>            
+            </>
+          ) : isFriend ? (
+            <button 
+              className="add-friend-button warning-button" 
+              onClick={() => conversation?.other_user_id && onUnfriend?.(conversation.other_user_id)}
+              disabled={!activeConversationId}
+            >
+              Unfriend
+            </button>
+          ) : (
+            <button 
+              className={`add-friend-button ${pendingAddFriend ? "warning-button" : ""}`} 
+              onClick={() => conversation && (pendingAddFriend ? onCancelInvite : onInvite)(conversation, "friend_request")}
+              disabled={!activeConversationId || isBlocked}
+            >
+              {pendingAddFriend ? "Cancel" : "Add friend"}
+            </button>
+          )}
+
           <button
             className={`block-button ${isBlocked ? "blocked" : ""}`}
             onClick={handleBlockToggle}
             disabled={!activeConversationId || (isBlocked && !canUnblock)}
           >
-            {canUnblock  ? "Unblock" : "Block"}
+            {canUnblock ? "Unblock" : "Block"}
           </button>
         </div>
       </div>
 
-      {!isBlocked &&  <div className="invite-bar">
-        {incomingInvite ? (
+        
+      {isFriend && !isBlocked &&  <div className="invite-bar">
+        {incomingInvite  && incomingInvite.invitationType === "game_request" ? (
           <div className="invite-actions">
             <span className="invite-text-inline">ready to play!</span>
-            <button className="invite-accept" onClick={() => onRespondInvite?.(true)}>Accept</button>
-            <button className="invite-deny" onClick={() => onRespondInvite?.(false)}>Deny</button>
+            <button className="invite-accept" onClick={() => onRespondInvite(true, "game_request")}>Accept</button>
+            <button className="invite-deny" onClick={() => onRespondInvite(false, "game_request")}>Deny</button>
           </div>
         ) : (
           <>
             <button
               className="invite-button"
               disabled={!isConnected || isBlocked || pendingInvite}
-              onClick={() => conversation && onInvite?.(conversation)}
+              onClick={() => conversation && onInvite(conversation, "game_request")}
             >
               {(pendingInvite)? "Pending Invite.." : "Invite to Play"}
             </button>
-            {(pendingInvite )&& <button onClick={() => onCancelInvite?.(conversation)} className="block-button blocked">cancel</button>}
+            {(pendingInvite) && <button onClick={() => onCancelInvite(conversation, "game_request")} className="block-button warning-button">cancel</button>}
           </>
         )}
       </div>}

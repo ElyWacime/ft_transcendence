@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 
 type ChatSocketContextValue = {
   socket: Socket | null;
@@ -9,6 +10,10 @@ type ChatSocketContextValue = {
   invitePrompt: any;
   setInvitePrompt: (invite: any) => void;
   currentUser: any;
+  friendsList: any;
+  setFriendsList: (friends: any) => void;
+  pendingAddFriend: boolean;
+  setPendingAddFriend: (pending: boolean) => void;
 };
 
 const ChatSocketContext = createContext<ChatSocketContextValue | null>(null);
@@ -17,11 +22,14 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost";
 const SERVER_URL = API_URL;
 
 export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
+  const navigate = useNavigate();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [invitePrompt, setInvitePrompt] = useState<any>(null);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [pendingInvite, setPendingInvite] = useState<boolean>(false)
+    const [pendingAddFriend, setPendingAddFriend] = useState<boolean>(false)
+    const [friendsList, setFriendsList] = useState<any>({})
     const { isLoggedIn } = useAuth();
 
 
@@ -50,13 +58,41 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     chatSocket.on("disconnect", () => setIsConnected(false));
     
     chatSocket.on("gameInvite", (data: any) => {
+      console.log("Received game invite:", data);
       setInvitePrompt(data);
     });
 
 
-    chatSocket.on("cancelInvite",() => {
-      setInvitePrompt(null);
-      setPendingInvite(false)
+    const handleGameInviteResponse = (data: any) => {
+      if (data.invitationType === "game_request") {
+        setPendingInvite(false)
+        if (data.accepted) {
+          navigate(`/loading?mode=2`);
+        }
+      } else if (data.invitationType === "friend_request") {
+        console.log("here")
+        setPendingAddFriend(false)
+        if (data.accepted) {
+          setFriendsList((prev: any) => ({
+            ...prev,
+            [data.fromUserId]: { isFriend: true }
+          }))
+        }
+      }
+    }
+
+
+    chatSocket.on('gameInviteResponse', handleGameInviteResponse)
+
+    
+    chatSocket.on("cancelInvite",({invitationType}) => {
+      if (invitationType === "game_request") {
+        setInvitePrompt(null);
+        setPendingInvite(false)
+      } else if (invitationType === "friend_request") {
+        setInvitePrompt(null);
+        setPendingAddFriend(false)
+      }
     });
 
     return () => {
@@ -65,7 +101,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
   }, [isLoggedIn]);
 
   return (
-    <ChatSocketContext.Provider value={{ socket, isConnected, invitePrompt, setInvitePrompt, currentUser, pendingInvite, setPendingInvite }}>
+    <ChatSocketContext.Provider value={{ socket, isConnected, invitePrompt, setInvitePrompt, currentUser, pendingInvite, setPendingInvite, pendingAddFriend, setPendingAddFriend, friendsList, setFriendsList }}>
       {children}
     </ChatSocketContext.Provider>
   );

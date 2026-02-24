@@ -90,6 +90,16 @@ async function blockUser(blockerId, blockedId) {
     await db.run(stmt, [blockerId, blockedId]);
 }
 
+async function addFriend(userIdA, userIdB) {
+    const stmt = `
+        INSERT INTO friends_list (user_a, user_b)
+        VALUES (?, ?)
+        ON CONFLICT(user_a, user_b) DO NOTHING
+    `;
+
+    await db.run(stmt, [userIdA, userIdB]);
+}
+
 async function getBlockingStatus(userIdA, userIdB) {
     const stmt = `
         SELECT blocker_id, blocked_id
@@ -112,38 +122,59 @@ async function getBlockingStatus(userIdA, userIdB) {
     };
 }
 
-
-async function createInvitation(inviterId, inviteeId) {
+async function getFriendStatus(userIdA, userIdB) {
     const stmt = `
-        INSERT INTO pending_invitations (inviter_id, invitee_id)
-        VALUES (?, ?)
-        ON CONFLICT(inviter_id, invitee_id) DO NOTHING
-    `;
-
-    await db.run(stmt, [inviterId, inviteeId]);
-}
-
-
-async function cancelInvitation(inviterId, inviteeId) {
-    const stmt = `
-        DELETE FROM pending_invitations
-        WHERE inviter_id = ? AND invitee_id = ?
-        OR (inviter_id = ? AND invitee_id = ?)
-
-    `;
-
-    await db.run(stmt, [inviterId, inviteeId, inviteeId, inviterId]);
-}
-
-async function getInvitationStatus(userIdA, userIdB) {
-    const stmt = `
-        SELECT inviter_id, invitee_id
-        FROM pending_invitations
-        WHERE (inviter_id = ? AND invitee_id = ?)
-        OR (inviter_id = ? AND invitee_id = ?)
+        SELECT user_a, user_b
+        FROM friends_list
+        WHERE (user_a = ? AND user_b = ?)
+        OR (user_a = ? AND user_b = ?)
     `;
 
     const row = await db.get(stmt, [userIdA, userIdB, userIdB, userIdA]);
+
+    if (!row) {
+        return { friends: false };
+    }
+
+    return {
+        friends: true,
+        userA: row.user_a,
+        userB: row.user_b
+    };
+} 
+
+
+async function createInvitation(inviterId, inviteeId, invitationType) {
+    const stmt = `
+        INSERT INTO pending_invitations (inviter_id, invitee_id, invitation_type)
+        VALUES (?, ?, ?)
+        ON CONFLICT(inviter_id, invitee_id) DO NOTHING
+    `;
+
+    await db.run(stmt, [inviterId, inviteeId, invitationType]);
+}
+
+
+async function cancelInvitation(inviterId, inviteeId, invitationType) {
+    const stmt = `
+        DELETE FROM pending_invitations
+        WHERE inviter_id = ? AND invitee_id = ? and invitation_type = ?
+        OR (inviter_id = ? AND invitee_id = ? AND invitation_type = ?)
+
+    `;
+
+    await db.run(stmt, [inviterId, inviteeId, invitationType, inviteeId, inviterId, invitationType]);
+}
+
+async function getInvitationStatus(userIdA, userIdB, invitationType) {
+    const stmt = `
+        SELECT inviter_id, invitee_id, invitation_type
+        FROM pending_invitations
+        WHERE (inviter_id = ? AND invitee_id = ? AND invitation_type = ?)
+        OR (inviter_id = ? AND invitee_id = ? AND invitation_type = ?)
+    `;
+
+    const row = await db.get(stmt, [userIdA, userIdB, invitationType, userIdB, userIdA, invitationType]);
 
     if (!row) {
         return { pending: false };
@@ -153,6 +184,7 @@ async function getInvitationStatus(userIdA, userIdB) {
         pending: true,
         inviterId: row.inviter_id,
         inviteeId: row.invitee_id,
+        invitationType: row.invitation_type,
         invitedBySelf: row.inviter_id === userIdA
     };
 }
@@ -166,15 +198,18 @@ async function unblockUser(blockerId, blockedId) {
     await db.run(stmt, [blockerId, blockedId]);
 }
 
-async function getUsers(user_id)
-{
+async function deleteFriend(userIdA, userIdB) {
     const stmt = `
-        SELECT * FROM users where id=?
-    `
+        DELETE FROM friends_list
+        WHERE (user_a = ? AND user_b = ?)
+        OR (user_a = ? AND user_b = ?)
+    `;
 
-    const users = await db.all(stmt, [user_id])
-    return users;
+    await db.run(stmt, [userIdA, userIdB, userIdB, userIdA]);
 }
+
+
+
 
 async function getUserByUsername(username) {
     const stmt = `
@@ -184,6 +219,8 @@ async function getUserByUsername(username) {
     const user = await db.get(stmt, [username]);
     return user;
 }
+
+
 
 
 async function checkIfConvExist(senderId, receipentId) 
@@ -258,7 +295,6 @@ export {
     initializeDb,
     saveMessage,
     getChatHistory,
-    getUsers,
     checkIfConvExist,
     createNewConversation,
     getConversationsForUser,
@@ -269,6 +305,7 @@ export {
     getInvitationStatus,
     createInvitation,
     cancelInvitation,
+    getFriendStatus,
     unblockUser,
-    getUserByUsername
+    getUserByUsername, addFriend, deleteFriend
 };

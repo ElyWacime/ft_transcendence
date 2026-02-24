@@ -279,6 +279,34 @@
   gap: 10px;
 }
 
+.add-friend-button {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.add-friend-button:hover:not(:disabled) {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.add-friend-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.warning-button:hover:not(:disabled),
+.warning-button:focus-visible {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border-color: hsl(var(--destructive));
+}
+
 .block-button {
   padding: 8px 14px;
   border-radius: 20px;
@@ -290,9 +318,11 @@
   transition: var(--transition-smooth);
 }
 
-.block-button:hover:not(:disabled) {
-  background: hsl(var(--accent));
-  color: hsl(var(--accent-foreground));
+.block-button:hover:not(:disabled),
+.block-button:focus-visible {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border-color: hsl(var(--destructive));
 }
 
 .block-button.blocked {

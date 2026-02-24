@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import cookie from "@fastify/cookie"
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
-import { initializeDb, saveMessage, getChatHistory, insertUsers, cancelInvitation, getUsers, createInvitation,  checkIfConvExist, createNewConversation, getConversationsForUser, getConversationParticipantIds, blockUser, getBlockingStatus, getInvitationStatus, unblockUser, getUserByUsername } from './sqlite_chat_logic.js';
+import { initializeDb, saveMessage, getChatHistory, getFriendStatus,  addFriend, deleteFriend, insertUsers, cancelInvitation, createInvitation,  checkIfConvExist, createNewConversation, getConversationsForUser, getConversationParticipantIds, blockUser, getBlockingStatus, getInvitationStatus, unblockUser, getUserByUsername } from './sqlite_chat_logic.js';
 
 const fastify = Fastify();
 
@@ -110,76 +110,6 @@ fastify.post("/addUsers", async (request) => {
   return await insertUsers(request.body.id, request.body.username);
 })
 
-fastify.post("/block", async (request) => {
-  const res = await desToken(request);
-  const token = await res.json();
-  const blockerId = token.user_id;
-  const blockedId = request.body.user_id;
-
-  await blockUser(blockerId, blockedId);
-  const status = await getBlockingStatus(blockerId, blockedId);
-
-  return {
-    blocked: status.blocked,
-    blockerId: status.blockerId,
-    blockedId: status.blockedId,
-    message: 'User blocked successfully'
-  };
-});
-
-fastify.post("/invite", async (request) => {
-  const res = await desToken(request);
-  const token = await res.json();
-  const inviterId = token.user_id;
-  const inviteeId = request.body.user_id;
-
-  await createInvitation(inviterId, inviteeId);
-  
-  return {
-    pending: true,
-    inviterId,
-    inviteeId,
-    message: 'Game invitation sent successfully'
-  };
-});
-
-fastify.post("/unblock", async (request, reply) => {
-  const res = await desToken(request);
-  const token = await res.json();
-  const blockerId = token.user_id;
-  const unblockedId = request.body.user_id;
-
-  const statusBefore = await getBlockingStatus(blockerId, unblockedId);
-  
-  if (!statusBefore.blocked || statusBefore.blockerId !== blockerId) {
-    return reply.code(400).send({ error: 'You can only unblock users you blocked' });
-  }
-
-  await unblockUser(blockerId, unblockedId);
-
-  return {
-    unblocked: true,
-    unblockedId,
-    message: 'User unblocked successfully'
-  };
-});
-
-fastify.post("/deleteInvite", async (request, reply) => {        
-  const res = await desToken(request);
-  const token = await res.json();
-  const inviterId = token.user_id;
-  const inviteeId = request.body.user_id;
-
-  await cancelInvitation(inviterId, inviteeId);
-
-  return {
-    pending: false,
-    inviterId,
-    inviteeId,
-    message: 'Game invitation cancelled successfully'
-  };
-});
-
 fastify.post("/block/status", async (request, reply) => {
   const res = await desToken(request);
 
@@ -205,15 +135,101 @@ fastify.post("/block/status", async (request, reply) => {
   };
 });
 
-fastify.post("/invitation/status", async (request, reply) => {
+fastify.post("/friends/status", async (request, reply) => {
   const res = await desToken(request);
 
   const token = await res.json();
   const requesterId = token.user_id;
   const otherUserId = request.body.user_id;
 
+  const status = await getFriendStatus(requesterId, otherUserId);
 
-  const status = await getInvitationStatus(requesterId, otherUserId);
+  if (!status.friends) {
+    return { friends: false };
+  }
+
+  return {
+    friends: true,
+    message: 'You are friends with this user'
+  };
+});
+
+fastify.post("/block", async (request) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const blockerId = token.user_id;
+  const blockedId = request.body.user_id;
+
+  await blockUser(blockerId, blockedId);
+  const status = await getBlockingStatus(blockerId, blockedId);
+
+  return {
+    blocked: status.blocked,
+    blockerId: status.blockerId,
+    blockedId: status.blockedId,
+    message: 'User blocked successfully'
+  };
+});
+
+
+fastify.post("/addFriend", async (request) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const user_a = token.user_id;
+  const user_b = request.body.user_id;
+
+  await addFriend(user_a, user_b);
+
+  return {
+    message: 'Friend added successfully'
+   };
+})
+
+
+fastify.post("/removeFriend", async (request) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const user_a = token.user_id;
+  const user_b = request.body.user_id;
+
+  await deleteFriend(user_a, user_b);
+
+  return {
+    message: 'Friend removed successfully'
+   };
+})
+
+fastify.post("/unblock", async (request, reply) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const blockerId = token.user_id;
+  const unblockedId = request.body.user_id;
+
+  const statusBefore = await getBlockingStatus(blockerId, unblockedId);
+  
+  if (!statusBefore.blocked || statusBefore.blockerId !== blockerId) {
+    return reply.code(400).send({ error: 'You can only unblock users you blocked' });
+  }
+
+  await unblockUser(blockerId, unblockedId);
+
+  return {
+    unblocked: true,
+    unblockedId,
+    message: 'User unblocked successfully'
+  };
+});
+
+fastify.post("/invitation/status", async (request, reply) => {
+  const res = await desToken(request);
+
+  const token = await res.json();
+  const requesterId = token.user_id;
+  const otherUserId = request.body.user_id;
+  const invitationType = request.body.invitationType;
+
+
+  const status = await getInvitationStatus(requesterId, otherUserId, invitationType);
 
   if (!status.pending) {
     return { pending: false };
@@ -225,8 +241,46 @@ fastify.post("/invitation/status", async (request, reply) => {
       pending: true,
       invitedBy,
       inviterId: status.inviterId,
-      inviteeId: status.inviteeId
+      inviteeId: status.inviteeId,
+      invitationType: status.invitationType,
     };
+});
+
+fastify.post("/invite", async (request) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const inviterId = token.user_id;
+  const inviteeId = request.body.user_id;
+  const invitationType = request.body.invitation_type;
+  
+
+  await createInvitation(inviterId, inviteeId, invitationType); 
+  
+  return {
+    pending: true,
+    inviterId,
+    inviteeId,
+    invitationType,
+    message: 'invitation sent successfully'
+  };
+});
+
+fastify.post("/deleteInvite", async (request, reply) => {        
+  const res = await desToken(request);
+  const token = await res.json();
+  const inviterId = token.user_id;
+  const inviteeId = request.body.user_id;
+  const invitationType = request.body.invitation_type;
+
+  await cancelInvitation(inviterId, inviteeId, invitationType);
+
+  return {
+    pending: false,
+    inviterId,
+    inviteeId,
+    invitationType,
+    message: 'invitation cancelled successfully'
+  };
 });
 
 io.on('connection', (socket) => {
@@ -274,22 +328,30 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('gameInvite', ({ conversationId, toUserId, fromUserId }) => {
+  socket.on('gameInvite', ({ conversationId, toUserId, fromUserId, invitationType }) => {
     socket.to(`user:${toUserId}`).emit('gameInvite', {
       conversationId,
       fromUserId,
+      invitationType
     });
   });
 
-  socket.on('cancelInvite', ({ toUserId  }) => {
-    socket.to(`user:${toUserId}`).emit('cancelInvite', {});
+  socket.on('cancelInvite', ({ toUserId, invitationType  }) => {
+    socket.to(`user:${toUserId}`).emit('cancelInvite', { invitationType });
   });
 
-  socket.on('gameInviteResponse', ({ conversationId, toUserId, fromUserId, accepted }) => {
+  socket.on('gameInviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {
     socket.to(`user:${toUserId}`).emit('gameInviteResponse', {
       conversationId,
       accepted,
-      fromUserId
+      fromUserId,
+      invitationType
+    });
+  });
+
+  socket.on('unfriend', ({ userId, toUnfriend }) => {
+    socket.to(`user:${userId}`).emit('unfriend', {
+      userId: toUnfriend
     });
   });
 });

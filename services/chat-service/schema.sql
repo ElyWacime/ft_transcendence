@@ -21,28 +21,27 @@ CREATE TABLE IF NOT EXISTS conversation_participants (
     UNIQUE(conversation_id, user_id)  
 );
 
-CREATE TABLE IF NOT EXISTS blocking_participants (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    blocker_id CHAR(36) NOT NULL,
-    blocked_id CHAR(36) NOT NULL,
-
-    FOREIGN KEY (blocker_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (blocked_id) REFERENCES users (id) ON DELETE CASCADE,
-
-    UNIQUE(blocker_id, blocked_id)
-);
-
 CREATE TABLE IF NOT EXISTS pending_invitations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- conversation_id INTEGER NOT NULL,
     inviter_id CHAR(36) NOT NULL,
     invitee_id CHAR(36) NOT NULL,
+    invitation_type TEXT NOT NULL CHECK(invitation_type IN ('game_request', 'friend_request')),
 
-    -- FOREIGN KEY (conversation_id) REFERENCES conversations (id) ON DELETE CASCADE,
     FOREIGN KEY (inviter_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (invitee_id) REFERENCES users (id) ON DELETE CASCADE,
 
     UNIQUE(inviter_id, invitee_id)
+);
+
+CREATE TABLE IF NOT EXISTS friends_list (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_a CHAR(36) NOT NULL,
+    user_b CHAR(36) NOT NULL,
+
+    FOREIGN KEY (user_a) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_b) REFERENCES users (id) ON DELETE CASCADE,
+
+    UNIQUE(user_a, user_b)
 );
 
 CREATE TABLE IF NOT EXISTS blocking_participants (

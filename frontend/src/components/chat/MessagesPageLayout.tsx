@@ -21,16 +21,20 @@ type MessagesPageLayoutProps = {
   onBlockConversation: (conversationId: number) => void
   onUnblockConversation: (conversationId: number) => void
   onCheckBlockStatus: (conversation: any) => void
-  onCheckInvitationStatus: (conversation: any) => void
+  onCheckInvitationStatus: (conversation: any, invitationType: string) => void
   invitePrompt?: any
-  onInvite: (conversation: any) => void
-  onRespondInvite: (accepted: boolean) => void
-  onCancelInvite: (conversation: any) => void
+  onInvite: (conversation: any, invitationType: string) => void
+  onRespondInvite: (accepted: boolean, invitationType: string) => void
+  onCancelInvite: (conversation: any, invitationType: string) => void
+  onCheckFriendshipStatus: (conversation: any) => void
   pendingInvite: boolean
+  onUnfriend: (userId: number) => void
+  pendingAddFriend: boolean
+  friendsList: any
   socket?: Socket | null
 }
 
-export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket, pendingInvite }: MessagesPageLayoutProps) {
+export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, onUnfriend, friendsList, onCheckFriendshipStatus, pendingAddFriend, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket, pendingInvite }: MessagesPageLayoutProps) {
   const { id } = useParams()
 
   useEffect(() => {
@@ -45,6 +49,8 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
 
   const selectedConversation = conversations.find((c) => c.id === selectedId)
   const blockStatus = selectedConversation ? blockedConversations[selectedConversation.id] : null
+  const friendstatus = selectedConversation ? friendsList[selectedConversation.other_user_id] : null
+  const isFriend = friendstatus?.isFriend ?? false
   const isBlocked = blockStatus?.blocked ?? false
   const blockedBy = blockStatus?.blockedBy ?? null
   const canUnblock = isBlocked && blockedBy === 'you'
@@ -53,12 +59,16 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
   useEffect(() => {
     if (!selectedConversation || !onCheckBlockStatus) return
     const cachedBlockingStatus = blockedConversations?.[selectedConversation.id]
-    
+    const cachedFriendshipStatus = friendsList?.[selectedConversation.other_user_id]
     if (!cachedBlockingStatus) {
       onCheckBlockStatus(selectedConversation)
     }
-    onCheckInvitationStatus(selectedConversation)
-  }, [selectedConversation, blockedConversations])
+    if (!cachedFriendshipStatus) {
+      onCheckFriendshipStatus(selectedConversation)
+    }
+    onCheckInvitationStatus(selectedConversation, "friend_request")
+    onCheckInvitationStatus(selectedConversation, "game_request")
+  }, [selectedConversation, blockedConversations, friendsList])
 
 
   const handleStartConversation = async (userId: number) => {
@@ -90,6 +100,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           onStartConversation={handleStartConversation}
         />
         <ChatWindow 
+          onUnfriend={onUnfriend}
           conversation={selectedConversation}
           messages={messages} 
           onSendMessage={onSendMessage}
@@ -97,10 +108,12 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           isConnected={isConnected}
           currentUser={currentUser}
           isBlocked={isBlocked}
+          isFriend={isFriend}
           blockedBy={blockedBy}
           canUnblock={canUnblock}
           incomingInvite={incomingInvite}
           onInvite={onInvite}
+          pendingAddFriend={pendingAddFriend}
           onRespondInvite={onRespondInvite}
           onBlockConversation={onBlockConversation}
           onUnblockConversation={onUnblockConversation}

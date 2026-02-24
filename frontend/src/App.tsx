@@ -31,10 +31,12 @@ import { ChatSocketProvider } from "./context/ChatSocketContext";
 const queryClient = new QueryClient();
 
 const RootLayout = () => (
-  <div className="page-wrapper">
-    <Navigation />
-    <Outlet />
-  </div>
+  <ChatSocketProvider>
+    <div className="page-wrapper">
+      <Navigation />
+      <Outlet />
+    </div>
+  </ChatSocketProvider>
 );
 
 const router = createBrowserRouter(
@@ -128,9 +130,7 @@ const App = () => (
       <Toaster />
       <AuthProvider children={undefined}>
         <WebSocketProvider>
-        <ChatSocketProvider>
-        <RouterProvider router={router} />
-        </ChatSocketProvider>
+          <RouterProvider router={router} />
         </WebSocketProvider>
       </AuthProvider>
   </QueryClientProvider>
