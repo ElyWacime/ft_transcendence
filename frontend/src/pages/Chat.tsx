@@ -203,7 +203,7 @@ export default function Chat() {
               if (response.ok) {
                 setFriendsList((prev: any) => ({
                   ...prev,
-                  [invitePrompt.fromUserId]: { isFriend: true }
+                  [invitePrompt.fromUserId]: { ...prev[invitePrompt.fromUserId], isFriend: true }
                 }))
               }
 
@@ -259,7 +259,7 @@ export default function Chat() {
       if (res.ok) {
         setFriendsList((prev: any) => ({
           ...prev,
-          [other_user_id]: { isFriend: false }
+          [other_user_id]: { ...prev[other_user_id], isFriend: false }
         }))
 
         cancelInvite({ other_user_id }, "game_request")
@@ -337,6 +337,7 @@ export default function Chat() {
   }
 
   const checkFriendshipStatus = async (conversation: any) => {
+    console.log("chec friends")
     try {
       const res = await fetch(`${SERVER_URL}/api/chat/friends/status`, {
         method: 'POST',
@@ -349,12 +350,12 @@ export default function Chat() {
         if (data.friends) {
           setFriendsList((prev: any) => ({
             ...prev,
-            [conversation.other_user_id]: {isFriend: true}
+            [conversation.other_user_id]: {...prev[conversation.other_user_id], isFriend: true}
           })) 
         } else { 
           setFriendsList((prev: any) => ({
             ...prev,
-            [conversation.other_user_id]: {isFriend: false}
+            [conversation.other_user_id]: {...prev[conversation.other_user_id], isFriend: false}
           })) 
         }
       }

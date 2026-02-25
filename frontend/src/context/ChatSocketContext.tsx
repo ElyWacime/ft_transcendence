@@ -42,6 +42,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     });
     setSocket(chatSocket);
     chatSocket.on("connect", async () => {
+      console.log("chat socket connected");
         try {
           const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' });
           const usercookie = await res.json();
@@ -64,7 +65,6 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     });
 
     const handleGameInviteResponse = (data: any) => {
-      console.log("friendssss")
       if (data.invitationType === "game_request") {
         setPendingInvite(false)
         if (data.accepted) {
@@ -81,17 +81,16 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    chatSocket.on('onlineFriends', (data: any) => {       
+    chatSocket.on('onlineFriends', (data: any) => {
       setFriendsList((prev: any) => {
         const updated = { ...prev };
         data.onlineFriends.forEach((friendId: number) => {
-          if (updated[friendId]) {
-            updated[friendId] = { ...updated[friendId], online: true };
-          }
+          updated[friendId] = { ...updated[friendId], online: true };
         });
         return updated;
       });
     });
+    
 
     chatSocket.on('friendOnline', (data: any) => {
       setFriendsList((prev: any) => ({

@@ -290,6 +290,7 @@ io.on('connection', (socket) => {
   let myId;
   
   socket.on('authenticate', async (userId) => {
+    console.log("auth")
     myId = userId;
     socket.join(`user:${myId}`);
     connectedUsers.set(userId, true);
@@ -314,6 +315,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', async () => {
+    console.log(`hit disconnect`);
     if (myId) {
       const friendIds = await getAllFriends(myId);
       
