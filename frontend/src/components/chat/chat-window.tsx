@@ -16,6 +16,7 @@ type ChatWindowProps = {
   currentUser?: any
   isBlocked: boolean
   isFriend: boolean
+  isOnline: boolean
   blockedBy?: string | null
   canUnblock: boolean
   incomingInvite?: any
@@ -31,7 +32,7 @@ type ChatWindowProps = {
   socket?: Socket | null
 }
 
-export default function ChatWindow({ conversation, messages, onSendMessage,  isFriend, pendingAddFriend, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, onAddFriend, onUnfriend, socket, pendingInvite}: ChatWindowProps) {
+export default function ChatWindow({ conversation, messages, onSendMessage,  isFriend, isOnline, pendingAddFriend, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, onAddFriend, onUnfriend, socket, pendingInvite}: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { id } = useParams()
@@ -113,7 +114,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
     )
   }
 
-  const peerName = conversation.other_user_username || conversation.name || "Chat partner"
+  const peerName = conversation.other_user_username
   const userProfileLink = `/dashboard/${peerName}`
   const filteredMessages = activeConversationId
     ? messages.filter((message) => {
@@ -130,6 +131,8 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
             <a className="chat-peer-link" href={userProfileLink} aria-label={`Open chat with ${peerName}`}>
               {peerName}
             </a>
+            
+            {isFriend && <div className={`online-indicator ${isOnline ? "online" : "offline"}`}>{isOnline ? "Online" : "Offline"} </div>}
           </div>
         </div>
         <div className="header-actions">

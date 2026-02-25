@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import cookie from "@fastify/cookie"
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
-import { initializeDb, saveMessage, getChatHistory, getFriendStatus,  addFriend, deleteFriend, insertUsers, cancelInvitation, createInvitation,  checkIfConvExist, createNewConversation, getConversationsForUser, getConversationParticipantIds, blockUser, getBlockingStatus, getInvitationStatus, unblockUser, getUserByUsername } from './sqlite_chat_logic.js';
+import { initializeDb, saveMessage, getChatHistory, getFriendStatus, addFriend, deleteFriend, insertUsers, cancelInvitation, createInvitation, checkIfConvExist, createNewConversation, getConversationsForUser, getConversationParticipantIds, blockUser, getBlockingStatus, getInvitationStatus, unblockUser, getUserByUsername, getAllFriends } from './sqlite_chat_logic.js';
 
 const fastify = Fastify();
 
@@ -23,6 +23,8 @@ const io = new Server(fastify.server, {
     credentials: true 
   }
 });
+
+const connectedUsers = new Map();
 
 async function desToken(request)
 {
@@ -180,6 +182,7 @@ fastify.post("/addFriend", async (request) => {
 
   await addFriend(user_a, user_b);
 
+
   return {
     message: 'Friend added successfully'
    };
@@ -286,9 +289,44 @@ fastify.post("/deleteInvite", async (request, reply) => {
 io.on('connection', (socket) => {
   let myId;
   
-  socket.on('authenticate', (userId) => {
+  socket.on('authenticate', async (userId) => {
+    console.log("auth")
     myId = userId;
     socket.join(`user:${myId}`);
+    connectedUsers.set(userId, true);
+
+    const friendIds = await getAllFriends(userId);
+    
+    const onlineFriends = friendIds.filter(friendId => connectedUsers.has(friendId));
+  
+    socket.emit('onlineFriends', { onlineFriends });
+
+    onlineFriends.forEach(friendId => {
+      socket.to(`user:${friendId}`).emit('friendOnline', { userId: myId });
+    });
+  });
+
+  socket.on('friendOnline', ({ userId }) => {
+    if (connectedUsers.has(userId)) {
+        socket.emit('friendOnline', { userId });
+    }
+
+    socket.to(`user:${userId}`).emit('friendOnline', { userId: myId });
+  });
+
+  socket.on('disconnect', async () => {
+    console.log(`hit disconnect`);
+    if (myId) {
+      const friendIds = await getAllFriends(myId);
+      
+      friendIds.forEach(friendId => {
+        if (connectedUsers.has(friendId)) {
+          socket.to(`user:${friendId}`).emit('friendOffline', { userId: myId });
+        }
+      });
+      
+      connectedUsers.delete(myId);
+    }
   });
 
   socket.on("newConversation", ({ userId }) => {

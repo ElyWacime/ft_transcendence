@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom"
 import { Socket } from 'socket.io-client'
 import ChatSidebar from "./chat-sidebar"
 import ChatWindow from "./chat-window"
+import { useAuth } from "@/context/AuthContext"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -36,6 +37,7 @@ type MessagesPageLayoutProps = {
 
 export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, onUnfriend, friendsList, onCheckFriendshipStatus, pendingAddFriend, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket, pendingInvite }: MessagesPageLayoutProps) {
   const { id } = useParams()
+  
 
   useEffect(() => {
     onFetchConversations()
@@ -51,6 +53,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
   const blockStatus = selectedConversation ? blockedConversations[selectedConversation.id] : null
   const friendstatus = selectedConversation ? friendsList[selectedConversation.other_user_id] : null
   const isFriend = friendstatus?.isFriend ?? false
+  const isOnline = friendstatus?.online ?? false
   const isBlocked = blockStatus?.blocked ?? false
   const blockedBy = blockStatus?.blockedBy ?? null
   const canUnblock = isBlocked && blockedBy === 'you'
@@ -59,16 +62,14 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
   useEffect(() => {
     if (!selectedConversation || !onCheckBlockStatus) return
     const cachedBlockingStatus = blockedConversations?.[selectedConversation.id]
-    const cachedFriendshipStatus = friendsList?.[selectedConversation.other_user_id]
     if (!cachedBlockingStatus) {
       onCheckBlockStatus(selectedConversation)
     }
-    if (!cachedFriendshipStatus) {
-      onCheckFriendshipStatus(selectedConversation)
-    }
+    onCheckFriendshipStatus(selectedConversation)
     onCheckInvitationStatus(selectedConversation, "friend_request")
     onCheckInvitationStatus(selectedConversation, "game_request")
-  }, [selectedConversation, blockedConversations, friendsList])
+    
+  }, [selectedConversation, blockedConversations])
 
 
   const handleStartConversation = async (userId: number) => {
@@ -109,6 +110,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           currentUser={currentUser}
           isBlocked={isBlocked}
           isFriend={isFriend}
+          isOnline={isOnline}
           blockedBy={blockedBy}
           canUnblock={canUnblock}
           incomingInvite={incomingInvite}

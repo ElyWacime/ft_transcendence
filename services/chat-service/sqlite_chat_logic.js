@@ -208,6 +208,20 @@ async function deleteFriend(userIdA, userIdB) {
     await db.run(stmt, [userIdA, userIdB, userIdB, userIdA]);
 }
 
+async function getAllFriends(userId) {
+    const stmt = `
+        SELECT CASE 
+            WHEN user_a = ? THEN user_b
+            ELSE user_a
+        END AS friend_id
+        FROM friends_list
+        WHERE user_a = ? OR user_b = ?
+    `;
+
+    const friends = await db.all(stmt, [userId, userId, userId]);
+    return friends.map(row => row.friend_id);
+}
+
 
 
 
@@ -307,5 +321,8 @@ export {
     cancelInvitation,
     getFriendStatus,
     unblockUser,
-    getUserByUsername, addFriend, deleteFriend
+    getUserByUsername,
+    addFriend,
+    deleteFriend,
+    getAllFriends
 };
