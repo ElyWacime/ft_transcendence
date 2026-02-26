@@ -68,8 +68,8 @@ export const PongCanvasAI = ({
     ball: {
       x: 400,
       y: 300,
-      dx: BALL_SPEED ,
-      dy: BALL_SPEED ,
+      dx: BALL_SPEED,
+      dy: BALL_SPEED,
       radius: 8,
     },
     paddle1: { x: 20, y: 250, width: 15, height: 100 },
@@ -83,7 +83,7 @@ export const PongCanvasAI = ({
     (dirx: number = 1) => ({
       x: 400,
       y: 300,
-      dx: dirx * BALL_SPEED ,
+      dx: dirx * BALL_SPEED,
       dy: (Math.random() > 0.5 ? 1 : -1) * BALL_SPEED,
       radius: 8,
     }),
@@ -196,7 +196,7 @@ export const PongCanvasAI = ({
         } else if (aiAction && aiRef.current) {
           const aiSpeed = paddleSpeed * delta * aiSpeedMultipliers[aiDifficulty];
           const ballApproaching = newState.ball.dx > 0;
-          
+
           if (ballApproaching) {
             if (aiAction.moveUp && newState.paddle2.y > 0) {
               newState.paddle2.y = Math.max(0, newState.paddle2.y - aiSpeed);
@@ -369,19 +369,19 @@ export const PongCanvasAI = ({
             <div className="player-control-hint">W/S Keys</div>
           </CardContent>
         </Card>
-  
+
         <div className="game-controls-center">
           <div className="game-controls-buttons">
             {gameState.gameStatus === "waiting" && (
               <button onClick={startGame} className="game-control-button start-button">
                 <Play className="button-icon" />
-                
+
               </button>
             )}
             {gameState.gameStatus === "playing" && (
               <button onClick={pauseGame} className="game-control-button pause-button">
                 <Pause className="button-icon" />
-                
+
               </button>
             )}
             {gameState.gameStatus === "paused" && (
@@ -392,12 +392,12 @@ export const PongCanvasAI = ({
             <div className="additional-controls">
               <button onClick={resetGame} className="game-control-button reset-button">
                 <RotateCcw className="button-icon" />
-                
+
               </button>
             </div>
           </div>
         </div>
-  
+
         <Card className="player-card player2-card">
           <CardHeader className="player-card-header">
             <CardTitle className="player-card-title">{player2Name}</CardTitle>
@@ -412,7 +412,7 @@ export const PongCanvasAI = ({
           </CardContent>
         </Card>
       </div>
-  
+
       <div className="game-canvas-container">
         <canvas
           ref={canvasRef}

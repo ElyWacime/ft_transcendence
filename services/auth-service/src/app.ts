@@ -6,7 +6,7 @@ import cors from "@fastify/cors";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { oauthRoutes } from "./modules/user/oauth.route";
 
-const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
+const app = Fastify({ logger: true, bodyLimit: 10 * 1024 * 1024 }).withTypeProvider<ZodTypeProvider>();
 
 app.register(cors, {
   origin: [
@@ -36,11 +36,11 @@ app.decorate(
   "authenticate",
   async (req: FastifyRequest, reply: FastifyReply) => {
     let token = req.headers.authorization?.replace('Bearer ', '');
-    
+
     if (!token) {
       token = req.cookies.access_token;
     }
-    
+
     if (!token) {
       return reply.status(401).send({ message: "Authentication required" });
     }
