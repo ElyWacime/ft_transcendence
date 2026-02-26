@@ -180,7 +180,7 @@ class UserAPI {
 
     if (res.ok) {
       try {
-        await fetch(`${API_URL}/api/chat/addUsers`, {
+        await fetch(`${API_URL}/api/chat/users/add`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

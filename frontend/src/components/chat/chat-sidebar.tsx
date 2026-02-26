@@ -29,7 +29,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     setLoading(true)
     setSearchError(null)
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/getUser`, {
+      const res = await fetch(`${SERVER_URL}/api/chat/user`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

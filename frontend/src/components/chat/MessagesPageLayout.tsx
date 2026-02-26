@@ -74,7 +74,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
 
   const handleStartConversation = async (userId: number) => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/conversation/start`, {
+      const res = await fetch(`${SERVER_URL}/api/chat/conversations/start`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

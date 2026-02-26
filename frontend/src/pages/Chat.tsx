@@ -63,9 +63,7 @@ export default function Chat() {
         }))
       }
     }
-
-
-
+    
     socket.on("newConversation", handleNewConversation)
     socket.on('receiveMessage', handleReceiveMessage)
     socket.on('blockStatusChanged', handleBlockStatusChanged)
@@ -136,7 +134,7 @@ export default function Chat() {
   const cancelInvite = async (conversation: any, invitationType: string) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
 
-    const response = await fetch(`${SERVER_URL}/api/chat/deleteInvite`, {
+    const response = await fetch(`${SERVER_URL}/api/chat/uninvite`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -176,7 +174,7 @@ export default function Chat() {
 
       if (res.ok)
       {
-          const response = await fetch(`${SERVER_URL}/api/chat/deleteInvite`, {
+          const response = await fetch(`${SERVER_URL}/api/chat/uninvite`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -193,7 +191,7 @@ export default function Chat() {
               navigate(`/loading?mode=2`);
             } else if (invitationType === "friend_request")
             {
-              const response = await fetch(`${SERVER_URL}/api/chat/addFriend`, {
+              const response = await fetch(`${SERVER_URL}/api/chat/friends/add`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -248,7 +246,7 @@ export default function Chat() {
 
   const removeFriend = async (other_user_id: number) => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/removeFriend`, {
+      const res = await fetch(`${SERVER_URL}/api/chat/friends/remove`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -284,7 +282,7 @@ export default function Chat() {
 
 
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/invitation/status`, {
+      const res = await fetch(`${SERVER_URL}/api/chat/invitations/status`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

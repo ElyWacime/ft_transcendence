@@ -1,7 +1,11 @@
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 import { promises as fs } from 'fs';    
 import path from 'path';
 
 const SCHEMA_FILE_PATH = path.join(process.cwd(), 'schema.sql');
+const DB_PATH = './dev.db';
+let db;
 
 async function setupDatabase(db) {
     try {
@@ -19,4 +23,22 @@ async function setupDatabase(db) {
     }
 }
 
-export { setupDatabase };
+export default async function initializeDb() {
+    try {
+        db = await open({
+            filename: DB_PATH,
+            driver: sqlite3.Database,
+        });
+
+        await setupDatabase(db);
+
+        console.log('Database tables are ready.');
+
+    } catch (error) {
+        console.error('Failed to initialize database:', error);
+        throw error;
+    }
+}
+
+
+export { db };

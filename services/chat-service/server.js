@@ -2,7 +2,12 @@ import Fastify from 'fastify';
 import cookie from "@fastify/cookie"
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
-import { initializeDb, saveMessage, getChatHistory, getFriendStatus, addFriend, deleteFriend, insertUsers, cancelInvitation, createInvitation, checkIfConvExist, createNewConversation, getConversationsForUser, getConversationParticipantIds, blockUser, getBlockingStatus, getInvitationStatus, unblockUser, getUserByUsername, getAllFriends } from './sqlite_chat_logic.js';
+import initializeDb from './setup-db.js';
+import { getInvitationStatus, createInvitation, cancelInvitation } from './invitation-q.js';
+import { getBlockingStatus, blockUser, unblockUser } from './block-q.js';
+import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './friends-q.js';
+import { insertUsers, getUserByUsername } from './user-q.js';
+import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './conversations-q.js';
 
 const fastify = Fastify();
 
@@ -40,48 +45,13 @@ fastify.get("/getCookieValue", async (request) => {
     const res =  await desToken(request);
     const token = await res.json();
     return token;
-})  
-
-fastify.post("/conversation/start", async (request) => { 
-  const res = await desToken(request);  
-
-  const token = await res.json();
-  const senderId = token.user_id;
-  const receipentId = request.body.receipentId;
-
-  let conv = await checkIfConvExist(senderId, receipentId);
-  if (conv)
-  {
-    return { conversationId: conv.id };
-  }
-
-  conv = await createNewConversation(senderId, receipentId);
-  return { conversationId: conv.id };
 })
 
-fastify.get("/conversations", async (request) => {
-    const res = await desToken(request);
-    const token = await res.json();
-    const senderId = token.user_id;
-
-    const userId = senderId;   
-    const conv = await getConversationsForUser(userId);
-
-    return conv;
+fastify.post("/users/add", async (request) => {
+  return await insertUsers(request.body.id, request.body.username);
 })
 
-fastify.get("/conversations/:id/messages", async (request) => {
-  const conversationId = request.params.id;
-
-  const messages = await getChatHistory(conversationId);
-
-  if (messages.length === 0) {
-    return [];
-  }
-  return messages;
-})
-
-fastify.post("/getUser", async (request, reply) => {
+fastify.post("/user", async (request, reply) => {
     const res = await desToken(request);
     const token = await res.json();
 
@@ -108,8 +78,89 @@ fastify.post("/getUser", async (request, reply) => {
     };
 });
 
-fastify.post("/addUsers", async (request) => {
-  return await insertUsers(request.body.id, request.body.username);
+fastify.get("/conversations", async (request) => {
+    const res = await desToken(request);
+    const token = await res.json();
+    const senderId = token.user_id;
+
+    const userId = senderId;   
+    const conv = await getConversationsForUser(userId);
+
+    return conv;
+})
+
+fastify.post("/conversations/start", async (request) => { 
+  const res = await desToken(request);  
+
+  const token = await res.json();
+  const senderId = token.user_id;
+  const receipentId = request.body.receipentId;
+
+  let conv = await checkIfConvExist(senderId, receipentId);
+  if (conv)
+  {
+    return { conversationId: conv.id };
+  }
+
+  conv = await createNewConversation(senderId, receipentId);
+  return { conversationId: conv.id };
+})
+
+fastify.get("/conversations/:id/messages", async (request) => {
+  const conversationId = request.params.id;
+
+  const messages = await getChatHistory(conversationId);
+
+  if (messages.length === 0) {
+    return [];
+  }
+  return messages;
+})
+
+fastify.post("/friends/status", async (request) => {
+  const res = await desToken(request);
+  
+  const token = await res.json();
+  const requesterId = token.user_id;
+  const otherUserId = request.body.user_id;
+  
+  const status = await getFriendStatus(requesterId, otherUserId);
+
+  if (!status.friends) {
+    return { friends: false };
+  }
+
+  return {
+    friends: true,
+    message: 'You are friends with this user'
+  };
+});
+
+fastify.post("/friends/add", async (request) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const user_a = token.user_id;
+  const user_b = request.body.user_id;
+  
+  await addFriend(user_a, user_b);
+  
+  
+  return {
+    message: 'Friend added successfully'
+  };
+})
+
+fastify.post("/friends/remove", async (request) => {
+  const res = await desToken(request);
+  const token = await res.json();
+  const user_a = token.user_id;
+  const user_b = request.body.user_id;
+  
+  await deleteFriend(user_a, user_b);
+  
+  return {
+    message: 'Friend removed successfully'
+  };
 })
 
 fastify.post("/block/status", async (request, reply) => {
@@ -137,25 +188,6 @@ fastify.post("/block/status", async (request, reply) => {
   };
 });
 
-fastify.post("/friends/status", async (request, reply) => {
-  const res = await desToken(request);
-
-  const token = await res.json();
-  const requesterId = token.user_id;
-  const otherUserId = request.body.user_id;
-
-  const status = await getFriendStatus(requesterId, otherUserId);
-
-  if (!status.friends) {
-    return { friends: false };
-  }
-
-  return {
-    friends: true,
-    message: 'You are friends with this user'
-  };
-});
-
 fastify.post("/block", async (request) => {
   const res = await desToken(request);
   const token = await res.json();
@@ -172,35 +204,6 @@ fastify.post("/block", async (request) => {
     message: 'User blocked successfully'
   };
 });
-
-
-fastify.post("/addFriend", async (request) => {
-  const res = await desToken(request);
-  const token = await res.json();
-  const user_a = token.user_id;
-  const user_b = request.body.user_id;
-
-  await addFriend(user_a, user_b);
-
-
-  return {
-    message: 'Friend added successfully'
-   };
-})
-
-
-fastify.post("/removeFriend", async (request) => {
-  const res = await desToken(request);
-  const token = await res.json();
-  const user_a = token.user_id;
-  const user_b = request.body.user_id;
-
-  await deleteFriend(user_a, user_b);
-
-  return {
-    message: 'Friend removed successfully'
-   };
-})
 
 fastify.post("/unblock", async (request, reply) => {
   const res = await desToken(request);
@@ -223,7 +226,7 @@ fastify.post("/unblock", async (request, reply) => {
   };
 });
 
-fastify.post("/invitation/status", async (request, reply) => {
+fastify.post("/invitations/status", async (request) => {
   const res = await desToken(request);
 
   const token = await res.json();
@@ -268,7 +271,7 @@ fastify.post("/invite", async (request) => {
   };
 });
 
-fastify.post("/deleteInvite", async (request, reply) => {        
+fastify.post("/uninvite", async (request) => {        
   const res = await desToken(request);
   const token = await res.json();
   const inviterId = token.user_id;
@@ -290,7 +293,6 @@ io.on('connection', (socket) => {
   let myId;
   
   socket.on('authenticate', async (userId) => {
-    console.log("auth")
     myId = userId;
     socket.join(`user:${myId}`);
     connectedUsers.set(userId, true);
@@ -315,7 +317,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', async () => {
-    console.log(`hit disconnect`);
     if (myId) {
       const friendIds = await getAllFriends(myId);
       
