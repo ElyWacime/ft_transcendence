@@ -99,6 +99,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           selectedId={selectedId}
           setSelectedId={setSelectedId}
           onStartConversation={handleStartConversation}
+          friendsList={friendsList}
         />
         <ChatWindow 
           onUnfriend={onUnfriend}

@@ -335,7 +335,6 @@ export default function Chat() {
   }
 
   const checkFriendshipStatus = async (conversation: any) => {
-    console.log("chec friends")
     try {
       const res = await fetch(`${SERVER_URL}/api/chat/friends/status`, {
         method: 'POST',

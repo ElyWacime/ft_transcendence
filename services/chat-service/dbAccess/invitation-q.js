@@ -1,4 +1,4 @@
-import { db } from './setup-db.js';
+import { db } from '../setup-db.js';
 
 async function getInvitationStatus(userIdA, userIdB, invitationType) {
     const stmt = `

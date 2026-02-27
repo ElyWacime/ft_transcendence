@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import type { KeyboardEvent } from 'react'
+// import { useChatSocket } from "@/context/ChatSocketContext"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -10,9 +11,11 @@ type ChatSidebarProps = {
   selectedId?: number
   setSelectedId: (id: number) => void
   onStartConversation?: (userId: number) => void
+  friendsList: any
 }
 
-export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation }: ChatSidebarProps) {
+export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation, friendsList }: ChatSidebarProps) {
+  // const { friendsList: contextFriendsList } = useChatSocket()
   const [showSearch, setShowSearch] = useState(false)
   const [searchInput, setSearchInput] = useState("")
   const [loading, setLoading] = useState(false)
@@ -89,6 +92,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     }
   }
 
+
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -128,6 +132,9 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
       ) : (
         <div className="conversations-list">
           {conversations.map((conversation) => {
+              const friendstatus = friendsList[conversation.other_user_id] || null
+              const isFriend = friendstatus?.isFriend ?? false
+              const isOnline = friendstatus?.online ?? false
               return conversation.last_message_body &&  
               <div
                 key={conversation.id}
@@ -135,7 +142,10 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
                 onClick={() =>  setSelectedId(conversation.id)}
               >
                 <div className="conversation-info">
-                  <div className="conversation-name">{conversation.other_user_username}</div>
+                  <div className="conversation-header">
+                    <div className="conversation-name">{conversation.other_user_username}</div>
+                    {isFriend && <div className={`status-dot ${isOnline ? "online" : "offline"}`}></div>}
+                  </div>
                   <div className="conversation-preview">{conversation.last_message_body}</div>
                 </div>
                 <div className="conversation-time">{formatTime(conversation.last_message_created_at || conversation.created_at)}</div>

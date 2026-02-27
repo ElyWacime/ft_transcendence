@@ -186,7 +186,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
         {incomingInvite  && incomingInvite.invitationType === "game_request" ? (
           <div className="invite-actions">
             <span className="invite-text-inline">ready to play!</span>
-            <button className="invite-accept" onClick={() => onRespondInvite(true, "game_request")}>Accept</button>
+            <button className="invite-accept" disabled={!isOnline}  onClick={() => onRespondInvite(true, "game_request")}>Accept</button>
             <button className="invite-deny" onClick={() => onRespondInvite(false, "game_request")}>Deny</button>
           </div>
         ) : (

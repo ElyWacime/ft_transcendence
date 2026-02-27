@@ -3,11 +3,11 @@ import cookie from "@fastify/cookie"
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
 import initializeDb from './setup-db.js';
-import { getInvitationStatus, createInvitation, cancelInvitation } from './invitation-q.js';
-import { getBlockingStatus, blockUser, unblockUser } from './block-q.js';
-import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './friends-q.js';
-import { insertUsers, getUserByUsername } from './user-q.js';
-import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './conversations-q.js';
+import { getInvitationStatus, createInvitation, cancelInvitation } from './dbAccess/invitation-q.js';
+import { getBlockingStatus, blockUser, unblockUser } from './dbAccess/block-q.js';
+import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './dbAccess/friends-q.js';
+import { insertUsers, getUserByUsername, updateUsername } from './dbAccess/user-q.js';
+import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './dbAccess/conversations-q.js';
 
 const fastify = Fastify();
 
@@ -77,6 +77,18 @@ fastify.post("/user", async (request, reply) => {
       userId: user.id
     };
 });
+
+fastify.post("/user/update", async (request) => {
+  const userId = request.body.user_id;
+  const newUsername = request.body.username;
+  const updatedUser = await updateUsername(userId, newUsername);
+
+  return {
+    message: 'Username updated successfully',
+    username: updatedUser.username
+  };
+});
+
 
 fastify.get("/conversations", async (request) => {
     const res = await desToken(request);

@@ -1,4 +1,7 @@
 Script for IPs in .env
 make sure the Oath works everytime i change the machine that runs the program
 modify the username
+    --- chat-service /user/update      body { user_id: userid, username: "newUsername" }
+
+
 -- RUN the build version

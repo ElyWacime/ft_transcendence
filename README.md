@@ -37,6 +37,7 @@ services/
   - fastify
   - SQLite
   - WebSocket
+  - Socket.io Server
 
 ## GAME RULES
 

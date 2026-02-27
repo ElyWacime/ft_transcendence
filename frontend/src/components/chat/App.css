@@ -253,6 +253,30 @@
   gap: 8px;
 }
 
+.conversation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.online {
+  background-color: hsl(142, 76%, 36%);
+  box-shadow: 0 0 4px hsl(142, 76%, 36%);
+}
+
+.status-dot.offline {
+  background-color: hsl(0, 0%, 50%);
+}
+
 
 .chat-window {
   flex: 1;
@@ -420,11 +444,16 @@
   font-weight: 600;
 }
 
-.invite-accept:hover {
+.invite-accept:hover:not(:disabled) {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
 }
 
+.invite-accept:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+  
 .invite-deny:hover {
   background: hsl(var(--destructive));
   color: hsl(var(--destructive-foreground));

@@ -1,4 +1,4 @@
-import { db } from "./setup-db.js";
+import { db } from "../setup-db.js";
 
 async function insertUsers(id, username) {
     const insertStmt = `INSERT INTO users (id, username) VALUES (?, ?) RETURNING *`;
@@ -15,4 +15,12 @@ async function getUserByUsername(username) {
     return user;
 }
 
-export { insertUsers, getUserByUsername };
+async function updateUsername(userId, newUsername) {
+    const stmt = `
+        UPDATE users SET username = ? WHERE id = ? RETURNING id, username
+    `;
+    
+    return await db.get(stmt, [newUsername, userId]);
+}
+
+export { insertUsers, getUserByUsername, updateUsername };
