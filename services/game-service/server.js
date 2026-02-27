@@ -373,7 +373,7 @@ const handleReportMissingOpponent = (tournamentId, matchId, reporterId) => {
   if (opponentReady) return; // opponent already ready; nothing to report
 
   const diffMs = Date.now() - new Date(reporterReadyAt).getTime();
-  if (diffMs < 300_000) return; // less than 1 minute wait
+  if (diffMs < 60_000) return; // less than 1 minute wait
 
   // advance reporter, drop opponent
   matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
