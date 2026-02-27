@@ -188,8 +188,6 @@ const createTournamentRoom = (creator) => {
   return tournament;
 };
 
-
-
 // handle leave tournament (only allowed before the bracket is full)
 const leaveTournamentRoom = (id, participant) => {
   const tournament = tournaments.get(id);
