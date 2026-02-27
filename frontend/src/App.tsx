@@ -27,6 +27,7 @@ import Result from "./pages/Result";
 
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { ChatSocketProvider } from "./context/ChatSocketContext";
+import ChangeUsername from "./pages/ChangeUsername";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const router = createBrowserRouter(
         { path: "profile/change-email", element: <ChangeEmail /> },
         { path: "profile/change-password", element: <ChangePassword /> },
         { path: "profile/change-picture", element: <ChangePicture /> },
+        { path: "profile/change-username", element: <ChangeUsername /> },
         {
           path: "dashboard/:identifier?",
           element: (

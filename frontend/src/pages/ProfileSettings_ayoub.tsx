@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import "../css/profile.css";
 
+// Add API call for username change (assuming userApi has a changeUsername method, otherwise use fetch)
+
 function getUserInfoFromToken() {
   try {
     const token = localStorage.getItem("token");
@@ -35,6 +37,12 @@ const ProfileSettings = () => {
     username: "",
     avatar: ""
   });
+  // State for username change
+  const [newUsername, setNewUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameChangeLoading, setUsernameChangeLoading] = useState(false);
+  const [usernameChangeError, setUsernameChangeError] = useState<string | null>(null);
+  const [usernameChangeSuccess, setUsernameChangeSuccess] = useState<string | null>(null);
   const [searchName, setSearchName] = useState("");
   const [searchResult, setSearchResult] = useState<{
     user_id: string;
@@ -124,6 +132,13 @@ const ProfileSettings = () => {
       icon: Camera,
       color: "text-purple-500",
       path: "/profile/change-picture"
+    },
+    {
+      title: "Change Username",
+      description: "Update your username",
+      icon: User,
+      color: "text-blue-500",
+      path: "/profile/change-username"
     }
   ];
 
@@ -188,8 +203,7 @@ const ProfileSettings = () => {
                   onChange={(e) => setSearchName(e.target.value)}
                   disabled={searchLoading}
                   className="profile-search-input"
-                    >
-                </input>
+                />
                 <button type="submit" disabled={searchLoading} className="search-btn">
                   {searchLoading ? "Searching..." : "Search"}
                 </button>
@@ -213,6 +227,7 @@ const ProfileSettings = () => {
               )}
             </div>
           </Card>
+       
 
           {}
           <div className="profile-settings-grid">

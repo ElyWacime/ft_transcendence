@@ -393,4 +393,8 @@ export async function userRoutes(app: FastifyInstance) {
     }
   });
   
+  // Add global error handler to always return JSON
+  app.setErrorHandler((error, request, reply) => {
+    reply.status(500).send({ message: "Internal server error", error: error.message });
+  });
 }
