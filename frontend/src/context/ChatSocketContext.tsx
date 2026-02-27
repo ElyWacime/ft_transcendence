@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
+import { fetchWithAuth } from "@/lib/tokenRefresh";
 
 type ChatSocketContextValue = {
   socket: Socket | null;
@@ -42,9 +43,8 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     });
     setSocket(chatSocket);
     chatSocket.on("connect", async () => {
-      console.log("chat socket connected");
         try {
-          const res = await fetch(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' });
+          const res = await fetchWithAuth(`${SERVER_URL}/api/chat/getCookieValue`, { credentials: 'include' });
           const usercookie = await res.json();
           const userId = usercookie.user_id;
           setCurrentUser({ id: userId });
@@ -60,8 +60,32 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       setIsConnected(false)
     });
     
-    chatSocket.on("gameInvite", (data: any) => {
+    chatSocket.on("Invite", (data: any) => {
       setInvitePrompt(data);
+    });
+
+    chatSocket.on('onlineFriends', (data: any) => {
+      setFriendsList((prev: any) => {
+        const updated = { ...prev };
+        data.onlineFriends.forEach((friendId: number) => {
+          updated[friendId] = { ...updated[friendId], online: true };
+        });
+        return updated;
+      });
+    });
+    
+    chatSocket.on('friendOnline', (data: any) => {
+      setFriendsList((prev: any) => ({
+        ...prev,
+        [data.userId]: { ...prev[data.userId], online: true }
+      }));
+    });
+
+    chatSocket.on('friendOffline', (data: any) => {
+      setFriendsList((prev: any) => ({
+        ...prev,
+        [data.userId]: { ...prev[data.userId], online: false }
+      }));
     });
 
     const handleGameInviteResponse = (data: any) => {
@@ -79,36 +103,10 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
           }))
         }
       }
-    }
+    }    
+    chatSocket.on('InviteResponse', handleGameInviteResponse)
 
-    chatSocket.on('onlineFriends', (data: any) => {
-      setFriendsList((prev: any) => {
-        const updated = { ...prev };
-        data.onlineFriends.forEach((friendId: number) => {
-          updated[friendId] = { ...updated[friendId], online: true };
-        });
-        return updated;
-      });
-    });
-    
-
-    chatSocket.on('friendOnline', (data: any) => {
-      setFriendsList((prev: any) => ({
-        ...prev,
-        [data.userId]: { ...prev[data.userId], online: true }
-      }));
-    });
-
-    chatSocket.on('friendOffline', (data: any) => {
-      setFriendsList((prev: any) => ({
-        ...prev,
-        [data.userId]: { ...prev[data.userId], online: false }
-      }));
-    });
-    
-    chatSocket.on('gameInviteResponse', handleGameInviteResponse)
-
-    chatSocket.on("cancelInvite",({invitationType}) => {
+    const handleCancelInvite = async ({invitationType}) => {
       if (invitationType === "game_request") {
         setInvitePrompt(null);
         setPendingInvite(false)
@@ -116,8 +114,10 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
         setInvitePrompt(null);
         setPendingAddFriend(false)
       }
-    });
+    }
+    chatSocket.on("cancelInvite", handleCancelInvite);
 
+    
     const handleUnfriend = ({ userId }: any) => {
       setPendingInvite(false)
       setInvitePrompt(null)
@@ -126,7 +126,6 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
         [userId]: { isFriend: false }
       }))
     }   
-    
     chatSocket.on('unfriend', handleUnfriend)
 
 

@@ -1,4 +1,5 @@
 "use client"
+import { fetchWithAuth } from "@/lib/tokenRefresh"
 import { useState } from "react"
 import type { KeyboardEvent } from 'react'
 // import { useChatSocket } from "@/context/ChatSocketContext"
@@ -15,7 +16,6 @@ type ChatSidebarProps = {
 }
 
 export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation, friendsList }: ChatSidebarProps) {
-  // const { friendsList: contextFriendsList } = useChatSocket()
   const [showSearch, setShowSearch] = useState(false)
   const [searchInput, setSearchInput] = useState("")
   const [loading, setLoading] = useState(false)
@@ -32,7 +32,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     setLoading(true)
     setSearchError(null)
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/user`, {
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/user`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

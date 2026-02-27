@@ -1,3 +1,4 @@
+import { fetchWithAuth } from "@/lib/tokenRefresh"
 import { useState, useRef, useEffect } from "react"
 import type { KeyboardEvent } from 'react'
 import { useParams } from "react-router-dom"
@@ -54,7 +55,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
     
     try {
       const endpoint = canUnblock ? '/unblock' : '/block'
-      const response = await fetch(`${SERVER_URL}/api/chat${endpoint}`, {
+      const response = await fetchWithAuth(`${SERVER_URL}/api/chat${endpoint}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

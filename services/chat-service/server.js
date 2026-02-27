@@ -41,8 +41,13 @@ async function desToken(request)
   return res;
 }
 
-fastify.get("/getCookieValue", async (request) => {
+fastify.get("/getCookieValue", async (request, reply) => {
     const res =  await desToken(request);
+    
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
+    }
+    
     const token = await res.json();
     return token;
 })
@@ -53,6 +58,11 @@ fastify.post("/users/add", async (request) => {
 
 fastify.post("/user", async (request, reply) => {
     const res = await desToken(request);
+    
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
+    }
+    
     const token = await res.json();
 
     const currentUsername = token.user_name;
@@ -78,7 +88,13 @@ fastify.post("/user", async (request, reply) => {
     };
 });
 
-fastify.post("/user/update", async (request) => {
+fastify.post("/user/update", async (request, reply) => {
+  const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
   const userId = request.body.user_id;
   const newUsername = request.body.username;
   const updatedUser = await updateUsername(userId, newUsername);
@@ -90,8 +106,13 @@ fastify.post("/user/update", async (request) => {
 });
 
 
-fastify.get("/conversations", async (request) => {
+fastify.get("/conversations", async (request, reply) => {
     const res = await desToken(request);
+    
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
+    }
+    
     const token = await res.json();
     const senderId = token.user_id;
 
@@ -101,8 +122,12 @@ fastify.get("/conversations", async (request) => {
     return conv;
 })
 
-fastify.post("/conversations/start", async (request) => { 
+fastify.post("/conversations/start", async (request, reply) => { 
   const res = await desToken(request);  
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
 
   const token = await res.json();
   const senderId = token.user_id;
@@ -129,8 +154,12 @@ fastify.get("/conversations/:id/messages", async (request) => {
   return messages;
 })
 
-fastify.post("/friends/status", async (request) => {
+fastify.post("/friends/status", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
   
   const token = await res.json();
   const requesterId = token.user_id;
@@ -148,8 +177,13 @@ fastify.post("/friends/status", async (request) => {
   };
 });
 
-fastify.post("/friends/add", async (request) => {
+fastify.post("/friends/add", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
   const token = await res.json();
   const user_a = token.user_id;
   const user_b = request.body.user_id;
@@ -162,8 +196,13 @@ fastify.post("/friends/add", async (request) => {
   };
 })
 
-fastify.post("/friends/remove", async (request) => {
+fastify.post("/friends/remove", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
   const token = await res.json();
   const user_a = token.user_id;
   const user_b = request.body.user_id;
@@ -177,6 +216,10 @@ fastify.post("/friends/remove", async (request) => {
 
 fastify.post("/block/status", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
 
   const token = await res.json();
   const requesterId = token.user_id;
@@ -200,8 +243,13 @@ fastify.post("/block/status", async (request, reply) => {
   };
 });
 
-fastify.post("/block", async (request) => {
+fastify.post("/block", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
   const token = await res.json();
   const blockerId = token.user_id;
   const blockedId = request.body.user_id;
@@ -219,6 +267,11 @@ fastify.post("/block", async (request) => {
 
 fastify.post("/unblock", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
   const token = await res.json();
   const blockerId = token.user_id;
   const unblockedId = request.body.user_id;
@@ -238,8 +291,12 @@ fastify.post("/unblock", async (request, reply) => {
   };
 });
 
-fastify.post("/invitations/status", async (request) => {
+fastify.post("/invitations/status", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
 
   const token = await res.json();
   const requesterId = token.user_id;
@@ -264,8 +321,13 @@ fastify.post("/invitations/status", async (request) => {
     };
 });
 
-fastify.post("/invite", async (request) => {
+fastify.post("/invite", async (request, reply) => {
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
   const token = await res.json();
   const inviterId = token.user_id;
   const inviteeId = request.body.user_id;
@@ -283,8 +345,13 @@ fastify.post("/invite", async (request) => {
   };
 });
 
-fastify.post("/uninvite", async (request) => {        
+fastify.post("/uninvite", async (request, reply) => {        
   const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
   const token = await res.json();
   const inviterId = token.user_id;
   const inviteeId = request.body.user_id;
@@ -320,14 +387,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('friendOnline', ({ userId }) => {
-    if (connectedUsers.has(userId)) {
-        socket.emit('friendOnline', { userId });
-    }
-
-    socket.to(`user:${userId}`).emit('friendOnline', { userId: myId });
-  });
-
   socket.on('disconnect', async () => {
     if (myId) {
       const friendIds = await getAllFriends(myId);
@@ -340,6 +399,14 @@ io.on('connection', (socket) => {
       
       connectedUsers.delete(myId);
     }
+  });  
+
+  socket.on('AddFriendOnline', ({ userId }) => {
+    if (connectedUsers.has(userId)) {
+        socket.emit('friendOnline', { userId });
+    }
+
+    socket.to(`user:${userId}`).emit('friendOnline', { userId: myId });
   });
 
   socket.on("newConversation", ({ userId }) => {
@@ -379,8 +446,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('gameInvite', ({ conversationId, toUserId, fromUserId, invitationType }) => {
-    socket.to(`user:${toUserId}`).emit('gameInvite', {
+  socket.on('Invite', ({ conversationId, toUserId, fromUserId, invitationType }) => {
+    socket.to(`user:${toUserId}`).emit('Invite', {
       conversationId,
       fromUserId,
       invitationType
@@ -391,8 +458,8 @@ io.on('connection', (socket) => {
     socket.to(`user:${toUserId}`).emit('cancelInvite', { invitationType });
   });
 
-  socket.on('gameInviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {
-    socket.to(`user:${toUserId}`).emit('gameInviteResponse', {
+  socket.on('InviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {
+    socket.to(`user:${toUserId}`).emit('InviteResponse', {
       conversationId,
       accepted,
       fromUserId,

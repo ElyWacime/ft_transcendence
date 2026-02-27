@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom"
 import { useChatSocket } from "../context/ChatSocketContext"
 import "../components/chat/App.css"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
+import { fetchWithAuth } from "@/lib/tokenRefresh"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
 
 let inviteHandle = async (P1, P2) => 
 {
-  const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+  const res = await fetchWithAuth(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({token:localStorage.getItem("token") , P1 ,P2 }),
@@ -78,8 +79,9 @@ export default function Chat() {
   
   const fetchConversations = async () => {
       try {
-        const res = await fetch(`${SERVER_URL}/api/chat/conversations`, { credentials: 'include' })
+        const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations`, { method: 'GET', credentials: 'include' })
         const conversationsData = await res.json()
+
         setConversations(conversationsData)
       } catch (error) {
         console.error('Failed to fetch conversations:', error)
@@ -107,7 +109,7 @@ export default function Chat() {
     if (!socket || !isConnected || !conversation?.other_user_id) return
 
 
-    const response = await fetch(`${SERVER_URL}/api/chat/invite`, {
+    const response = await fetchWithAuth(`${SERVER_URL}/api/chat/invite`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -123,7 +125,7 @@ export default function Chat() {
     {
       setPendingAddFriend(true)
     }      
-    socket.emit('gameInvite', {
+    socket.emit('Invite', {
       conversationId: conversation.id,
       toUserId: conversation.other_user_id,
       fromUserId: currentUser?.id,
@@ -134,7 +136,7 @@ export default function Chat() {
   const cancelInvite = async (conversation: any, invitationType: string) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
 
-    const response = await fetch(`${SERVER_URL}/api/chat/uninvite`, {
+    const response = await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -164,7 +166,7 @@ export default function Chat() {
     try 
     {
       let res = await inviteHandle(invitePrompt.fromUserId,  currentUser.id );
-      socket.emit('gameInviteResponse', {
+      socket.emit('InviteResponse', {
             conversationId: invitePrompt.conversationId,
             toUserId: invitePrompt.fromUserId,
             fromUserId: currentUser.id,
@@ -174,7 +176,7 @@ export default function Chat() {
 
       if (res.ok)
       {
-          const response = await fetch(`${SERVER_URL}/api/chat/uninvite`, {
+          const response = await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -191,7 +193,7 @@ export default function Chat() {
               navigate(`/loading?mode=2`);
             } else if (invitationType === "friend_request")
             {
-              const response = await fetch(`${SERVER_URL}/api/chat/friends/add`, {
+              const response = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/add`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -205,7 +207,7 @@ export default function Chat() {
                 }))
               }
 
-              socket.emit('friendOnline', { userId: invitePrompt.fromUserId })
+              socket.emit('AddFriendOnline', { userId: invitePrompt.fromUserId })
             }              
           }
       }
@@ -231,7 +233,7 @@ export default function Chat() {
       return
     }
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/conversations/${conversationId}/messages`, { credentials: 'include' })
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/${conversationId}/messages`, { credentials: 'include' })
       const historyData = await res.json()
       setMessages(historyData)
     } catch (error) {
@@ -246,7 +248,7 @@ export default function Chat() {
 
   const removeFriend = async (other_user_id: number) => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/friends/remove`, {
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/remove`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -282,7 +284,7 @@ export default function Chat() {
 
 
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/invitations/status`, {
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/invitations/status`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -336,7 +338,7 @@ export default function Chat() {
 
   const checkFriendshipStatus = async (conversation: any) => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/friends/status`, {
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/status`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -364,7 +366,7 @@ export default function Chat() {
   const checkBlockStatus = async (conversation: any) => {
     if (!conversation?.id || !conversation?.other_user_id) return
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/block/status`, {
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/block/status`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
