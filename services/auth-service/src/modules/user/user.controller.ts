@@ -264,6 +264,113 @@ export async function update_password(
   }
 }
 
+export async function update_username(
+  req: FastifyRequest<{
+    Body: { current_password: string; new_username: string };
+  }>,
+  reply: FastifyReply,
+) {
+  try {
+    const userToken = req.user as {
+      id: string;
+      email: string;
+    };
+
+    const { current_password, new_username } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email: userToken.email },
+    });
+
+    if (!user) {
+      return reply.code(404).send({ message: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      current_password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      return reply.code(401).send({ message: "Invalid password" });
+    }
+
+    const usernameExists = await prisma.user.findUnique({
+      where: { name: new_username },
+    });
+
+    if (usernameExists) {
+      return reply.code(409).send({ message: "Username already taken" });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { email: userToken.email },
+      data: { name: new_username },
+    });
+
+    try {
+      const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'http://chat-service:3700';
+      const chatServiceResponse = await fetch(`${chatServiceUrl}/user/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: updatedUser.id,
+          username: new_username,
+        }),
+      });
+
+      if (!chatServiceResponse.ok) {
+        console.error('Failed to sync username with chat service:', await chatServiceResponse.text());
+      }
+    } catch (syncError) {
+      console.error('Error syncing username with chat service:', syncError);
+    }
+
+    const payload = {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+    };
+
+    const accessToken = req.jwt.sign(payload, { expiresIn: "15m" });
+    const refreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
+
+    await prisma.user.update({
+      where: { id: updatedUser.id },
+      data: { refreshToken },
+    });
+
+    reply.setCookie("access_token", accessToken, {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    reply.setCookie("refresh_token", refreshToken, {
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    return reply.send({
+      success: true,
+      message: "Username updated successfully",
+      accessToken,
+      refreshToken,
+      newUsername: updatedUser.name,
+    });
+  } catch (err) {
+    console.error(err);
+    return reply.code(500).send({
+      message: "Internal server error",
+    });
+  }
+}
+
 export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
   const users = await prisma.user.findMany({
     select: {
