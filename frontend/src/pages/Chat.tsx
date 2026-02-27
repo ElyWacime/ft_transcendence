@@ -10,7 +10,7 @@ const SERVER_URL = API_URL
 
 let inviteHandle = async (P1, P2) => 
 {
-  const res = await fetchWithAuth(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+  const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({token:localStorage.getItem("token") , P1 ,P2 }),
@@ -233,7 +233,7 @@ export default function Chat() {
       return
     }
     try {
-      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/${conversationId}/messages`, { credentials: 'include' })
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/${conversationId}/messages`, { method: 'GET', credentials: 'include' })
       const historyData = await res.json()
       setMessages(historyData)
     } catch (error) {
