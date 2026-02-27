@@ -21,6 +21,8 @@ interface MatchSlot {
   winner: Participant | null;
   ready?: Record<string, boolean>;
   matchId?: number | null;
+  ready_at: Date | null;
+  readyAt?: Record<string, string>;
 }
 
 interface Tournament {
@@ -64,14 +66,40 @@ export default function TournamentOnlinePage() {
     return t?.id || null;
   }, [tournaments, currentUser]);
 
+
+
+useEffect(() => {
+
+   const checkIfaAlayerIsLate = async () => {
+      if (tournaments.semifinals && !Array.isArray(tournaments) && tournaments.status !== "finals")
+      {
+        const dateNow = new Date();
+        if (tournaments.semifinals[0].ready_at)
+        {
+          const diff = Math.abs(dateNow.getTime() - new Date(tournaments.semifinals[0].ready_at).getTime());
+           const minutes = Math.floor((diff / (1000 * 60)) % 60);
+           if (minutes <61)
+           {
+            // make them both ready.. by the name of low!
+            markReady(tournaments.id, tournaments.semifinals[0].id);
+           }
+        }
+      }
+    }
+     const intervalId = setInterval(checkIfaAlayerIsLate, 1000);
+   return () => clearInterval(intervalId);
+}, []);
   // initial load: fetch tournament list from game-service REST endpoint
   // REST gives us a snapshot even if websocket connects a tick later or user refreshes mid-flow
   useEffect(() => {
+
+   
     const load = async () => {
       try {
         const res = await fetch(`${API_URL}/tournaments-online`, { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
+          console.log("data>>>>>", data);
           setTournaments(Array.isArray(data) ? data : []);
         }
       } catch (e) {
@@ -182,6 +210,17 @@ export default function TournamentOnlinePage() {
     setIsSubmitting(false);
   };
 
+  const reportMissing = (tournamentId: string, matchId: string) => {
+    if (!currentUser) {
+      toast.error("Login to report a missing opponent");
+      return;
+    }
+    setIsSubmitting(true);
+    const ok = sendAction({ type: "TOURNAMENT_REPORT_MISSING", tournamentId, matchId });
+    if (ok) toast.message("Reported. If they stay unready for 5 minute, you'll advance.");
+    setIsSubmitting(false);
+  };
+
   // render a single tournament card (participants, bracket, ready buttons)
   // keeps UI logic colocated so both semifinals and final sections read from the same Tournament shape
   const renderTournamentCard = (t: Tournament) => {
@@ -239,7 +278,7 @@ export default function TournamentOnlinePage() {
             <p className="muted">Semifinals</p>
             {(t.semifinals ?? []).map((m) => (
               <div key={m.id} className="participant">
-                <span className="badge">{m.id}</span>
+                {/* <span className="badge">{m.id}</span> */}
                 <span className="name">
                   {(m.player1?.name || "?")} vs {(m.player2?.name || "?")}
                 </span>
@@ -250,7 +289,19 @@ export default function TournamentOnlinePage() {
                     disabled={isSubmitting || m.ready?.[currentUser.id]}
                     onClick={() => markReady(t.id, m.id)}
                   >
-                    {m.ready?.[currentUser.id] ? "Ready" : "I'm ready"}
+                    {m.ready?.[currentUser.id] ? "ready" : "Ready"}
+                  </button>
+                )}
+                {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
+                  <button
+                 title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
+                  className="primary"
+
+                    // className="ghost"
+                    disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || t.status == "completed" }
+                    onClick={() => reportMissing(t.id, m.id)}
+                  >
+                    Report
                   </button>
                 )}
               </div>
@@ -272,7 +323,18 @@ export default function TournamentOnlinePage() {
                   disabled={isSubmitting || t.final?.ready?.[currentUser.id]}
                   onClick={() => markReady(t.id, t.final?.id || "final")}
                 >
-                  {t.final?.ready?.[currentUser.id] ? "Ready" : "I'm ready"}
+                  {t.final?.ready?.[currentUser.id] ? "ready" : "Ready"}
+                </button>
+              )}
+              {currentUser && [t.final?.player1?.id, t.final?.player2?.id].includes(currentUser.id) && (
+                <button
+                  className="primary"
+                  title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
+                  // className="ghost"
+                  disabled={isSubmitting || !t.final?.ready?.[currentUser.id]|| !iAmInside || t.status == "completed"}
+                  onClick={() => reportMissing(t.id, t.final?.id || "final")}
+                >
+                  Report
                 </button>
               )}
             </div>
@@ -330,7 +392,7 @@ export default function TournamentOnlinePage() {
               Create tournament
             </button>
             {myTournamentId && <span className="muted">You are already in a tournament.</span>}
-          </div>
+          </div>  
         </div>
         {isLoading ? (
           <p className="muted">Loading tournaments...</p>

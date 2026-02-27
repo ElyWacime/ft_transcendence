@@ -161,8 +161,8 @@ function resetBall(direction = 1, m) {
 const buildSemifinals = (participants, tournamentId) => {
   const [p1, p2, p3, p4] = participants;
   return [
-    { id: `${tournamentId}-semi1`, player1: p1, player2: p2, winner: null, ready: {}, matchId: null },
-    { id: `${tournamentId}-semi2`, player1: p3, player2: p4, winner: null, ready: {}, matchId: null },
+    { id: `${tournamentId}-semi1`, player1: p1, player2: p2, winner: null, ready: {}, readyAt: {}, matchId: null },
+    { id: `${tournamentId}-semi2`, player1: p3, player2: p4, winner: null, ready: {}, readyAt: {}, matchId: null },
   ];
 };
 
@@ -248,7 +248,7 @@ const joinTournamentRoom = (id, participant) => {
   if (tournament.full && tournament.participants.length >= 4) {
     tournament.status = "semifinals";
     tournament.semifinals = buildSemifinals(tournament.participants.slice(0, 4), tournament.id);
-    tournament.final = { id: `${tournament.id}-final`, player1: null, player2: null, winner: null, ready: {}, matchId: null };
+    tournament.final = { id: `${tournament.id}-final`, player1: null, player2: null, winner: null, ready: {}, readyAt: {}, matchId: null };
   }
   tournaments.set(id, tournament);
   broadcastTournamentState();
@@ -293,8 +293,11 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
   const allMatches = [...(tournament.semifinals || []), tournament.final].filter(Boolean);
   const matchSlot = allMatches.find((m) => m.id === matchId);
   if (!matchSlot || !matchSlot.player1 || !matchSlot.player2) return;
+  matchSlot.createdAt = new Date();
+  matchSlot.readyAt = matchSlot.readyAt || {};
 
   matchSlot.ready = { ...matchSlot.ready, [playerId]: true };
+  matchSlot.readyAt[playerId] = new Date().toISOString();
 
   const p1Ready = Boolean(matchSlot.ready[matchSlot.player1.id]);
   const p2Ready = Boolean(matchSlot.ready[matchSlot.player2.id]);
@@ -343,6 +346,60 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
   }
 
   // always broadcast the latest ready state so UIs reflect button disabled/ready indicators
+  broadcastTournamentState();
+};
+
+// player reports opponent missing; if reporter has been ready for >=1 minute and opponent not ready, auto-advance reporter
+const handleReportMissingOpponent = (tournamentId, matchId, reporterId) => {
+  const tournament = tournaments.get(tournamentId);
+  if (!tournament) return;
+
+  const semifinals = tournament.semifinals || [];
+  const finalMatch = tournament.final;
+  const allMatches = [...semifinals, finalMatch].filter(Boolean);
+  const matchSlot = allMatches.find((m) => m.id === matchId);
+  if (!matchSlot || !matchSlot.player1 || !matchSlot.player2) return;
+
+  matchSlot.readyAt = matchSlot.readyAt || {};
+  matchSlot.ready = matchSlot.ready || {};
+
+  const reporterReadyAt = matchSlot.readyAt[reporterId];
+  const reporterReady = Boolean(matchSlot.ready[reporterId]);
+  if (!reporterReady || !reporterReadyAt) return; // reporter never readied or timestamp missing
+
+  const opponent = matchSlot.player1.id === reporterId ? matchSlot.player2 : matchSlot.player1;
+  if (!opponent) return;
+  const opponentReady = Boolean(matchSlot.ready[opponent.id]);
+  if (opponentReady) return; // opponent already ready; nothing to report
+
+  const diffMs = Date.now() - new Date(reporterReadyAt).getTime();
+  if (diffMs < 300_000) return; // less than 1 minute wait
+
+  // advance reporter, drop opponent
+  matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
+  eliminateParticipant(tournament, opponent.id);
+
+  if (semifinals.includes(matchSlot)) {
+    if (tournament.final) {
+      if (!tournament.final.player1) {
+        tournament.final.player1 = matchSlot.winner;
+      } else if (!tournament.final.player2 && tournament.final.player1.id !== matchSlot.winner.id) {
+        tournament.final.player2 = matchSlot.winner;
+      }
+      tournament.final.ready = {};
+      tournament.final.readyAt = {};
+      if (tournament.final.player1 && tournament.final.player2) {
+        tournament.final.matchId = null;
+        tournament.status = "finals";
+      }
+    }
+  } else if (finalMatch && finalMatch.id === matchId) {
+    finalMatch.winner = matchSlot.winner;
+    tournament.winner = matchSlot.winner;
+    tournament.status = "completed";
+  }
+
+  tournaments.set(tournamentId, tournament);
   broadcastTournamentState();
 };
 
@@ -411,7 +468,7 @@ fastify.addHook("preHandler", (req, _res, next) => {
 
 fastify.register(fastifyCookie, {
   secret: process.env.JWT_ACCESS_SECRET,
-  hook: "preHandler",
+  hook: "preHandler", 
 });
 
 fastify.get('/', async (request, reply) => {
@@ -702,6 +759,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         }
         else if (request.type == "TOURNAMENT_READY") {
           await handleTournamentReady(request.tournamentId, request.matchId, id);
+        }
+        else if (request.type == "TOURNAMENT_REPORT_MISSING") {
+          handleReportMissingOpponent(request.tournamentId, request.matchId, id);
         }
         else if (request.type == "REQUEST_TOURNAMENTS") {
           sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));

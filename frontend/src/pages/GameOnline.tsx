@@ -89,12 +89,28 @@ const GameOnline = () => {
         // setflag(false);
         endGame(data.id);
 
+        
         // if its a match tournament navigate back to tournament page.
-        navigate("/result", { 
-          state: { 
-            message: x, 
-          } 
+        
+        if (!data.T_Id){
+
+          navigate("/result", {
+          state: {
+            message: x,
+          }
         });
+        }
+        
+        else{
+          navigate("/tournament-online", {
+
+            state: { 
+              tournamentId: data.T_Id, 
+            } 
+          });
+
+
+        }
         // navigate("/");
         // toast.success(`${winner} wins the match!`, {
         //   duration: 2000,
