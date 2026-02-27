@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createUser, login, logout, update_email, update_password, update_image, refreshToken} from "./user.controller";
+import { createUser, login, logout, update_email, update_password, update_username, update_image, refreshToken} from "./user.controller";
 import prisma from "../../utils/prisma";
 
 export async function userRoutes(app: FastifyInstance) {
@@ -156,6 +156,51 @@ export async function userRoutes(app: FastifyInstance) {
       },
     },
     handler: update_password,
+  });
+
+  app.put("/update_username", {
+    preHandler: app.authenticate,
+    schema: {
+      body: {
+        type: "object",
+        required: ["current_password", "new_username"],
+        properties: {
+          current_password: { type: "string", minLength: 6 },
+          new_username: { type: "string", minLength: 3 },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            message: { type: "string" },
+            accessToken: { type: "string" },
+            refreshToken: { type: "string" },
+            newUsername: { type: "string" },
+          },
+        },
+        401: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+        404: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+        409: {
+          type: "object",
+          properties: {
+            message: { type: "string" },
+          },
+        },
+      },
+    },
+    handler: update_username,
   });
 
   app.put("/update_image", {
