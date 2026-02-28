@@ -16,6 +16,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
+import MatchHistory from "./pages/MatchHistory";
 import MatchMacking from "./pages/MatchMacking";
 import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 import ProfileSettings from "./pages/ProfileSettings_ayoub";
@@ -26,6 +27,7 @@ import Chat from "./pages/Chat";
 import Result from "./pages/Result";
 
 import { WebSocketProvider } from "./context/WebSocketContext";
+import { ChatSocketProvider } from "./context/ChatSocketContext";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +67,14 @@ const router = createBrowserRouter(
           element: (
             <ProtectedRoute>
               <ProfileSettings />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "history",
+          element: (
+            <ProtectedRoute>
+              <MatchHistory />
             </ProtectedRoute>
           ),
         },
@@ -127,7 +137,9 @@ const App = () => (
       <Toaster />
       <AuthProvider children={undefined}>
         <WebSocketProvider>
+        <ChatSocketProvider>
         <RouterProvider router={router} />
+        </ChatSocketProvider>
         </WebSocketProvider>
       </AuthProvider>
   </QueryClientProvider>

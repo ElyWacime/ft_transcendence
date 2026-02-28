@@ -31,7 +31,7 @@ const MAX_Score = 5;
 await dbcnx.connect();
 
 
-function sendtoplayer(id, data) {
+const sendtoplayer = async (id, data) => {
   if (id) {
     let socket = (clients.get(id));
     if (socket && socket.readyState === 1)
@@ -144,7 +144,14 @@ function tick(m,dt) {
     resetBall(1, m);
   }
   if (m.score2 >= MAX_Score || m.score1 >= MAX_Score)
+  {
     m.gameStatus = "FINISHED";
+    m.Winner_Id = m.P2_Id;
+    if (m.score1 >= m.score2)
+    m.Winner_Id = m.P1_Id;
+    dbcnx.updateMatch(m);
+    matches.delete(m.id);
+  }
 }
 
 function resetBall(direction = 1, m) {
@@ -482,7 +489,7 @@ fastify.get('/tournaments-online', async (_request, reply) => {
   }
 });
 
-const handelQuiiting = async(id) => {
+const handelRoomQuiiting = async(id) => {
   let m = await dbcnx.deletePendingMatchByPlayerID(id);
   if (m)
   {
@@ -498,42 +505,29 @@ const handelQuiiting = async(id) => {
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
 
-    let resuser = null;
-    if (m.P1_Id && m.P1_Id != id )
-    {
-        resuser = await dbcnx.getUser(m.P1_Id);
-        ngame.player1Name = resuser.User_name;
-        ngame.player1Email = resuser.email;
-    }
-    
-    if (m.P2_Id  && m.P2_Id != id )
-    {
-      resuser = await dbcnx.getUser(m.P2_Id);
-      ngame.player2Name = resuser.User_name;
-      ngame.player2Email = resuser.email;
-    }
-   
-    if (m.P3_Id  &&m.P3_Id != id )
-    {
-      resuser = await dbcnx.getUser(m.P3_Id);
-      ngame.player3Name = resuser.User_name;
-      ngame.player3Email = resuser.email;
-    }
-    
-    if (m.P4_Id  && m.P4_Id != id )
-    {
-      resuser = await dbcnx.getUser(m.P4_Id);
-      ngame.player4Name = resuser.User_name;
-      ngame.player4Email = resuser.email;
-    }
-    let data = JSON.stringify(ngame);
-    sendtoplayer(ngame.P1_Id, data);
-    sendtoplayer(ngame.P2_Id, data);
-    sendtoplayer(ngame.P3_Id, data);
-    sendtoplayer(ngame.P4_Id, data);
+    let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+    ngame.player1Name = name1;
+    ngame.player2Name = name2;
+    ngame.player3Name = name3;
+    ngame.player4Name = name4;
+
+  if (!ngame.player1Name && (ngame.P1_Id != id))
+    ngame.player1Name = clients_info.get(ngame.P1_Id);
+  if (!ngame.player2Name && (ngame.P2_Id != id))
+    ngame.player2Name = clients_info.get(ngame.P2_Id);
+  if (!ngame.player3Name && (ngame.P3_Id != id))
+    ngame.player3Name = clients_info.get(ngame.P3_Id);
+  if (!ngame.player4Name && (ngame.P4_Id != id))
+    ngame.player4Name = clients_info.get(ngame.P4_Id);
+
+  let data = JSON.stringify(ngame);
+  sendtoplayer(ngame.P1_Id, data);
+  sendtoplayer(ngame.P2_Id, data);
+  sendtoplayer(ngame.P3_Id, data);
+  sendtoplayer(ngame.P4_Id, data);
   }
   else
-    console.log("coudnt find this match");
+    console.log("coudnt find this match :: ",id);
 
 };
 
@@ -543,13 +537,14 @@ const handelRegister = async(request,id,email,name) => {
   u.id = id; 
   u.email = email;
   u.User_name = await route(id);
+  clients_info.set(id, u.User_name);
   if (!u.User_name)
-    u.User_name = name;
-  if (!u.User_name)
+  {
     u.User_name = id;
+    clients_info.set(id, null);
+  }
   u.isOnline = true;
   u.Auto_Match = true;
-  clients_info.set(id, u.User_name);
   await dbcnx.createUsers(u);
   let m = await dbcnx.getOngoingMatch(id);
   if (!m) 
@@ -558,7 +553,6 @@ const handelRegister = async(request,id,email,name) => {
     if (!m) {
       m = new Match();
       m.P1_Id = id;
-      m.player1Name = u.User_name;
       m.mode = request.mode;
       if (!request.tournement) {
         m.id = await dbcnx.createMatch_not(m);
@@ -570,12 +564,12 @@ const handelRegister = async(request,id,email,name) => {
     else 
     {
       if (request.mode == 2) 
-        {
+      {
         if (m.P1_Id == null) 
           m.P1_Id = id;
         else
           m.P2_Id = id;
-        }
+      }
       else
       {
         if (m.P1_Id == null) 
@@ -587,7 +581,7 @@ const handelRegister = async(request,id,email,name) => {
         else 
           m.P4_Id = id;
       }
-        m.count_players = m.count_players + 1;
+      m.count_players = m.count_players + 1;
     }
   }
   ngame.id = m.id;
@@ -595,18 +589,30 @@ const handelRegister = async(request,id,email,name) => {
   ngame.P2_Id = m.P2_Id;
   ngame.P3_Id = m.P3_Id;
   ngame.P4_Id = m.P4_Id;
-  let resuser = clients_info.get(m.P1_Id);
-  if (resuser)
-      ngame.player1Name = resuser;
-  resuser =clients_info.get(m.P2_Id);
-  if (resuser)
-    ngame.player2Name = resuser;
-  resuser =clients_info.get(m.P3_Id);
-  if (resuser)
-    ngame.player3Name = resuser;
-  resuser =clients_info.get(m.P4_Id);
-  if (resuser)
-    ngame.player4Name = resuser;
+  let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+  ngame.player1Name = name1;
+  ngame.player2Name = name2;
+  ngame.player3Name = name3;
+  ngame.player4Name = name4;
+
+  // if ( ngame.P1_Id == id)
+  //   ngame.player1Name = u.User_name;
+  // if ( ngame.P2_Id == id)
+  //   ngame.player2Name = u.User_name;
+  // if ( ngame.P3_Id == id)
+  //   ngame.player3Name = u.User_name;
+  // if ( ngame.P4_Id == id)
+  //   ngame.player4Name = u.User_name;
+
+  if (!ngame.player1Name)
+    ngame.player1Name = clients_info.get(ngame.P1_Id);
+  if (!ngame.player2Name)
+    ngame.player2Name = clients_info.get(ngame.P2_Id);
+  if (!ngame.player3Name)
+    ngame.player3Name = clients_info.get(ngame.P3_Id);
+  if (!ngame.player4Name)
+    ngame.player4Name = clients_info.get(ngame.P4_Id);
+
   ngame.T_Id = m.T_Id;
   ngame.count_players = m.count_players;
   ngame.mode = request.mode;
@@ -620,6 +626,7 @@ const handelRegister = async(request,id,email,name) => {
   ngame.gameStatus = m.gameStatus;
   let data = JSON.stringify(ngame);
   await dbcnx.updateMatch(m);
+  // console.log("Server wiill send ::: ",ngame);
   sendtoplayer(ngame.P1_Id, data);
   sendtoplayer(ngame.P2_Id, data);
   sendtoplayer(ngame.P3_Id, data);
@@ -649,12 +656,12 @@ const handelMove = async (request,id) =>{
   }
 };
 
-const handelFinish = async (request) =>  {
-  let m = matches.get(request.matchId);
+const handelFinish = async (ID) =>  {
+  let m = matches.get(ID);
   if (m) 
   {
-    m.id = request.matchId;
-    m.id_Match = request.id_Match;
+    m.id = ID;
+    m.id_Match = ID;
     if (m.score1 >= m.score2)
       m.Winner_Id = m.P1_Id;
     else
@@ -664,6 +671,8 @@ const handelFinish = async (request) =>  {
     updateTournamentAfterMatch(m);
     matches.delete(m.id);
   }
+  else
+    console.log("Couldnt end request.matchId ",ID);
 };
 
 const handelDup = async (connection,id) => {
@@ -675,15 +684,15 @@ const handelDup = async (connection,id) => {
         clients.get(id).close();
         console.log("Server Closed Duplicate Socket for ",id);
       }
-      
     }
-    catch (e) {  console.log("Error Server Closed Duplicate Socket for ",id);
-
+    catch (e) 
+    {  
+      console.log("Error Server Closed Duplicate Socket for ",id);
     }
   }
 };
 
-const interval = setInterval(() => {
+const interval = setInterval(async () => {
   if (matches.size == 0)
     return;
   for (const [id, match] of matches) {
@@ -701,6 +710,8 @@ const interval = setInterval(() => {
 
 const route = async (id) => {
   try {
+    if(!id)
+      return null;
     const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
       method: 'GET',
       headers: {
@@ -723,25 +734,25 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
    try
    {
-    const request = JSON.parse(msg);
-    let token = request.token;
-    console.log("This is server.js >> ",request.type);
-    if (token) {
-        const decoded = req.jwt.verify(token);
-        const id = decoded.id;
-        const email = decoded.email;
-        const name = decoded.name;
-        await handelDup(connection,id);
-        clients.set(id, connection);
-        if (request.type == "REGISTER") 
-          await handelRegister(request,id,email,name);
-        else if (request.type == "MOVE") 
-          await handelMove(request,id);
-        else if (request.type == "FINISHED") 
-          await  handelFinish(request) ;
-        else if (request.type == "DELETE") 
-          await handelQuiiting(id);
-        else if (request.type == "TOURNAMENT_CREATE") {
+      const request = JSON.parse(msg);
+      let token = request.token;
+      console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
+      if (token) {
+          const decoded = req.jwt.verify(token);
+          const id = decoded.id;
+          const email = decoded.email;
+          const name = decoded.name;
+          await handelDup(connection,id);
+          clients.set(id, connection);
+          if (request.type == "REGISTER") 
+            await handelRegister(request,id,email,name);
+          else if (request.type == "MOVE") 
+            await handelMove(request,id);
+          else if (request.type == "FINISHED") 
+            await  handelFinish(request.matchId) ;
+          else if (request.type == "DELETE") 
+            await handelRoomQuiiting(id);
+          else if (request.type == "TOURNAMENT_CREATE") {
           const creator = { id, name: name || email || id };
           createTournamentRoom(creator);
         }
@@ -765,8 +776,8 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
         }
       }
-    else 
-      console.log("No token provided, proceeding without authentication");
+      else 
+        console.log("No token provided, proceeding without authentication");
    }
    catch (e)
    {
@@ -777,7 +788,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
     for (const [id, client] of clients) {
       if (client == connection) {
        try {
-        await handelQuiiting(id);
+        await handelRoomQuiiting(id);
         clients.delete(id);
         console.log("Server OnClosed Socket for ",id);
         break;
@@ -789,6 +800,32 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
+fastify.post('/sync-email', async (request, reply) => {
+  try {
+    const { userId, email } = request.body;
+    
+    if (!userId || !email) {
+      return reply.code(400).send({ message: 'userId and email are required' });
+    }
+
+    const existingUser = await dbcnx.getUserById(userId);
+    
+    if (existingUser) {
+      await dbcnx.db.run(
+        `UPDATE Users SET email = ? WHERE id = ?`, 
+        [email, userId]
+      );
+      
+      return reply.send({ success: true, message: 'Email synced successfully' });
+    } else {
+      return reply.send({ success: true, message: 'User not in game service yet' });
+    }
+  } catch (error) {
+    console.error('Error syncing email:', error);
+    return reply.code(500).send({ message: 'Failed to sync email' });
+  }
+});
+
 fastify.post('/invite', async (request, reply) => {
   try {
     let token = request.body.token;
@@ -796,35 +833,23 @@ fastify.post('/invite', async (request, reply) => {
       return reply.code(403).send({ message: 'Not Log in' });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
-    let m1 = await dbcnx.getAvaiable(P1);
-    let m2 = await dbcnx.getAvaiable(P2);
-    const decoded = request.jwt.verify(token);
-    const id = decoded.id;
+    let [name1, name2, m1, m2]= await Promise.all([ route(P1), route(P2), dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
     if (!(m1 || m2))
     {
       let u = new Users();
       u.id = P1; 
-      u.User_name = await route(P1); 
+      u.User_name = name1;
       u.email = P1; 
-      let res = clients_info.get(P1);
-      if(!res)
-      {
-        clients_info.set(P1,u.User_name);
-        await dbcnx.insertUser(u);
-      }
-      if (!res)
-      {
-        u = new Users();
-        u.id = P2; 
-        u.User_name = await route(P2); 
-        u.email = P2; 
-        res = clients_info.get(P2);
-        if (!res)
-        {
-          clients_info.set(P2,u.User_name);
-          await dbcnx.insertUser(u);
-        }
-      }
+      await dbcnx.createUsers(u);
+      clients_info.set(P1,name1);
+
+      u = new Users();
+      u.id = P2; 
+      u.User_name = name2;
+      u.email = P2; 
+      await dbcnx.createUsers(u);
+      clients_info.set(P2,name2);
+
       let m = new Match();
       m.P1_Id = P1;
       m.P2_Id = P2;
@@ -834,7 +859,7 @@ fastify.post('/invite', async (request, reply) => {
     }
     return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
   } catch (e) {
-    return reply.code(404).send({ message: e });
+    return reply.code(405).send({ message: 'Error ' + e });
   }
 });
 
@@ -903,7 +928,7 @@ fastify.post('/check', async (request, reply) => {
     }
     return reply.code(201).send({ message: 'Available' });
   } catch (e) {
-    return reply.code(404).send({ message: e });
+    return reply.code(405).send({ message: e });
   }
 });
 
@@ -927,30 +952,38 @@ fastify.post('/endmatch', async (request, reply) => {
         ngame.score2 = 5;
         ngame.Winner_Id = ngame.P2_Id;
       }
-      ngame.gameStatus = 'FINISHED';
-      await dbcnx.updateMatch(ngame);
-      if (ngame.P1_Id == id )
-        ngame.P1_Id = null;
-      if (ngame.P2_Id == id )
-        ngame.P2_Id = null;
-      if (ngame.P3_Id == id )
-        ngame.P3_Id = null;
-      if (ngame.P4_Id == id )
-        ngame.P4_Id = null;
-      let data = JSON.stringify(ngame);
-      sendtoplayer(ngame.P1_Id, data);
-      sendtoplayer(ngame.P2_Id, data);
-      sendtoplayer(ngame.P3_Id, data);
-      sendtoplayer(ngame.P4_Id, data);
-      matches.delete(m.id);
     }
     return reply.code(201).send({ message: 'Good' });
   } catch (e) {
-      return reply.code(404).send({ message: e });
+      return reply.code(405).send({ message: e });
+  }
+});
+
+
+fastify.post('/allmatch', async (request, reply) => {
+  try {
+    let matches = await dbcnx.getPlayerMatches(request.body.id);
+    if (matches) {
+      matches = await Promise.all(matches.map(async (m) => {
+        const [P1, P2, P3, P4, Winner] = await Promise.all([
+          route(m.P1_Id),
+          route(m.P2_Id),
+          route(m.P3_Id),
+          route(m.P4_Id),
+          route(m.Winner_Id),
+        ]);
+        return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
+      }));
+    }
+
+    return reply.code(201).send({ matches });
+  } 
+  catch (e) {
+    return reply.code(500).send({ message: e.toString() });
   }
 });
 
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
+import { userInfo } from "os";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
-// console.log("Dashboard routes registered!");
 fastify.listen({ port: 3000, host: "0.0.0.0" });

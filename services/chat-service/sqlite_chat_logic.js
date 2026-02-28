@@ -112,6 +112,51 @@ async function getBlockingStatus(userIdA, userIdB) {
     };
 }
 
+
+async function createInvitation(inviterId, inviteeId) {
+    const stmt = `
+        INSERT INTO pending_invitations (inviter_id, invitee_id)
+        VALUES (?, ?)
+        ON CONFLICT(inviter_id, invitee_id) DO NOTHING
+    `;
+
+    await db.run(stmt, [inviterId, inviteeId]);
+}
+
+
+async function cancelInvitation(inviterId, inviteeId) {
+    const stmt = `
+        DELETE FROM pending_invitations
+        WHERE inviter_id = ? AND invitee_id = ?
+        OR (inviter_id = ? AND invitee_id = ?)
+
+    `;
+
+    await db.run(stmt, [inviterId, inviteeId, inviteeId, inviterId]);
+}
+
+async function getInvitationStatus(userIdA, userIdB) {
+    const stmt = `
+        SELECT inviter_id, invitee_id
+        FROM pending_invitations
+        WHERE (inviter_id = ? AND invitee_id = ?)
+        OR (inviter_id = ? AND invitee_id = ?)
+    `;
+
+    const row = await db.get(stmt, [userIdA, userIdB, userIdB, userIdA]);
+
+    if (!row) {
+        return { pending: false };
+    }
+
+    return {
+        pending: true,
+        inviterId: row.inviter_id,
+        inviteeId: row.invitee_id,
+        invitedBySelf: row.inviter_id === userIdA
+    };
+}
+
 async function unblockUser(blockerId, blockedId) {
     const stmt = `
         DELETE FROM blocking_participants
@@ -221,6 +266,9 @@ export {
     insertUsers,
     blockUser,
     getBlockingStatus,
+    getInvitationStatus,
+    createInvitation,
+    cancelInvitation,
     unblockUser,
     getUserByUsername
 };

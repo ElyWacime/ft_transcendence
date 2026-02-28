@@ -38,7 +38,8 @@ const Result = () => {
                   </h1>
                 <div className="additional-controls">
               <button onClick={resetGame} className="game-control-button2">
-                <RotateCcw className="button-icon" />
+                {/* <RotateCcw className="button-icon" />  */}
+                Play Another Match!
               </button>
             </div>
                 </div>

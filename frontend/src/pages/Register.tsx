@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Trophy } from "lucide-react";

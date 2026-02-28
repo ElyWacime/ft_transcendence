@@ -2,24 +2,19 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-// import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState ,useRef, useCallback} from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
 
 const MatchMacking = () => {
     const { ws, isReady } = useWebSocket();
-    let keys = { ArrowUp: false, ArrowDown: false };
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
-    const email = localStorage.getItem("email");
     let del = useRef(true);
     let matchref = useRef(true);
     const [features, setFeatures] = useState([]);
-
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      // console.log(data);
       matchref.current = data.id;
       setFeatures(() => {
           if (mode == "4")
@@ -28,25 +23,25 @@ const MatchMacking = () => {
                 {
                     icon: Users,
                     title: data.player1Name || "Player1",
-                    description: data.player1Name != null ? "ready"  : "waiting" ,
+                    description: data.P1_Id ? "ready"  : "waiting" ,
                     color: "feature-icon-container-color-red"
                 },
                 {
                     icon: Users,
                     title: data.player2Name || "Player2",
-                    description:data.player2Name != null ? "ready"  : "waiting" ,
+                    description:data.P2_Id ? "ready"  : "waiting" ,
                     color: "feature-icon-container"
                 },
                 {
                     icon: Users,
                     title: data.player3Name || "Player3",
-                    description: data.player3Name != null ? "ready"  : "waiting" ,
+                    description: data.P3_Id ? "ready"  : "waiting" ,
                     color: "feature-icon-container-color-red"
                 },
                 {
                     icon: Users,
                     title: data.player4Name || "Player4",
-                    description: data.player4Name != null ? "ready"  : "waiting" ,
+                    description: data.P4_Id ? "ready"  : "waiting" ,
                     color: "feature-icon-container"
                 },
             ];
@@ -57,13 +52,13 @@ const MatchMacking = () => {
               {
                   icon: Users,
                   title: data.player1Name || "Player1",
-                  description:  data.player1Name != null ? "ready"  : "waiting" ,
+                  description:  data.P1_Id  ? "ready"  : "waiting" ,
                   color: "feature-icon-container"
               },
               {
                   icon: Users,
                   title: data.player2Name || "Player2",
-                  description:  data.player2Name != null ? "ready"  : "waiting" ,
+                  description:  data.P2_Id  ? "ready"  : "waiting" ,
                   color: "feature-icon-container"
               }];
           }
@@ -130,14 +125,15 @@ const MatchMacking = () => {
                   {features.map((feature, index) => (
                     <Card
                       key={index}
-                      className="feature-card"
+                      className="feature-card2"
                     >
                       <div className="feature-card-content">
                         <div className={feature.color}>
                           <feature.icon className="feature-icon"  />
                         </div>
-                        <h3 className="feature-card-title">{feature.title}</h3>
-                        <p className="feature-card-description">{feature.description}</p>
+                        <h3 className="feature-card-title2">{feature.title}</h3>
+                        <p className={feature.description == "ready" ? "stateGmae-g": "stateGmae-r" }>{feature.description}</p>
+                        {(mode == 4 ) && (<p  className={index % 2 == 0 ? "stateGmae-A": "stateGmae-B" }>{index % 2 == 0 ? "Team A" :"Team B"}</p>)}
                       </div>
                     </Card>
                   ))}

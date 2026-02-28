@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams,useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
@@ -50,15 +50,16 @@ interface DashboardData {
 
 const Dashboard_ayoub = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state || "";
+  const { id} = state;
   const { identifier } = useParams<{ identifier?: string }>();
   const { isLoggedIn } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now());
-  const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
-? dashboardData?.user.avatar
-: `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
+  const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image") ? dashboardData?.user.avatar: `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
 
   useEffect(() => {
     if (!identifier && !isLoggedIn) {
@@ -80,7 +81,6 @@ const Dashboard_ayoub = () => {
       }
 
       try {
-        // console.log("Fetching dashboard for user:", userIdentifier);
         const data = await playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier);
         
         setDashboardData(data);
@@ -178,6 +178,9 @@ const Dashboard_ayoub = () => {
                 <span>Statistics</span>
               </h3>
               <div className="dashboard-stats">
+              <div className="stat-row">
+                  <span className="stat-label" onClick = {()=>{ navigate("/history",{state:{id}})}}>Match History</span>
+                </div>
                 <div className="stat-row">
                   <span className="stat-label">Total Matches</span>
                   <span className="stat-value">{statistics.totalMatches}</span>
