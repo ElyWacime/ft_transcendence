@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+  import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
@@ -149,6 +149,8 @@ function tick(m,dt) {
     m.Winner_Id = m.P2_Id;
     if (m.score1 >= m.score2)
     m.Winner_Id = m.P1_Id;
+    updateTournamentAfterMatch(m);
+
     dbcnx.updateMatch(m);
     matches.delete(m.id);
   }
