@@ -1,8 +1,6 @@
 "use client"
-import { fetchWithAuth } from "@/lib/tokenRefresh"
 import { useState } from "react"
 import type { KeyboardEvent } from 'react'
-// import { useChatSocket } from "@/context/ChatSocketContext"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -12,15 +10,15 @@ type ChatSidebarProps = {
   selectedId?: number
   setSelectedId: (id: number) => void
   onStartConversation?: (userId: number) => void
-  friendsList: any
 }
 
-export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation, friendsList }: ChatSidebarProps) {
+export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation }: ChatSidebarProps) {
   const [showSearch, setShowSearch] = useState(false)
   const [searchInput, setSearchInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [searchResult, setSearchResult] = useState<any>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
+
 
   const searchUser = async () => {
     if (!searchInput.trim()) {
@@ -32,7 +30,7 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     setLoading(true)
     setSearchError(null)
     try {
-      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/user`, {
+      const res = await fetch(`${SERVER_URL}/api/chat/getUser`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -92,7 +90,6 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     }
   }
 
-
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -131,27 +128,19 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
         </div>
       ) : (
         <div className="conversations-list">
-          {conversations.map((conversation) => {
-              const friendstatus = friendsList[conversation.other_user_id] || null
-              const isFriend = friendstatus?.isFriend ?? false
-              const isOnline = friendstatus?.online ?? false
-              return conversation.last_message_body &&  
-              <div
-                key={conversation.id}
-                className={`conversation-item ${selectedId === conversation.id ? "active" : ""}`}
-                onClick={() =>  setSelectedId(conversation.id)}
-              >
-                <div className="conversation-info">
-                  <div className="conversation-header">
-                    <div className="conversation-name">{conversation.other_user_username}</div>
-                    {isFriend && <div className={`status-dot ${isOnline ? "online" : "offline"}`}></div>}
-                  </div>
-                  <div className="conversation-preview">{conversation.last_message_body}</div>
-                </div>
-                <div className="conversation-time">{formatTime(conversation.last_message_created_at || conversation.created_at)}</div>
+          {conversations.map((conversation) => (
+            <div
+              key={conversation.id}
+              className={`conversation-item ${selectedId === conversation.id ? "active" : ""}`}
+              onClick={() =>  setSelectedId(conversation.id)}
+            >
+              <div className="conversation-info">
+                <div className="conversation-name">{conversation.other_user_username}</div>
+                <div className="conversation-preview">{conversation.last_message_body}</div>
               </div>
-            }   
-          )}
+              <div className="conversation-time">{formatTime(conversation.last_message_created_at || conversation.created_at)}</div>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -62,6 +62,10 @@ export async function login(
       message: "Invalid email or password",
     });
   }
+  await prisma.user.update({
+    where: { email },
+    data: { loggedIn: true },
+  });
 
   const payload = {
     id: user.id,
@@ -69,38 +73,17 @@ export async function login(
     name: user.name,
   };
   
-  const accessToken = req.jwt.sign(payload, { expiresIn: "15m" });
-  
-  const refreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
+  const token = req.jwt.sign(payload);
 
-  await prisma.user.update({
-    where: { email },
-    data: { loggedIn: true, refreshToken },
-  });
-
-  reply.setCookie("access_token", accessToken, {
+  const replay = reply.setCookie("access_token", token, {
     path: "/",
     httpOnly: true,
     secure: false,
     sameSite: "lax",
   });
-  
-  reply.setCookie("refresh_token", refreshToken, {
-    path: "/",
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
-  
-  return { 
-    accessToken, 
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    }
-  };
+  // console.log("\n\n\nreply from cookies: ", replay);
+  // console.log("\n\n\naccess_token cookie set", token);
+  return { accessToken: token };
 }
 
 export async function update_email(
@@ -111,19 +94,13 @@ export async function update_email(
 ) {
   const { new_email, password } = req.body;
 
-  let token = req.headers.authorization?.replace('Bearer ', '');
-  if (!token) {
-    token = req.cookies.access_token;
-  }
-
-  if (!token) {
-    return reply.code(401).send({ message: "Authentication required" });
-  }
+  const cookieToken = req.cookies.access_token;
 
   try {
-    const decoded = req.jwt.verify(token) as { id: string; email: string; name: string };
+    const decoded = req.jwt.verify(cookieToken);
+    const decoded_email = decoded.email;
     const user = await prisma.user.findUnique({ 
-      where: { email: decoded.email } 
+      where: { email: decoded_email } 
     });
     
     if (!user) {
@@ -144,52 +121,17 @@ export async function update_email(
     }
   
     const updatedUser = await prisma.user.update({
-      where: { email: decoded.email },
+      where: { email: decoded_email },
       data: { email: new_email },
     });
   
-    try {
-      const gameServiceUrl = process.env.GAME_SERVICE_URL || 'http://game-server:3000';
-      const gameServiceResponse = await fetch(`${gameServiceUrl}/sync-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: updatedUser.id,
-          email: new_email,
-        }),
-      });
-
-      if (!gameServiceResponse.ok) {
-        console.error('Failed to sync email with game service:', await gameServiceResponse.text());
-      }
-    } catch (syncError) {
-      console.error('Error syncing email with game service:', syncError);
-    }
-
-    const payload = {
+    const token = req.jwt.sign({
       id: updatedUser.id,
       email: updatedUser.email,
       name: updatedUser.name,
-    };
-
-    const accessToken = req.jwt.sign(payload, { expiresIn: "15m" });
-    const refreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
-
-    await prisma.user.update({
-      where: { id: updatedUser.id },
-      data: { refreshToken },
     });
   
-    reply.setCookie("access_token", accessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    reply.setCookie("refresh_token", refreshToken, {
+    reply.setCookie("access_token", token, {
       path: "/",
       httpOnly: true,
       secure: false,
@@ -199,9 +141,7 @@ export async function update_email(
     return {
       success: true,
       message: "Email updated successfully",
-      accessToken,
-      refreshToken,
-      newEmail: updatedUser.email,
+      accessToken: token,
     };
      
   } catch (error) {
@@ -264,113 +204,6 @@ export async function update_password(
   }
 }
 
-export async function update_username(
-  req: FastifyRequest<{
-    Body: { current_password: string; new_username: string };
-  }>,
-  reply: FastifyReply,
-) {
-  try {
-    const userToken = req.user as {
-      id: string;
-      email: string;
-    };
-
-    const { current_password, new_username } = req.body;
-
-    const user = await prisma.user.findUnique({
-      where: { email: userToken.email },
-    });
-
-    if (!user) {
-      return reply.code(404).send({ message: "User not found" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      current_password,
-      user.password,
-    );
-
-    if (!isPasswordValid) {
-      return reply.code(401).send({ message: "Invalid password" });
-    }
-
-    const usernameExists = await prisma.user.findUnique({
-      where: { name: new_username },
-    });
-
-    if (usernameExists) {
-      return reply.code(409).send({ message: "Username already taken" });
-    }
-
-    const updatedUser = await prisma.user.update({
-      where: { email: userToken.email },
-      data: { name: new_username },
-    });
-
-    try {
-      const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'http://chat-service:3700';
-      const chatServiceResponse = await fetch(`${chatServiceUrl}/user/update`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: updatedUser.id,
-          username: new_username,
-        }),
-      });
-
-      if (!chatServiceResponse.ok) {
-        console.error('Failed to sync username with chat service:', await chatServiceResponse.text());
-      }
-    } catch (syncError) {
-      console.error('Error syncing username with chat service:', syncError);
-    }
-
-    const payload = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
-    };
-
-    const accessToken = req.jwt.sign(payload, { expiresIn: "15m" });
-    const refreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
-
-    await prisma.user.update({
-      where: { id: updatedUser.id },
-      data: { refreshToken },
-    });
-
-    reply.setCookie("access_token", accessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    reply.setCookie("refresh_token", refreshToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    return reply.send({
-      success: true,
-      message: "Username updated successfully",
-      accessToken,
-      refreshToken,
-      newUsername: updatedUser.name,
-    });
-  } catch (err) {
-    console.error(err);
-    return reply.code(500).send({
-      message: "Internal server error",
-    });
-  }
-}
-
 export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
   const users = await prisma.user.findMany({
     select: {
@@ -389,80 +222,10 @@ export async function logout(
   const { email } = req.body;
   const user = await prisma.user.update({
     where: { email },
-    data: { loggedIn: false, refreshToken: null },
+    data: { loggedIn: false },
   });
   reply.clearCookie("access_token");
-  reply.clearCookie("refresh_token");
   return reply.send({ message: "Logout successful" });
-}
-
-export async function refreshToken(
-  req: FastifyRequest,
-  reply: FastifyReply,
-) {
-  let refreshToken = req.cookies.refresh_token;
-  
-  if (!refreshToken) {
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      refreshToken = authHeader.substring(7);
-    }
-  }
-
-  if (!refreshToken) {
-    return reply.code(401).send({ message: "Refresh token required" });
-  }
-
-  try {
-    const decoded = req.jwt.verify(refreshToken) as {
-      id: string;
-      email: string;
-      name: string;
-    };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-
-    if (!user || user.refreshToken !== refreshToken) {
-      return reply.code(401).send({ message: "Invalid refresh token" });
-    }
-
-    const payload = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    };
-
-    const newAccessToken = req.jwt.sign(payload, { expiresIn: "15m" });
-    
-    await new Promise(resolve => setTimeout(resolve, 1));
-    
-    const newRefreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken: newRefreshToken },
-    });
-
-    reply.setCookie("access_token", newAccessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    reply.setCookie("refresh_token", newRefreshToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
-  } catch (err) {
-    return reply.code(401).send({ message: "Invalid or expired refresh token" });
-  }
 }
 
 
@@ -523,6 +286,8 @@ export const update_image = async (
       }
     });
     
+    // console.log(`[update_image] Updated avatar for user ${userId}, MIME type: ${mimeType}`);
+    
     return reply.send({
       success: true,
       message: "Image updated successfully",
@@ -531,7 +296,7 @@ export const update_image = async (
     });
     
   } catch (err) {
-
+    // console.error('[update_image] Error:', err);
 
     if (err.code === 'P2025') {
       return reply.status(404).send({

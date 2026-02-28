@@ -11,11 +11,11 @@ import { Toaster } from "sonner"
 import GameOnline from "./pages/GameOnline";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import TournamentOnline from "./pages/TournamentOnline"; // online tournament lobby/bracket page leveraging game-service websocket
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
-import MatchHistory from "./pages/MatchHistory";
 import MatchMacking from "./pages/MatchMacking";
 import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 import ProfileSettings from "./pages/ProfileSettings_ayoub";
@@ -26,17 +26,14 @@ import Chat from "./pages/Chat";
 import Result from "./pages/Result";
 
 import { WebSocketProvider } from "./context/WebSocketContext";
-import { ChatSocketProvider } from "./context/ChatSocketContext";
 
 const queryClient = new QueryClient();
 
 const RootLayout = () => (
-  <ChatSocketProvider>
-    <div className="page-wrapper">
-      <Navigation />
-      <Outlet />
-    </div>
-  </ChatSocketProvider>
+  <div className="page-wrapper">
+    <Navigation />
+    <Outlet />
+  </div>
 );
 
 const router = createBrowserRouter(
@@ -71,14 +68,6 @@ const router = createBrowserRouter(
             </ProtectedRoute>
           ),
         },
-        {
-          path: "history",
-          element: (
-            <ProtectedRoute>
-              <MatchHistory />
-            </ProtectedRoute>
-          ),
-        },
         { path: "profile/change-email", element: <ChangeEmail /> },
         { path: "profile/change-password", element: <ChangePassword /> },
         { path: "profile/change-picture", element: <ChangePicture /> },
@@ -101,6 +90,14 @@ const router = createBrowserRouter(
         { path: "game", element: <Game /> },
         { path: "result", element: <Result /> },
         { path: "game-online", element: <GameOnline /> },
+        {
+          path: "tournament-online",
+          element: (
+            <ProtectedRoute>
+              <TournamentOnline />
+            </ProtectedRoute>
+          ),
+        },
         { path: "game-ai", element: <GameAI /> },
         {
           path: "login",
@@ -130,7 +127,7 @@ const App = () => (
       <Toaster />
       <AuthProvider children={undefined}>
         <WebSocketProvider>
-          <RouterProvider router={router} />
+        <RouterProvider router={router} />
         </WebSocketProvider>
       </AuthProvider>
   </QueryClientProvider>

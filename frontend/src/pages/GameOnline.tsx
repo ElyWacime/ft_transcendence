@@ -37,43 +37,85 @@ const GameOnline = () => {
     const decoded = decodeJWT(token);
     id = decoded.id;
    } catch (e) {
-      console.log("ERROR :: ",e);
+      console.log(e);
    }
   }
 
-  // const endGame = useCallback((id) => {
-  //   if (ws && isReady && ws.readyState == WebSocket.OPEN)
-  //     ws.send(JSON.stringify({
-  //       token:localStorage.getItem("token"),
-  //       type: "FINISHED",
-  //       mode: mode,
-  //       matchId:id
-  //     }));
-  //   }
-  // );
+  const endGame = useCallback((id) => {
+    if (ws && isReady && ws.readyState == WebSocket.OPEN)
+      ws.send(JSON.stringify({
+        token:localStorage.getItem("token"),
+        type: "FINISHED",
+        mode: mode,
+        matchId:id
+      }));
+    }
+  );
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      // console.log("Server says  ",data);
       if (data.score1  >= 5 ||  data.score2  >= 5) {
         
         let x = "";
         if (data.score1  > data.score2 )
         {
           if (data.P1_Id == id || data.P3_Id == id)
+            {
+              toast.success(`You win the match!`);
               x = `You win the match!`;
+            }
           else
+            {
+              toast.error(`You Lost the match!`);
               x = `You Lost the match!`;
+            }
         } 
         else
         {
           if (data.P2_Id == id || data.P4_Id == id)
+           {
+            toast.success(`You win the match!`);
             x = `You win the match!`;
+           }
           else
+          {
+            toast.error(`You Lost the match!`);
             x = `You Lost the match!`;
+          }
         }
-        // endGame(data.id);
-        navigate("/result", {state: { message: x}});
+        // setmessage(x);
+        // setflag(false);
+        endGame(data.id);
+
+        
+        // if its a match tournament navigate back to tournament page.
+        
+        if (!data.T_Id){
+
+          navigate("/result", {
+          state: {
+            message: x,
+          }
+        });
+        }
+        
+        else{
+          navigate("/tournament-online", {
+
+            state: { 
+              tournamentId: data.T_Id, 
+            } 
+          });
+
+
+        }
+        // navigate("/");
+        // toast.success(`${winner} wins the match!`, {
+        //   duration: 2000,
+        //   onAutoClose: () => navigate("/"),
+        // });
       }
     }
   );

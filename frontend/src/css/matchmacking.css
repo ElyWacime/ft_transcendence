@@ -125,27 +125,12 @@
   }
 }
 
-.stateGmae-A
-{
-  color:  hsl(233, 91%, 60%);
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: '1.2rem';
-  font-weight: 'bold';
-}
 
-.stateGmae-B
-{
-  color:  hsl(217 91% 60%);
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: '1.2rem';
-  font-weight: 'bold';
-}
-.feature-card2 {
-  background-image: linear-gradient(135deg, hsl(222 47% 6%), hsl(222 47% 12%));
-  /* background-image: linear-gradient(135deg, hsl(217, 68%, 16%), hsl(222 47% 12%)); */
+.feature-card {
+  background-image: var(--gradient-secondary);
   border: 1px solid hsl(var(--border));
   padding: 1.5rem; 
-  border-radius: 4rem;
+  border-radius: calc(var(--radius) - 2px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   height: 100%;
@@ -153,13 +138,13 @@
   flex-direction: column;
 }
 
-.feature-card2:hover {
+.feature-card:hover {
   border-color: hsl(var(--primary));
   box-shadow: var(--shadow-glow);
   transform: translateY(-2px);
 }
 
-.feature-card2-content {
+.feature-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -190,10 +175,10 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color:  hsl(245, 91%, 60%);
+  background-color: rgb(193, 36, 36);
 }
 
-.feature-card2:hover .feature-icon-container {
+.feature-card:hover .feature-icon-container {
   transform: scale(1.1); 
 }
 
@@ -203,31 +188,14 @@
   color: hsl(var(--primary-foreground));
 }
 
-.feature-card2-title {
+.feature-card-title {
   font-weight: 600; 
   font-size: 1.125rem; 
   color: hsl(var(--foreground));
   margin: 0;
 }
 
-.stateGmae-g
-{
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: '1.2rem';
-    font-weight: 'bold';
-    color:#10b981;
-}
-
-.stateGmae-r
-{
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: '1.2rem';
-    font-weight: 'bold';
-    color:#b91010;
-}
-
-
-.feature-card2-description {
+.feature-card-description {
   color: hsl(var(--muted-foreground));
   font-size: 0.875rem; 
   line-height: 1.5;
@@ -317,7 +285,7 @@
     gap: 1rem;
   }
   
-  .feature-card2 {
+  .feature-card {
     padding: 1rem;
   }
 }
@@ -346,7 +314,7 @@
 
 
 @media (prefers-color-scheme: dark) {
-  .feature-card2:hover {
+  .feature-card:hover {
     background-image: linear-gradient(135deg, 
       hsl(222 47% 8%), 
       hsl(222 47% 12%)
@@ -357,13 +325,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
-  .feature-card2,
-  .feature-card2:hover .feature-icon-container {
+  .feature-card,
+  .feature-card:hover .feature-icon-container {
     animation: none;
     transition: none;
   }
   
-  .feature-card2:hover {
+  .feature-card:hover {
     transform: none;
   }
 }

@@ -253,30 +253,6 @@
   gap: 8px;
 }
 
-.conversation-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.status-dot.online {
-  background-color: hsl(142, 76%, 36%);
-  box-shadow: 0 0 4px hsl(142, 76%, 36%);
-}
-
-.status-dot.offline {
-  background-color: hsl(0, 0%, 50%);
-}
-
 
 .chat-window {
   flex: 1;
@@ -303,34 +279,6 @@
   gap: 10px;
 }
 
-.add-friend-button {
-  padding: 8px 14px;
-  border-radius: 20px;
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--muted));
-  color: hsl(var(--muted-foreground));
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-smooth);
-}
-
-.add-friend-button:hover:not(:disabled) {
-  background: hsl(var(--accent));
-  color: hsl(var(--accent-foreground));
-}
-
-.add-friend-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.warning-button:hover:not(:disabled),
-.warning-button:focus-visible {
-  background: hsl(var(--destructive));
-  color: hsl(var(--destructive-foreground));
-  border-color: hsl(var(--destructive));
-}
-
 .block-button {
   padding: 8px 14px;
   border-radius: 20px;
@@ -342,11 +290,9 @@
   transition: var(--transition-smooth);
 }
 
-.block-button:hover:not(:disabled),
-.block-button:focus-visible {
-  background: hsl(var(--destructive));
-  color: hsl(var(--destructive-foreground));
-  border-color: hsl(var(--destructive));
+.block-button:hover:not(:disabled) {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
 }
 
 .block-button.blocked {
@@ -444,16 +390,11 @@
   font-weight: 600;
 }
 
-.invite-accept:hover:not(:disabled) {
+.invite-accept:hover {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
 }
 
-.invite-accept:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-  
 .invite-deny:hover {
   background: hsl(var(--destructive));
   color: hsl(var(--destructive-foreground));
@@ -470,26 +411,6 @@
   font-size: 12px;
   color: hsl(var(--muted-foreground));
   margin: 0;
-}
-
-.online-indicator {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.online-indicator.online {
-  background: hsl(142, 76%, 36% / 0.15);
-  color: hsl(142, 76%, 36%);
-  border: 1px solid hsl(142, 76%, 36% / 0.3);
-}
-
-.online-indicator.offline {
-  background: hsl(var(--muted));
-  color: hsl(var(--muted-foreground));
-  border: 1px solid hsl(var(--border));
 }
 
 
@@ -632,15 +553,9 @@
   box-shadow: var(--shadow-neon);
 }
 
-
-.send-button:hover:not(:disabled) {
+.send-button:hover {
   background: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
-}
-
-.send-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .send-button:active {

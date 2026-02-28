@@ -1,5 +1,3 @@
-import { fetchWithAuth } from './tokenRefresh';
-
 class PlayerDashboardAPI_ayoub {
 
   private baseUrl = "/api";
@@ -7,9 +5,16 @@ class PlayerDashboardAPI_ayoub {
   async getPlayerDashboard(identifier: string) {
     const url = `${this.baseUrl}/dashboard/${identifier}`;
     
+    const token = localStorage.getItem("token");
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    
     try {
-      const res = await fetchWithAuth(url, {
+      const res = await fetch(url, {
         method: "GET",
+        headers: headers,
       });
 
       if (!res.ok)

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+// import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Trophy, Github } from "lucide-react";
@@ -17,10 +18,12 @@ const Login = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const email = params.get("email");
-    const refreshToken = params.get("refreshToken");
 
     if (token && email) {
-      login(token, email, refreshToken || undefined);
+      localStorage.setItem("token", token);
+      localStorage.setItem("email", email);
+
+      login(token, email);
 
       toast.success("Successfully logged in with GitHub!");
       navigate("/tournament", { replace: true });
@@ -35,9 +38,7 @@ const Login = () => {
     try {
       const res = await userApi.login(email, password);
       if (res.accessToken) {
-        // Use email from server response, not from form input
-        const userEmail = res.user?.email || email;
-        login(res.accessToken, userEmail, res.refreshToken);
+        login(res.accessToken, email);
         toast.success("Welcome back!");
         navigate("/");
       } else {

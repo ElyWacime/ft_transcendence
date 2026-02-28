@@ -76,26 +76,14 @@ export async function oauthRoutes(app: FastifyInstance) {
       },
     });
 
-    const jwtAccessToken = jwt.sign(
+    const jwtToken = jwt.sign(
       { id: dbUser.id, username: dbUser.name, email: dbUser.email },
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "10h" },
     );
-
-    const jwtRefreshToken = jwt.sign(
-      { id: dbUser.id, username: dbUser.name, email: dbUser.email },
-      process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "7d" },
-    );
-
-    await prisma.user.update({
-      where: { id: dbUser.id },
-      data: { refreshToken: jwtRefreshToken },
-    });
 
     const redirectUrl = new URL(`http://${process.env.DOMAIN}/login`);
-    redirectUrl.searchParams.set("token", jwtAccessToken);
-    redirectUrl.searchParams.set("refreshToken", jwtRefreshToken);
+    redirectUrl.searchParams.set("token", jwtToken);
     redirectUrl.searchParams.set("email", email);
     reply.redirect(redirectUrl.toString());
 

@@ -127,6 +127,7 @@ export class AIOpponent {
   }
 
   private predictComplexTrajectory(gameState: AIGameState): number {
+    //here if there is multiple bouncc
     const ball = gameState.ball;
     const aiPaddle = gameState.aiPaddle;
 

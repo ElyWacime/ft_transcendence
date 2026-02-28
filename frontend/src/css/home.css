@@ -113,12 +113,7 @@
   gap: 1.5rem; 
   align-items: stretch;
 }
-.features-grid1 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem; 
-  align-items: stretch;
-}
+
 @media (min-width: 768px) {
   .features-grid {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -143,30 +138,6 @@
 .feature-card:hover {
   border-color: hsl(var(--primary));
   box-shadow: var(--shadow-glow);
-}
-
-.match-win {
-  background-color: #167354; /* dark green */
-  color: white;
-  border: 1px solid #064e3b;
-}
-
-.match-loss {
-  background-color: #7f1616; /* dark red */
-  color: white;
-  border: 1px solid #7f1d1d;
-}
-
-.match-pend {
-  background-color: #1e2e8a; /* dark red */
-  color: white;
-  border: 1px solid  #1e2e8a;
-}
-
-/* Optional: hover effect for both */
-.match-win:hover, .match-loss:hover,.match-pend:hover {
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-  transform: scale(1.03);
 }
 
 .feature-card-content {

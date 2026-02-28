@@ -1,4 +1,3 @@
-import { fetchWithAuth } from "@/lib/tokenRefresh"
 import { useState, useRef, useEffect } from "react"
 import type { KeyboardEvent } from 'react'
 import { useParams } from "react-router-dom"
@@ -16,30 +15,24 @@ type ChatWindowProps = {
   isConnected: boolean
   currentUser?: any
   isBlocked: boolean
-  isFriend: boolean
-  isOnline: boolean
   blockedBy?: string | null
   canUnblock: boolean
   incomingInvite?: any
-  onInvite?: (conversation: any, invitationType: string) => void
-  onRespondInvite?: (accepted: boolean, invitationType: string) => void
-  onCancelInvite?: (conversation: any, invitationType: string) => void
+  onInvite?: (conversation: any) => void
+  onRespondInvite?: (accepted: boolean) => void
   onBlockConversation?: (conversationId: number) => void
   onUnblockConversation?: (conversationId: number) => void
-  onAddFriend?: (userId: number) => void
-  onUnfriend?: (userId: number) => void
-  pendingInvite: boolean
-  pendingAddFriend: boolean
   socket?: Socket | null
 }
 
-export default function ChatWindow({ conversation, messages, onSendMessage,  isFriend, isOnline, pendingAddFriend, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, onAddFriend, onUnfriend, socket, pendingInvite}: ChatWindowProps) {
+export default function ChatWindow({ conversation, messages, onSendMessage, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onBlockConversation, onUnblockConversation, socket }: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { id } = useParams()
   const activeConversationId = id ? parseInt(id, 10) : null
 
   useEffect(() => {
+
     if (activeConversationId) {
       onGetHistory(activeConversationId)
     }
@@ -55,7 +48,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
     
     try {
       const endpoint = canUnblock ? '/unblock' : '/block'
-      const response = await fetchWithAuth(`${SERVER_URL}/api/chat${endpoint}`, {
+      const response = await fetch(`${SERVER_URL}/api/chat${endpoint}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -63,6 +56,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
       })
 
       const res = await response.json()
+      console.log(res)
       
       if (response.ok) {
         if (canUnblock) {
@@ -83,7 +77,6 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
       } else {
         console.error('Failed to block/unblock user')
       }
-      
     } catch (error) {
       console.error('Error toggling block status:', error)
     }
@@ -115,7 +108,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
     )
   }
 
-  const peerName = conversation.other_user_username
+  const peerName = conversation.other_user_username || conversation.name || "Chat partner"
   const userProfileLink = `/dashboard/${peerName}`
   const filteredMessages = activeConversationId
     ? messages.filter((message) => {
@@ -132,46 +125,9 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
             <a className="chat-peer-link" href={userProfileLink} aria-label={`Open chat with ${peerName}`}>
               {peerName}
             </a>
-            
-            {isFriend && <div className={`online-indicator ${isOnline ? "online" : "offline"}`}>{isOnline ? "Online" : "Offline"} </div>}
           </div>
         </div>
         <div className="header-actions">
-          {incomingInvite?.invitationType === "friend_request" ? (
-            <>
-              <button 
-                className="add-friend-button" 
-                onClick={() => onRespondInvite(true, "friend_request")}
-                disabled={!activeConversationId || isBlocked}
-              >
-                Accept
-              </button> 
-              <button 
-                className="add-friend-button warning-button" 
-                onClick={() => onRespondInvite(false, "friend_request")}
-                disabled={!activeConversationId || isBlocked}
-              >
-                Deny
-              </button>            
-            </>
-          ) : isFriend ? (
-            <button 
-              className="add-friend-button warning-button" 
-              onClick={() => conversation?.other_user_id && onUnfriend?.(conversation.other_user_id)}
-              disabled={!activeConversationId || isBlocked}
-            >
-              Unfriend
-            </button>
-          ) : (
-            <button 
-              className={`add-friend-button ${pendingAddFriend ? "warning-button" : ""}`} 
-              onClick={() => conversation && (pendingAddFriend ? onCancelInvite : onInvite)(conversation, "friend_request")}
-              disabled={!activeConversationId || isBlocked}
-            >
-              {pendingAddFriend ? "Cancel" : "Add friend"}
-            </button>
-          )}
-
           <button
             className={`block-button ${isBlocked ? "blocked" : ""}`}
             onClick={handleBlockToggle}
@@ -182,28 +138,23 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
         </div>
       </div>
 
-        
-      {isFriend && !isBlocked &&  <div className="invite-bar">
-        {incomingInvite  && incomingInvite.invitationType === "game_request" ? (
+      <div className="invite-bar">
+        {incomingInvite ? (
           <div className="invite-actions">
             <span className="invite-text-inline">ready to play!</span>
-            <button className="invite-accept" disabled={!isOnline}  onClick={() => onRespondInvite(true, "game_request")}>Accept</button>
-            <button className="invite-deny" onClick={() => onRespondInvite(false, "game_request")}>Deny</button>
+            <button className="invite-accept" onClick={() => onRespondInvite?.(true)}>Accept</button>
+            <button className="invite-deny" onClick={() => onRespondInvite?.(false)}>Deny</button>
           </div>
         ) : (
-          <>
-            <button
-              className="invite-button"
-              disabled={!isConnected || isBlocked || pendingInvite}
-              onClick={() => conversation && onInvite(conversation, "game_request")}
-            >
-              {(pendingInvite)? "Pending Invite.." : "Invite to Play"}
-            </button>
-            {(pendingInvite) && <button onClick={() => onCancelInvite(conversation, "game_request")} className="block-button warning-button">cancel</button>}
-          </>
+          <button
+            className="invite-button"
+            disabled={!isConnected || isBlocked}
+            onClick={() => conversation && onInvite?.(conversation)}
+          >
+            Invite to Play
+          </button>
         )}
-      </div>}
-      
+      </div>
 
       {isBlocked && blockedBy === 'you' && (
         <div className="blocked-banner">
@@ -236,7 +187,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="input-area"  >
+      <div className="input-area">
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -244,9 +195,9 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
           placeholder="Type a message..."
           className="message-input"
           rows={1}
-          disabled={isBlocked}
+          disabled={!isConnected || isBlocked}
         />
-        <button onClick={handleSend} className="send-button" disabled={isBlocked}>
+        <button onClick={handleSend} className="send-button" disabled={!isConnected || isBlocked}>
           Send
         </button>
       </div>

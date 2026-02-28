@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom"
 import { Socket } from 'socket.io-client'
 import ChatSidebar from "./chat-sidebar"
 import ChatWindow from "./chat-window"
-import { useAuth } from "@/context/AuthContext"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -22,22 +21,14 @@ type MessagesPageLayoutProps = {
   onBlockConversation: (conversationId: number) => void
   onUnblockConversation: (conversationId: number) => void
   onCheckBlockStatus: (conversation: any) => void
-  onCheckInvitationStatus: (conversation: any, invitationType: string) => void
   invitePrompt?: any
-  onInvite: (conversation: any, invitationType: string) => void
-  onRespondInvite: (accepted: boolean, invitationType: string) => void
-  onCancelInvite: (conversation: any, invitationType: string) => void
-  onCheckFriendshipStatus: (conversation: any) => void
-  pendingInvite: boolean
-  onUnfriend: (userId: number) => void
-  pendingAddFriend: boolean
-  friendsList: any
+  onInvite: (conversation: any) => void
+  onRespondInvite: (accepted: boolean) => void
   socket?: Socket | null
 }
 
-export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, onUnfriend, friendsList, onCheckFriendshipStatus, pendingAddFriend, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket, pendingInvite }: MessagesPageLayoutProps) {
+export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
   const { id } = useParams()
-  
 
   useEffect(() => {
     onFetchConversations()
@@ -51,30 +42,20 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
 
   const selectedConversation = conversations.find((c) => c.id === selectedId)
   const blockStatus = selectedConversation ? blockedConversations[selectedConversation.id] : null
-  const friendstatus = selectedConversation ? friendsList[selectedConversation.other_user_id] : null
-  const isFriend = friendstatus?.isFriend ?? false
-  const isOnline = friendstatus?.online ?? false
   const isBlocked = blockStatus?.blocked ?? false
   const blockedBy = blockStatus?.blockedBy ?? null
   const canUnblock = isBlocked && blockedBy === 'you'
   const incomingInvite = selectedConversation && invitePrompt?.conversationId === selectedConversation.id ? invitePrompt : null
 
   useEffect(() => {
-    if (!selectedConversation || !onCheckBlockStatus) return
-    const cachedBlockingStatus = blockedConversations?.[selectedConversation.id]
-    if (!cachedBlockingStatus) {
+    if (selectedConversation && onCheckBlockStatus) {
       onCheckBlockStatus(selectedConversation)
     }
-    onCheckFriendshipStatus(selectedConversation)
-    onCheckInvitationStatus(selectedConversation, "friend_request")
-    onCheckInvitationStatus(selectedConversation, "game_request")
-    
-  }, [selectedConversation, blockedConversations])
-
+  }, [selectedConversation])
 
   const handleStartConversation = async (userId: number) => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/chat/conversations/start`, {
+      const res = await fetch(`${SERVER_URL}/api/chat/conversation/start`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -99,10 +80,8 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           selectedId={selectedId}
           setSelectedId={setSelectedId}
           onStartConversation={handleStartConversation}
-          friendsList={friendsList}
         />
         <ChatWindow 
-          onUnfriend={onUnfriend}
           conversation={selectedConversation}
           messages={messages} 
           onSendMessage={onSendMessage}
@@ -110,19 +89,14 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           isConnected={isConnected}
           currentUser={currentUser}
           isBlocked={isBlocked}
-          isFriend={isFriend}
-          isOnline={isOnline}
           blockedBy={blockedBy}
           canUnblock={canUnblock}
           incomingInvite={incomingInvite}
           onInvite={onInvite}
-          pendingAddFriend={pendingAddFriend}
           onRespondInvite={onRespondInvite}
           onBlockConversation={onBlockConversation}
           onUnblockConversation={onUnblockConversation}
-          pendingInvite={pendingInvite}
           socket={socket}
-          onCancelInvite={onCancelInvite}
         />
       </div>
     </div>

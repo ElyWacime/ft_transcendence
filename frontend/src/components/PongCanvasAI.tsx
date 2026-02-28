@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
+// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { AIOpponent, AIAction, AIGameState, Difficulty } from "@/lib/ai/AIOpponent";
@@ -135,6 +136,12 @@ export const PongCanvasAI = ({
     ctx.shadowBlur = 20;
     ctx.fill();
     ctx.shadowBlur = 0;
+
+    // ctx.fillStyle = "hsl(210 40% 98%)";
+    // ctx.font = '48px "JetBrains Mono"';
+    // ctx.textAlign = "center";
+    // ctx.fillText(state.score.player1.toString(), canvas.width / 4, 60);
+    // ctx.fillText(state.score.player2.toString(), (canvas.width * 3) / 4, 60);
   }, []);
 
   const mapGameStateToAI = useCallback(
@@ -353,21 +360,13 @@ export const PongCanvasAI = ({
       <div className="player-controls-grid">
         <Card className="player-card player1-card">
           <CardHeader className="player-card-header">
-            <CardTitle className="player-card-title">
-            <span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' } }>
-                  {player1Name}
-                </span>
-                </CardTitle>
+            <CardTitle className="player-card-title">{player1Name}</CardTitle>
           </CardHeader>
-          <CardContent className="player-card-content styling" >
+          <CardContent className="player-card-content">
             <div className="player-score player1-score">
               {gameState.score.player1}
             </div>
-            <div className="player-control-hint">
-            <span style={{ color: 'hsl(217 91% 60%)', fontWeight: 'bold' } }>
-                   W/S Keys
-                </span>
-              </div>
+            <div className="player-control-hint">W/S Keys</div>
           </CardContent>
         </Card>
   

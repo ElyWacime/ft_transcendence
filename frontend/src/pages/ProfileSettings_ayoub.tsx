@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -29,7 +30,6 @@ function getUserInfoFromToken() {
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [userInfo, setUserInfo] = useState({
     email: "",
     username: "",
@@ -62,7 +62,6 @@ const ProfileSettings = () => {
           });
           setAvatarKey(Date.now());
         } else {
-          // Always get email from localStorage first (most up-to-date after email change)
           const email = localStorage.getItem("email") || tokenData?.email || "";
           const username = localStorage.getItem("username") || tokenData?.username || "Player";
           setUserInfo({ email, username, avatar: "" });
@@ -70,7 +69,6 @@ const ProfileSettings = () => {
       } catch (error) {
         console.error("Failed to fetch user data:", error);
         const tokenData = getUserInfoFromToken();
-        // Always get email from localStorage first (most up-to-date after email change)
         const email = localStorage.getItem("email") || tokenData?.email || "";
         const username = localStorage.getItem("username") || tokenData?.username || "Player";
         setUserInfo({ email, username, avatar: "" });
@@ -80,10 +78,14 @@ const ProfileSettings = () => {
     };
     
     fetchUserData();
-  }, [location.pathname]); // Re-fetch when route changes
+  }, []);
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // setSearchLoading(true);
+    // setSearchError(null);
+    // setSearchResult(null);
+
     const trimmed = searchName.trim();
     if (!trimmed) {
       setSearchError("Enter a username to search");
@@ -205,7 +207,7 @@ const ProfileSettings = () => {
                       <p className="profile-result-name">{searchResult.user_name}</p>
                       <p className="profile-result-email">{searchResult.user_email}</p>
                     </div>
-                    <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user_name}`, {state : {id : searchResult.user_id}})}}>
+                    <button className="profile-dashboard-btn dashboard-btn" onClick={() => navigate(`/dashboard/${searchResult.user_name}`)}>
                       View dashboard
                     </button>
                   </div>
