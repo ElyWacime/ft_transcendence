@@ -253,6 +253,13 @@ const joinTournamentRoom = (id, participant) => {
   }
   tournament.full = tournament.participants.length >= 4;
   if (tournament.full && tournament.participants.length >= 4) {
+    // notify all four participants that semifinals are waiting
+    const firstFour = tournament.participants.slice(0, 4);
+    for (const p of firstFour) {
+      const waiting = new GameState();
+      waiting.waitingMatch = true;
+      sendtoplayer(p.id, JSON.stringify(waiting));
+    }
     tournament.status = "semifinals";
     tournament.semifinals = buildSemifinals(tournament.participants.slice(0, 4), tournament.id);
     tournament.final = { id: `${tournament.id}-final`, player1: null, player2: null, winner: null, ready: {}, readyAt: {}, matchId: null };
@@ -445,6 +452,14 @@ const updateTournamentAfterMatch = (gameState) => {
       if (tournament.final.player1 && tournament.final.player2) {
         tournament.final.matchId = null;
         tournament.status = "finals";
+
+        // notify both finalists that there's a match waiting for them(if they are not in the tournamnt page)
+        const finalists = [tournament.final.player1, tournament.final.player2].filter(Boolean);
+        for (const p of finalists) {
+          const waiting = new GameState();
+          waiting.waitingMatch = true;
+          sendtoplayer(p.id, JSON.stringify(waiting));
+        }
       }
     }
   } else if (finalMatch && finalMatch.matchId === gameState.id) {
@@ -737,6 +752,13 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    try
    {
       const request = JSON.parse(msg);
+      // if (msg.waitingMatch)
+      // {
+      //   // pop up that says a match is waiting for you.
+      //   console.log("This is waitingMatch >>>>> ",request.waitingMatch);
+      //   alert("A match is waiting for you. Please navigate to the arena.");
+        
+      // }
       let token = request.token;
       console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {

@@ -3,6 +3,7 @@ import { open } from "sqlite";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+// import { line } from "strip-comments";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +49,7 @@ export class Participate_Tournament {
 export class GameState {
     constructor() {
         this.id = 0;
+        this.waitingMatch = false;
         this.intour = false;
         this.now = Date.now();
         this.last = Date.now();

@@ -2,8 +2,12 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback } f
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
 import { decodeJWT } from "@/lib/jwt-utils";
+import { useLocation } from 'react-router-dom';
 
 const WebSocketContext = createContext(null);
+
+
+
 
 export const WebSocketProvider = ({ children }) => {
   const { isLoggedIn } = useAuth();
@@ -17,8 +21,20 @@ export const WebSocketProvider = ({ children }) => {
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
+
       const data = JSON.parse(event.data);
-      // console.log(data);
+      // tournament notification for absent players
+      // console.log("path", window.location.pathname );
+      if (window.location.pathname !== "/tournament-online" && data?.waitingMatch) {
+        // toast.info("you have a match waiting. Go to the arena to play.");
+        toast.info("you have a match waiting in the tournament", {position:"top-right"});
+
+      }
+      // if (data?.waitingMatch) {
+      //   // toast.info("Tournament: you have a match waiting. Go to the arena to play.");
+      // toast.info("you have a match waiting in the tournament", {position:"top-right",color:"blue"});
+
+      // }
 
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
