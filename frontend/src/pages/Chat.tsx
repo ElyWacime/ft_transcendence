@@ -19,11 +19,10 @@ let inviteHandle = async (P1, P2) =>
 }
 
 export default function Chat() {
-  const { socket, isConnected, invitePrompt, setInvitePrompt, currentUser, pendingInvite, setPendingInvite, pendingAddFriend, setPendingAddFriend, friendsList, setFriendsList } = useChatSocket()
+  const { socket, isConnected, pendingInvitations, setPendingInvitations, invitePrompt, setInvitePrompt, currentUser, friendsList, setFriendsList, blockedConversations, setBlockedConversations } = useChatSocket()
   const [conversations, setConversations] = useState<any[]>([])
   const [selectedId, setSelectedId] = useState<number>()
   const [messages, setMessages] = useState<any[]>([])
-  const [blockedConversations, setBlockedConversations] = useState<any>({})
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -49,40 +48,25 @@ export default function Chat() {
         return conv
       }))
     }
-    
-    const handleBlockStatusChanged = (data: any) => {
-      const { conversationId, blockedBy } = data
-      if (blockedBy === 'other') {
-        setBlockedConversations((prev: any) => ({
-          ...prev,
-          [conversationId]: { blocked: true, blockedBy: 'other' }
-        }))
-      } else if (blockedBy === null) {
-        setBlockedConversations((prev: any) => ({
-          ...prev,
-          [conversationId]: { blocked: false, blockedBy: null }
-        }))
-      }
-    }
-    
+        
     socket.on("newConversation", handleNewConversation)
     socket.on('receiveMessage', handleReceiveMessage)
-    socket.on('blockStatusChanged', handleBlockStatusChanged)
 
     return () => {
       socket.off("newConversation", handleNewConversation)
       socket.off('receiveMessage', handleReceiveMessage)
-      socket.off('blockStatusChanged', handleBlockStatusChanged)
     }
-
   }, [socket, navigate])
-  
+
   const fetchConversations = async () => {
       try {
         const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations`, { method: 'GET', credentials: 'include' })
         const conversationsData = await res.json()
-
-        setConversations(conversationsData)
+        setConversations(conversationsData)        
+        for (const conversation of conversationsData) {
+          if (!friendsList?.[conversation.other_user_id])
+            checkFriendshipStatus(conversation);
+        }
       } catch (error) {
         console.error('Failed to fetch conversations:', error)
       }
@@ -117,14 +101,14 @@ export default function Chat() {
     })
     const re = await response.json()
 
-
-    if (re.invitationType === "game_request")
-    {
-      setPendingInvite(true)    
-    } else if (re.invitationType === "friend_request")
-    {
-      setPendingAddFriend(true)
-    }      
+    setPendingInvitations((prev: any) => ({
+      ...prev,
+      [conversation.id]: {
+        ...prev[conversation.id],
+        [invitationType]: true
+      }
+    }))
+    
     socket.emit('Invite', {
       conversationId: conversation.id,
       toUserId: conversation.other_user_id,
@@ -136,6 +120,7 @@ export default function Chat() {
   const cancelInvite = async (conversation: any, invitationType: string) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
 
+
     const response = await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
         method: 'POST',
         credentials: 'include',
@@ -145,16 +130,15 @@ export default function Chat() {
     
     const re = await response.json()    
 
-    if (re.invitationType === "game_request")
-    {
-      setPendingInvite(false)
-      setInvitePrompt(null)
-    } else if (re.invitationType === "friend_request")
-    {
-      setPendingAddFriend(false)
-      setInvitePrompt(null)
-    }          
-
+    setPendingInvitations((prev: any) => ({
+      ...prev,
+      [conversation.id]: {
+        ...prev[conversation.id],
+        [invitationType]: false
+      }
+    }))
+    
+    setInvitePrompt(null)
     socket.emit('cancelInvite', {
       toUserId: conversation.other_user_id,
       invitationType: invitationType
@@ -163,9 +147,10 @@ export default function Chat() {
 
   const respondInvite = async (accepted: boolean, invitationType: string) => {
     if (!socket || !invitePrompt) return
+    
     try 
     {
-      let res = await inviteHandle(invitePrompt.fromUserId,  currentUser.id );
+      let res = await inviteHandle(invitePrompt.fromUserId,  currentUser.id);
       socket.emit('InviteResponse', {
             conversationId: invitePrompt.conversationId,
             toUserId: invitePrompt.fromUserId,
@@ -218,14 +203,23 @@ export default function Chat() {
     }
 
     setInvitePrompt(null)
-    if (invitationType === "game_request")
-    { 
-      setPendingInvite(false)      
-    } else if (invitationType === "friend_request")
-    {
-      setPendingAddFriend(false)
+    
+    const respondingConversation = conversations.find(c => c.other_user_id === invitePrompt?.fromUserId)
+    if (respondingConversation) {
+      setPendingInvitations((prev: any) => ({
+        ...prev,
+        [respondingConversation.id]: {
+          ...prev[respondingConversation.id],
+          [invitationType]: false
+        }
+      }))
+    
     }
   }
+
+  useEffect(() => {
+    console.log(friendsList) 
+  }, [])
 
   const getChatHistory = async (conversationId: number) => {
     if (!conversationId) {
@@ -246,7 +240,8 @@ export default function Chat() {
   }
 
 
-  const removeFriend = async (other_user_id: number) => {
+  const removeFriend = async (conversation: any) => {
+    const other_user_id = conversation.other_user_id
     try {
       const res = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/remove`, {
         method: 'POST',
@@ -257,13 +252,14 @@ export default function Chat() {
       const data = await res.json()
       
       if (res.ok) {
+        cancelInvite( conversation  , "game_request")
         setFriendsList((prev: any) => ({
           ...prev,
           [other_user_id]: { ...prev[other_user_id], isFriend: false }
         }))
 
-        cancelInvite({ other_user_id }, "game_request")
         socket?.emit('unfriend', {
+          conversationId: conversation.id,
           userId: other_user_id,
           toUnfriend: currentUser?.id
         })
@@ -281,8 +277,6 @@ export default function Chat() {
   }
 
   const checkInvitationStatus = async (conversation: any, invitationType: string) => {
-
-
     try {
       const res = await fetchWithAuth(`${SERVER_URL}/api/chat/invitations/status`, {
         method: 'POST',
@@ -294,40 +288,26 @@ export default function Chat() {
       const data = await res.json()
 
       if (res.ok) {
-        if (data.pending === true) {
-          if (invitationType === "game_request") {
-            setPendingInvite(true)
-            if (data.invitedBy === "other") {
-              setInvitePrompt({
-                conversationId: conversation.id,
-                fromUserId: conversation.other_user_id,
-                invitationType: invitationType
-              })
-            }
-          } else if (invitationType === "friend_request") {
-            setPendingAddFriend(true)
-            if (data.invitedBy === "other") {
-              setInvitePrompt({
-                conversationId: conversation.id,
-                fromUserId: conversation.other_user_id,
-                invitationType: invitationType
-              })
-            }
+        setPendingInvitations((prev: any) => ({
+          ...prev,
+          [conversation.id]: {
+            ...prev[conversation.id],
+            [invitationType]: data.pending
           }
-        }
-        else {
-          if (invitationType === "game_request") {
-            setPendingInvite(false)
-            if (invitePrompt?.conversationId === conversation.id && 
-                invitePrompt?.invitationType === "game_request") {
-              setInvitePrompt(null)
-            }
-          } else if (invitationType === "friend_request") {
-            setPendingAddFriend(false)
-            if (invitePrompt?.conversationId === conversation.id && 
-                invitePrompt?.invitationType === "friend_request") {
-              setInvitePrompt(null)
-            }
+        }))
+        
+        if (data.pending === true) {
+          if (data.invitedBy === "other") {
+            setInvitePrompt({
+              conversationId: conversation.id,
+              fromUserId: conversation.other_user_id,
+              invitationType: invitationType
+            })
+          }
+        } else {
+          if (invitePrompt?.conversationId === conversation.id && 
+              invitePrompt?.invitationType === invitationType) {
+            setInvitePrompt(null)
           }
         }
       }
@@ -335,7 +315,7 @@ export default function Chat() {
       console.error('Failed to check invitation status:', error)
     }
   }
-
+  
   const checkFriendshipStatus = async (conversation: any) => {
     try {
       const res = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/status`, {
@@ -346,17 +326,10 @@ export default function Chat() {
       })
       const data = await res.json()
       if (res.ok) {
-        if (data.friends) {
           setFriendsList((prev: any) => ({
             ...prev,
-            [conversation.other_user_id]: {...prev[conversation.other_user_id], isFriend: true}
+            [conversation.other_user_id]: {...prev[conversation.other_user_id], isFriend: data.friends}
           })) 
-        } else { 
-          setFriendsList((prev: any) => ({
-            ...prev,
-            [conversation.other_user_id]: {...prev[conversation.other_user_id], isFriend: false}
-          })) 
-        }
       }
     } catch (error) {
       console.error('Failed to check friendship status:', error)
@@ -403,6 +376,7 @@ export default function Chat() {
       currentUser={currentUser}
       onFetchConversations={fetchConversations}
       blockedConversations={blockedConversations}
+      pendingInvitations={pendingInvitations}
       onBlockConversation={handleBlockConversation}
       onUnblockConversation={handleUnblockConversation}
       onCheckBlockStatus={checkBlockStatus}
@@ -414,8 +388,6 @@ export default function Chat() {
       onCancelInvite={cancelInvite}
       onUnfriend={removeFriend}
       onRespondInvite={respondInvite}
-      pendingInvite={pendingInvite}
-      pendingAddFriend={pendingAddFriend}
       socket={socket}
     />
   )

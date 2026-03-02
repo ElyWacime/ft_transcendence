@@ -23,14 +23,16 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost";
 const SERVER_URL = API_URL;
 
 export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [invitePrompt, setInvitePrompt] = useState<any>(null);
     const [currentUser, setCurrentUser] = useState<any>(null);
-    const [pendingInvite, setPendingInvite] = useState<boolean>(false)
-    const [pendingAddFriend, setPendingAddFriend] = useState<boolean>(false)
     const [friendsList, setFriendsList] = useState<any>({})
+    const [pendingInvitations, setPendingInvitations] = useState<any>({})
+    const [blockedConversations, setBlockedConversations] = useState<any>({})
+
+
     const { isLoggedIn } = useAuth();
 
 
@@ -57,6 +59,9 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     );
 
     chatSocket.on("disconnect", () => {
+      setFriendsList({});
+      setPendingInvitations({});
+      setBlockedConversations({});
       setIsConnected(false)
     });
     
@@ -90,12 +95,10 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
 
     const handleGameInviteResponse = (data: any) => {
       if (data.invitationType === "game_request") {
-        setPendingInvite(false)
         if (data.accepted) {
           navigate(`/loading?mode=2`);
         }
       } else if (data.invitationType === "friend_request") {
-        setPendingAddFriend(false)
         if (data.accepted) {
           setFriendsList((prev: any) => ({
             ...prev,
@@ -103,41 +106,65 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
           }))
         }
       }
+      setPendingInvitations((prev: any) => ({
+        ...prev,
+        [data.conversationId]: {
+          ...prev[data.conversationId],
+          [`${data.invitationType}`]: false
+        }
+      }))
     }    
     chatSocket.on('InviteResponse', handleGameInviteResponse)
 
     const handleCancelInvite = async ({invitationType}) => {
-      if (invitationType === "game_request") {
-        setInvitePrompt(null);
-        setPendingInvite(false)
-      } else if (invitationType === "friend_request") {
-        setInvitePrompt(null);
-        setPendingAddFriend(false)
-      }
+      setInvitePrompt(null);
     }
     chatSocket.on("cancelInvite", handleCancelInvite);
-
     
-    const handleUnfriend = ({ userId }: any) => {
-      setPendingInvite(false)
-      setInvitePrompt(null)
+    const handleUnfriend = ({ userId, conversationId }: any) => {
+      console.log("hit")
       setFriendsList((prev: any) => ({
         ...prev,
         [userId]: { isFriend: false }
+      })) 
+      setPendingInvitations((prev: any) => ({
+        ...prev,
+        [conversationId]: {
+          ...prev[conversationId],
+          game_request: false,
+        }
       }))
     }   
     chatSocket.on('unfriend', handleUnfriend)
+
+    const handleBlockStatusChanged = (data: any) => {
+      const { conversationId, blockedBy } = data
+      if (blockedBy === 'other') {
+        setBlockedConversations((prev: any) => ({
+          ...prev,
+          [conversationId]: { blocked: true, blockedBy: 'other' }
+        }))
+      } else if (blockedBy === null) {
+        setBlockedConversations((prev: any) => ({
+          ...prev,
+          [conversationId]: { blocked: false, blockedBy: null }
+        }))
+      }
+    }
+    chatSocket.on('blockStatusChanged', handleBlockStatusChanged)
 
 
     return () => {
       chatSocket.disconnect();
       chatSocket.off('unfriend', handleUnfriend)
+      chatSocket.off('InviteResponse', handleGameInviteResponse)
+      chatSocket.off('blockStatusChanged', handleBlockStatusChanged)
 
     };
   }, [isLoggedIn]);
 
   return (
-    <ChatSocketContext.Provider value={{ socket, isConnected, invitePrompt, setInvitePrompt, currentUser, pendingInvite, setPendingInvite, pendingAddFriend, setPendingAddFriend, friendsList, setFriendsList }}>
+    <ChatSocketContext.Provider value={{ socket, currentUser, isConnected, invitePrompt, setInvitePrompt, pendingInvitations, setPendingInvitations, friendsList, setFriendsList, blockedConversations, setBlockedConversations }}>
       {children}
     </ChatSocketContext.Provider>
   );

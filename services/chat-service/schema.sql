@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS pending_invitations (
     FOREIGN KEY (inviter_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (invitee_id) REFERENCES users (id) ON DELETE CASCADE,
 
-    UNIQUE(inviter_id, invitee_id)
+    UNIQUE(inviter_id, invitee_id, invitation_type)
 );
 
 CREATE TABLE IF NOT EXISTS friends_list (

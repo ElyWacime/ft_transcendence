@@ -27,7 +27,7 @@ type ChatWindowProps = {
   onBlockConversation?: (conversationId: number) => void
   onUnblockConversation?: (conversationId: number) => void
   onAddFriend?: (userId: number) => void
-  onUnfriend?: (userId: number) => void
+  onUnfriend?: (conversation: any) => void
   pendingInvite: boolean
   pendingAddFriend: boolean
   socket?: Socket | null
@@ -38,6 +38,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { id } = useParams()
   const activeConversationId = id ? parseInt(id, 10) : null
+
 
   useEffect(() => {
     if (activeConversationId) {
@@ -157,7 +158,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
           ) : isFriend ? (
             <button 
               className="add-friend-button warning-button" 
-              onClick={() => conversation?.other_user_id && onUnfriend?.(conversation.other_user_id)}
+              onClick={() => conversation?.other_user_id && onUnfriend?.(conversation)}
               disabled={!activeConversationId || isBlocked}
             >
               Unfriend

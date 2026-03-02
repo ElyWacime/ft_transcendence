@@ -467,8 +467,9 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('unfriend', ({ userId, toUnfriend }) => {
+  socket.on('unfriend', ({ userId, toUnfriend, conversationId }) => {
     socket.to(`user:${userId}`).emit('unfriend', {
+      conversationId: conversationId,
       userId: toUnfriend
     });
   });
