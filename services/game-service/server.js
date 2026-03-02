@@ -365,6 +365,8 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
 
 // player reports opponent missing; if reporter has been ready for >=1 minute and opponent not ready, auto-advance reporter
 const handleReportMissingOpponent = (tournamentId, matchId, reporterId) => {
+  
+  console.log("This is handleReportMissingOpponent >> ", tournamentId, matchId, reporterId);
   const tournament = tournaments.get(tournamentId);
   if (!tournament) return;
 
@@ -372,8 +374,41 @@ const handleReportMissingOpponent = (tournamentId, matchId, reporterId) => {
   const finalMatch = tournament.final;
   const allMatches = [...semifinals, finalMatch].filter(Boolean);
   const matchSlot = allMatches.find((m) => m.id === matchId);
-  if (!matchSlot || !matchSlot.player1 || !matchSlot.player2) return;
+  if (!matchSlot) return;
 
+  // --- Final edge case: reporter is alone for >=3 minutes since tournament creation
+  const isFinal = finalMatch && finalMatch.id === matchId;
+  if (isFinal) {
+    const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
+    const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
+    const soloPlayer = reporterIsPlayer1 ? matchSlot.player1 : reporterIsPlayer2 ? matchSlot.player2 : null;
+    const opponent = reporterIsPlayer1 ? matchSlot.player2 : reporterIsPlayer2 ? matchSlot.player1 : null;
+
+    if (soloPlayer && !opponent) {
+      const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
+      const THREE_MINUTES_MS = 60_000;
+      const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
+      if (threeMinutesElapsed) {
+        finalMatch.winner = soloPlayer;
+        tournament.winner = soloPlayer;
+        tournament.status = "completed";
+
+        // remove any lingering participants who aren't the winner
+        const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
+        for (const leftover of remaining) {
+          eliminateParticipant(tournament, leftover.id);
+        }
+
+        tournaments.set(tournamentId, tournament);
+        broadcastTournamentState();
+        return;
+      }
+    }
+  }
+
+  if (!matchSlot.player1 || !matchSlot.player2) return;
+
+  console.log("after match check >> ", matchSlot);
   matchSlot.readyAt = matchSlot.readyAt || {};
   matchSlot.ready = matchSlot.ready || {};
 

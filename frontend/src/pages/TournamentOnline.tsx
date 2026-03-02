@@ -286,7 +286,7 @@ useEffect(() => {
                 {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
                   <button
                     className="ghost"
-                    disabled={isSubmitting || m.ready?.[currentUser.id]}
+                    disabled={isSubmitting || m.ready?.[currentUser.id] || !iAmInside}
                     onClick={() => markReady(t.id, m.id)}
                   >
                     {m.ready?.[currentUser.id] ? "ready" : "Ready"}
@@ -331,7 +331,7 @@ useEffect(() => {
                   className="primary"
                   title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
                   // className="ghost"
-                  disabled={isSubmitting || !t.final?.ready?.[currentUser.id]|| !iAmInside || t.status == "completed"}
+                  disabled={isSubmitting ||  !iAmInside || t.status == "completed" }
                   onClick={() => reportMissing(t.id, t.final?.id || "final")}
                 >
                   Report
