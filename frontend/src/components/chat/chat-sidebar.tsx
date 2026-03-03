@@ -1,6 +1,4 @@
-import { fetchWithAuth } from "@/lib/tokenRefresh"
-import { useState } from "react"
-import type { KeyboardEvent } from 'react'
+import { Link } from "react-router-dom"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -8,70 +6,10 @@ const SERVER_URL = API_URL
 type ChatSidebarProps = {
   conversations: any[]
   selectedId?: number
-  setSelectedId: (id: number) => void
-  onStartConversation?: (userId: number) => void
   friendsList: any
 }
 
-export default function ChatSidebar({ conversations, selectedId, setSelectedId, onStartConversation, friendsList }: ChatSidebarProps) {
-  const [showSearch, setShowSearch] = useState(false)
-  const [searchInput, setSearchInput] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [searchResult, setSearchResult] = useState<any>(null)
-  const [searchError, setSearchError] = useState<string | null>(null)
-
-  const searchUser = async () => {
-    if (!searchInput.trim()) {
-      setSearchResult(null)
-      setSearchError(null)
-      return
-    }
-
-    setLoading(true)
-    setSearchError(null)
-    try {
-      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/user`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: searchInput.trim() })
-      })
-      const data = await res.json()
-
-      if (res.ok) {
-        setSearchResult(data)
-      } else {
-        setSearchError(data.error || 'User not found')
-        setSearchResult(null)
-      }
-    } catch (error) {
-      console.error('Failed to search user:', error)
-      setSearchError('Failed to search user')
-      setSearchResult(null)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      searchUser()
-    } else if (e.key === 'Escape') {
-      setShowSearch(false)
-    }
-  }
-
-  const handleUserSelect = () => {
-    if (!searchResult || searchResult.isSelf) return
-    if (onStartConversation) {
-      onStartConversation(searchResult.user_id || searchResult.userId || searchResult.id)
-    }
-    setShowSearch(false)
-    setSearchInput("")
-    setSearchResult(null)
-    setSearchError(null)
-  }
-
+export default function ChatSidebar({ conversations, selectedId, friendsList }: ChatSidebarProps) {
   const formatTime = (dateString: string) => {
     const messageDate = new Date(dateString)
     const today = new Date()
@@ -90,54 +28,18 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
     }
   }
 
-
   return (
     <div className="sidebar">
-      {/* <div className="sidebar-header">
-        <h1>Messages</h1>
-        <button className="new-chat-btn" onClick={() => setShowSearch(!showSearch)}>+</button>
-      </div> */}
-
-      {showSearch ? (
-        <div className="search-section">
-          <input
-            type="text"
-            placeholder="Search users..."
-            className="search-input"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={handleKeyPress}
-            autoFocus
-          />
-          {loading ? (
-            <div className="search-loading">Searching...</div>
-          ) : searchError ? (
-            <div className="search-empty">{searchError}</div>
-          ) : searchResult ? (
-            searchResult.isSelf ? (
-              <div className="search-empty">{searchResult.message}</div>
-            ) : (
-              <div className="users-list">
-                <div className="user-item" onClick={handleUserSelect}>
-                  <div className="user-name">{searchResult.username}</div>
-                </div>
-              </div>
-            )
-          ) : (
-            <div className="search-empty">Type a username and press Enter</div>
-          )}
-        </div>
-      ) : (
         <div className="conversations-list">
           {conversations.map((conversation) => {
               const friendstatus = friendsList[conversation.other_user_id] || null
               const isFriend = friendstatus?.isFriend ?? false
               const isOnline = friendstatus?.online ?? false
               return conversation.last_message_body &&  
-              <div
+              <Link
                 key={conversation.id}
                 className={`conversation-item ${selectedId === conversation.id ? "active" : ""}`}
-                onClick={() =>  setSelectedId(conversation.id)}
+                to={`/chat/${conversation.id}`}
               >
                 <div className="conversation-info">
                   <div className="conversation-header">
@@ -147,11 +49,10 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
                   <div className="conversation-preview">{conversation.last_message_body}</div>
                 </div>
                 <div className="conversation-time">{formatTime(conversation.last_message_created_at || conversation.created_at)}</div>
-              </div>
+              </Link>
             }   
           )}
         </div>
-      )}
     </div>
   )
 }

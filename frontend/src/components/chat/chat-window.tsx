@@ -1,7 +1,6 @@
 import { fetchWithAuth } from "@/lib/tokenRefresh"
 import { useState, useRef, useEffect } from "react"
 import type { KeyboardEvent } from 'react'
-import { useParams } from "react-router-dom"
 import { Socket } from 'socket.io-client'
 
 
@@ -36,15 +35,13 @@ type ChatWindowProps = {
 export default function ChatWindow({ conversation, messages, onSendMessage,  isFriend, isOnline, pendingAddFriend, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, onAddFriend, onUnfriend, socket, pendingInvite}: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { id } = useParams()
-  const activeConversationId = id ? parseInt(id, 10) : null
-
+  const activeConversationId = conversation?.id ?? null
 
   useEffect(() => {
     if (activeConversationId) {
       onGetHistory(activeConversationId)
     }
-  }, [activeConversationId, id])
+  }, [activeConversationId])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -92,8 +89,8 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
 
   const handleSend = () => {
     if (isBlocked) return
-    if (inputValue.trim() && id && isConnected) {
-      onSendMessage(inputValue, id)
+    if (inputValue.trim() && activeConversationId && isConnected) {
+      onSendMessage(inputValue, String(activeConversationId))
       setInputValue("")
     }
   }

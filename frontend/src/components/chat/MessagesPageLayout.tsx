@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { Socket } from 'socket.io-client'
 import ChatSidebar from "./chat-sidebar"
 import ChatWindow from "./chat-window"
@@ -12,7 +12,6 @@ const SERVER_URL = API_URL
 type MessagesPageLayoutProps = {
   conversations: any[]
   selectedId?: number
-  setSelectedId: (id: number) => void
   messages: any[]
   onSendMessage: (content: string, conversationId: string) => void
   onGetHistory: (conversationId: number) => void
@@ -38,10 +37,9 @@ type StartConversationParams = {
   userId: number
   socket?: Socket | null
   onFetchConversations?: () => void | Promise<void>
-  setSelectedId?: (id: number) => void
 }
 
-export const handleStartConversation = async ({ userId, socket, onFetchConversations, setSelectedId }: StartConversationParams) => {
+export const handleStartConversation = async ({ userId, socket, onFetchConversations }: StartConversationParams) => {
   try {
     const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/start`, {
       method: 'POST',
@@ -55,9 +53,6 @@ export const handleStartConversation = async ({ userId, socket, onFetchConversat
       if (onFetchConversations) {
         await onFetchConversations()
       }
-      if (setSelectedId) {
-        setSelectedId(data.conversationId)
-      }
       return data.conversationId as number
     }
   } catch (error) {
@@ -66,19 +61,12 @@ export const handleStartConversation = async ({ userId, socket, onFetchConversat
   return null
 }
 
-export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, onUnfriend, friendsList, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, pendingInvitations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
-  const { id } = useParams()
-  
+export default function MessagesPageLayout ({ conversations, selectedId, onUnfriend, friendsList, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, pendingInvitations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
+  const navigate = useNavigate()
 
   useEffect(() => {
     onFetchConversations()
   }, [])
-
-  useEffect(() => {
-    if (id) {
-      setSelectedId(parseInt(id))
-    }
-  }, [id])
 
   const selectedConversation = conversations.find((c) => c.id === selectedId)
   const blockStatus = selectedConversation ? blockedConversations[selectedConversation.id] : null
@@ -107,7 +95,10 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
   }, [selectedConversation])
 
   const startConversation = async (userId: number) => {
-    await handleStartConversation({ userId, socket, onFetchConversations, setSelectedId })
+    const conversationId = await handleStartConversation({ userId, socket, onFetchConversations })
+    if (conversationId) {
+      navigate(`/chat/${conversationId}`)
+    }
   }
 
   return (
@@ -116,8 +107,6 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
         <ChatSidebar
           conversations={conversations}
           selectedId={selectedId}
-          setSelectedId={setSelectedId}
-          onStartConversation={startConversation}
           friendsList={friendsList}
         />
         <ChatWindow 

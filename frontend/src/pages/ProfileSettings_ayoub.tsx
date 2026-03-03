@@ -218,7 +218,7 @@ const ProfileSettings = () => {
                       </button>
                       {String(getUserInfoFromToken()?.id) !== String(searchResult.user_id) && (
                         <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
-                          const conversationId =  await handleStartConversation({ userId: searchResult.user_id, socket: socket, onFetchConversations: null, setSelectedId: null })
+                          const conversationId =  await handleStartConversation({ userId: searchResult.user_id, socket: socket, onFetchConversations: null })
                           navigate(`/chat/${conversationId}`)
                         }}>Message
                         </button>

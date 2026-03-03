@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useChatSocket } from "../context/ChatSocketContext"
 import "../components/chat/App.css"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
@@ -21,9 +21,10 @@ let inviteHandle = async (P1, P2) =>
 export default function Chat() {
   const { socket, isConnected, pendingInvitations, setPendingInvitations, invitePrompt, setInvitePrompt, currentUser, friendsList, setFriendsList, blockedConversations, setBlockedConversations } = useChatSocket()
   const [conversations, setConversations] = useState<any[]>([])
-  const [selectedId, setSelectedId] = useState<number>()
   const [messages, setMessages] = useState<any[]>([])
   const navigate = useNavigate()
+  const { id } = useParams<{ id?: string }>()
+  const selectedId = id ? parseInt(id, 10) : undefined
 
   useEffect(() => {
     if (!socket) return
@@ -71,11 +72,6 @@ export default function Chat() {
         console.error('Failed to fetch conversations:', error)
       }
     }
-
-  useEffect(() => {
-    if (selectedId)
-      navigate(`/chat/${selectedId}`)
-  }, [selectedId, navigate])
 
   const handleSendMessage = (content: string, conversationId: string) => {
     if (!socket || !isConnected) {
@@ -365,7 +361,6 @@ export default function Chat() {
     <MessagesPageLayout 
       conversations={conversations}
       selectedId={selectedId}
-      setSelectedId={setSelectedId}
       messages={messages}
       onSendMessage={handleSendMessage}
       onGetHistory={getChatHistory}
