@@ -93,10 +93,10 @@ export default function ChatSidebar({ conversations, selectedId, setSelectedId, 
 
   return (
     <div className="sidebar">
-      <div className="sidebar-header">
+      {/* <div className="sidebar-header">
         <h1>Messages</h1>
         <button className="new-chat-btn" onClick={() => setShowSearch(!showSearch)}>+</button>
-      </div>
+      </div> */}
 
       {showSearch ? (
         <div className="search-section">

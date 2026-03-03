@@ -133,6 +133,12 @@ fastify.post("/conversations/start", async (request, reply) => {
   const senderId = token.user_id;
   const receipentId = request.body.receipentId;
 
+
+
+  if (senderId === receipentId) {
+    return reply.code(400).send({ error: 'Cannot start a conversation with yourself' });
+  }
+
   let conv = await checkIfConvExist(senderId, receipentId);
   if (conv)
   {

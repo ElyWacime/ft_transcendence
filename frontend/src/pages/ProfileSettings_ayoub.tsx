@@ -208,8 +208,7 @@ const ProfileSettings = () => {
               {searchResult && (
                 <div className="profile-search-result">
                   <div className="profile-result-content">
-                    <div>
-                      <p className="profile-result-label">Username</p>
+                    <div className="profile-result-user">
                       <p className="profile-result-name">{searchResult.user_name}</p>
                       <p className="profile-result-email">{searchResult.user_email}</p>
                     </div>
@@ -217,11 +216,13 @@ const ProfileSettings = () => {
                       <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user_name}`, {state : {id : searchResult.user_id}})}}>
                         View dashboard
                       </button>
-                      <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
-                        const conversationId =  await handleStartConversation({ userId: searchResult.user_id, socket: socket, onFetchConversations: null, setSelectedId: null })
-                        navigate(`/chat/${conversationId}`)
-                      }}>Message
-                      </button>
+                      {String(getUserInfoFromToken()?.id) !== String(searchResult.user_id) && (
+                        <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
+                          const conversationId =  await handleStartConversation({ userId: searchResult.user_id, socket: socket, onFetchConversations: null, setSelectedId: null })
+                          navigate(`/chat/${conversationId}`)
+                        }}>Message
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
