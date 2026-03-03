@@ -135,7 +135,7 @@ const Home = () => {
       <section className="features-section">
         <div className="features-container">
           <h2 className="features-title glow-text">
-            Game Features
+            Game modes
           </h2>
           <div className="features-grid">
             {features.map((feature, index) => (

@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { Navigation } from "@/components/navigation";
 import Home from "./pages/Home";
-import LocalTournament from "./pages/LocalTournament";
 import GameAI from "./pages/GameAI";
 import Game from "./pages/Game";
 import { Toaster } from "sonner"
@@ -15,7 +14,6 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
-import MatchHistory from "./pages/MatchHistory";
 import MatchMacking from "./pages/MatchMacking";
 import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 import ProfileSettings from "./pages/ProfileSettings_ayoub";
@@ -46,7 +44,6 @@ const router = createBrowserRouter(
       element: <RootLayout />,
       children: [
         { index: true, element: <Home /> },
-        { path: "tournament", element: <LocalTournament /> },
         {
           path: "chat",
           element: (
@@ -68,14 +65,6 @@ const router = createBrowserRouter(
           element: (
             <ProtectedRoute>
               <ProfileSettings />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "history",
-          element: (
-            <ProtectedRoute>
-              <MatchHistory />
             </ProtectedRoute>
           ),
         },

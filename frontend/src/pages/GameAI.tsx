@@ -1,5 +1,4 @@
 import { PongCanvasAI } from "@/components/PongCanvasAI";
-import { Bot } from "lucide-react";
 
 const GameAI = () => {
   const player1 = localStorage.getItem("name") || "You";
@@ -10,7 +9,6 @@ const GameAI = () => {
         <div className="ai-game-header">
           <div className="ai-game-title-container">
             <h1 className="ai-game-title glow-text">
-              <Bot className="ai-icon" />
               <span>PLAYER VS AI</span>
             </h1>
             <p className="ai-game-subtitle">

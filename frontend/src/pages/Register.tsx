@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
-import { Trophy } from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -36,7 +35,6 @@ const Register = () => {
     <div className="register-page">
       <div className="register-header">
         <h1 className="register-title glow-text">
-          <Trophy className="trophy-icon" />
           <span>FT TRANSCENDENCE</span>
         </h1>
         <p className="register-subtitle">

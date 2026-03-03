@@ -3,7 +3,7 @@ import { useNavigate, useParams,useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
-import { Trophy, User, TrendingUp, Gamepad2, Award, Users } from "lucide-react";
+import { User, TrendingUp, Gamepad2, Award, Users } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import "../css/dashboard.css";
@@ -148,7 +148,6 @@ const Dashboard_ayoub = () => {
         {}
         <div className="dashboard-header">
           <h1 className="dashboard-title glow-text">
-            <Trophy className="dashboard-title-icon" />
             <span>Player Dashboard</span>
           </h1>
         </div>

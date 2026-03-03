@@ -39,9 +39,14 @@ const ProfileSettings = () => {
   });
   const [searchName, setSearchName] = useState("");
   const [searchResult, setSearchResult] = useState<{
-    user_id: string;
-    user_name: string;
-    user_email: string;
+    user: {
+      id: string;
+      User_name: string;
+      email: string;
+      avatar?: string;
+    };
+    statistics?: any;
+    lastMatch?: any;
   } | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -151,7 +156,6 @@ const ProfileSettings = () => {
       <div className="profile-container">
         <div className="profile-header">
           <h1 className="profile-title glow-text">
-            <Trophy className="profile-title-icon" />
             <span>Profile Settings</span>
           </h1>
           <p className="profile-subtitle">Manage your account settings</p>
@@ -208,17 +212,23 @@ const ProfileSettings = () => {
               {searchResult && (
                 <div className="profile-search-result">
                   <div className="profile-result-content">
+                    <Avatar className="profile-result-avatar">
+                      <AvatarImage src={searchResult.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"} />
+                      <AvatarFallback>
+                        {searchResult.user.User_name?.charAt(0)?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="profile-result-user">
-                      <p className="profile-result-name">{searchResult.user_name}</p>
-                      <p className="profile-result-email">{searchResult.user_email}</p>
+                      <p className="profile-result-name">{searchResult.user.User_name}</p>
+                      <p className="profile-result-email">{searchResult.user.email}</p>
                     </div>
                     <div className="profile-result-actions">
-                      <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user_name}`, {state : {id : searchResult.user_id}})}}>
+                      <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user.User_name}`, {state : {id : searchResult.user.id}})}}>
                         View dashboard
                       </button>
-                      {String(getUserInfoFromToken()?.id) !== String(searchResult.user_id) && (
+                      {String(getUserInfoFromToken()?.id) !== String(searchResult.user.id) && (
                         <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
-                          const conversationId =  await handleStartConversation({ userId: searchResult.user_id, socket: socket, onFetchConversations: null })
+                          const conversationId =  await handleStartConversation({ userId: searchResult.user.id, socket: socket, onFetchConversations: null })
                           navigate(`/chat/${conversationId}`)
                         }}>Message
                         </button>

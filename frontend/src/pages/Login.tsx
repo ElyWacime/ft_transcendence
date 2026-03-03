@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
-import { Trophy, Github } from "lucide-react";
+import { Github } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
@@ -59,7 +59,6 @@ const Login = () => {
     <div className="login-page">
       <div className="login-header">
         <h1 className="login-title glow-text">
-          <Trophy className="trophy-icon" />
           <span>FT TRANSCENDENCE</span>
         </h1>
         <p className="login-subtitle">

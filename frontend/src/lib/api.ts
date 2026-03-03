@@ -282,23 +282,17 @@ class UserAPI {
   }
 
   async searchByName(name: string) {
-    const res = await fetchWithAuth(`${this.baseUrl}/search-this-name`, {
-      method: "POST",
-      body: JSON.stringify({ name }),
+    const res = await fetchWithAuth(`/api/dashboard/${name}`, {
+      method: "GET",
       credentials: 'include',
     });
     const data = await res.json();
     
-    if (!res.ok || data.valid === false) {
+    if (!res.ok) {
       throw new Error(data?.error || "User not found");
     }
 
-    return data as {
-      valid: true;
-      user_name: string;
-      user_email: string;
-      user_id: string;
-    };
+    return data;
   }
 }
 

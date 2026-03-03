@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import {useCallback,useEffect} from "react";
-import {RotateCcw} from "lucide-react";
 import Home from "./Home";
 
 
@@ -33,12 +32,8 @@ const Result = () => {
             <div className="tournament-match">
               <div className="game-header">
                 <div style={{ paddingTop: "2rem" }} className="ai-game-title-container">
-                  <h1 className="ai-game-title glow-text">
-                    🏆 Result 🏆
-                  </h1>
                 <div className="additional-controls">
               <button onClick={resetGame} className="game-control-button2">
-                {/* <RotateCcw className="button-icon" />  */}
                 Play Another Match!
               </button>
             </div>

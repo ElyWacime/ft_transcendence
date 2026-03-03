@@ -480,12 +480,13 @@
 @media (min-width: 768px) {
   .profile-user-card {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     gap: 1.5rem;
   }
 }
 
 .profile-avatar {
+  flex-shrink: 0;
   width: 8rem;
   height: 8rem;
   border: 4px solid hsla(var(--primary) / 0.2);
@@ -497,11 +498,15 @@
 
 .profile-user-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
 @media (min-width: 768px) {
   .profile-user-info {
+    align-items: flex-start;
     text-align: left;
   }
 }
@@ -519,26 +524,31 @@
 
 .profile-dashboard-btn 
 {
-  width: 40%;
   color: white;
   font-weight: 800;
   font-size: 0.75rem;
-  padding: 0.75rem;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
-  /* display: flex; */
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  /* box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4); */
-  /*  */
   letter-spacing: 0.1em;
   background: hsl(217, 73%, 46%);
-  /* width: 100%;
-  margin-top: 0.5rem;
-  color: hsl(var(--primary));
-  border-color: hsla(var(--primary) / 0.6); */
+  transition: background 200ms ease;
+  white-space: nowrap;
+}
+
+.profile-dashboard-btn:hover {
+  background: hsl(217, 73%, 56%);
+}
+
+@media (min-width: 768px) {
+  .profile-dashboard-btn {
+    align-self: flex-start;
+  }
 }
 
 
@@ -618,11 +628,18 @@
   gap: 0.5rem;
 }
 
+.profile-result-avatar {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
 .profile-result-user {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.25rem;
+  flex: 1;
 }
 
 .profile-result-actions {
