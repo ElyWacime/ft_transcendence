@@ -217,9 +217,6 @@ export default function Chat() {
     }
   }
 
-  useEffect(() => {
-    console.log(friendsList) 
-  }, [])
 
   const getChatHistory = async (conversationId: number) => {
     if (!conversationId) {

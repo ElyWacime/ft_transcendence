@@ -177,6 +177,21 @@ fastify.post("/friends/status", async (request, reply) => {
   };
 });
 
+fastify.get("/friends", async (request, reply) => {
+  const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+  
+  const token = await res.json();
+  const userId = token.user_id;
+  
+  const friends = await getAllFriends(userId);
+  
+  return { friends };
+});-
+
 fastify.post("/friends/add", async (request, reply) => {
   const res = await desToken(request);
   

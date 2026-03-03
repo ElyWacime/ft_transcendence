@@ -5,7 +5,9 @@ import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
+import { handleStartConversation } from "@/components/chat/MessagesPageLayout";
 import "../css/profile.css";
+import { useChatSocket } from "@/context/ChatSocketContext";
 
 function getUserInfoFromToken() {
   try {
@@ -45,7 +47,8 @@ const ProfileSettings = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [avatarKey, setAvatarKey] = useState(Date.now());
-
+  const { socket } = useChatSocket();
+    
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -85,8 +88,11 @@ const ProfileSettings = () => {
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = searchName.trim();
+    setSearchLoading(true);
+    setSearchError(null);
     if (!trimmed) {
       setSearchError("Enter a username to search");
+      setSearchResult(null);
       setSearchLoading(false);
       return;
     }
@@ -94,8 +100,10 @@ const ProfileSettings = () => {
     try {
       const data = await userApi.searchByName(trimmed);
       setSearchResult(data);
+      setSearchError(null);
       toast.success("User found");
     } catch (err: any) {
+      setSearchResult(null);
       setSearchError(err?.message || "User not found");
       toast.error(err?.message || "User not found");
     } finally {
@@ -205,9 +213,16 @@ const ProfileSettings = () => {
                       <p className="profile-result-name">{searchResult.user_name}</p>
                       <p className="profile-result-email">{searchResult.user_email}</p>
                     </div>
-                    <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user_name}`, {state : {id : searchResult.user_id}})}}>
-                      View dashboard
-                    </button>
+                    <div className="profile-result-actions">
+                      <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user_name}`, {state : {id : searchResult.user_id}})}}>
+                        View dashboard
+                      </button>
+                      <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
+                        const conversationId =  await handleStartConversation({ userId: searchResult.user_id, socket: socket, onFetchConversations: null, setSelectedId: null })
+                        navigate(`/chat/${conversationId}`)
+                      }}>Message
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

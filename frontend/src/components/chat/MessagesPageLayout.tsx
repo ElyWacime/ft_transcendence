@@ -4,6 +4,7 @@ import { Socket } from 'socket.io-client'
 import ChatSidebar from "./chat-sidebar"
 import ChatWindow from "./chat-window"
 import { useAuth } from "@/context/AuthContext"
+import { fetchWithAuth } from "@/lib/tokenRefresh"
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
 const SERVER_URL = API_URL
@@ -31,6 +32,38 @@ type MessagesPageLayoutProps = {
   onUnfriend: (conversation: any) => void
   friendsList: any
   socket?: Socket | null
+}
+
+type StartConversationParams = {
+  userId: number
+  socket?: Socket | null
+  onFetchConversations?: () => void | Promise<void>
+  setSelectedId?: (id: number) => void
+}
+
+export const handleStartConversation = async ({ userId, socket, onFetchConversations, setSelectedId }: StartConversationParams) => {
+  try {
+    const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/start`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receipentId: userId })
+    })
+    const data = await res.json()
+    if (data.conversationId) {
+      socket?.emit("newConversation", { userId })
+      if (onFetchConversations) {
+        await onFetchConversations()
+      }
+      if (setSelectedId) {
+        setSelectedId(data.conversationId)
+      }
+      return data.conversationId as number
+    }
+  } catch (error) {
+    console.error('Failed to start conversation:', error)
+  }
+  return null
 }
 
 export default function MessagesPageLayout ({ conversations, selectedId, setSelectedId, onUnfriend, friendsList, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, pendingInvitations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
@@ -73,23 +106,8 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
     }
   }, [selectedConversation])
 
-  const handleStartConversation = async (userId: number) => {
-    try {
-      const res = await fetch(`${SERVER_URL}/api/chat/conversations/start`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ receipentId: userId })
-      })
-      const data = await res.json()
-      if (data.conversationId) {
-        socket.emit("newConversation", { userId })
-        await onFetchConversations()
-        setSelectedId(data.conversationId)
-      }
-    } catch (error) {
-      console.error('Failed to start conversation:', error)
-    }
+  const startConversation = async (userId: number) => {
+    await handleStartConversation({ userId, socket, onFetchConversations, setSelectedId })
   }
 
   return (
@@ -99,7 +117,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, setSele
           conversations={conversations}
           selectedId={selectedId}
           setSelectedId={setSelectedId}
-          onStartConversation={handleStartConversation}
+          onStartConversation={startConversation}
           friendsList={friendsList}
         />
         <ChatWindow 
