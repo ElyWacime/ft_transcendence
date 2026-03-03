@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../css/tournament-online.css";
@@ -60,35 +60,10 @@ export default function TournamentOnlinePage() {
     ? { id: decoded.id, name: decoded.name || decoded.email || "You" }
     : null;
 
-  const myTournamentId = useMemo(() => {
-    if (!currentUser) return null;
-    const t = tournaments.find((tour) => tour.participants?.some((p) => p.id === currentUser.id));
-    return t?.id || null;
-  }, [tournaments, currentUser]);
+  const myTournamentId = currentUser
+    ? tournaments.find((tour) => tour.participants?.some((p) => p.id === currentUser.id))?.id || null
+    : null;
 
-
-
-useEffect(() => {
-
-   const checkIfaAlayerIsLate = async () => {
-      if (tournaments.semifinals && !Array.isArray(tournaments) && tournaments.status !== "finals")
-      {
-        const dateNow = new Date();
-        if (tournaments.semifinals[0].ready_at)
-        {
-          const diff = Math.abs(dateNow.getTime() - new Date(tournaments.semifinals[0].ready_at).getTime());
-           const minutes = Math.floor((diff / (1000 * 60)) % 60);
-           if (minutes <61)
-           {
-            // make them both ready.. by the name of low!
-            markReady(tournaments.id, tournaments.semifinals[0].id);
-           }
-        }
-      }
-    }
-     const intervalId = setInterval(checkIfaAlayerIsLate, 1000);
-   return () => clearInterval(intervalId);
-}, []);
   // initial load: fetch tournament list from game-service REST endpoint
   // REST gives us a snapshot even if websocket connects a tick later or user refreshes mid-flow
   useEffect(() => {
@@ -112,10 +87,12 @@ useEffect(() => {
     load();
   }, []);
 
-  // websocket handler: live tournament state + match-ready cues
-  // TOURNAMENTS_STATE keeps cards updated; TOURNAMENT_MATCH_READY tells players to jump into their match
-  const handleMessage = useCallback(
-    (event: MessageEvent) => {
+  // register websocket listener and handle tournament events
+  // keeps UI live-synced; TOURNAMENT_MATCH_READY also redirects players into their match
+  useEffect(() => {
+    if (!ws || !isReady || ws.readyState !== WebSocket.OPEN) return;
+
+    const handleMessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === "TOURNAMENTS_STATE") {
@@ -125,30 +102,17 @@ useEffect(() => {
           const isPlayer =
             data.player1?.id === currentUser?.id || data.player2?.id === currentUser?.id;
           if (isPlayer) {
-            // toast.success("Your tournament match is ready! Redirecting to the arena...");
             navigate(`/loading?mode=2`);
           }
         }
       } catch (e) {
         console.error("Failed to parse WS message", e);
       }
-    },
-    [currentUser, navigate]
-  );
+    };
 
-  // register websocket listener and request current tournaments once socket is open
-  // we proactively request a snapshot so late-joiners still get the latest state even if no broadcast fires
-  useEffect(() => {
-    if (!ws || !isReady || ws.readyState !== WebSocket.OPEN) return;
     ws.addEventListener("message", handleMessage);
-    ws.send(
-      JSON.stringify({
-        type: "REQUEST_TOURNAMENTS",
-        token: localStorage.getItem("token"),
-      })
-    );
     return () => ws.removeEventListener("message", handleMessage);
-  }, [ws, isReady, handleMessage]);
+  }, [ws, isReady, currentUser, navigate]);
 
   // helper to send authed websocket actions to game-service
   // all tournament mutations (create/join/ready) flow through the existing WS channel used by gameplay
@@ -286,7 +250,7 @@ useEffect(() => {
                 {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
                   <button
                     className="ghost"
-                    disabled={isSubmitting || m.ready?.[currentUser.id] || !iAmInside}
+                    disabled={isSubmitting || m.ready?.[currentUser.id]}
                     onClick={() => markReady(t.id, m.id)}
                   >
                     {m.ready?.[currentUser.id] ? "ready" : "Ready"}
@@ -296,9 +260,8 @@ useEffect(() => {
                   <button
                  title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
                   className="primary"
-
                     // className="ghost"
-                    disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || t.status == "completed" }
+                    disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 || t.status == "completed")}
                     onClick={() => reportMissing(t.id, m.id)}
                   >
                     Report
@@ -331,7 +294,7 @@ useEffect(() => {
                   className="primary"
                   title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
                   // className="ghost"
-                  disabled={isSubmitting ||  !iAmInside || t.status == "completed" }
+                  disabled={isSubmitting ||  !iAmInside || t.status == "completed"}
                   onClick={() => reportMissing(t.id, t.final?.id || "final")}
                 >
                   Report

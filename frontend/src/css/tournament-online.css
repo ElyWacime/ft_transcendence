@@ -10,7 +10,8 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  max-width: 780px;
+  max-width: 70vw;
+  align-items: center;
 }
 
 .tournament-card {
@@ -18,7 +19,6 @@
   border: 1px solid #1f2a3d;
   border-radius: 16px;
   padding: 24px;
-  max-width: 780px;
   width: 100%;
   color: #e4e8f0;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -162,6 +162,16 @@
   flex-wrap: wrap;
 }
 
+.create-card .page-actions {
+  padding: 22px 0 6px;
+  justify-content: center;
+}
+
+.create-card .primary {
+  box-shadow: 0 12px 36px rgba(124, 58, 237, 0.4);
+  transform: translateY(2px);
+}
+
 .tournament-actions button {
   border: none;
   border-radius: 10px;
@@ -194,6 +204,49 @@
 
 .tournament-actions .ghost:hover:not(:disabled) {
   transform: translateY(-1px);
+}
+
+/* Global button styles to reuse for bracket actions (ready/report) */
+.ghost {
+  background: #111827;
+  color: #e4e8f0;
+  border: 1px solid #1f2a3d;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.ghost:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.ghost:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  border: 1px solid #2f2e8b;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+  transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .muted {
