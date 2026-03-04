@@ -261,7 +261,7 @@ export default function TournamentOnlinePage() {
                  title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
                   className="primary"
                     // className="ghost"
-                    disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 || t.status == "completed")}
+                    disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 && t.status == "finals") || t.status == "completed"}
                     onClick={() => reportMissing(t.id, m.id)}
                   >
                     Report
