@@ -27,9 +27,17 @@ services:
       - ./services/auth-service:/app
       - /app/node_modules
       - ./services/auth-service/prisma/db:/app/prisma/db
+      - ./services/gateway/certs/dev.crt:/usr/local/share/ca-certificates/dev.crt:ro
+      - ./services/gateway/certs/dev.key:/usr/local/share/ca-certificates/dev.key:ro
     environment:
       - PORT=8000
       - NODE_ENV=development
+      - INTERNAL_TLS=true
+      - TLS_CERT_PATH=/usr/local/share/ca-certificates/dev.crt
+      - TLS_KEY_PATH=/usr/local/share/ca-certificates/dev.key
+      - CHAT_SERVICE_URL=https://gateway/api/chat
+      - GAME_SERVICE_URL=https://gateway
+      - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/dev.crt
     command: npm run dev
     networks:
       - transcendence
@@ -44,8 +52,16 @@ services:
     volumes:
       - ./services/chat-service:/app
       - /app/node_modules
+      - ./services/gateway/certs/dev.crt:/usr/local/share/ca-certificates/dev.crt:ro
+      - ./services/gateway/certs/dev.key:/usr/local/share/ca-certificates/dev.key:ro
     env_file:
       - ./services/chat-service/.env
+    environment:
+      - INTERNAL_TLS=true
+      - TLS_CERT_PATH=/usr/local/share/ca-certificates/dev.crt
+      - TLS_KEY_PATH=/usr/local/share/ca-certificates/dev.key
+      - AUTH_SERVICE_URL=https://gateway/api/users
+      - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/dev.crt
     command: npm run start
     networks:
       - transcendence    
@@ -56,11 +72,14 @@ services:
     depends_on:
       - frontend
       - auth-service
+      - chat-service
       - game-server
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./services/gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./services/gateway/certs:/etc/nginx/certs:ro
     networks:
       - transcendence
     restart: always
@@ -72,11 +91,18 @@ services:
     environment:
       - JWT_ACCESS_SECRET=supersecretkey
       - JWT_REFRESH_SECRET=superrefreshkey
+      - INTERNAL_TLS=true
+      - TLS_CERT_PATH=/usr/local/share/ca-certificates/dev.crt
+      - TLS_KEY_PATH=/usr/local/share/ca-certificates/dev.key
+      - AUTH_SERVICE_URL=https://gateway/api/users
+      - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/dev.crt
     ports:
       - "3000:3000"
     command: npm run start
     volumes:
       - ./services/game-service/db:/app/db
+      - ./services/gateway/certs/dev.crt:/usr/local/share/ca-certificates/dev.crt:ro
+      - ./services/gateway/certs/dev.key:/usr/local/share/ca-certificates/dev.key:ro
     depends_on:
       - frontend
       - auth-service

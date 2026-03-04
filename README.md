@@ -68,3 +68,22 @@ The application uses a microservices architecture:
 - Gateway: Routes requests to appropriate services
 
 Services communicate via HTTP and WebSocket protocols.
+
+## HTTPS / WSS (DEV - SELF SIGNED)
+
+- Gateway now terminates TLS on port `443`.
+- HTTP on port `80` is redirected to HTTPS.
+- Browser traffic uses `https://localhost` and websocket traffic uses `wss://localhost`.
+- Internal gateway-to-service hops also use HTTPS with certificate verification enabled.
+- A self-signed certificate is auto-generated before startup by `make up` in:
+  - `services/gateway/certs/dev.crt`
+  - `services/gateway/certs/dev.key`
+
+If your browser warns about the certificate, trust it locally for development.
+
+### Use machine IP instead of localhost
+
+- Print current machine IP:
+  - `make ip`
+- Apply machine IP to env files and regenerate TLS cert SAN:
+  - `make use-ip`

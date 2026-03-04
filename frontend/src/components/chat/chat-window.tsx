@@ -4,7 +4,7 @@ import type { KeyboardEvent } from 'react'
 import { Socket } from 'socket.io-client'
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin
 const SERVER_URL = API_URL
 
 type ChatWindowProps = {

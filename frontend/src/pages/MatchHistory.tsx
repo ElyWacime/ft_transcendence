@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import Home from "./Home";
 import { decodeJWT } from "@/lib/jwt-utils";
 
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+
 const MatchHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,7 +23,7 @@ const MatchHistory = () => {
   }
 
   const getall = async () => {
-    let matchess =  await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/allmatch`, {
+    let matchess =  await fetch(`${API_URL}/allmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token") ,id:id}),

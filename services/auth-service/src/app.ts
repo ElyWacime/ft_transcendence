@@ -5,14 +5,29 @@ import fCookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { oauthRoutes } from "./modules/user/oauth.route";
+import { readFileSync } from "node:fs";
 
-const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
+const internalTlsEnabled = process.env.INTERNAL_TLS === "true";
+const app = Fastify({
+  logger: true,
+  ...(internalTlsEnabled
+    ? {
+        https: {
+          cert: readFileSync(process.env.TLS_CERT_PATH || "/usr/local/share/ca-certificates/dev.crt"),
+          key: readFileSync(process.env.TLS_KEY_PATH || "/usr/local/share/ca-certificates/dev.key"),
+        },
+      }
+    : {}),
+}).withTypeProvider<ZodTypeProvider>();
 
 app.register(cors, {
   origin: [
     `http://${process.env.DOMAIN}`,
     `http://${process.env.DOMAIN}:8080`,
+    `https://${process.env.DOMAIN}`,
+    `https://${process.env.DOMAIN}:443`,
     "http://10.30.233.136:8080",
+    "https://10.30.233.136",
     "http://frontend:8080",
     "http://0.0.0.0",
   ],

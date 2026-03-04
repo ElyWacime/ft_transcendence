@@ -6,7 +6,7 @@ import ChatWindow from "./chat-window"
 import { useAuth } from "@/context/AuthContext"
 import { fetchWithAuth } from "@/lib/tokenRefresh"
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin
 const SERVER_URL = API_URL
 
 type MessagesPageLayoutProps = {

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 let isRefreshing = false;
 let refreshPromise: Promise<any> | null = null;

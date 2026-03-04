@@ -93,7 +93,8 @@ export async function oauthRoutes(app: FastifyInstance) {
       data: { refreshToken: jwtRefreshToken },
     });
 
-    const redirectUrl = new URL(`http://${process.env.DOMAIN}/login`);
+    const appProtocol = process.env.APP_PROTOCOL || "https";
+    const redirectUrl = new URL(`${appProtocol}://${process.env.DOMAIN}/login`);
     redirectUrl.searchParams.set("token", jwtAccessToken);
     redirectUrl.searchParams.set("refreshToken", jwtRefreshToken);
     redirectUrl.searchParams.set("email", email);

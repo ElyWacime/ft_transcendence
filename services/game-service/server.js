@@ -3,11 +3,24 @@ import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
+import { readFileSync } from "node:fs";
 import { randomUUID } from "crypto"; // used to generate unique tournament ids for in-memory rooms; survives only while the process is alive
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
 
-const fastify = Fastify({ logger: false });
+const internalTlsEnabled = process.env.INTERNAL_TLS === "true";
+const fastify = Fastify({
+  logger: false,
+  ...(internalTlsEnabled
+    ? {
+        https: {
+          cert: readFileSync(process.env.TLS_CERT_PATH || "/usr/local/share/ca-certificates/dev.crt"),
+          key: readFileSync(process.env.TLS_KEY_PATH || "/usr/local/share/ca-certificates/dev.key"),
+        },
+      }
+    : {}),
+});
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:8000";
 
 await fastify.register(websocket);
 
@@ -764,7 +777,7 @@ const route = async (id) => {
   try {
     if(!id)
       return null;
-    const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
+    const response = await fetch(`${AUTH_SERVICE_URL}/get-user/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

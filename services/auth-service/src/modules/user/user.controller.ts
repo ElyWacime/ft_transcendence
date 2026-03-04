@@ -81,14 +81,14 @@ export async function login(
   reply.setCookie("access_token", accessToken, {
     path: "/",
     httpOnly: true,
-    secure: false,
+    secure: process.env.COOKIE_SECURE === "true",
     sameSite: "lax",
   });
   
   reply.setCookie("refresh_token", refreshToken, {
     path: "/",
     httpOnly: true,
-    secure: false,
+    secure: process.env.COOKIE_SECURE === "true",
     sameSite: "lax",
   });
   
@@ -185,14 +185,14 @@ export async function update_email(
     reply.setCookie("access_token", accessToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: process.env.COOKIE_SECURE === "true",
       sameSite: "lax",
     });
 
     reply.setCookie("refresh_token", refreshToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: process.env.COOKIE_SECURE === "true",
       sameSite: "lax",
     });
   
@@ -345,14 +345,14 @@ export async function update_username(
     reply.setCookie("access_token", accessToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: process.env.COOKIE_SECURE === "true",
       sameSite: "lax",
     });
 
     reply.setCookie("refresh_token", refreshToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: process.env.COOKIE_SECURE === "true",
       sameSite: "lax",
     });
 
@@ -448,14 +448,14 @@ export async function refreshToken(
     reply.setCookie("access_token", newAccessToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: process.env.COOKIE_SECURE === "true",
       sameSite: "lax",
     });
 
     reply.setCookie("refresh_token", newRefreshToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: process.env.COOKIE_SECURE === "true",
       sameSite: "lax",
     });
 

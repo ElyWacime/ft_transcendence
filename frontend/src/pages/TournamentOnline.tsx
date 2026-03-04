@@ -7,7 +7,7 @@ import { useWebSocket } from "@/context/WebSocketContext";
 
 // game-service base URL (used for initial tournament snapshot fetch before sockets sync)
 // sockets keep the page live, but we still seed the UI with the latest known state on first load
-const API_URL = `http://${import.meta.env.VITE_DOMAIN}:3000`;
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 interface Participant {
   id: string;

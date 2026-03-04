@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import { readFileSync } from 'node:fs';
 import cookie from "@fastify/cookie"
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
@@ -9,7 +10,17 @@ import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './dbAcc
 import { insertUsers, getUserByUsername, updateUsername } from './dbAccess/user-q.js';
 import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './dbAccess/conversations-q.js';
 
-const fastify = Fastify();
+const internalTlsEnabled = process.env.INTERNAL_TLS === 'true';
+const fastify = Fastify(
+  internalTlsEnabled
+    ? {
+        https: {
+          cert: readFileSync(process.env.TLS_CERT_PATH || '/usr/local/share/ca-certificates/dev.crt'),
+          key: readFileSync(process.env.TLS_KEY_PATH || '/usr/local/share/ca-certificates/dev.key'),
+        },
+      }
+    : {}
+);
 
 const allowAllOrigins = (origin, cb) => cb(null, true);
 
@@ -30,10 +41,11 @@ const io = new Server(fastify.server, {
 });
 
 const connectedUsers = new Map();
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
 
 async function desToken(request)
 {
-   const res = await fetch('http://auth-service:8000/validate_token', {
+  const res = await fetch(`${AUTH_SERVICE_URL}/validate_token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: request.cookies.access_token }),

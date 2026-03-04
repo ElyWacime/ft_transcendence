@@ -6,6 +6,9 @@ import { useLocation } from 'react-router-dom';
 
 const WebSocketContext = createContext(null);
 
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+const WS_URL = `${API_URL.replace(/^http/, "ws")}/ws`;
+
 
 
 
@@ -80,7 +83,7 @@ export const WebSocketProvider = ({ children }) => {
 
     if (wsRef.current) return; 
 
-    const socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+    const socket = new WebSocket(WS_URL);
     wsRef.current = socket;
     setWs(socket);
 

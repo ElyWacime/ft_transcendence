@@ -4,6 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { decodeJWT } from "@/lib/jwt-utils";
+
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+
 const Home = () => {
 
   const navigate = useNavigate();
@@ -25,7 +28,7 @@ const Home = () => {
   });
 
   const checkhandel = async (mode: number) => {
-    return await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/check`, {
+    return await fetch(`${API_URL}/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
@@ -34,7 +37,7 @@ const Home = () => {
   };
 
   const endmatchhandel = async () => {
-    return await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/endmatch`, {
+    return await fetch(`${API_URL}/endmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token") }),
