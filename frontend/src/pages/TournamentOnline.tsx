@@ -226,12 +226,12 @@ export default function TournamentOnlinePage() {
           <span className={`status-pill ${t.full ? "full" : "active"}`}>{statusLabel}</span>
         </div>
 
-        <div className="tournament-state">
+        {/* <div className="tournament-state"> */}
           <div>
-            <p className="label">Created at</p>
-            <p className="value">{t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}</p>
+            {/* <p className="label">Created at</p> */}
+            <p className="created-at">{t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}</p>
           </div>
-        </div>
+        {/* </div> */}
 
         <div className="participants">
           <div className="participants-header">
@@ -289,7 +289,7 @@ export default function TournamentOnlinePage() {
                 )}
               </div>
             ))}
-            {(t.semifinals ?? []).length === 0 && <p className="muted">Waiting for 4 players...</p>}
+            {/* {(t.semifinals ?? []).length === 0 && <p className="muted">Waiting for 4 players...</p>} */}
           </div>
 
           <div className="bracket-section">

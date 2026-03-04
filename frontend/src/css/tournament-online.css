@@ -49,20 +49,20 @@
 .status-pill {
   padding: 6px 12px;
   border-radius: 999px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   border: 1px solid #25324a;
 }
 
 .status-pill.active {
-  background: #123620;
-  color: #7af2a1;
-  border-color: #1f8b4d;
+  background: #013013;
+  color: #f2f2f2;
+  border-color: #37473e;
 }
 
 .status-pill.full {
-  background: #3a1522;
-  color: #f6a5b3;
-  border-color: #b13b55;
+  background: #312126;
+  color: #ffffff;
+  border-color: #493e40;
 }
 
 .status-pill.inactive {
@@ -76,6 +76,11 @@
   line-height: 1.5;
 }
 
+.created-at{
+  color: #8192ad;
+  font-size: 0.6rem;
+  margin-top: 4px;
+}
 .tournament-body {
   display: flex;
   flex-direction: column;
@@ -109,7 +114,66 @@
 .participants-list {
   display: flex;
   flex-direction: column;
+  gap: 5px;
+}
+
+.bracket {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #0b101b;
+  border: 1px solid #1f2a3d;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.bracket-section {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  align-items: center;
+}
+
+.bracket-section .participant {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  align-items: center;
+  gap: 12px;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.bracket-section .participant .name {
+  justify-self: center;
+}
+
+.bracket-section .participant .badge {
+  min-width: 48px;
+  text-align: center;
+}
+
+.bracket-section .participant .pill.full {
+  justify-self: start;
+}
+
+.bracket-section .participant button {
+  justify-self: end;
+}
+
+@media (max-width: 640px) {
+  .bracket-section .participant {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .bracket-section .participant .pill.full,
+  .bracket-section .participant button,
+  .bracket-section .participant .badge,
+  .bracket-section .participant .name {
+    justify-self: center;
+  }
 }
 
 .participant {
@@ -139,8 +203,8 @@
   padding: 4px 10px;
   border-radius: 999px;
   background: #3a1522;
-  color: #f6a5b3;
-  border: 1px solid #b13b55;
+  color: #daaab2;
+  border: 1px solid #de99a8;
   font-size: 0.85rem;
 }
 
