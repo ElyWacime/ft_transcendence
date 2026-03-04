@@ -125,6 +125,11 @@ export default function TournamentOnlinePage() {
     return true;
   };
 
+  // request a fresh tournaments snapshot from the server; used after we trigger a mutation
+  const requestTournaments = () => {
+    sendAction({ type: "REQUEST_TOURNAMENTS" });
+  };
+
   // create a new online tournament (server adds creator as first participant)
   // if socket is down we bail fast to avoid confusing UX
   const createTournament = () => {
@@ -134,7 +139,10 @@ export default function TournamentOnlinePage() {
     }
     setIsSubmitting(true);
     const ok = sendAction({ type: "TOURNAMENT_CREATE" });
-    if (ok) toast.success("Tournament created. Waiting for players...");
+    if (ok) {
+      toast.success("Tournament created. Waiting for players...");
+      requestTournaments();
+    }
     setIsSubmitting(false);
   };
 
@@ -148,7 +156,10 @@ export default function TournamentOnlinePage() {
     }
     setIsSubmitting(true);
     const ok = sendAction({ type: "TOURNAMENT_LEAVE", tournamentId });
-    if (ok) toast.success("Left tournament successfully");
+    if (ok) {
+      toast.success("Left tournament successfully");
+      requestTournaments();
+    }
     setIsSubmitting(false);
     
 
@@ -161,7 +172,10 @@ export default function TournamentOnlinePage() {
     }
     setIsSubmitting(true);
     const ok = sendAction({ type: "TOURNAMENT_JOIN", tournamentId });
-    if (ok) toast.success("Joined tournament");
+    if (ok) {
+      toast.success("Joined tournament");
+      requestTournaments();
+    }
     setIsSubmitting(false);
   };
 
@@ -170,7 +184,10 @@ export default function TournamentOnlinePage() {
   const markReady = (tournamentId: string, matchId: string) => {
     setIsSubmitting(true);
     const ok = sendAction({ type: "TOURNAMENT_READY", tournamentId, matchId });
-    if (ok) toast.success("Ready! Waiting for opponent...");
+    if (ok) {
+      toast.success("Ready! Waiting for opponent...");
+      requestTournaments();
+    }
     setIsSubmitting(false);
   };
 
@@ -181,7 +198,10 @@ export default function TournamentOnlinePage() {
     }
     setIsSubmitting(true);
     const ok = sendAction({ type: "TOURNAMENT_REPORT_MISSING", tournamentId, matchId });
-    if (ok) toast.message("Reported. If they stay unready for 5 minute, you'll advance.");
+    if (ok) {
+      toast.message("click report if you think your opponent is missing.");
+      requestTournaments();
+    }
     setIsSubmitting(false);
   };
 
@@ -292,7 +312,7 @@ export default function TournamentOnlinePage() {
               {currentUser && [t.final?.player1?.id, t.final?.player2?.id].includes(currentUser.id) && (
                 <button
                   className="primary"
-                  title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
+                  title="Report if your opponent didnt show up - for more than 30 minutes since the beginning of the tournamament , or if your opponent present but remains unready for more than 5 minutes."
                   // className="ghost"
                   disabled={isSubmitting ||  !iAmInside || t.status == "completed"}
                   onClick={() => reportMissing(t.id, t.final?.id || "final")}
