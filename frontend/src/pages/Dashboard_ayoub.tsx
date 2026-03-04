@@ -3,7 +3,7 @@ import { useNavigate, useParams,useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
-import { User, TrendingUp, Gamepad2, Award, Users } from "lucide-react";
+import { User, TrendingUp, Gamepad2, Award, Users, ExternalLink } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import "../css/dashboard.css";
@@ -177,8 +177,9 @@ const Dashboard_ayoub = () => {
                 <span>Statistics</span>
               </h3>
               <div className="dashboard-stats">
-              <div className="stat-row">
-                  <span className="stat-label" onClick = {()=>{ navigate("/history",{state:{id}})}}>Match History</span>
+                <div className="stat-row" style={{cursor: "pointer"}} onClick = {()=>{navigate("/history",{state:{id}})}}>
+                  <span className="stat-label">Match History</span>
+                  <ExternalLink className="stat-icon" style={{width: "1rem", height: "1rem"}} />
                 </div>
                 <div className="stat-row">
                   <span className="stat-label">Total Matches</span>

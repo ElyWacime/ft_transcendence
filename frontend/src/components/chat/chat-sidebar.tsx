@@ -1,8 +1,5 @@
 import { Link } from "react-router-dom"
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
-const SERVER_URL = API_URL
-
 type ChatSidebarProps = {
   conversations: any[]
   selectedId?: number
@@ -28,10 +25,22 @@ export default function ChatSidebar({ conversations, selectedId, friendsList }: 
     }
   }
 
+  const allEmpty = conversations.every(chat => !chat.last_message_body);
+
   return (
     <div className="sidebar">
         <div className="conversations-list">
-          {conversations.map((conversation) => {
+          {conversations.length === 0 || allEmpty ? (
+            <div style={{ 
+              padding: '2rem', 
+              textAlign: 'center', 
+              color: '#999',
+              fontSize: '0.9rem'
+            }}>
+              No conversations yet. Start chatting with your friends!
+            </div>
+          ) : (
+            conversations.map((conversation) => {
               const friendstatus = friendsList[conversation.other_user_id] || null
               const isFriend = friendstatus?.isFriend ?? false
               const isOnline = friendstatus?.online ?? false
@@ -50,7 +59,7 @@ export default function ChatSidebar({ conversations, selectedId, friendsList }: 
                 </div>
                 <div className="conversation-time">{formatTime(conversation.last_message_created_at || conversation.created_at)}</div>
               </Link>
-            }   
+            })
           )}
         </div>
     </div>

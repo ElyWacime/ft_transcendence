@@ -15,6 +15,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
+import MatchHistory from "./pages/MatchHistory";
 import MatchMacking from "./pages/MatchMacking";
 import Dashboard_ayoub from "./pages/Dashboard_ayoub";
 import ProfileSettings from "./pages/ProfileSettings_ayoub";
@@ -66,6 +67,14 @@ const router = createBrowserRouter(
           element: (
             <ProtectedRoute>
               <ProfileSettings />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "history",
+          element: (
+            <ProtectedRoute>
+              <MatchHistory />
             </ProtectedRoute>
           ),
         },
