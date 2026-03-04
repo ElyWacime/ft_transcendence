@@ -10,6 +10,7 @@ import { Toaster } from "sonner"
 import GameOnline from "./pages/GameOnline";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import TournamentOnline from "./pages/TournamentOnline"; // online tournament lobby/bracket page leveraging game-service websocket
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
@@ -90,6 +91,14 @@ const router = createBrowserRouter(
         { path: "game", element: <Game /> },
         { path: "result", element: <Result /> },
         { path: "game-online", element: <GameOnline /> },
+        {
+          path: "tournament-online",
+          element: (
+            <ProtectedRoute>
+              <TournamentOnline />
+            </ProtectedRoute>
+          ),
+        },
         { path: "game-ai", element: <GameAI /> },
         {
           path: "login",
