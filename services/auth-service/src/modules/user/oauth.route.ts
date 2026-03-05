@@ -16,6 +16,7 @@ export async function oauthRoutes(app: FastifyInstance) {
 
   app.get("/github/callback", async (req, reply) => {
     const code = (req.query as any).code;
+clear
 
     const tokenRes = await fetch(
       "https://github.com/login/oauth/access_token",
