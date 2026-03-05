@@ -32,9 +32,9 @@ const LocalTournament = () => {
   const [tournamentWinner, setTournamentWinner] = useState<Player | null>(null);
 
   const handleAliasChange = (index: number, value: string) => {
-    const newAliases = [...aliases];
-    newAliases[index] = value;
-    setAliases(newAliases);
+    const next = [...aliases];
+    next[index] = value;
+    setAliases(next);
   };
 
   const handleStartTournament = () => {
@@ -71,27 +71,24 @@ const LocalTournament = () => {
     if (!currentMatch) return;
 
     const winner = player1Score > player2Score ? currentMatch.player1 : currentMatch.player2;
-    const loser = player1Score > player2Score ? currentMatch.player2 : currentMatch.player1;
-
+    const loser = winner === currentMatch.player1 ? currentMatch.player2 : currentMatch.player1;
     const result = { matchId: currentMatch.matchId, winner, loser };
+
     setMatchResults((prev) => [...prev, result]);
 
     if (currentMatch.matchId === "semi1") {
-      // stash first semifinal winner and move to the second semifinal
       setSemifinalWinners([winner]);
-      const secondMatch: MatchState = {
+      setCurrentMatch({
         player1: players[2],
         player2: players[3],
         round: 1,
         matchId: "semi2",
-      };
-      setCurrentMatch(secondMatch);
+      });
       return;
     }
 
     if (currentMatch.matchId === "semi2") {
-      // build finals using the stored semifinal 1 winner plus this winner
-      const semi1Winner = matchResults.find((m) => m.matchId === "semi1")?.winner || semifinalWinners[0];
+      const semi1Winner = semifinalWinners[0] || matchResults.find((m) => m.matchId === "semi1")?.winner;
       if (!semi1Winner) {
         toast.error("Semifinal 1 winner missing. Restarting bracket.");
         handleBackToSetup();
@@ -101,14 +98,12 @@ const LocalTournament = () => {
       const updatedSemis = [semi1Winner, winner];
       setSemifinalWinners(updatedSemis);
 
-      const finalMatch: MatchState = {
+      setCurrentMatch({
         player1: updatedSemis[0],
         player2: updatedSemis[1],
         round: 2,
         matchId: "final",
-      };
-
-      setCurrentMatch(finalMatch);
+      });
       setPhase("finals");
       return;
     }
