@@ -42,16 +42,13 @@ const LocalTournament = () => {
       toast.error("All players must enter an alias!");
       return;
     }
-    let map = new Set<String>();
 
-    aliases.map((a) => {
-        map.add(a);
-    })
-    if (map.size < 4)
-     {
-        toast.error("All players must enter a Unique alias!");
-        return;
-     }
+    const unique = new Set(aliases.map((a) => a.trim().toLowerCase()));
+    if (unique.size !== 4) {
+      toast.error("Aliases must be unique.");
+      return;
+    }
+
     const newPlayers: Player[] = aliases.map((alias, i) => ({
       id: i + 1,
       alias: alias.trim(),
@@ -77,29 +74,46 @@ const LocalTournament = () => {
     const loser = player1Score > player2Score ? currentMatch.player2 : currentMatch.player1;
 
     const result = { matchId: currentMatch.matchId, winner, loser };
-    
-    setMatchResults(prev => [...prev, result]);
+    setMatchResults((prev) => [...prev, result]);
 
     if (currentMatch.matchId === "semi1") {
-      setSemifinalWinners(prev => [...prev, winner]);
+      // stash first semifinal winner and move to the second semifinal
+      setSemifinalWinners([winner]);
       const secondMatch: MatchState = {
-        player1: players[2], 
-        player2: players[3], 
+        player1: players[2],
+        player2: players[3],
         round: 1,
         matchId: "semi2",
       };
       setCurrentMatch(secondMatch);
-    } else if (currentMatch.matchId === "semi2") {
-      setSemifinalWinners(prev => [...prev, winner]);
+      return;
+    }
+
+    if (currentMatch.matchId === "semi2") {
+      // build finals using the stored semifinal 1 winner plus this winner
+      const semi1Winner = matchResults.find((m) => m.matchId === "semi1")?.winner || semifinalWinners[0];
+      if (!semi1Winner) {
+        toast.error("Semifinal 1 winner missing. Restarting bracket.");
+        handleBackToSetup();
+        return;
+      }
+
+      const updatedSemis = [semi1Winner, winner];
+      setSemifinalWinners(updatedSemis);
+
       const finalMatch: MatchState = {
-        player1: semifinalWinners[0],
-        player2: winner,
+        player1: updatedSemis[0],
+        player2: updatedSemis[1],
         round: 2,
         matchId: "final",
       };
+
       setCurrentMatch(finalMatch);
       setPhase("finals");
-    } else if (currentMatch.matchId === "final") {
+      return;
+    }
+
+    if (currentMatch.matchId === "final") {
       setTournamentWinner(winner);
       setCurrentMatch(null);
       setPhase("completed");
@@ -124,7 +138,6 @@ const LocalTournament = () => {
             <div className="game-header">
               <button
                 onClick={() => navigate(-1)}
-                variant="outline"
                 className="back-button"
               >
                 <ArrowLeft className="back-icon" />
@@ -185,7 +198,7 @@ const LocalTournament = () => {
                   className="start-button"
                 >
                   <Trophy style={{ width: '20px', height: '20px' }} />
-                  Sart Tournament
+                  START TOURNAMENT
                 </button>
               </div>
             </div>
@@ -195,7 +208,6 @@ const LocalTournament = () => {
             <div className="game-header">
               <button
                 onClick={handleBackToSetup}
-                variant="outline"
                 className="back-button"
               >
                 <ArrowLeft className="back-icon" />
@@ -213,7 +225,7 @@ const LocalTournament = () => {
               </div>
               <div className="header-spacer"></div>
             </div>
-            <div className={`game-canvas-container`}>
+            <div className={`game-canvas-container`} key={currentMatch.matchId}>
               <PongCanvas
                 player1Name={currentMatch.player1.alias}
                 player2Name={currentMatch.player2.alias}
@@ -227,7 +239,6 @@ const LocalTournament = () => {
             <div className="game-header">
               <button
                 onClick={handleBackToSetup}
-                variant="outline"
                 className="back-button"
               >
                 <ArrowLeft className="back-icon" />

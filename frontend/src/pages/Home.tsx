@@ -45,10 +45,10 @@ const Home = () => {
   const features = [
     {
       icon: Trophy,
-      title: "Tournament Mode",
+      title: "Local Tournament",
       type:"page",
-      description: "Compete in elimination tournaments with dynamic brackets",
-      page: "/tournament",
+      description: "4-player offline bracket on one device",
+      page: "/local-tournament",
     },
     {
       // entry point into the new websocket-backed online tournament lobby
@@ -132,11 +132,11 @@ const Home = () => {
             Compete, dominate, and become the Pong champion!
           </p>
           <button
-            onClick={() => navigate("/tournament")}
+            onClick={() => navigate("/local-tournament")}
             className="hero-button animate-pulse-glow"
           >
             <Trophy className="button-icon" />
-            Create Tournament
+            Start Local Tournament
           </button>
         </div>
       </section>

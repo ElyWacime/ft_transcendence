@@ -24,6 +24,7 @@ import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
 import Chat from "./pages/Chat";
 import Result from "./pages/Result";
+import LocalTournament from "./pages/LocalTournament";
 
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { ChatSocketProvider } from "./context/ChatSocketContext";
@@ -100,6 +101,7 @@ const router = createBrowserRouter(
         { path: "game", element: <Game /> },
         { path: "result", element: <Result /> },
         { path: "game-online", element: <GameOnline /> },
+        { path: "local-tournament", element: <LocalTournament /> },
         {
           path: "tournament-online",
           element: (

@@ -5,6 +5,11 @@
   width: 100%;
 }
 
+.vs {
+  margin: 5px;
+  color: #d198e5;
+  font-size: 1.0rem;
+}
 .tournament-list {
   display: flex;
   flex-direction: column;

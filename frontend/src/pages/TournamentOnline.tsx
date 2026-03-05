@@ -264,7 +264,7 @@ export default function TournamentOnlinePage() {
               <div key={m.id} className="participant">
                 {/* <span className="badge">{m.id}</span> */}
                 <span className="name">
-                  {(m.player1?.name || "?")} vs {(m.player2?.name || "?")}
+                  {(m.player1?.name || "?")} <span className="vs">vs</span> {(m.player2?.name || "?")}
                 </span>
                 {m.winner && <span className="pill full">Winner: {m.winner.name}</span>}
                 {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
@@ -297,13 +297,13 @@ export default function TournamentOnlinePage() {
             <div className="participant">
               <span className="badge">Final</span>
               <span className="name">
-                {(t.final?.player1?.name || "?")} vs {(t.final?.player2?.name || "?")}
+                {(t.final?.player1?.name || "?")} <span className="vs">vs</span> {(t.final?.player2?.name || "?")}
               </span>
               {t.final?.winner && <span className="pill full">Winner: {t.final.winner.name}</span>}
               {currentUser && [t.final?.player1?.id, t.final?.player2?.id].includes(currentUser.id) && (
                 <button
                   className="ghost"
-                  disabled={isSubmitting || t.final?.ready?.[currentUser.id]}
+                  disabled={isSubmitting || t.final?.ready?.[currentUser.id] || t.participants.length < 2}
                   onClick={() => markReady(t.id, t.final?.id || "final")}
                 >
                   {t.final?.ready?.[currentUser.id] ? "ready" : "Ready"}
