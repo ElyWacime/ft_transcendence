@@ -1,0 +1,25 @@
+# SSL Certificates
+services/gateway/certs/
+*.key
+*.crt
+*.pem
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Docker volumes
+**/db/
+**/prisma/db/*.db
+**/prisma/db/*.db-journal
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

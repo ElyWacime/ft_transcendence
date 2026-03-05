@@ -19,7 +19,7 @@ type ChatSocketContextValue = {
 
 const ChatSocketContext = createContext<ChatSocketContextValue | null>(null);
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost";
+const API_URL = import.meta.env.VITE_API_URL || "https://localhost";
 const SERVER_URL = API_URL;
 
 export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {

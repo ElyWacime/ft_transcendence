@@ -6,16 +6,19 @@ import { useEffect, useState ,useRef, useCallback} from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
 
 const MatchMacking = () => {
-    const { ws, isReady } = useWebSocket();
+    const { ws, isReady, wsRef } = useWebSocket();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
     let del = useRef(true);
     let matchref = useRef(true);
     const [features, setFeatures] = useState([]);
+    const [isWaiting, setIsWaiting] = useState(true);
     const handleMessage = useCallback((event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      console.log("MatchMacking received:", data);
       matchref.current = data.id;
+      setIsWaiting(false);
       setFeatures(() => {
           if (mode == "4")
           {
@@ -79,25 +82,36 @@ const MatchMacking = () => {
     });
 
     useEffect(() => {
-      if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
+      const socket = wsRef?.current;
+      
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        console.log("WebSocket not ready:", { 
+          hasSocket: !!socket, 
+          readyState: socket?.readyState,
+          isReady 
+        });
+        return;
+      }
 
-      ws.send(JSON.stringify({
+      console.log("Sending REGISTER message for mode:", mode);
+      socket.send(JSON.stringify({
             token:localStorage.getItem("token"),
             type: "REGISTER",
             mode,
         }));
-        ws.addEventListener("message", handleMessage);
+        socket.addEventListener("message", handleMessage);
         return () => {
-            if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {
-                ws.send(JSON.stringify({
+            if (del.current && socket && socket.readyState === WebSocket.OPEN) {
+                console.log("Sending DELETE message on cleanup");
+                socket.send(JSON.stringify({
                     token:localStorage.getItem("token"),
                     type: "DELETE",
                     matchId: matchref.current 
                 }));
             }
-            ws.removeEventListener("message", handleMessage);
+            socket.removeEventListener("message", handleMessage);
         };
-    }, [ws, isReady]);
+    }, [wsRef, isReady, mode, handleMessage]);
 
     return (
         <>
@@ -121,6 +135,12 @@ const MatchMacking = () => {
                 <h2 className="features-title glow-text">
                   Game's Waiting Room
                 </h2>
+                {isWaiting ? (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#a0aec0' }}>
+                    <p>Connecting to match...</p>
+                    <p style={{ fontSize: '12px', marginTop: '10px' }}>Waiting for server response...</p>
+                  </div>
+                ) : (
                 <div className="features-grid">
                   {features.map((feature, index) => (
                     <Card
@@ -138,6 +158,7 @@ const MatchMacking = () => {
                     </Card>
                   ))}
                 </div>
+                )}
               </div>
             </section>
           </div>

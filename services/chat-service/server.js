@@ -2,6 +2,8 @@ import Fastify from 'fastify';
 import cookie from "@fastify/cookie"
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
+import * as fs from 'fs';
+import https from 'https';
 import initializeDb from './setup-db.js';
 import { getInvitationStatus, createInvitation, cancelInvitation } from './dbAccess/invitation-q.js';
 import { getBlockingStatus, blockUser, unblockUser } from './dbAccess/block-q.js';
@@ -9,7 +11,14 @@ import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './dbAcc
 import { insertUsers, getUserByUsername, updateUsername } from './dbAccess/user-q.js';
 import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './dbAccess/conversations-q.js';
 
-const fastify = Fastify();
+const httpsOptions = process.env.USE_HTTPS === "true" ? {
+  https: {
+    key: fs.readFileSync("/app/certs/private.key"),
+    cert: fs.readFileSync("/app/certs/certificate.crt"),
+  }
+} : {};
+
+const fastify = Fastify(httpsOptions);
 
 const allowAllOrigins = (origin, cb) => cb(null, true);
 
@@ -31,13 +40,25 @@ const io = new Server(fastify.server, {
 
 const connectedUsers = new Map();
 
+// Create HTTPS agent for self-signed certificates
+const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
+  rejectUnauthorized: false
+}) : undefined;
+
 async function desToken(request)
 {
-   const res = await fetch('http://auth-service:8000/validate_token', {
+   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+   const fetchOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: request.cookies.access_token }),
-  });
+   };
+   
+   if (httpsAgent) {
+     fetchOptions.agent = httpsAgent;
+   }
+   
+   const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
   return res;
 }
 
@@ -498,9 +519,14 @@ io.on('connection', (socket) => {
 
 const start = async () => {
   try {
-    await initializeDb(); 
-    await fastify.listen({ port: 3700, host: '0.0.0.0' });
-    fastify.log.info(`Server listening on port 3700`);
+    await initializeDb();
+    
+    const useHttps = process.env.USE_HTTPS === "true";
+    const port = 3700;
+
+    await fastify.listen({ port, host: '0.0.0.0' });
+
+    fastify.log.info(`Server listening on port ${port} (${useHttps ? 'HTTPS' : 'HTTP'})`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

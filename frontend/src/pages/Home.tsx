@@ -25,7 +25,7 @@ const Home = () => {
   });
 
   const checkhandel = async (mode: number) => {
-    return await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/check`, {
+    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
@@ -34,7 +34,7 @@ const Home = () => {
   };
 
   const endmatchhandel = async () => {
-    return await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/endmatch`, {
+    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/endmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token") }),

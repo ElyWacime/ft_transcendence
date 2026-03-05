@@ -3,11 +3,27 @@ import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
+import * as fs from "fs";
+import https from "https";
 import { randomUUID } from "crypto"; // used to generate unique tournament ids for in-memory rooms; survives only while the process is alive
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
+const httpsOptions = process.env.USE_HTTPS === "true" ? {
+  https: {
+    key: fs.readFileSync("/app/certs/private.key"),
+    cert: fs.readFileSync("/app/certs/certificate.crt"),
+  }
+} : {};
 
-const fastify = Fastify({ logger: false });
+const fastify = Fastify({ 
+  logger: false,
+  ...httpsOptions
+});
+
+// Create HTTPS agent for self-signed certificates
+const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
+  rejectUnauthorized: false
+}) : undefined;
 
 await fastify.register(websocket);
 
@@ -34,9 +50,17 @@ await dbcnx.connect();
 const sendtoplayer = async (id, data) => {
   if (id) {
     let socket = (clients.get(id));
-    if (socket && socket.readyState === 1)
-      socket.send(data);
+    if (socket) {
+      if (socket.readyState === 1) {
+        socket.send(data);
+        console.log("Sent data to player:", id, "readyState:", socket.readyState);
+      } else {
+        console.log("Cannot send to player:", id, "readyState:", socket.readyState, "(expected 1)");
+      }
+    } else {
+      console.log("Socket not found for player:", id);
     }
+  }
 }
 
 // ---
@@ -584,105 +608,119 @@ const handelRoomQuiiting = async(id) => {
 };
 
 const handelRegister = async(request,id,email,name) => {
-  let u = new Users();
-  let ngame = new GameState();
-  u.id = id; 
-  u.email = email;
-  u.User_name = await route(id);
-  clients_info.set(id, u.User_name);
-  if (!u.User_name)
-  {
-    u.User_name = id;
-    clients_info.set(id, null);
-  }
-  u.isOnline = true;
-  u.Auto_Match = true;
-  await dbcnx.createUsers(u);
-  let m = await dbcnx.getOngoingMatch(id);
-  if (!m) 
-  {
-    m = await dbcnx.getOpenRoom(request.mode);
-    if (!m) {
-      m = new Match();
-      m.P1_Id = id;
-      m.mode = request.mode;
-      if (!request.tournement) {
-        m.id = await dbcnx.createMatch_not(m);
-      }
-      else {
-        m.id = await dbcnx.createMatch(m);
-      }
-    }
-    else 
+  try {
+    let u = new Users();
+    let ngame = new GameState();
+    u.id = id; 
+    u.email = email;
+    u.User_name = await route(id);
+    clients_info.set(id, u.User_name);
+    if (!u.User_name)
     {
-      if (request.mode == 2) 
-      {
-        if (m.P1_Id == null) 
-          m.P1_Id = id;
-        else
-          m.P2_Id = id;
-      }
-      else
-      {
-        if (m.P1_Id == null) 
-          m.P1_Id = id;
-        else if (m.P2_Id == null) 
-          m.P2_Id = id;
-        else if (m.P3_Id == null) 
-          m.P3_Id = id;
-        else 
-          m.P4_Id = id;
-      }
-      m.count_players = m.count_players + 1;
+      u.User_name = id;
+      clients_info.set(id, null);
     }
+    u.isOnline = true;
+    u.Auto_Match = true;
+    await dbcnx.createUsers(u);
+    console.log("User created/updated:", id);
+    
+    let m = await dbcnx.getOngoingMatch(id);
+    console.log("Ongoing match for user:", id, ":", m ? m.id : "none");
+    
+    if (!m) 
+    {
+      m = await dbcnx.getOpenRoom(request.mode);
+      console.log("Open room for mode", request.mode, ":", m ? m.id : "creating new");
+      
+      if (!m) {
+        m = new Match();
+        m.P1_Id = id;
+        m.mode = request.mode;
+        if (!request.tournement) {
+          m.id = await dbcnx.createMatch_not(m);
+        }
+        else {
+          m.id = await dbcnx.createMatch(m);
+        }
+        console.log("Created new match:", m.id, "for user:", id);
+      }
+      else 
+      {
+        if (request.mode == 2) 
+        {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else
+            m.P2_Id = id;
+        }
+        else
+        {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else if (m.P2_Id == null) 
+            m.P2_Id = id;
+          else if (m.P3_Id == null) 
+            m.P3_Id = id;
+          else 
+            m.P4_Id = id;
+        }
+        m.count_players = m.count_players + 1;
+        console.log("Added user", id, "to existing match", m.id);
+      }
+    }
+    ngame.id = m.id;
+    ngame.P1_Id = m.P1_Id;
+    ngame.P2_Id = m.P2_Id;
+    ngame.P3_Id = m.P3_Id;
+    ngame.P4_Id = m.P4_Id;
+    let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+    ngame.player1Name = name1;
+    ngame.player2Name = name2;
+    ngame.player3Name = name3;
+    ngame.player4Name = name4;
+
+    // if ( ngame.P1_Id == id)
+    //   ngame.player1Name = u.User_name;
+    // if ( ngame.P2_Id == id)
+    //   ngame.player2Name = u.User_name;
+    // if ( ngame.P3_Id == id)
+    //   ngame.player3Name = u.User_name;
+    // if ( ngame.P4_Id == id)
+    //   ngame.player4Name = u.User_name;
+
+    if (!ngame.player1Name)
+      ngame.player1Name = clients_info.get(ngame.P1_Id);
+    if (!ngame.player2Name)
+      ngame.player2Name = clients_info.get(ngame.P2_Id);
+    if (!ngame.player3Name)
+      ngame.player3Name = clients_info.get(ngame.P3_Id);
+    if (!ngame.player4Name)
+      ngame.player4Name = clients_info.get(ngame.P4_Id);
+
+    ngame.T_Id = m.T_Id;
+    ngame.count_players = m.count_players;
+    ngame.mode = request.mode;
+    ngame.id = m.id;
+    if (ngame.count_players == request.mode) 
+    {
+        m.gameStatus = "PLAYING";
+        if(!matches.get(m.id))
+          matches.set(m.id, ngame);
+        console.log("Match is full! Starting game for match:", m.id);
+    }
+    ngame.gameStatus = m.gameStatus;
+    let data = JSON.stringify(ngame);
+    await dbcnx.updateMatch(m);
+    console.log("Sending game state to players for match:", m.id);
+    // console.log("Server wiill send ::: ",ngame);
+    sendtoplayer(ngame.P1_Id, data);
+    sendtoplayer(ngame.P2_Id, data);
+    sendtoplayer(ngame.P3_Id, data);
+    sendtoplayer(ngame.P4_Id, data);
+  } catch (error) {
+    console.error("Error in handelRegister for user:", id, "-", error);
   }
-  ngame.id = m.id;
-  ngame.P1_Id = m.P1_Id;
-  ngame.P2_Id = m.P2_Id;
-  ngame.P3_Id = m.P3_Id;
-  ngame.P4_Id = m.P4_Id;
-  let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
-  ngame.player1Name = name1;
-  ngame.player2Name = name2;
-  ngame.player3Name = name3;
-  ngame.player4Name = name4;
-
-  // if ( ngame.P1_Id == id)
-  //   ngame.player1Name = u.User_name;
-  // if ( ngame.P2_Id == id)
-  //   ngame.player2Name = u.User_name;
-  // if ( ngame.P3_Id == id)
-  //   ngame.player3Name = u.User_name;
-  // if ( ngame.P4_Id == id)
-  //   ngame.player4Name = u.User_name;
-
-  if (!ngame.player1Name)
-    ngame.player1Name = clients_info.get(ngame.P1_Id);
-  if (!ngame.player2Name)
-    ngame.player2Name = clients_info.get(ngame.P2_Id);
-  if (!ngame.player3Name)
-    ngame.player3Name = clients_info.get(ngame.P3_Id);
-  if (!ngame.player4Name)
-    ngame.player4Name = clients_info.get(ngame.P4_Id);
-
-  ngame.T_Id = m.T_Id;
-  ngame.count_players = m.count_players;
-  ngame.mode = request.mode;
-  ngame.id = m.id;
-  if (ngame.count_players == request.mode) 
-  {
-      m.gameStatus = "PLAYING";
-      if(!matches.get(m.id))
-        matches.set(m.id, ngame);
-  }
-  ngame.gameStatus = m.gameStatus;
-  let data = JSON.stringify(ngame);
-  await dbcnx.updateMatch(m);
-  // console.log("Server wiill send ::: ",ngame);
-  sendtoplayer(ngame.P1_Id, data);
-  sendtoplayer(ngame.P2_Id, data);
-  sendtoplayer(ngame.P3_Id, data);
-  sendtoplayer(ngame.P4_Id, data);
 };
 
 const handelMove = async (request,id) =>{
@@ -764,12 +802,19 @@ const route = async (id) => {
   try {
     if(!id)
       return null;
-    const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
+    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+    const fetchOptions = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    };
+    
+    if (httpsAgent) {
+      fetchOptions.agent = httpsAgent;
+    }
+    
+    const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
     if (!response.ok) {
       console.error(`Auth service returned status ${response.status}`);
       return null;
@@ -797,14 +842,24 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       let token = request.token;
       console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
-          const decoded = req.jwt.verify(token);
+          let decoded;
+          try {
+            decoded = req.jwt.verify(token);
+          } catch (jwtError) {
+            console.error("JWT verification failed:", jwtError.message);
+            connection.send(JSON.stringify({ error: "JWT verification failed" }));
+            return;
+          }
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
+          console.log("User connected with id:", id, "type:", request.type);
           await handelDup(connection,id);
           clients.set(id, connection);
-          if (request.type == "REGISTER") 
+          if (request.type == "REGISTER") {
+            console.log("Handling REGISTER for user:", id, "mode:", request.mode);
             await handelRegister(request,id,email,name);
+          }
           else if (request.type == "MOVE") 
             await handelMove(request,id);
           else if (request.type == "FINISHED") 
@@ -840,7 +895,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    }
    catch (e)
    {
-      console.log("Error :",e);
+      console.error("WebSocket message handler error:", e);
    }
   });
   connection.on("close", async () => {
@@ -1045,4 +1100,9 @@ fastify.post('/allmatch', async (request, reply) => {
 import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
 import { userInfo } from "os";
 await registerDashboardRoutes_ayoub(fastify, dbcnx);
-fastify.listen({ port: 3000, host: "0.0.0.0" });
+
+const useHttps = process.env.USE_HTTPS === "true";
+const port = 3000;
+
+fastify.listen({ port, host: "0.0.0.0" });
+console.log(`Game server listening on port ${port} (${useHttps ? 'HTTPS' : 'HTTP'})`);

@@ -379,14 +379,28 @@ export class SQLiteDB {
     }
     async createUsers(t) {
         let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? `, [t.id]);
-        if (a)
+        if (a) {
             return await this.db.run(`UPDATE Users 
             SET 
             email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
             WHERE id = ?`, [t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.id]);
-        else
-            return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
-            VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1 , t.avatar]);
+        } else {
+            try {
+                return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
+                VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1 , t.avatar]);
+            } catch (err) {
+                // If insert fails due to unique constraint on email, update instead
+                if (err.code === 'SQLITE_CONSTRAINT') {
+                    console.log("User with email already exists, updating:", t.email);
+                    return await this.db.run(`UPDATE Users 
+                    SET 
+                    User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
+                    WHERE email = ?`, [t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.email]);
+                } else {
+                    throw err;
+                }
+            }
+        }
     }
 
     async getUserss() {

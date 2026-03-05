@@ -10,11 +10,12 @@ rebuild: clean up
 
 clean:
 	docker-compose down -v
-	rm -f services/chat-service/dev.db
-	rm -f services/auth-service/prisma/db/data.db
-	rm -f services/game-service/db/database.sqlite
-	docker system prune -f
-	
+
+fclean: clean
+	sudo rm -f services/chat-service/dev.db
+	sudo rm -f services/auth-service/prisma/db/data.db
+	sudo rm -f services/game-service/db/database.sqlite
+
 rm:
 	(docker compose down -v --rmi all --remove-orphans) 2>/dev/null || true
 
@@ -26,6 +27,11 @@ db2: rm
 	
 db:
 	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite
-re: rm up
+re: fclean up
 
+ps:
+	docker compose ps
 
+certs:
+	chmod +x generate-certs.sh
+	./generate-certs.sh

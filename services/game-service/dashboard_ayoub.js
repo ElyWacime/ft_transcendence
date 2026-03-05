@@ -62,7 +62,7 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
           }
         } else {
           try {
-            const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
+            const authServiceUrl = process.env.AUTH_SERVICE_URL || 'https://auth-service:8000';
             const searchUrl = `${authServiceUrl}/api/auth/search-this-name`;
             
             const authResponse = await fetch(searchUrl, {
@@ -126,7 +126,7 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
         
         if (token) {
-          const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
+          const authServiceUrl = process.env.AUTH_SERVICE_URL || 'https://auth-service:8000';
           const userInfoUrl = `${authServiceUrl}/user-info/${userId}`;
           
           const authResponse = await fetch(userInfoUrl, {
