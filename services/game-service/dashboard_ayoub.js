@@ -5,17 +5,17 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
   fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     try {
       const { identifier } = request.params;
-      
+      const authHeader = request.headers.authorization;
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
       let user = await dbcnx.getUserByName(identifier);
       if (!user) {
         user = await dbcnx.getUserById(identifier);
       }
-      const id = user?.id || identifier;
-      
-      if (!user) {
-        const authHeader = request.headers.authorization;
-        const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
+      let userId = user?.id;
+
+      if (!userId) {
         if (!token) {
           return reply.code(404).send({ error: 'User not found.' });
         }
@@ -29,42 +29,14 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
 
         const matchesId = decoded.id === identifier;
         const matchesUsername = decoded.name === identifier;
-        const isOwnDashboard = matchesId || matchesUsername;
 
-        if (isOwnDashboard) {
-          try {
-            const newUser = new Users();
-            newUser.id = decoded.id;
-            newUser.email = decoded.email || '';
-            newUser.User_name = decoded.name || decoded.email || 'User';
-            newUser.User_password = '';
-            newUser.isOnline = true;
-            newUser.Auto_Match = true;
-            newUser.loggedIn = true;
-
-            await dbcnx.createUsers(newUser);
-            user = await dbcnx.getUserById(decoded.id);
-
-            if (!user) {
-              const fallback = await dbcnx.db.get(`SELECT * FROM Users WHERE id = ?`, [decoded.id]);
-              user = fallback || {
-                id: newUser.id,
-                email: newUser.email,
-                User_name: newUser.User_name,
-                avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
-                isOnline: true,
-                Auto_Match: true,
-                CreatedAt: new Date().toISOString()
-              };
-            }
-          } catch (createError) {
-            return reply.code(500).send({ error: 'Internal server error' });
-          }
+        if (matchesId || matchesUsername) {
+          userId = decoded.id;
         } else {
           try {
             const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
             const searchUrl = `${authServiceUrl}/api/auth/search-this-name`;
-            
+
             const authResponse = await fetch(searchUrl, {
               method: 'POST',
               headers: {
@@ -79,37 +51,33 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
             }
 
             const authUser = await authResponse.json();
-            
-            const newUser = new Users();
-            newUser.id = authUser.user_id;
-            newUser.email = authUser.user_email || '';
-            newUser.User_name = authUser.user_name || 'User';
-            newUser.User_password = '';
-            newUser.isOnline = false;
-            newUser.Auto_Match = true;
-            newUser.loggedIn = false;
-
-            await dbcnx.createUsers(newUser);
-            user = await dbcnx.getUserById(authUser.user_id);
-
-            if (!user) {
-              user = {
-                id: newUser.id,
-                email: newUser.email,
-                User_name: newUser.User_name,
-                avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
-                isOnline: false,
-                Auto_Match: true,
-                CreatedAt: new Date().toISOString()
-              };
-            }
+            userId = authUser.user_id;
           } catch (fetchError) {
             return reply.code(404).send({ error: 'User not found.' });
           }
         }
       }
 
-      const userId = user.id;
+      if (!user && userId) {
+        user = await dbcnx.getUserById(userId);
+      }
+
+      if (!userId) {
+        return reply.code(404).send({ error: 'User not found.' });
+      }
+
+      if (!user) {
+        user = {
+          id: userId,
+          email: '',
+          User_name: 'User',
+          avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
+          isOnline: false,
+          Auto_Match: true,
+          CreatedAt: new Date().toISOString()
+        };
+      }
+
       const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
         Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [userId, userId, userId, userId]);
       const winsCount = await dbcnx.UserCountWins_ayoub(userId);
@@ -121,10 +89,9 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
 
       let latestAvatar = user.avatar;
+      let latestEmail = user.email;
+      let latestUsername = user.User_name;
       try {
-        const authHeader = request.headers.authorization;
-        const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
-        
         if (token) {
           const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-service:8000';
           const userInfoUrl = `${authServiceUrl}/user-info/${userId}`;
@@ -138,13 +105,27 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
           
           if (authResponse.ok) {
             const authUser = await authResponse.json();
+            if (authUser.email) {
+              latestEmail = authUser.email;
+            }
+            if (authUser.name) {
+              latestUsername = authUser.name;
+            }
             if (authUser.avatar) {
               latestAvatar = authUser.avatar;
               console.log("Fetched latest avatar from auth-service for user:", userId);
               console.log("Latest avatar URL:", latestAvatar);
-              if (user.avatar !== latestAvatar) {
-                await dbcnx.db.run(`UPDATE Users SET avatar = ? WHERE id = ?`, [latestAvatar, userId]);
-              }
+            }
+
+            if (
+              user.avatar !== latestAvatar ||
+              user.email !== latestEmail ||
+              user.User_name !== latestUsername
+            ) {
+              await dbcnx.db.run(
+                `UPDATE Users SET avatar = ?, email = ?, User_name = ? WHERE id = ?`,
+                [latestAvatar, latestEmail, latestUsername, userId]
+              );
             }
           }
         }
@@ -155,8 +136,8 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       return {
         user: {
           id: user.id,
-          email: user.email,
-          User_name: user.User_name,
+          email: latestEmail,
+          User_name: latestUsername,
           avatar: latestAvatar,
           isOnline: user.isOnline,
           Auto_Match: user.Auto_Match,

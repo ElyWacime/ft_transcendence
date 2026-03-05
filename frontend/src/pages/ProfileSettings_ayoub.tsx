@@ -137,6 +137,13 @@ const ProfileSettings = () => {
       icon: Camera,
       color: "text-purple-500",
       path: "/profile/change-picture"
+    },
+    {
+      title: "Change username",
+      description: "Update your username",
+      icon: User,
+      color: "text-green-500",
+      path: "/profile/change-username"
     }
   ];
 
@@ -244,8 +251,9 @@ const ProfileSettings = () => {
           <div className="profile-settings-grid">
             {settingsOptions.map((option) => {
               const IconComponent = option.icon;
-                          const iconColorClass = option.color === 'text-blue-500' ? 'icon-blue' : 
-                                                  option.color === 'text-green-500' ? 'icon-green' : 'icon-purple';
+              const iconColorClass = option.color === 'text-blue-500' ? 'icon-blue' : 
+                                     option.color === 'text-green-500' ? 'icon-green' : 
+                                     option.color === 'text-orange-500' ? 'icon-orange' : 'icon-purple';
               return (
                 <Card
                   key={option.path}

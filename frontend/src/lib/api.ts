@@ -170,6 +170,14 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 class UserAPI {
   private baseUrl = `${API_URL}/api/users`;
 
+  async updateUsername(current_password: string, new_username: string) {
+    const res = await fetchWithAuth(`${this.baseUrl}/update_username`, {
+      method: "PUT",
+      body: JSON.stringify({ current_password, new_username }),
+      credentials: 'include',
+    });
+        return await res.json();
+  }
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
       method: "POST",

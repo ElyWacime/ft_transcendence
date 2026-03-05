@@ -6,7 +6,10 @@ import cors from "@fastify/cors";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { oauthRoutes } from "./modules/user/oauth.route";
 
-const app = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
+const app = Fastify({
+  logger: true,
+  bodyLimit: 100 * 1024 * 1024,
+}).withTypeProvider<ZodTypeProvider>();
 
 app.register(cors, {
   origin: [
