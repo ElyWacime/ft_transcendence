@@ -6,7 +6,7 @@ up:
 down:
 	docker-compose down
 
-rebuild: clean up
+rebuild: fclean certs up
 
 clean:
 	docker-compose down -v
@@ -15,6 +15,9 @@ fclean: clean
 	sudo rm -f services/chat-service/dev.db
 	sudo rm -f services/auth-service/prisma/db/data.db
 	sudo rm -f services/game-service/db/database.sqlite
+	sudo rm ./services/gateway/certs/certificate.crt
+	sudo rm ./services/gateway/certs/private.key
+
 
 rm:
 	(docker compose down -v --rmi all --remove-orphans) 2>/dev/null || true
@@ -27,7 +30,8 @@ db2: rm
 	
 db:
 	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite
-re: fclean up
+
+re: clean up
 
 ps:
 	docker compose ps
