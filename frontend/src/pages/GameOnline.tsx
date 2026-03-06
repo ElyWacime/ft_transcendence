@@ -88,7 +88,7 @@ const GameOnline = () => {
         }
         
         else{
-          navigate("/tournaments-online", {
+          navigate("/online-tournament", {
 
             state: { 
               tournamentId: data.T_Id, 

@@ -25,7 +25,7 @@ const Home = () => {
   });
 
   const checkhandel = async (mode: number) => {
-    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/check`, {
+    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
@@ -34,7 +34,7 @@ const Home = () => {
   };
 
   const endmatchhandel = async () => {
-    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/endmatch`, {
+    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/endmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token") }),
@@ -51,14 +51,6 @@ const Home = () => {
       description: "Play with players online",
       page: "/loading?mode=2",
     },
-    // {
-    //   // entry point into the new websocket-backed online tournament lobby
-    //   icon: Trophy,
-    //   title: "Online Tournament",
-    //   type:"page",
-    //   description: "Join live brackets with other players",
-    //   page: "/tournament",
-    // },
     {
       icon: Gamepad2,
       title: "2 vs 2 Online",
@@ -67,14 +59,6 @@ const Home = () => {
       description: "Team up and play against another team",
       page: "/loading?mode=4",
     },
-    // {
-    //   icon: Trophy,
-    //   title: "Local Tournament",
-    //   type:"page",
-    //   description: "4-player offline bracket on one device",
-    //   page: "/local-tournament",
-    // },
-
     {
       icon: Users,
       title: "1 vs 1",

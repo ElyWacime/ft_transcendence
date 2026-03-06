@@ -888,35 +888,35 @@ fastify.post('/invite', async (request, reply) => {
   }
 });
 
-fastify.post('/tournament', async (request, reply) => {
-  try 
-  {
-    let token = request.body.token;
-    if (!token)
-      return reply.code(403).send({ message: 'Not Log in' });
-    const decoded = request.jwt.verify(token);
-    let P1 = request.body.P1;
-    let P2 = request.body.P2;
-    let tournement = request.body.tournement;
-    let [ m1, m2]= await Promise.all([ dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
-    let m = null;
-    if (!(m1 || m2))
-    {
-      m = new Match();
-      m.P1_Id = P1;
-      m.P2_Id = P2;
-      m.T_Id = tournement;
-      m.count_players = 2;
-      await  dbcnx.createVIPMatch(m);
-      return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
-    }
-    return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
-  } 
-  catch (e) 
-  {
-    return reply.code(404).send({ message: e });
-  }
-});
+// fastify.post('/tournament', async (request, reply) => {
+//   try 
+//   {
+//     let token = request.body.token;
+//     if (!token)
+//       return reply.code(403).send({ message: 'Not Log in' });
+//     const decoded = request.jwt.verify(token);
+//     let P1 = request.body.P1;
+//     let P2 = request.body.P2;
+//     let tournement = request.body.tournement;
+//     let [ m1, m2]= await Promise.all([ dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
+//     let m = null;
+//     if (!(m1 || m2))
+//     {
+//       m = new Match();
+//       m.P1_Id = P1;
+//       m.P2_Id = P2;
+//       m.T_Id = tournement;
+//       m.count_players = 2;
+//       await  dbcnx.createVIPMatch(m);
+//       return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+//     }
+//     return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
+//   } 
+//   catch (e) 
+//   {
+//     return reply.code(404).send({ message: e });
+//   }
+// });
 
 fastify.post('/check', async (request, reply) => {
   try {

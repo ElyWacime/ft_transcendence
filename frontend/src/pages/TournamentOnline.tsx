@@ -67,11 +67,9 @@ export default function TournamentOnlinePage() {
   // initial load: fetch tournament list from game-service REST endpoint
   // REST gives us a snapshot even if websocket connects a tick later or user refreshes mid-flow
   useEffect(() => {
-
-   
     const load = async () => {
       try {
-        const res = await fetch(`${API_URL}/tournaments-online`, { credentials: "include" });
+        const res = await fetch(`${API_URL}/api/game/online-tournaments`, { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           // console.log("data>>>>>", data);
