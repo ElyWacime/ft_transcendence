@@ -74,7 +74,7 @@ export default function TournamentOnlinePage() {
         const res = await fetch(`${API_URL}/tournaments-online`, { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
-          console.log("data>>>>>", data);
+          // console.log("data>>>>>", data);
           setTournaments(Array.isArray(data) ? data : []);
         }
       } catch (e) {

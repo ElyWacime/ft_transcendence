@@ -36,7 +36,6 @@ await fastify.register(cors, {
 
 let dbcnx = new SQLiteDB();
 let clients = new Map();
-// let clients_info = new Map();
 let matches = new Map();
 let tournaments = new Map(); // in-memory store for online tournament state (blown away on restart; persistence not required for quick-fire brackets)
 const TICK_RATE = 60;
@@ -600,43 +599,22 @@ const handelRoomQuiiting = async(id) => {
 
 };
 
-const handelRegister = async(request,id,email,name) => {
+const handelRegister = async(request,id) => {
   try {
-    let u = new Users();
+
     let ngame = new GameState();
-    u.id = id; 
-    u.email = email;
-    u.User_name = await route(id);
-    clients_info.set(id, u.User_name);
-    if (!u.User_name)
-    {
-      u.User_name = id;
-      clients_info.set(id, null);
-    }
-    u.isOnline = true;
-    u.Auto_Match = true;
-    await dbcnx.createUsers(u);
-    console.log("User created/updated:", id);
-    
     let m = await dbcnx.getOngoingMatch(id);
-    console.log("Ongoing match for user:", id, ":", m ? m.id : "none");
-    
     if (!m) 
     {
       m = await dbcnx.getOpenRoom(request.mode);
-      console.log("Open room for mode", request.mode, ":", m ? m.id : "creating new");
-      
       if (!m) {
         m = new Match();
         m.P1_Id = id;
         m.mode = request.mode;
-        if (!request.tournement) {
+        if (!request.tournement) 
           m.id = await dbcnx.createMatch_not(m);
-        }
-        else {
+        else 
           m.id = await dbcnx.createMatch(m);
-        }
-        console.log("Created new match:", m.id, "for user:", id);
       }
       else 
       {
@@ -659,7 +637,6 @@ const handelRegister = async(request,id,email,name) => {
             m.P4_Id = id;
         }
         m.count_players = m.count_players + 1;
-        console.log("Added user", id, "to existing match", m.id);
       }
     }
     ngame.id = m.id;
@@ -681,12 +658,10 @@ const handelRegister = async(request,id,email,name) => {
         m.gameStatus = "PLAYING";
         if(!matches.get(m.id))
           matches.set(m.id, ngame);
-        console.log("Match is full! Starting game for match:", m.id);
     }
     ngame.gameStatus = m.gameStatus;
     let data = JSON.stringify(ngame);
     await dbcnx.updateMatch(m);
-    console.log("Sending game state to players for match:", m.id);
     sendtoplayer(ngame.P1_Id, data);
     sendtoplayer(ngame.P2_Id, data);
     sendtoplayer(ngame.P3_Id, data);
@@ -805,13 +780,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    try
    {
       const request = JSON.parse(msg);
-      // if (msg.waitingMatch)
-      // {
-      //   // pop up that says a match is waiting for you.
-      //   console.log("This is waitingMatch >>>>> ",request.waitingMatch);
-      //   alert("A match is waiting for you. Please navigate to the arena.");
-        
-      // }
       let token = request.token;
       console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
@@ -824,15 +792,11 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
             return;
           }
           const id = decoded.id;
-          const email = decoded.email;
-          const name = decoded.name;
-          console.log("User connected with id:", id, "type:", request.type);
           await handelDup(connection,id);
           clients.set(id, connection);
-          if (request.type == "REGISTER") {
-            console.log("Handling REGISTER for user:", id, "mode:", request.mode);
-            await handelRegister(request,id,email,name);
-          }
+          const name = await route(id);
+          if (request.type == "REGISTER") 
+            await handelRegister(request,id);
           else if (request.type == "MOVE") 
             await handelMove(request,id);
           else if (request.type == "FINISHED") 
@@ -840,17 +804,16 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           else if (request.type == "DELETE") 
             await handelRoomQuiiting(id);
           else if (request.type == "TOURNAMENT_CREATE") {
-          const creator = { id, name: name || email || id };
+          const creator = { id, name  };
           createTournamentRoom(creator);
         }
-
         else if (request.type == "TOURNAMENT_LEAVE") 
-          {
-          const participant = { id, name: name || email || id };
-          leaveTournamentRoom(request.tournamentId, participant);
-          }
+        {
+        const participant = { id, name};
+        leaveTournamentRoom(request.tournamentId, participant);
+        }
         else if (request.type == "TOURNAMENT_JOIN") {
-          const participant = { id, name: name || email || id };
+          const participant = { id, name };
           joinTournamentRoom(request.tournamentId, participant);
         }
         else if (request.type == "TOURNAMENT_READY") {
@@ -887,37 +850,12 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   });
 });
 
-fastify.post('/sync-email', async (request, reply) => {
-  try {
-    const { userId, email } = request.body;
-    
-    if (!userId || !email) {
-      return reply.code(400).send({ message: 'userId and email are required' });
-    }
-
-    const existingUser = await dbcnx.getUserById(userId);
-    
-    if (existingUser) {
-      await dbcnx.db.run(
-        `UPDATE Users SET email = ? WHERE id = ?`, 
-        [email, userId]
-      );
-      
-      return reply.send({ success: true, message: 'Email synced successfully' });
-    } else {
-      return reply.send({ success: true, message: 'User not in game service yet' });
-    }
-  } catch (error) {
-    console.error('Error syncing email:', error);
-    return reply.code(500).send({ message: 'Failed to sync email' });
-  }
-});
-
 fastify.post('/invite', async (request, reply) => {
   try {
     let token = request.body.token;
     if (!token)
       return reply.code(403).send({ message: 'Not Log in' });
+    const decoded = request.jwt.verify(token);
     let P1 = request.body.P1;
     let P2 = request.body.P2;
     let [name1, name2, m1, m2]= await Promise.all([ route(P1), route(P2), dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
@@ -957,33 +895,13 @@ fastify.post('/tournament', async (request, reply) => {
     if (!token)
       return reply.code(403).send({ message: 'Not Log in' });
     const decoded = request.jwt.verify(token);
-    const id = decoded.id;
     let P1 = request.body.P1;
     let P2 = request.body.P2;
     let tournement = request.body.tournement;
-    let m1 = await dbcnx.getAvaiable(P1);
-    let m2 = await dbcnx.getAvaiable(P2);
+    let [ m1, m2]= await Promise.all([ dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
     let m = null;
     if (!(m1 || m2))
     {
-      let u = new Users();
-      let res = await dbcnx.getUser(P1);
-      if (!res)
-      {
-        u.id = P1; 
-        u.User_name = await route(P1); 
-        u.email = P1; 
-        await dbcnx.insertUser(u);
-      }
-      res = await dbcnx.getUser(P2);
-      if (!res)
-      {
-        u = new Users();
-        u.id = P2; 
-        u.User_name = await route(P2); 
-        u.email = P2; 
-        await dbcnx.insertUser(u);
-      }
       m = new Match();
       m.P1_Id = P1;
       m.P2_Id = P2;
@@ -1069,182 +987,13 @@ fastify.post('/allmatch', async (request, reply) => {
   }
 });
 
-fastify.get('/api/dashboard/:identifier', async (request, reply) => {
-  try {
-    const { identifier } = request.params;
-    
-    let user = await dbcnx.getUserByName(identifier);
-    if (!user) {
-      user = await dbcnx.getUserById(identifier);
-    }
-    const id = user?.id || identifier;
-    
-    if (!user) {
-      const authHeader = request.headers.authorization;
-      const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
-      if (!token) {
-        return reply.code(404).send({ error: 'User not found.' });
-      }
-
-      let decoded;
-      try {
-        decoded = fastify.jwt.verify(token);
-      } catch (verifyError) {
-        return reply.code(404).send({ error: 'User not found.' });
-      }
-
-      const matchesId = decoded.id === identifier;
-      const matchesUsername = decoded.name === identifier;
-      const isOwnDashboard = matchesId || matchesUsername;
-
-      if (isOwnDashboard) {
-        try {
-          const newUser = new Users();
-          newUser.id = decoded.id;
-          newUser.email = decoded.email || '';
-          newUser.User_name = decoded.name || decoded.email || 'User';
-          newUser.User_password = '';
-          newUser.isOnline = true;
-          newUser.Auto_Match = true;
-          newUser.loggedIn = true;
-
-          await dbcnx.createUsers(newUser);
-          user = await dbcnx.getUserById(decoded.id);
-
-          if (!user) {
-            const fallback = await dbcnx.db.get(`SELECT * FROM Users WHERE id = ?`, [decoded.id]);
-            user = fallback || {
-              id: newUser.id,
-              email: newUser.email,
-              User_name: newUser.User_name,
-              avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
-              isOnline: true,
-              Auto_Match: true,
-              CreatedAt: new Date().toISOString()
-            };
-          }
-        } catch (createError) {
-          return reply.code(500).send({ error: 'Internal server error' });
-        }
-      } else {
-        try {
-          const authServiceUrl = process.env.AUTH_SERVICE_URL || 'https://auth-service:8000';
-          const searchUrl = `${authServiceUrl}/api/auth/search-this-name`;
-          
-          const authResponse = await fetch(searchUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ name: identifier })
-          });
-
-          if (!authResponse.ok) {
-            return reply.code(404).send({ error: 'User not found.' });
-          }
-
-          const authUser = await authResponse.json();
-          
-          const newUser = new Users();
-          newUser.id = authUser.user_id;
-          newUser.email = authUser.user_email || '';
-          newUser.User_name = authUser.user_name || 'User';
-          newUser.User_password = '';
-          newUser.isOnline = false;
-          newUser.Auto_Match = true;
-          newUser.loggedIn = false;
-
-          await dbcnx.createUsers(newUser);
-          user = await dbcnx.getUserById(authUser.user_id);
-
-          if (!user) {
-            user = {
-              id: newUser.id,
-              email: newUser.email,
-              User_name: newUser.User_name,
-              avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
-              isOnline: false,
-              Auto_Match: true,
-              CreatedAt: new Date().toISOString()
-            };
-          }
-        } catch (fetchError) {
-          return reply.code(404).send({ error: 'User not found.' });
-        }
-      }
-    }
-
-    const userId = user.id;
-    const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
-      Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [userId, userId, userId, userId]);
-    const winsCount = await dbcnx.UserCountWins_ayoub(userId);
-    const tournParticipation = await dbcnx.UserCountTournParticipation_ayoub(userId);
-    const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(userId);
-
-    const totalMatches = matchesCount?.Played || 0;
-    const totalWins = winsCount?.Winned || 0;
-    const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
-
-    let latestAvatar = user.avatar;
-    try {
-      const authHeader = request.headers.authorization;
-      const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
-      
-      if (token) {
-        const authServiceUrl = process.env.AUTH_SERVICE_URL || 'https://auth-service:8000';
-        const userInfoUrl = `${authServiceUrl}/user-info/${userId}`;
-        
-        const authResponse = await fetch(userInfoUrl, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (authResponse.ok) {
-          const authUser = await authResponse.json();
-          if (authUser.avatar) {
-            latestAvatar = authUser.avatar;
-            console.log("Fetched latest avatar from auth-service for user:", userId);
-            console.log("Latest avatar URL:", latestAvatar);
-            if (user.avatar !== latestAvatar) {
-              await dbcnx.db.run(`UPDATE Users SET avatar = ? WHERE id = ?`, [latestAvatar, userId]);
-            }
-          }
-        }
-      }
-    } catch (avatarError) {
-      console.log("Could not fetch latest avatar from auth-service:", avatarError.message);
-    }
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        User_name: user.User_name,
-        avatar: latestAvatar,
-        isOnline: user.isOnline,
-        Auto_Match: user.Auto_Match,
-        CreatedAt: user.CreatedAt
-      },
-      statistics: {
-        totalMatches: totalMatches,
-        totalWins: totalWins,
-        totalLosses: totalMatches - totalWins,
-        winRate: parseFloat(winRate),
-        tournamentParticipations: tournParticipation?.Participate || 0
-      },
-      lastMatch: lastMatch || null
-    };
-  } catch (error) {
-    console.error('Dashboard error:', error);
-    return reply.code(500).send({ error: 'Internal server error' });
-  }
-});
+import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
+import { userInfo } from "os";
+await registerDashboardRoutes_ayoub(fastify, dbcnx);
 
 const useHttps = process.env.USE_HTTPS === "true";
 const port = 3000;
+
 fastify.listen({ port, host: "0.0.0.0" });
 console.log(`Game server listening on port ${port} (${useHttps ? 'HTTPS' : 'HTTP'})`);

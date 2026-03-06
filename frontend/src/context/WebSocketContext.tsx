@@ -25,7 +25,7 @@ export const WebSocketProvider = ({ children }) => {
       const data = JSON.parse(event.data);
       // tournament notification for absent players
       // console.log("path", window.location.pathname );
-      if (window.location.pathname !== "/tournament-online" && data?.waitingMatch) {
+      if (window.location.pathname !== "/tournaments-online" && data?.waitingMatch) {
         // toast.info("you have a match waiting. Go to the arena to play.");
         toast.info("you have a match waiting in the tournament", {position:"top-right"});
 

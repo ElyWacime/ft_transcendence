@@ -44,11 +44,12 @@ const Home = () => {
 
   const features = [
     {
-      icon: Trophy,
-      title: "Local Tournament",
-      type:"page",
-      description: "4-player offline bracket on one device",
-      page: "/local-tournament",
+      icon: Gamepad2,
+      title: "1 vs 1 Online",
+      type:"onlinegame",
+      mode:2,
+      description: "Play with players online",
+      page: "/loading?mode=2",
     },
     {
       // entry point into the new websocket-backed online tournament lobby
@@ -56,23 +57,7 @@ const Home = () => {
       title: "Online Tournament",
       type:"page",
       description: "Join live brackets with other players",
-      page: "/tournament-online",
-    },
-    {
-      icon: Users,
-      title: "1 vs 1",
-      type:"page",
-      mode:0,
-      description: "Play with a friend on the same keyboard",
-      page: "/game"
-    },
-    {
-      icon: Gamepad2,
-      title: "1 vs 1 Online",
-      type:"onlinegame",
-      mode:2,
-      description: "Play with players online",
-      page: "/loading?mode=2",
+      page: "/tournament",
     },
     {
       icon: Gamepad2,
@@ -82,6 +67,24 @@ const Home = () => {
       description: "Team up and play against another team",
       page: "/loading?mode=4",
     },
+    {
+      icon: Trophy,
+      title: "Local Tournament",
+      type:"page",
+      description: "4-player offline bracket on one device",
+      page: "/local-tournament",
+    },
+
+    {
+      icon: Users,
+      title: "1 vs 1",
+      type:"page",
+      mode:0,
+      description: "Play with a friend on the same keyboard",
+      page: "/game"
+    },
+
+
     {
       icon: Zap,
       title: "1 vs AI",
