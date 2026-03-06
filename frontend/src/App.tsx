@@ -22,7 +22,6 @@ import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
-import ChangeUsername from "./pages/Change_username_page";
 import Chat from "./pages/Chat";
 import Result from "./pages/Result";
 import LocalTournament from "./pages/LocalTournament";
@@ -83,7 +82,6 @@ const router = createBrowserRouter(
         { path: "profile/change-email", element: <ChangeEmail /> },
         { path: "profile/change-password", element: <ChangePassword /> },
         { path: "profile/change-picture", element: <ChangePicture /> },
-        { path: "profile/change-username", element: <ChangeUsername /> },
         {
           path: "dashboard/:identifier?",
           element: (

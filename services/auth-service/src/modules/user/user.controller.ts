@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { CreateUserInput, LoginUserInput, UpdateEmailInput, UpdatePassInput } from "./user.schema";
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
+import { getHttpsAgent } from "../../utils/https-agent";
 
 const SALT_ROUNDS = 10;
 
@@ -149,8 +150,9 @@ export async function update_email(
     });
   
     try {
-      const gameServiceUrl = process.env.GAME_SERVICE_URL || 'http://game-server:3000';
-      const gameServiceResponse = await fetch(`${gameServiceUrl}/sync-email`, {
+      const gameServiceUrl = process.env.GAME_SERVICE_URL || 'https://game-server:3000';
+      const httpsAgent = getHttpsAgent();
+      const fetchOptions: RequestInit = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +161,11 @@ export async function update_email(
           userId: updatedUser.id,
           email: new_email,
         }),
-      });
+      };
+      if (httpsAgent) {
+        (fetchOptions as any).agent = httpsAgent;
+      }
+      const gameServiceResponse = await fetch(`${gameServiceUrl}/sync-email`, fetchOptions);
 
       if (!gameServiceResponse.ok) {
         console.error('Failed to sync email with game service:', await gameServiceResponse.text());
@@ -309,8 +315,9 @@ export async function update_username(
     });
 
     try {
-      const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'http://chat-service:3700';
-      const chatServiceResponse = await fetch(`${chatServiceUrl}/user/update`, {
+      const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'https://chat-service:3700';
+      const httpsAgent = getHttpsAgent();
+      const fetchOptions: RequestInit = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -319,7 +326,11 @@ export async function update_username(
           user_id: updatedUser.id,
           username: new_username,
         }),
-      });
+      };
+      if (httpsAgent) {
+        (fetchOptions as any).agent = httpsAgent;
+      }
+      const chatServiceResponse = await fetch(`${chatServiceUrl}/user/update`, fetchOptions);
 
       if (!chatServiceResponse.ok) {
         console.error('Failed to sync username with chat service:', await chatServiceResponse.text());

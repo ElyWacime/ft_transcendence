@@ -21,7 +21,8 @@ const MatchHistory = () => {
   }
 
   const getall = async () => {
-    let matchess =  await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/allmatch`, {
+    const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
+    let matchess =  await fetch(`${GAME_SERVICE_URL}/allmatch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem("token") ,id:id}),

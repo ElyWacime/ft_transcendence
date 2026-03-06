@@ -5,12 +5,13 @@ import "../components/chat/App.css"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
 import { fetchWithAuth } from "@/lib/tokenRefresh"
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost'
+const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
 const SERVER_URL = API_URL
+const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`
 
 let inviteHandle = async (P1, P2) => 
 {
-  const res = await fetch(`http://${import.meta.env.VITE_DOMAIN}:3000/invite`, {
+  const res = await fetch(`${GAME_SERVICE_URL}/invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({token:localStorage.getItem("token") , P1 ,P2 }),

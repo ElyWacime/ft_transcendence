@@ -5,20 +5,22 @@ import fCookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { oauthRoutes } from "./modules/user/oauth.route";
+import * as fs from "fs";
 
-const app = Fastify({
+const httpsOptions = process.env.USE_HTTPS === "true" ? {
+  https: {
+    key: fs.readFileSync("/app/certs/private.key"),
+    cert: fs.readFileSync("/app/certs/certificate.crt"),
+  }
+} : {};
+
+const app = Fastify({ 
   logger: true,
-  bodyLimit: 100 * 1024 * 1024,
+  ...httpsOptions
 }).withTypeProvider<ZodTypeProvider>();
 
 app.register(cors, {
-  origin: [
-    `http://${process.env.DOMAIN}`,
-    `http://${process.env.DOMAIN}:8080`,
-    "http://10.30.233.136:8080",
-    "http://frontend:8080",
-    "http://0.0.0.0",
-  ],
+  origin: true,  // Allow all origins for development
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -73,8 +75,12 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 
 async function main() {
   try {
-    await app.listen({ port: 8000, host: "0.0.0.0" });
-    app.log.info("✅ Auth service running on port 8000");
+    const port = 8000;
+    const useHttps = process.env.USE_HTTPS === "true";
+
+    await app.listen({ port, host: "0.0.0.0" });
+    
+    app.log.info(`✅ Auth service running on port 8000 (${useHttps ? 'HTTPS' : 'HTTP'})`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

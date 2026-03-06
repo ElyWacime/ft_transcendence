@@ -3,11 +3,27 @@ import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
+import * as fs from "fs";
+import https from "https";
 import { randomUUID } from "crypto"; // used to generate unique tournament ids for in-memory rooms; survives only while the process is alive
 import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
 
+const httpsOptions = process.env.USE_HTTPS === "true" ? {
+  https: {
+    key: fs.readFileSync("/app/certs/private.key"),
+    cert: fs.readFileSync("/app/certs/certificate.crt"),
+  }
+} : {};
 
-const fastify = Fastify({ logger: false });
+const fastify = Fastify({ 
+  logger: false,
+  ...httpsOptions
+});
+
+// Create HTTPS agent for self-signed certificates
+const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
+  rejectUnauthorized: false
+}) : undefined;
 
 await fastify.register(websocket);
 
@@ -20,7 +36,7 @@ await fastify.register(cors, {
 
 let dbcnx = new SQLiteDB();
 let clients = new Map();
-let clients_info = new Map();
+// let clients_info = new Map();
 let matches = new Map();
 let tournaments = new Map(); // in-memory store for online tournament state (blown away on restart; persistence not required for quick-fire brackets)
 const TICK_RATE = 60;
@@ -34,9 +50,17 @@ await dbcnx.connect();
 const sendtoplayer = async (id, data) => {
   if (id) {
     let socket = (clients.get(id));
-    if (socket && socket.readyState === 1)
-      socket.send(data);
+    if (socket) {
+      if (socket.readyState === 1) {
+        socket.send(data);
+        console.log("Sent data to player:", id, "readyState:", socket.readyState);
+      } else {
+        console.log("Cannot send to player:", id, "readyState:", socket.readyState, "(expected 1)");
+      }
+    } else {
+      console.log("Socket not found for player:", id);
     }
+  }
 }
 
 // ---
@@ -347,8 +371,8 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     g.count_players = 2;
     g.mode = 2;
     g.gameStatus = "PLAYING";
-    g.player1Name = clients_info.get(g.P1_Id) || matchSlot.player1.name;
-    g.player2Name = clients_info.get(g.P2_Id) || matchSlot.player2.name;
+    g.player1Name = await route(g.P1_Id);
+    g.player2Name = await route(g.P2_Id);
 
     matches.set(g.id, g);
 
@@ -454,7 +478,7 @@ const handleReportMissingOpponent = (tournamentId, matchId, reporterId) => {
 
 // after a match finishes, advance bracket (promote semifinal winners to final or crown winner)
 // we accept GameState from the running match tick loop and reflect winners back into the tournament map
-const updateTournamentAfterMatch = (gameState) => {
+const updateTournamentAfterMatch = async (gameState) => {
   if (!gameState?.T_Id) return;
   const tournamentId = gameState.T_Id;
   const tournament = tournaments.get(tournamentId);
@@ -468,7 +492,8 @@ const updateTournamentAfterMatch = (gameState) => {
 
   const semMatch = semifinals.find((m) => m.matchId === gameState.id);
   if (semMatch) {
-    semMatch.winner = winnerParticipant || { id: Winner_Id, name: clients_info.get(Winner_Id) || "Winner" };
+    let wname = await route(Winner_Id);
+    semMatch.winner = winnerParticipant || { id: Winner_Id, name: wname || "Winner" };
     // eliminate the losing participant and keep the bracket locked
     const p1Id = semMatch.player1?.id;
     const p2Id = semMatch.player2?.id;
@@ -498,7 +523,8 @@ const updateTournamentAfterMatch = (gameState) => {
       }
     }
   } else if (finalMatch && finalMatch.matchId === gameState.id) {
-    finalMatch.winner = winnerParticipant || { id: Winner_Id, name: clients_info.get(Winner_Id) || "Winner" };
+    let wwname = await route(Winner_Id);
+    finalMatch.winner = winnerParticipant || { id: Winner_Id, name: wwname|| "Winner" };
     // eliminate the finalist who lost; keep tournament locked
     const p1Id = finalMatch.player1?.id;
     const p2Id = finalMatch.player2?.id;
@@ -563,15 +589,6 @@ const handelRoomQuiiting = async(id) => {
     ngame.player3Name = name3;
     ngame.player4Name = name4;
 
-  if (!ngame.player1Name && (ngame.P1_Id != id))
-    ngame.player1Name = clients_info.get(ngame.P1_Id);
-  if (!ngame.player2Name && (ngame.P2_Id != id))
-    ngame.player2Name = clients_info.get(ngame.P2_Id);
-  if (!ngame.player3Name && (ngame.P3_Id != id))
-    ngame.player3Name = clients_info.get(ngame.P3_Id);
-  if (!ngame.player4Name && (ngame.P4_Id != id))
-    ngame.player4Name = clients_info.get(ngame.P4_Id);
-
   let data = JSON.stringify(ngame);
   sendtoplayer(ngame.P1_Id, data);
   sendtoplayer(ngame.P2_Id, data);
@@ -584,105 +601,99 @@ const handelRoomQuiiting = async(id) => {
 };
 
 const handelRegister = async(request,id,email,name) => {
-  let u = new Users();
-  let ngame = new GameState();
-  u.id = id; 
-  u.email = email;
-  u.User_name = await route(id);
-  clients_info.set(id, u.User_name);
-  if (!u.User_name)
-  {
-    u.User_name = id;
-    clients_info.set(id, null);
-  }
-  u.isOnline = true;
-  u.Auto_Match = true;
-  await dbcnx.createUsers(u);
-  let m = await dbcnx.getOngoingMatch(id);
-  if (!m) 
-  {
-    m = await dbcnx.getOpenRoom(request.mode);
-    if (!m) {
-      m = new Match();
-      m.P1_Id = id;
-      m.mode = request.mode;
-      if (!request.tournement) {
-        m.id = await dbcnx.createMatch_not(m);
-      }
-      else {
-        m.id = await dbcnx.createMatch(m);
-      }
-    }
-    else 
+  try {
+    let u = new Users();
+    let ngame = new GameState();
+    u.id = id; 
+    u.email = email;
+    u.User_name = await route(id);
+    clients_info.set(id, u.User_name);
+    if (!u.User_name)
     {
-      if (request.mode == 2) 
-      {
-        if (m.P1_Id == null) 
-          m.P1_Id = id;
-        else
-          m.P2_Id = id;
-      }
-      else
-      {
-        if (m.P1_Id == null) 
-          m.P1_Id = id;
-        else if (m.P2_Id == null) 
-          m.P2_Id = id;
-        else if (m.P3_Id == null) 
-          m.P3_Id = id;
-        else 
-          m.P4_Id = id;
-      }
-      m.count_players = m.count_players + 1;
+      u.User_name = id;
+      clients_info.set(id, null);
     }
+    u.isOnline = true;
+    u.Auto_Match = true;
+    await dbcnx.createUsers(u);
+    console.log("User created/updated:", id);
+    
+    let m = await dbcnx.getOngoingMatch(id);
+    console.log("Ongoing match for user:", id, ":", m ? m.id : "none");
+    
+    if (!m) 
+    {
+      m = await dbcnx.getOpenRoom(request.mode);
+      console.log("Open room for mode", request.mode, ":", m ? m.id : "creating new");
+      
+      if (!m) {
+        m = new Match();
+        m.P1_Id = id;
+        m.mode = request.mode;
+        if (!request.tournement) {
+          m.id = await dbcnx.createMatch_not(m);
+        }
+        else {
+          m.id = await dbcnx.createMatch(m);
+        }
+        console.log("Created new match:", m.id, "for user:", id);
+      }
+      else 
+      {
+        if (request.mode == 2) 
+        {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else
+            m.P2_Id = id;
+        }
+        else
+        {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else if (m.P2_Id == null) 
+            m.P2_Id = id;
+          else if (m.P3_Id == null) 
+            m.P3_Id = id;
+          else 
+            m.P4_Id = id;
+        }
+        m.count_players = m.count_players + 1;
+        console.log("Added user", id, "to existing match", m.id);
+      }
+    }
+    ngame.id = m.id;
+    ngame.P1_Id = m.P1_Id;
+    ngame.P2_Id = m.P2_Id;
+    ngame.P3_Id = m.P3_Id;
+    ngame.P4_Id = m.P4_Id;
+    let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+    ngame.player1Name = name1;
+    ngame.player2Name = name2;
+    ngame.player3Name = name3;
+    ngame.player4Name = name4;
+    ngame.T_Id = m.T_Id;
+    ngame.count_players = m.count_players;
+    ngame.mode = request.mode;
+    ngame.id = m.id;
+    if (ngame.count_players == request.mode) 
+    {
+        m.gameStatus = "PLAYING";
+        if(!matches.get(m.id))
+          matches.set(m.id, ngame);
+        console.log("Match is full! Starting game for match:", m.id);
+    }
+    ngame.gameStatus = m.gameStatus;
+    let data = JSON.stringify(ngame);
+    await dbcnx.updateMatch(m);
+    console.log("Sending game state to players for match:", m.id);
+    sendtoplayer(ngame.P1_Id, data);
+    sendtoplayer(ngame.P2_Id, data);
+    sendtoplayer(ngame.P3_Id, data);
+    sendtoplayer(ngame.P4_Id, data);
+  } catch (error) {
+    console.error("Error in handelRegister for user:", id, "-", error);
   }
-  ngame.id = m.id;
-  ngame.P1_Id = m.P1_Id;
-  ngame.P2_Id = m.P2_Id;
-  ngame.P3_Id = m.P3_Id;
-  ngame.P4_Id = m.P4_Id;
-  let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
-  ngame.player1Name = name1;
-  ngame.player2Name = name2;
-  ngame.player3Name = name3;
-  ngame.player4Name = name4;
-
-  // if ( ngame.P1_Id == id)
-  //   ngame.player1Name = u.User_name;
-  // if ( ngame.P2_Id == id)
-  //   ngame.player2Name = u.User_name;
-  // if ( ngame.P3_Id == id)
-  //   ngame.player3Name = u.User_name;
-  // if ( ngame.P4_Id == id)
-  //   ngame.player4Name = u.User_name;
-
-  if (!ngame.player1Name)
-    ngame.player1Name = clients_info.get(ngame.P1_Id);
-  if (!ngame.player2Name)
-    ngame.player2Name = clients_info.get(ngame.P2_Id);
-  if (!ngame.player3Name)
-    ngame.player3Name = clients_info.get(ngame.P3_Id);
-  if (!ngame.player4Name)
-    ngame.player4Name = clients_info.get(ngame.P4_Id);
-
-  ngame.T_Id = m.T_Id;
-  ngame.count_players = m.count_players;
-  ngame.mode = request.mode;
-  ngame.id = m.id;
-  if (ngame.count_players == request.mode) 
-  {
-      m.gameStatus = "PLAYING";
-      if(!matches.get(m.id))
-        matches.set(m.id, ngame);
-  }
-  ngame.gameStatus = m.gameStatus;
-  let data = JSON.stringify(ngame);
-  await dbcnx.updateMatch(m);
-  // console.log("Server wiill send ::: ",ngame);
-  sendtoplayer(ngame.P1_Id, data);
-  sendtoplayer(ngame.P2_Id, data);
-  sendtoplayer(ngame.P3_Id, data);
-  sendtoplayer(ngame.P4_Id, data);
 };
 
 const handelMove = async (request,id) =>{
@@ -764,12 +775,19 @@ const route = async (id) => {
   try {
     if(!id)
       return null;
-    const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
+    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+    const fetchOptions = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    };
+    
+    if (httpsAgent) {
+      fetchOptions.agent = httpsAgent;
+    }
+    
+    const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
     if (!response.ok) {
       console.error(`Auth service returned status ${response.status}`);
       return null;
@@ -797,14 +815,24 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       let token = request.token;
       console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
-          const decoded = req.jwt.verify(token);
+          let decoded;
+          try {
+            decoded = req.jwt.verify(token);
+          } catch (jwtError) {
+            console.error("JWT verification failed:", jwtError.message);
+            connection.send(JSON.stringify({ error: "JWT verification failed" }));
+            return;
+          }
           const id = decoded.id;
           const email = decoded.email;
           const name = decoded.name;
+          console.log("User connected with id:", id, "type:", request.type);
           await handelDup(connection,id);
           clients.set(id, connection);
-          if (request.type == "REGISTER") 
+          if (request.type == "REGISTER") {
+            console.log("Handling REGISTER for user:", id, "mode:", request.mode);
             await handelRegister(request,id,email,name);
+          }
           else if (request.type == "MOVE") 
             await handelMove(request,id);
           else if (request.type == "FINISHED") 
@@ -840,7 +868,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    }
    catch (e)
    {
-      console.log("Error :",e);
+      console.error("WebSocket message handler error:", e);
    }
   });
   connection.on("close", async () => {
@@ -1018,7 +1046,6 @@ fastify.post('/endmatch', async (request, reply) => {
   }
 });
 
-
 fastify.post('/allmatch', async (request, reply) => {
   try {
     let matches = await dbcnx.getPlayerMatches(request.body.id);
@@ -1042,7 +1069,182 @@ fastify.post('/allmatch', async (request, reply) => {
   }
 });
 
-import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
-import { userInfo } from "os";
-await registerDashboardRoutes_ayoub(fastify, dbcnx);
-fastify.listen({ port: 3000, host: "0.0.0.0" });
+fastify.get('/api/dashboard/:identifier', async (request, reply) => {
+  try {
+    const { identifier } = request.params;
+    
+    let user = await dbcnx.getUserByName(identifier);
+    if (!user) {
+      user = await dbcnx.getUserById(identifier);
+    }
+    const id = user?.id || identifier;
+    
+    if (!user) {
+      const authHeader = request.headers.authorization;
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
+      if (!token) {
+        return reply.code(404).send({ error: 'User not found.' });
+      }
+
+      let decoded;
+      try {
+        decoded = fastify.jwt.verify(token);
+      } catch (verifyError) {
+        return reply.code(404).send({ error: 'User not found.' });
+      }
+
+      const matchesId = decoded.id === identifier;
+      const matchesUsername = decoded.name === identifier;
+      const isOwnDashboard = matchesId || matchesUsername;
+
+      if (isOwnDashboard) {
+        try {
+          const newUser = new Users();
+          newUser.id = decoded.id;
+          newUser.email = decoded.email || '';
+          newUser.User_name = decoded.name || decoded.email || 'User';
+          newUser.User_password = '';
+          newUser.isOnline = true;
+          newUser.Auto_Match = true;
+          newUser.loggedIn = true;
+
+          await dbcnx.createUsers(newUser);
+          user = await dbcnx.getUserById(decoded.id);
+
+          if (!user) {
+            const fallback = await dbcnx.db.get(`SELECT * FROM Users WHERE id = ?`, [decoded.id]);
+            user = fallback || {
+              id: newUser.id,
+              email: newUser.email,
+              User_name: newUser.User_name,
+              avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
+              isOnline: true,
+              Auto_Match: true,
+              CreatedAt: new Date().toISOString()
+            };
+          }
+        } catch (createError) {
+          return reply.code(500).send({ error: 'Internal server error' });
+        }
+      } else {
+        try {
+          const authServiceUrl = process.env.AUTH_SERVICE_URL || 'https://auth-service:8000';
+          const searchUrl = `${authServiceUrl}/api/auth/search-this-name`;
+          
+          const authResponse = await fetch(searchUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ name: identifier })
+          });
+
+          if (!authResponse.ok) {
+            return reply.code(404).send({ error: 'User not found.' });
+          }
+
+          const authUser = await authResponse.json();
+          
+          const newUser = new Users();
+          newUser.id = authUser.user_id;
+          newUser.email = authUser.user_email || '';
+          newUser.User_name = authUser.user_name || 'User';
+          newUser.User_password = '';
+          newUser.isOnline = false;
+          newUser.Auto_Match = true;
+          newUser.loggedIn = false;
+
+          await dbcnx.createUsers(newUser);
+          user = await dbcnx.getUserById(authUser.user_id);
+
+          if (!user) {
+            user = {
+              id: newUser.id,
+              email: newUser.email,
+              User_name: newUser.User_name,
+              avatar: 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg',
+              isOnline: false,
+              Auto_Match: true,
+              CreatedAt: new Date().toISOString()
+            };
+          }
+        } catch (fetchError) {
+          return reply.code(404).send({ error: 'User not found.' });
+        }
+      }
+    }
+
+    const userId = user.id;
+    const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
+      Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [userId, userId, userId, userId]);
+    const winsCount = await dbcnx.UserCountWins_ayoub(userId);
+    const tournParticipation = await dbcnx.UserCountTournParticipation_ayoub(userId);
+    const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(userId);
+
+    const totalMatches = matchesCount?.Played || 0;
+    const totalWins = winsCount?.Winned || 0;
+    const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
+
+    let latestAvatar = user.avatar;
+    try {
+      const authHeader = request.headers.authorization;
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+      
+      if (token) {
+        const authServiceUrl = process.env.AUTH_SERVICE_URL || 'https://auth-service:8000';
+        const userInfoUrl = `${authServiceUrl}/user-info/${userId}`;
+        
+        const authResponse = await fetch(userInfoUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (authResponse.ok) {
+          const authUser = await authResponse.json();
+          if (authUser.avatar) {
+            latestAvatar = authUser.avatar;
+            console.log("Fetched latest avatar from auth-service for user:", userId);
+            console.log("Latest avatar URL:", latestAvatar);
+            if (user.avatar !== latestAvatar) {
+              await dbcnx.db.run(`UPDATE Users SET avatar = ? WHERE id = ?`, [latestAvatar, userId]);
+            }
+          }
+        }
+      }
+    } catch (avatarError) {
+      console.log("Could not fetch latest avatar from auth-service:", avatarError.message);
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        User_name: user.User_name,
+        avatar: latestAvatar,
+        isOnline: user.isOnline,
+        Auto_Match: user.Auto_Match,
+        CreatedAt: user.CreatedAt
+      },
+      statistics: {
+        totalMatches: totalMatches,
+        totalWins: totalWins,
+        totalLosses: totalMatches - totalWins,
+        winRate: parseFloat(winRate),
+        tournamentParticipations: tournParticipation?.Participate || 0
+      },
+      lastMatch: lastMatch || null
+    };
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    return reply.code(500).send({ error: 'Internal server error' });
+  }
+});
+
+const useHttps = process.env.USE_HTTPS === "true";
+const port = 3000;
+fastify.listen({ port, host: "0.0.0.0" });
+console.log(`Game server listening on port ${port} (${useHttps ? 'HTTPS' : 'HTTP'})`);

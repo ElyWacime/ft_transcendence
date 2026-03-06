@@ -28,7 +28,7 @@ const GameOnline = () => {
   
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
-  const { ws, isReady } = useWebSocket();
+  const { ws, isReady, wsRef } = useWebSocket();
   let token = localStorage.getItem("token");
   let id = null;
   if (token)

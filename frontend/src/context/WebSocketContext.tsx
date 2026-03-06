@@ -80,17 +80,19 @@ export const WebSocketProvider = ({ children }) => {
 
     if (wsRef.current) return; 
 
-    const socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}:3000/ws`);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = import.meta.env.VITE_DOMAIN || window.location.host;
+    const socket = new WebSocket(`${protocol}//${host}/ws`);
     wsRef.current = socket;
     setWs(socket);
 
     socket.onopen = () => 
     {
       setIsReady(true);
-      // console.log("WebSocket connected");
+      console.log("WebSocket connected and ready");
     };
     socket.onclose = () => {
-      // console.log("WebSocket disconnected");
+      console.log("WebSocket disconnected");
       setIsReady(false);
       wsRef.current = null;
       setWs(null);
@@ -106,7 +108,7 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [isLoggedIn, handleMessage]);
 
-  return <WebSocketContext.Provider value={{ ws, isReady }}>{children}</WebSocketContext.Provider>;
+  return <WebSocketContext.Provider value={{ ws, isReady, wsRef }}>{children}</WebSocketContext.Provider>;
 };
 
 export const useWebSocket = () => {

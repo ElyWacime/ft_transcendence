@@ -2,9 +2,13 @@ DATABASE_URL=file:/app/prisma/db/data.db
 JWT_ACCESS_SECRET=supersecretkey
 JWT_REFRESH_SECRET=superrefreshkey
 COOKIE_SECRET=superrefreshkey
-COOKIE_DOMAIN=10.30.233.136
-DOMAIN=10.30.233.136
+COOKIE_DOMAIN=localhost
+DOMAIN=localhost
+# Service URLs
+AUTH_SERVICE_URL=https://auth-service:8000
+GAME_SERVICE_URL=https://game-server:3000
+CHAT_SERVICE_URL=https://chat-service:3700
 # 0Auth github
 GITHUB_CLIENT_ID=Ov23li0RtOtfHkMO4veG
 GITHUB_CLIENT_SECRET=516af7363f54d6ef550dc67a37a37420b3b4eb23
-GITHUB_CALLBACK_URL=http://10.30.233.136/api/users/github/callback
+GITHUB_CALLBACK_URL=https://localhost/api/users/github/callback

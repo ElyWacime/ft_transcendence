@@ -701,7 +701,8 @@ const interval = setInterval(() => {
 
 const route = async (id) => {
   try {
-    const response = await fetch(`http://auth-service:8000/get-user/${id}`, {
+    const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}:8000`;
+    const response = await fetch(`${AUTH_SERVICE_URL}/get-user/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

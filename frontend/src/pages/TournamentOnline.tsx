@@ -7,7 +7,7 @@ import { useWebSocket } from "@/context/WebSocketContext";
 
 // game-service base URL (used for initial tournament snapshot fetch before sockets sync)
 // sockets keep the page live, but we still seed the UI with the latest known state on first load
-const API_URL = `http://${import.meta.env.VITE_DOMAIN}:3000`;
+const API_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
 
 interface Participant {
   id: string;
@@ -46,11 +46,11 @@ interface CurrentUser {
 
 export default function TournamentOnlinePage() {
   const navigate = useNavigate();
-  const { ws, isReady } = useWebSocket();
+  const { ws, isReady, wsRef } = useWebSocket();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isConnected = isReady && ws?.readyState === WebSocket.OPEN;
+  const isConnected = isReady && wsRef?.current?.readyState === WebSocket.OPEN;
 
   // derive current user from stored JWT so we can personalize joins/ready buttons
   // this keeps the page purely client-side; no extra auth fetch round-trip just to know who we are
@@ -90,7 +90,8 @@ export default function TournamentOnlinePage() {
   // register websocket listener and handle tournament events
   // keeps UI live-synced; TOURNAMENT_MATCH_READY also redirects players into their match
   useEffect(() => {
-    if (!ws || !isReady || ws.readyState !== WebSocket.OPEN) return;
+    const socket = wsRef?.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
 
     const handleMessage = (event: MessageEvent) => {
       try {
@@ -117,11 +118,12 @@ export default function TournamentOnlinePage() {
   // helper to send authed websocket actions to game-service
   // all tournament mutations (create/join/ready) flow through the existing WS channel used by gameplay
   const sendAction = (payload: Record<string, unknown>) => {
-    if (!ws || !isReady || ws.readyState !== WebSocket.OPEN) {
+    const socket = wsRef?.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
       toast.error("Socket not connected");
       return false;
     }
-    ws.send(JSON.stringify({ token: localStorage.getItem("token"), ...payload }));
+    socket.send(JSON.stringify({ token: localStorage.getItem("token"), ...payload }));
     return true;
   };
 
