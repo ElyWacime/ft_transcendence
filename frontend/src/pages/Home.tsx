@@ -51,14 +51,14 @@ const Home = () => {
       description: "Play with players online",
       page: "/loading?mode=2",
     },
-    {
-      // entry point into the new websocket-backed online tournament lobby
-      icon: Trophy,
-      title: "Online Tournament",
-      type:"page",
-      description: "Join live brackets with other players",
-      page: "/tournament",
-    },
+    // {
+    //   // entry point into the new websocket-backed online tournament lobby
+    //   icon: Trophy,
+    //   title: "Online Tournament",
+    //   type:"page",
+    //   description: "Join live brackets with other players",
+    //   page: "/tournament",
+    // },
     {
       icon: Gamepad2,
       title: "2 vs 2 Online",
@@ -67,13 +67,13 @@ const Home = () => {
       description: "Team up and play against another team",
       page: "/loading?mode=4",
     },
-    {
-      icon: Trophy,
-      title: "Local Tournament",
-      type:"page",
-      description: "4-player offline bracket on one device",
-      page: "/local-tournament",
-    },
+    // {
+    //   icon: Trophy,
+    //   title: "Local Tournament",
+    //   type:"page",
+    //   description: "4-player offline bracket on one device",
+    //   page: "/local-tournament",
+    // },
 
     {
       icon: Users,
@@ -135,11 +135,11 @@ const Home = () => {
             Compete, dominate, and become the Pong champion!
           </p>
           <button
-            onClick={() => navigate("/local-tournament")}
+            onClick={() => navigate("/online-tournament")}
             className="hero-button animate-pulse-glow"
           >
             <Trophy className="button-icon" />
-            Start Local Tournament
+            Start Tournament
           </button>
         </div>
       </section>
