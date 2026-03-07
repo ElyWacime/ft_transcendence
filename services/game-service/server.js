@@ -1,4 +1,4 @@
-  import Fastify from "fastify";
+import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";

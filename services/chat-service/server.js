@@ -1,15 +1,12 @@
-import Fastify from 'fastify';
-import cookie from "@fastify/cookie"
-import cors from "@fastify/cors"
-import { Server } from 'socket.io';
-import * as fs from 'fs';
-import https from 'https';
-import initializeDb from './setup-db.js';
-import { getInvitationStatus, createInvitation, cancelInvitation } from './dbAccess/invitation-q.js';
-import { getBlockingStatus, blockUser, unblockUser } from './dbAccess/block-q.js';
-import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './dbAccess/friends-q.js';
-import { insertUsers, getUserByUsername, updateUsername } from './dbAccess/user-q.js';
-import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './dbAccess/conversations-q.js';
+import Fastify from "fastify";
+import fastifyCookie from "@fastify/cookie";
+import fjwt from "@fastify/jwt";  
+import websocket from "@fastify/websocket";
+import cors from "@fastify/cors";
+import * as fs from "fs";
+import https from "https";
+import { randomUUID } from "crypto"; // used to generate unique tournament ids for in-memory rooms; survives only while the process is alive
+import { Match, SQLiteDB, GameState } from "./DBController.js";
 
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
   https: {
@@ -18,519 +15,972 @@ const httpsOptions = process.env.USE_HTTPS === "true" ? {
   }
 } : {};
 
-const fastify = Fastify(httpsOptions);
-
-const allowAllOrigins = (origin, cb) => cb(null, true);
-
-await fastify.register(cookie);
-await fastify.register(cors, {
-  origin: allowAllOrigins,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "Cookie"],
-  credentials: true
+const fastify = Fastify({ 
+  logger: false,
+  ...httpsOptions
 });
-
-const io = new Server(fastify.server, {
-  cors: {
-    origin: (requestOrigin, callback) => callback(null, true),
-    methods: ["GET", "POST"], 
-    credentials: true 
-  }
-});
-
-const connectedUsers = new Map();
 
 // Create HTTPS agent for self-signed certificates
 const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
   rejectUnauthorized: false
 }) : undefined;
 
-async function desToken(request)
+await fastify.register(websocket);
+
+await fastify.register(cors, {
+  origin: true,
+  credentials: true,
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
+});
+
+let dbcnx = new SQLiteDB();
+let clients = new Map();
+let matches = new Map();
+let tournaments = new Map(); // in-memory store for online tournament state (blown away on restart; persistence not required for quick-fire brackets)
+const TICK_RATE = 60;
+const PADDLE_SPEED = 8;
+const MAX_Speed = 25;
+const MAX_Score = 5;
+
+await dbcnx.connect();
+
+
+const sendtoplayer = async (id, data) => 
 {
-   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
-   const fetchOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: request.cookies.access_token }),
-   };
-   
-   if (httpsAgent) {
-     fetchOptions.agent = httpsAgent;
-   }
-   
-   const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
-  return res;
+  if (id) {
+    let socket = (clients.get(id));
+    if (socket && socket.readyState === 1)
+      socket.send(data);
+    }
 }
 
-fastify.get("/getCookieValue", async (request, reply) => {
-    const res =  await desToken(request);
-    
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
+// ---
+
+// broadcast a payload to every connected websocket client
+// this is intentionally dumb fan-out: every player gets the same snapshot so UIs stay eventually consistent
+function broadcastAll(data) {
+  const payload = typeof data === "string" ? data : JSON.stringify(data);
+  for (const [, socket] of clients) {
+    if (socket && socket.readyState === 1) {
+      socket.send(payload);
     }
-    
-    const token = await res.json();
-    return token;
-})
-
-fastify.post("/users/add", async (request) => {
-  return await insertUsers(request.body.id, request.body.username);
-})
-
-fastify.post("/user", async (request, reply) => {
-    const res = await desToken(request);
-    
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    
-    const token = await res.json();
-
-    const currentUsername = token.user_name;
-    const searchUsername = request.body.username;
-
-    const user = await getUserByUsername(searchUsername);
-
-    if (!user) {
-      return reply.code(404).send({ error: 'User not found' });
-    }
-
-    if (user.username === currentUsername) {
-      return {
-        isSelf: true,
-        message: 'This is your own account'
-      };
-    }
-
-    return {
-      isSelf: false,
-      username: user.username,
-      userId: user.id
-    };
-});
-
-fastify.post("/user/update", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
   }
-  
-  const userId = request.body.user_id;
-  const newUsername = request.body.username;
-  const updatedUser = await updateUsername(userId, newUsername);
+}
 
-  return {
-    message: 'Username updated successfully',
-    username: updatedUser.username
-  };
-});
+// push current tournaments snapshot to all players so UIs stay live-synced
+// we send a flat array; clients reconcile on their side (no diffing server-side to keep logic simple)
+const broadcastTournamentState = () => {
+  const snapshot = Array.from(tournaments.values());
+  broadcastAll({ type: "TOURNAMENTS_STATE", tournaments: snapshot });
+};
+// remove a participant from a tournament after elimination without unlocking the room
+// we intentionally keep the tournament marked as full so no new joins are allowed mid-bracket
+const eliminateParticipant = (tournament, participantId) => {
+  if (!participantId || !tournament) return;
+  tournament.participants = tournament.participants.filter((p) => p.id !== participantId);
+  // keep the room locked once it had 4 players; do NOT flip full back to false
+  tournament.full = true;
+};
+// ---------
+function moveplayer(m,y,up,down,id,dt)
+{
+  if (!id) return null;
+  if (up)
+    y = Math.max(0, y - (PADDLE_SPEED * dt));
+  else if (down)
+    y = Math.min(m.height - m.sizePaddle_height, y + (PADDLE_SPEED * dt));
+  return y;
+}
 
-
-fastify.get("/conversations", async (request, reply) => {
-    const res = await desToken(request);
-    
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    
-    const token = await res.json();
-    const senderId = token.user_id;
-
-    const userId = senderId;   
-    const conv = await getConversationsForUser(userId);
-
-    return conv;
-})
-
-fastify.post("/conversations/start", async (request, reply) => { 
-  const res = await desToken(request);  
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-
-  const token = await res.json();
-  const senderId = token.user_id;
-  const receipentId = request.body.receipentId;
-
-
-
-  if (senderId === receipentId) {
-    return reply.code(400).send({ error: 'Cannot start a conversation with yourself' });
-  }
-
-  let conv = await checkIfConvExist(senderId, receipentId);
-  if (conv)
+function playercoli(m,x,y,id, n,dt)
+{
+  if (!id) return;
+  if (n == 1)
   {
-    return { conversationId: conv.id };
+    if (
+      m.Ball_x - m.ball_radius <= x + m.sizePaddle_width &&
+      m.Ball_x - m.ball_radius >= x &&
+      m.Ball_y + m.ball_radius >= y &&
+      m.Ball_y - m.ball_radius <= y + m.sizePaddle_height &&
+      m.Ball_dx < 0
+    ) {
+         m.Ball_x = x + m.sizePaddle_width + m.ball_radius;
+         m.Ball_dx *= -1;
+         if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < MAX_Speed * MAX_Speed) {
+           m.Ball_dx *= 1.2;
+           m.Ball_dy *= 1.2;
+           }
+    }
+  }
+  else if (n == 0)
+  {
+    if (
+      m.Ball_x + m.ball_radius >= x &&
+      m.Ball_x + m.ball_radius <= x + m.sizePaddle_width &&
+      m.Ball_y + m.ball_radius >= y &&
+      m.Ball_y - m.ball_radius <= y + m.sizePaddle_height &&
+      m.Ball_dx > 0
+    ){
+         m.Ball_x = x - m.ball_radius;
+         m.Ball_dx = -m.Ball_dx;
+         if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < MAX_Speed * MAX_Speed) {
+          m.Ball_dx *= 1.2;
+          m.Ball_dy *= 1.2;
+    }
+    }
+  }
+}
+
+function tick(m,dt) {
+  if (m.gameStatus !== "PLAYING") return;
+
+  m.Player1_y = moveplayer(m, m.Player1_y, m.p1UPkey, m.p1Downkey, m.P1_Id,dt);
+  m.Player2_y = moveplayer(m, m.Player2_y, m.p2UPkey, m.p2Downkey, m.P2_Id,dt);
+  m.Player3_y = moveplayer(m, m.Player3_y, m.p3UPkey, m.p3Downkey, m.P3_Id,dt);
+  m.Player4_y = moveplayer(m, m.Player4_y, m.p4UPkey, m.p4Downkey, m.P4_Id,dt);
+  m.Ball_x += m.Ball_dx*dt;
+  m.Ball_y += m.Ball_dy*dt;
+
+  if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
+    m.Ball_dy *= -1;
+    m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
   }
 
-  conv = await createNewConversation(senderId, receipentId);
-  return { conversationId: conv.id };
-})
+  playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id,1,dt);
+  playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id,1,dt);
+  playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id,0,dt);
+  playercoli(m, m.Player4_x, m.Player4_y, m.P4_Id,0,dt);
 
-fastify.get("/conversations/:id/messages", async (request) => {
-  const conversationId = request.params.id;
-
-  const messages = await getChatHistory(conversationId);
-
-  if (messages.length === 0) {
-    return [];
+  if (m.Ball_x < 0) {
+    m.score2 += 1;
+    resetBall(-1, m);
+  } else if (m.Ball_x > m.width) {
+    m.score1 += 1;
+    resetBall(1, m);
   }
-  return messages;
-})
+  if (m.score2 >= MAX_Score || m.score1 >= MAX_Score)
+  {
+    m.gameStatus = "FINISHED";
+    m.Winner_Id = m.P2_Id;
+    if (m.score1 >= m.score2)
+    m.Winner_Id = m.P1_Id;
+    updateTournamentAfterMatch(m);
 
-fastify.post("/friends/status", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
+    dbcnx.updateMatch(m);
+    matches.delete(m.id);
   }
-  
-  const token = await res.json();
-  const requesterId = token.user_id;
-  const otherUserId = request.body.user_id;
-  
-  const status = await getFriendStatus(requesterId, otherUserId);
+}
 
-  if (!status.friends) {
-    return { friends: false };
-  }
+function resetBall(direction = 1, m) {
+  m.Ball_x = m.width / 2;
+  m.Ball_y = m.height / 2;
+  m.Ball_dx = 2 * direction;
+  m.Ball_dy = 2;
+}
 
-  return {
-    friends: true,
-    message: 'You are friends with this user'
+// ----------------- Tournament helpers -----------------
+
+// build two semifinal slots once 4 participants join
+// slot ids are stable and namespaced with tournament id to avoid clashes across rooms
+const buildSemifinals = (participants, tournamentId) => {
+  const [p1, p2, p3, p4] = participants;
+  return [
+    { id: `${tournamentId}-semi1`, player1: p1, player2: p2, winner: null, ready: {}, readyAt: {}, matchId: null },
+    { id: `${tournamentId}-semi2`, player1: p3, player2: p4, winner: null, ready: {}, readyAt: {}, matchId: null },
+  ];
+};
+
+// create a new in-memory tournament room seeded with the creator as first participant
+// no DB write here: tournaments are ephemeral and only need to exist for the lifetime of matches
+const createTournamentRoom = (creator) => {
+  const id = randomUUID();
+  const tournament = {
+    id,
+    active: true,
+    createdBy: creator?.id || null,
+    createdByName: creator?.name || creator?.email || "Unknown",
+    createdAt: new Date().toISOString(),
+    participants: creator ? [creator] : [],
+    full: false,
+    status: "waiting",
+    semifinals: [],
+    final: null,
+    winner: null,
   };
-});
+  tournaments.set(id, tournament);
+  broadcastTournamentState();
+  return tournament;
+};
 
-fastify.get("/friends", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const userId = token.user_id;
-  
-  const friends = await getAllFriends(userId);
-  
-  return { friends };
-});-
+// handle leave tournament (only allowed before the bracket is full)
+const leaveTournamentRoom = (id, participant) => {
+  const tournament = tournaments.get(id);
+  if (!tournament) return null;
 
-fastify.post("/friends/add", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
+  // if the tournament is finished and the winner is the last remaining participant, delete the room
+  if (
+    tournament.status === "completed" &&
+    tournament.winner?.id === participant.id &&
+    tournament.participants.length === 1
+  ) {
+    tournaments.delete(id);
+    broadcastTournamentState();
+    return null;
   }
-  
-  const token = await res.json();
-  const user_a = token.user_id;
-  const user_b = request.body.user_id;
-  
-  await addFriend(user_a, user_b);
-  
-  
-  return {
-    message: 'Friend added successfully'
+
+  // once 4 players are locked in, don't allow leaving to keep brackets stable
+  if (tournament.full || tournament.participants.length >= 4) {
+    return tournament;
+  }
+
+  // remove the participant by id
+  tournament.participants = tournament.participants.filter((p) => p.id !== participant.id);
+
+  // reset state since we are back to a waiting room
+  tournament.full = tournament.participants.length >= 4;
+  tournament.status = tournament.full ? tournament.status : "waiting";
+  if (!tournament.full) {
+    tournament.semifinals = [];
+    tournament.final = null;
+    tournament.winner = null;
+  }
+
+  // delete empty tournaments to avoid clutter
+  console.log("This is leaveTournamentRoom >> ", tournament.participants.length);
+  if (tournament.participants.length === 0) {
+    tournaments.delete(id);
+  } else {
+    tournaments.set(id, tournament);
+  }
+
+  broadcastTournamentState();
+  return tournament;
+};
+
+// add a player to a tournament; when full, auto-generate bracket scaffolding
+// we gate at 4 participants and immediately build semis + a final placeholder
+const joinTournamentRoom = (id, participant) => {
+  const tournament = tournaments.get(id);
+  if (!tournament || tournament.full) return tournament;
+  const exists = tournament.participants.some((p) => p.id === participant.id);
+  if (!exists) {  
+    tournament.participants.push(participant);
+  }
+  tournament.full = tournament.participants.length >= 4;
+  if (tournament.full && tournament.participants.length >= 4) {
+    // notify all four participants that semifinals are waiting
+    const firstFour = tournament.participants.slice(0, 4);
+    for (const p of firstFour) {
+      const waiting = new GameState();
+      waiting.waitingMatch = true;
+      sendtoplayer(p.id, JSON.stringify(waiting));
+    }
+    tournament.status = "semifinals";
+    tournament.semifinals = buildSemifinals(tournament.participants.slice(0, 4), tournament.id);
+    tournament.final = { id: `${tournament.id}-final`, player1: null, player2: null, winner: null, ready: {}, readyAt: {}, matchId: null };
+  }
+  tournaments.set(id, tournament);
+  broadcastTournamentState();
+  return tournament;
+};
+
+// notify the two players in a bracket slot that their match is ready
+// front-end listens for this payload and self-navigates to the arena (/loading?mode=2) with its own token
+const notifyPlayersMatchReady = (tournament, matchSlot, mode = 2) => {
+  const payload = {
+    type: "TOURNAMENT_MATCH_READY",
+    tournamentId: tournament.id,
+    matchId: matchSlot.id,
+    matchDbId: matchSlot.matchId,
+    player1: matchSlot.player1,
+    player2: matchSlot.player2,
+    mode,
   };
-})
+  sendtoplayer(matchSlot.player1?.id, JSON.stringify(payload));
+  sendtoplayer(matchSlot.player2?.id, JSON.stringify(payload));
+};
 
-fastify.post("/friends/remove", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const user_a = token.user_id;
-  const user_b = request.body.user_id;
-  
-  await deleteFriend(user_a, user_b);
-  
-  return {
-    message: 'Friend removed successfully'
-  };
-})
+// create a VIP match row for this bracket slot if not already created and cache its id on the slot
+// VIP matches let us run isolated 1v1 games tied to a tournament without polluting general matchmaking
+const ensureVipMatch = async (matchSlot, tournamentId) => {
+  if (matchSlot.matchId) return matchSlot.matchId;
+  const m = new Match();
+  m.P1_Id = matchSlot.player1?.id;
+  m.P2_Id = matchSlot.player2?.id;
+  m.count_players = 2;
+  m.T_Id = tournamentId;
+  const newId = await dbcnx.createVIPMatch(m);
+  matchSlot.matchId = newId;
+  return newId;
+};
 
-fastify.post("/block/status", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
+// mark a player as ready for their bracket match; once both ready, spin up/attach VIP match and notify
+// ready state is stored on the match slot to avoid per-user global flags
+const handleTournamentReady = async (tournamentId, matchId, playerId) => {
+  const tournament = tournaments.get(tournamentId);
+  if (!tournament) return;
+  const allMatches = [...(tournament.semifinals || []), tournament.final].filter(Boolean);
+  const matchSlot = allMatches.find((m) => m.id === matchId);
+  if (!matchSlot || !matchSlot.player1 || !matchSlot.player2) return;
+  matchSlot.createdAt = new Date();
+  matchSlot.readyAt = matchSlot.readyAt || {};
 
-  const token = await res.json();
-  const requesterId = token.user_id;
-  const otherUserId = request.body.user_id;
+  matchSlot.ready = { ...matchSlot.ready, [playerId]: true };
+  matchSlot.readyAt[playerId] = new Date().toISOString();
 
-  const status = await getBlockingStatus(requesterId, otherUserId);
+  const p1Ready = Boolean(matchSlot.ready[matchSlot.player1.id]);
+  const p2Ready = Boolean(matchSlot.ready[matchSlot.player2.id]);
+  const bothReady = p1Ready && p2Ready;
 
-  if (!status.blocked) {
-    return { blocked: false };
-  }
+  if (bothReady) {
+    // create/ensure DB match row
+    const matchDbId = await ensureVipMatch(matchSlot, tournamentId);
+    matchSlot.matchId = matchDbId;
 
-  const blockedBy = status.blockerId === requesterId ? 'you' : 'other';
-  const message = blockedBy === 'you' ? 'You blocked the other user' : 'The other user blocked you';
+    // hydrate runtime game state and start it immediately so tick loop can drive the ball
+    let dbMatch = await dbcnx.getMatchById(matchDbId);
+    if (!dbMatch) {
+      dbMatch = new Match();
+      dbMatch.id = matchDbId;
+      dbMatch.P1_Id = matchSlot.player1.id;
+      dbMatch.P2_Id = matchSlot.player2.id;
+      dbMatch.mode = 2;
+      dbMatch.count_players = 2;
+      dbMatch.T_Id = tournamentId;
+    }
+    dbMatch.gameStatus = "PLAYING";
+    dbMatch.count_players = 2;
+    dbMatch.mode = 2;
+    dbMatch.T_Id = tournamentId;
+    await dbcnx.updateMatch(dbMatch);
 
-  return {
-    blocked: true,
-    blockedBy,
-    blockerId: status.blockerId,
-    blockedId: status.blockedId,
-    message
-  };
-});
+    const g = new GameState();
+    g.id = matchDbId;
+    g.P1_Id = matchSlot.player1.id;
+    g.P2_Id = matchSlot.player2.id;
+    g.T_Id = tournamentId;
+    g.count_players = 2;
+    g.mode = 2;
+    g.gameStatus = "PLAYING";
+    g.player1Name = await getUserName(g.P1_Id);
+    g.player2Name = await getUserName(g.P2_Id);
 
-fastify.post("/block", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const blockerId = token.user_id;
-  const blockedId = request.body.user_id;
+    matches.set(g.id, g);
 
-  await blockUser(blockerId, blockedId);
-  const status = await getBlockingStatus(blockerId, blockedId);
-
-  return {
-    blocked: status.blocked,
-    blockerId: status.blockerId,
-    blockedId: status.blockedId,
-    message: 'User blocked successfully'
-  };
-});
-
-fastify.post("/unblock", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const blockerId = token.user_id;
-  const unblockedId = request.body.user_id;
-
-  const statusBefore = await getBlockingStatus(blockerId, unblockedId);
-  
-  if (!statusBefore.blocked || statusBefore.blockerId !== blockerId) {
-    return reply.code(400).send({ error: 'You can only unblock users you blocked' });
+    // immediately tell both players their match is ready so UI navigates and also seeds them with state
+    notifyPlayersMatchReady(tournament, matchSlot, 2);
+    const payload = JSON.stringify(g);
+    sendtoplayer(g.P1_Id, payload);
+    sendtoplayer(g.P2_Id, payload);
   }
 
-  await unblockUser(blockerId, unblockedId);
+  // always broadcast the latest ready state so UIs reflect button disabled/ready indicators
+  broadcastTournamentState();
+};
 
-  return {
-    unblocked: true,
-    unblockedId,
-    message: 'User unblocked successfully'
-  };
-});
-
-fastify.post("/invitations/status", async (request, reply) => {
-  const res = await desToken(request);
+// player reports opponent missing; if reporter has been ready for >=1 minute and opponent not ready, auto-advance reporter
+const handleReportMissingOpponent = (tournamentId, matchId, reporterId) => {
   
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
+  console.log("This is handleReportMissingOpponent >> ", tournamentId, matchId, reporterId);
+  const tournament = tournaments.get(tournamentId);
+  if (!tournament) return;
 
-  const token = await res.json();
-  const requesterId = token.user_id;
-  const otherUserId = request.body.user_id;
-  const invitationType = request.body.invitationType;
+  const semifinals = tournament.semifinals || [];
+  const finalMatch = tournament.final;
+  const allMatches = [...semifinals, finalMatch].filter(Boolean);
+  const matchSlot = allMatches.find((m) => m.id === matchId);
+  if (!matchSlot) return;
 
+  // --- Final edge case: reporter is alone for >=3 minutes since tournament creation
+  const isFinal = finalMatch && finalMatch.id === matchId;
+  if (isFinal) {
+    const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
+    const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
+    const soloPlayer = reporterIsPlayer1 ? matchSlot.player1 : reporterIsPlayer2 ? matchSlot.player2 : null;
+    const opponent = reporterIsPlayer1 ? matchSlot.player2 : reporterIsPlayer2 ? matchSlot.player1 : null;
 
-  const status = await getInvitationStatus(requesterId, otherUserId, invitationType);
+    if (soloPlayer && !opponent) {
+      const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
+      const THREE_MINUTES_MS = 60_000;
+      const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
+      if (threeMinutesElapsed) {
+        finalMatch.winner = soloPlayer;
+        tournament.winner = soloPlayer;
+        tournament.status = "completed";
 
-  if (!status.pending) {
-    return { pending: false };
-  }
-
-  const invitedBy = status.inviterId === requesterId ? 'you' : 'other';
-
-  return {
-      pending: true,
-      invitedBy,
-      inviterId: status.inviterId,
-      inviteeId: status.inviteeId,
-      invitationType: status.invitationType,
-    };
-});
-
-fastify.post("/invite", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const inviterId = token.user_id;
-  const inviteeId = request.body.user_id;
-  const invitationType = request.body.invitation_type;
-  
-
-  await createInvitation(inviterId, inviteeId, invitationType); 
-  
-  return {
-    pending: true,
-    inviterId,
-    inviteeId,
-    invitationType,
-    message: 'invitation sent successfully'
-  };
-});
-
-fastify.post("/uninvite", async (request, reply) => {        
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const inviterId = token.user_id;
-  const inviteeId = request.body.user_id;
-  const invitationType = request.body.invitation_type;
-
-  await cancelInvitation(inviterId, inviteeId, invitationType);
-
-  return {
-    pending: false,
-    inviterId,
-    inviteeId,
-    invitationType,
-    message: 'invitation cancelled successfully'
-  };
-});
-
-io.on('connection', (socket) => {
-  let myId;
-  
-  socket.on('authenticate', async (userId) => {
-    myId = userId;
-    socket.join(`user:${myId}`);
-    connectedUsers.set(userId, true);
-
-    const friendIds = await getAllFriends(userId);
-    
-    const onlineFriends = friendIds.filter(friendId => connectedUsers.has(friendId));
-  
-    socket.emit('onlineFriends', { onlineFriends });
-
-    onlineFriends.forEach(friendId => {
-      socket.to(`user:${friendId}`).emit('friendOnline', { userId: myId });
-    });
-  });
-
-  socket.on('disconnect', async () => {
-    if (myId) {
-      const friendIds = await getAllFriends(myId);
-      
-      friendIds.forEach(friendId => {
-        if (connectedUsers.has(friendId)) {
-          socket.to(`user:${friendId}`).emit('friendOffline', { userId: myId });
+        // remove any lingering participants who aren't the winner
+        const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
+        for (const leftover of remaining) {
+          eliminateParticipant(tournament, leftover.id);
         }
-      });
-      
-      connectedUsers.delete(myId);
+
+        tournaments.set(tournamentId, tournament);
+        broadcastTournamentState();
+        return;
+      }
     }
-  });  
+  }
 
-  socket.on('AddFriendOnline', ({ userId }) => {
-    if (connectedUsers.has(userId)) {
-        socket.emit('friendOnline', { userId });
+  if (!matchSlot.player1 || !matchSlot.player2) return;
+
+  console.log("after match check >> ", matchSlot);
+  matchSlot.readyAt = matchSlot.readyAt || {};
+  matchSlot.ready = matchSlot.ready || {};
+
+  const reporterReadyAt = matchSlot.readyAt[reporterId];
+  const reporterReady = Boolean(matchSlot.ready[reporterId]);
+  if (!reporterReady || !reporterReadyAt) return; // reporter never readied or timestamp missing
+
+  const opponent = matchSlot.player1.id === reporterId ? matchSlot.player2 : matchSlot.player1;
+  if (!opponent) return;
+  const opponentReady = Boolean(matchSlot.ready[opponent.id]);
+  if (opponentReady) return; // opponent already ready; nothing to report
+
+  const diffMs = Date.now() - new Date(reporterReadyAt).getTime();
+  if (diffMs < 60_000) return; // less than 1 minute wait
+
+  // advance reporter, drop opponent
+  matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
+  eliminateParticipant(tournament, opponent.id);
+
+  if (semifinals.includes(matchSlot)) {
+    if (tournament.final) {
+      if (!tournament.final.player1) {
+        tournament.final.player1 = matchSlot.winner;
+      } else if (!tournament.final.player2 && tournament.final.player1.id !== matchSlot.winner.id) {
+        tournament.final.player2 = matchSlot.winner;
+      }
+      tournament.final.ready = {};
+      tournament.final.readyAt = {};
+      if (tournament.final.player1 && tournament.final.player2) {
+        tournament.final.matchId = null;
+        tournament.status = "finals";
+      }
     }
+  } else if (finalMatch && finalMatch.id === matchId) {
+    finalMatch.winner = matchSlot.winner;
+    tournament.winner = matchSlot.winner;
+    tournament.status = "completed";
+  }
 
-    socket.to(`user:${userId}`).emit('friendOnline', { userId: myId });
-  });
+  tournaments.set(tournamentId, tournament);
+  broadcastTournamentState();
+};
 
-  socket.on("newConversation", ({ userId }) => {
-    socket.to(`user:${userId}`).emit("newConversation", {});
-  });
+// after a match finishes, advance bracket (promote semifinal winners to final or crown winner)
+// we accept GameState from the running match tick loop and reflect winners back into the tournament map
+const updateTournamentAfterMatch = async (gameState) => {
+  if (!gameState?.T_Id) return;
+  const tournamentId = gameState.T_Id;
+  const tournament = tournaments.get(tournamentId);
+  if (!tournament) return;
 
-  socket.on('sendMessage', async (data) => {
-    try {
-      const { conversationId, content } = data;
+  const { Winner_Id } = gameState;
+  const winnerParticipant = tournament.participants.find((p) => p.id === Winner_Id);
 
-      const message = await saveMessage(conversationId, myId, content.trim());
+  const semifinals = tournament.semifinals || [];
+  const finalMatch = tournament.final;
 
-      const participantIds = await getConversationParticipantIds(conversationId);
-      participantIds.forEach((pid) => {
-        socket.to(`user:${pid}`).emit('receiveMessage', message);
-        if (pid === myId) {
-          socket.emit('receiveMessage', message);
+  const semMatch = semifinals.find((m) => m.matchId === gameState.id);
+  if (semMatch) {
+    let wname = await getUserName(Winner_Id);
+    semMatch.winner = winnerParticipant || { id: Winner_Id, name: wname || "Winner" };
+    // eliminate the losing participant and keep the bracket locked
+    const p1Id = semMatch.player1?.id;
+    const p2Id = semMatch.player2?.id;
+    const loserId = Winner_Id === p1Id ? p2Id : p1Id;
+    if (loserId) eliminateParticipant(tournament, loserId);
+
+    if (tournament.final) {
+      // only fill an empty slot; avoid showing the same semifinal winner on both sides before the second semi finishes
+      if (!tournament.final.player1) {
+        tournament.final.player1 = semMatch.winner;
+      } else if (!tournament.final.player2 && tournament.final.player1.id !== semMatch.winner.id) {
+        tournament.final.player2 = semMatch.winner;
+      }
+      // finalists must ready-up again; also force a fresh match id for the final once both sides are known
+      tournament.final.ready = {};
+      if (tournament.final.player1 && tournament.final.player2) {
+        tournament.final.matchId = null;
+        tournament.status = "finals";
+
+        // notify both finalists that there's a match waiting for them(if they are not in the tournamnt page)
+        const finalists = [tournament.final.player1, tournament.final.player2].filter(Boolean);
+        for (const p of finalists) {
+          const waiting = new GameState();
+          waiting.waitingMatch = true;
+          sendtoplayer(p.id, JSON.stringify(waiting));
         }
-      });
-
-    } catch (error) {
-      fastify.log.error(error, 'Error saving message');
+      }
     }
-  });
+  } else if (finalMatch && finalMatch.matchId === gameState.id) {
+    let wwname = await getUserName(Winner_Id);
+    finalMatch.winner = winnerParticipant || { id: Winner_Id, name: wwname|| "Winner" };
+    // eliminate the finalist who lost; keep tournament locked
+    const p1Id = finalMatch.player1?.id;
+    const p2Id = finalMatch.player2?.id;
+    const loserId = Winner_Id === p1Id ? p2Id : p1Id;
+    if (loserId) eliminateParticipant(tournament, loserId);
 
-  socket.on('blockStatusChanged', async (data) => {
-    try {
-      const { otherUserId, conversationId, blockedBy } = data;
+    tournament.winner = finalMatch.winner;
+    tournament.status = "completed";
+  }
 
-      socket.to(`user:${otherUserId}`).emit('blockStatusChanged', {
-        conversationId,
-        blockedBy
-      });
+  tournaments.set(tournamentId, tournament);
+  broadcastTournamentState();
+};
 
-    } catch (error) {
-      fastify.log.error(error, 'Error handling block status change');
-    }
-  });
 
-  socket.on('Invite', ({ conversationId, toUserId, fromUserId, invitationType }) => {
-    socket.to(`user:${toUserId}`).emit('Invite', {
-      conversationId,
-      fromUserId,
-      invitationType
-    });
-  });
-
-  socket.on('cancelInvite', ({ toUserId, invitationType  }) => {
-    socket.to(`user:${toUserId}`).emit('cancelInvite', { invitationType });
-  });
-
-  socket.on('InviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {
-    socket.to(`user:${toUserId}`).emit('InviteResponse', {
-      conversationId,
-      accepted,
-      fromUserId,
-      invitationType
-    });
-  });
-
-  socket.on('unfriend', ({ userId, toUnfriend, conversationId }) => {
-    socket.to(`user:${userId}`).emit('unfriend', {
-      conversationId: conversationId,
-      userId: toUnfriend
-    });
-  });
+fastify.register(fjwt, { 
+  secret: process.env.JWT_ACCESS_SECRET
 });
 
-const start = async () => {
+fastify.addHook("preHandler", (req, _res, next) => {
+  req.jwt = fastify.jwt;
+  next();
+});
+
+fastify.register(fastifyCookie, {
+  secret: process.env.JWT_ACCESS_SECRET,
+  hook: "preHandler", 
+});
+
+fastify.get('/', async (request, reply) => {
+  return { message: 'Server is running' };
+});
+
+fastify.get('/tournaments-online', async (_request, reply) => {
   try {
-    await initializeDb();
-    
-    const useHttps = process.env.USE_HTTPS === "true";
-    const port = 3700;
+    const snapshot = Array.from(tournaments.values());
+    return snapshot;
+  } catch (e) {
+    return reply.code(500).send({ message: "Failed to load tournaments" });
+  }
+});
 
-    await fastify.listen({ port, host: '0.0.0.0' });
+const handelRoomQuiiting = async(id) => {
+  let m = await dbcnx.deletePendingMatchByPlayerID(id);
+  if (m)
+  {
+    let ngame = new GameState();
+    ngame.id = m.id;
+    ngame.P1_Id = m.P1_Id;
+    ngame.P2_Id = m.P2_Id;
+    ngame.P3_Id = m.P3_Id;
+    ngame.P4_Id = m.P4_Id;
+    ngame.T_Id = m.T_Id;
+    ngame.count_players = m.count_players;
+    ngame.mode = m.mode;
+    ngame.id = m.id;
+    ngame.gameStatus = m.gameStatus;
 
-    fastify.log.info(`Server listening on port ${port} (${useHttps ? 'HTTPS' : 'HTTP'})`);
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
+    let [name1,name2,name3,name4] = await Promise.all([getUserName(m.P1_Id),getUserName(m.P2_Id),getUserName(m.P3_Id),getUserName(m.P4_Id)]);
+    ngame.player1Name = name1;
+    ngame.player2Name = name2;
+    ngame.player3Name = name3;
+    ngame.player4Name = name4;
+
+  let data = JSON.stringify(ngame);
+  sendtoplayer(ngame.P1_Id, data);
+  sendtoplayer(ngame.P2_Id, data);
+  sendtoplayer(ngame.P3_Id, data);
+  sendtoplayer(ngame.P4_Id, data);
+  }
+  else
+    console.log("coudnt find this match :: ",id);
+
+};
+
+const handelRegister = async(request,id) => {
+  try {
+
+    let ngame = new GameState();
+    let m = await dbcnx.getOngoingMatch(id);
+    if (!m) 
+    {
+      m = await dbcnx.getOpenRoom(request.mode);
+      if (!m) {
+        m = new Match();
+        m.P1_Id = id;
+        m.mode = request.mode;
+        if (!request.tournement) 
+          m.id = await dbcnx.createMatch_not(m);
+        else 
+          m.id = await dbcnx.createMatch(m);
+      }
+      else 
+      {
+        if (request.mode == 2) 
+        {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else
+            m.P2_Id = id;
+        }
+        else
+        {
+          if (m.P1_Id == null) 
+            m.P1_Id = id;
+          else if (m.P2_Id == null) 
+            m.P2_Id = id;
+          else if (m.P3_Id == null) 
+            m.P3_Id = id;
+          else 
+            m.P4_Id = id;
+        }
+        m.count_players = m.count_players + 1;
+      }
+    }
+    ngame.id = m.id;
+    ngame.P1_Id = m.P1_Id;
+    ngame.P2_Id = m.P2_Id;
+    ngame.P3_Id = m.P3_Id;
+    ngame.P4_Id = m.P4_Id;
+    let [name1,name2,name3,name4] = await Promise.all([getUserName(m.P1_Id),getUserName(m.P2_Id),getUserName(m.P3_Id),getUserName(m.P4_Id)]);
+    ngame.player1Name = name1;
+    ngame.player2Name = name2;
+    ngame.player3Name = name3;
+    ngame.player4Name = name4;
+    ngame.T_Id = m.T_Id;
+    ngame.count_players = m.count_players;
+    ngame.mode = request.mode;
+    ngame.id = m.id;
+    if (ngame.count_players == request.mode) 
+    {
+        m.gameStatus = "PLAYING";
+        if(!matches.get(m.id))
+          matches.set(m.id, ngame);
+    }
+    ngame.gameStatus = m.gameStatus;
+    let data = JSON.stringify(ngame);
+    await dbcnx.updateMatch(m);
+    sendtoplayer(ngame.P1_Id, data);
+    sendtoplayer(ngame.P2_Id, data);
+    sendtoplayer(ngame.P3_Id, data);
+    sendtoplayer(ngame.P4_Id, data);
+  } catch (error) {
+    console.error("Error in handelRegister for user:", id, "-", error);
   }
 };
 
-start();
+const handelMove = async (request,id) =>{
+  let match = matches.get(request.matchId);
+  if(match)
+  {
+    if (match.P1_Id == id) {
+      match.p1UPkey = request.keys.ArrowUp;
+      match.p1Downkey = request.keys.ArrowDown;
+    }
+    else if (match.P2_Id == id) {
+      match.p2UPkey = request.keys.ArrowUp;
+      match.p2Downkey = request.keys.ArrowDown;
+    }
+    else if (match.P3_Id && match.P3_Id == id) {
+      match.p3UPkey = request.keys.ArrowUp;
+      match.p3Downkey = request.keys.ArrowDown;
+    }
+    else if (match.P4_Id && match.P4_Id == id) {
+      match.p4UPkey = request.keys.ArrowUp;
+      match.p4Downkey = request.keys.ArrowDown;
+    }
+  }
+};
+
+const handelFinish = async (ID) =>  {
+  let m = matches.get(ID);
+  if (m) 
+  {
+    m.id = ID;
+    m.id_Match = ID;
+    if (m.score1 >= m.score2)
+      m.Winner_Id = m.P1_Id;
+    else
+      m.Winner_Id = m.P2_Id;
+    m.gameStatus = "FINISHED";
+    await dbcnx.updateMatch(m);
+    updateTournamentAfterMatch(m);
+    matches.delete(m.id);
+  }
+  else
+    console.log("Couldnt end request.matchId ",ID);
+};
+
+const handelDup = async (connection,id) => {
+  if (clients.has(id)) 
+  {
+    try {
+      if (clients.get(id) != connection) 
+      {
+        clients.get(id).close();
+        console.log("Server Closed Duplicate Socket for ",id);
+      }
+    }
+    catch (e) 
+    {  
+      console.log("Error Server Closed Duplicate Socket for ",id);
+    }
+  }
+};
+
+const interval = setInterval(async () => {
+  if (matches.size == 0)
+    return;
+  for (const [id, match] of matches) {
+    match.now = Date.now();
+    let delta = (((match.now - match.last)) * TICK_RATE) / 1000;
+    match.last = match.now;
+    tick(match,delta);
+    let data = JSON.stringify(match);
+    sendtoplayer(match.P1_Id, data);
+    sendtoplayer(match.P2_Id, data);
+    sendtoplayer(match.P3_Id, data);
+    sendtoplayer(match.P4_Id, data);
+  }
+}, 1000 / TICK_RATE);
+
+const getUserName = async (id) => {
+  try {
+    if(!id)
+      return null;
+    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+    const fetchOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    if (httpsAgent) {
+      fetchOptions.agent = httpsAgent;
+    }
+    const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
+    if (!response.ok) {
+      console.error(`Auth service returned status ${response.status}`);
+      return null;
+    }
+    const user = await response.json();
+    return user ? user.name : null;
+  } catch (error) {
+    console.error(`Error fetching user ${id} from auth service: `,error);
+    return null;
+  }
+};
+
+fastify.get("/ws", { websocket: true }, async (connection, req) => {
+  connection.on("message", async (msg) => {
+   try
+   {
+      const request = JSON.parse(msg);
+      let token = request.token;
+      console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
+      if (token) {
+          let decoded;
+          try {
+            decoded = req.jwt.verify(token);
+            if(!decoded)
+              connection.send(JSON.stringify({ error: "Bad Token" }));
+          } catch (jwtError) {
+            connection.send(JSON.stringify({ error: "JWT verification failed" }));
+            return;
+          }
+          const id = decoded.id;
+          await handelDup(connection,id);
+          clients.set(id, connection);
+          const name = await getUserName(id);
+          if (request.type == "REGISTER") 
+            await handelRegister(request,id);
+          else if (request.type == "MOVE") 
+            await handelMove(request,id);
+          else if (request.type == "FINISHED") 
+            await  handelFinish(request.matchId) ;
+          else if (request.type == "DELETE") 
+            await handelRoomQuiiting(id);
+          else if (request.type == "TOURNAMENT_CREATE") {
+          const creator = { id, name  };
+          createTournamentRoom(creator);
+        }
+        else if (request.type == "TOURNAMENT_LEAVE") 
+        {
+        const participant = { id, name};
+        leaveTournamentRoom(request.tournamentId, participant);
+        }
+        else if (request.type == "TOURNAMENT_JOIN") {
+          const participant = { id, name };
+          joinTournamentRoom(request.tournamentId, participant);
+        }
+        else if (request.type == "TOURNAMENT_READY") {
+          await handleTournamentReady(request.tournamentId, request.matchId, id);
+        }
+        else if (request.type == "TOURNAMENT_REPORT_MISSING") {
+          handleReportMissingOpponent(request.tournamentId, request.matchId, id);
+        }
+        else if (request.type == "REQUEST_TOURNAMENTS") {
+          sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
+        }
+      }
+      else 
+      {
+        console.log("No token provided, proceeding on Closing connection");
+        connection.close();
+      }
+   }
+   catch (e)
+   {
+      console.error("WebSocket message handler error:", e);
+   }
+  });
+  connection.on("close", async () => {
+    for (const [id, client] of clients) {
+      if (client == connection) {
+       try {
+        await handelRoomQuiiting(id);
+        clients.delete(id);
+        console.log("Server OnClosed Socket for ",id);
+        break;
+       } catch (e) {
+          console.error("Server OnClosed Socket error:", e);
+       }
+      }
+    }
+  });
+});
+
+fastify.post('/invite', async (request, reply) => {
+  try {
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
+    const decoded = request.jwt.verify(token);
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
+    let P1 = request.body.P1;
+    let P2 = request.body.P2;
+    let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
+    if (!(m1 || m2))
+    {
+      let m = new Match();
+      m.P1_Id = P1;
+      m.P2_Id = P2;
+      m.count_players = 2;
+      await  dbcnx.createVIPMatch(m);
+      return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+    }
+    return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
+  } catch (e) {
+    return reply.code(405).send({ message: 'Error ' + e });
+  }
+});
+
+fastify.post('/check', async (request, reply) => {
+  try {
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
+    const decoded = request.jwt.verify(token);
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
+    const id = decoded.id;
+    let m = await dbcnx.getAvaiable(id);
+  
+    if (m && m.mode != request.body.mode)
+    {
+      return reply.code(409).send({ message: 'Not Available' });
+    }
+    return reply.code(201).send({ message: 'Available' });
+  } catch (e) {
+    return reply.code(405).send({ message: e });
+  }
+});
+
+fastify.post('/endmatch', async (request, reply) => {
+  try {
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
+    const decoded = request.jwt.verify(token);
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
+    const id = decoded.id;
+    let m = await dbcnx.getcurrentmatch(id);
+    if (m)
+    {
+      let ngame =  matches.get(m.id);
+      ngame.score1 = 5;
+      ngame.score2 = 0;
+      ngame.Winner_Id = ngame.P1_Id;
+      if (ngame.P1_Id == id || ngame.P3_Id == id)
+      {
+        ngame.score1 = 0;
+        ngame.score2 = 5;
+        ngame.Winner_Id = ngame.P2_Id;
+      }
+    }
+    return reply.code(201).send({ message: 'Good' });
+  } catch (e) {
+      return reply.code(405).send({ message: e });
+  }
+});
+
+fastify.post('/allmatch', async (request, reply) => {
+  try {
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
+    const decoded = request.jwt.verify(token);
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
+    let matches = await dbcnx.getPlayerMatches(request.body.id);
+    if (matches) {
+      matches = await Promise.all(matches.map(async (m) => {
+        const [P1, P2, P3, P4, Winner] = await Promise.all([
+          getUserName(m.P1_Id),
+          getUserName(m.P2_Id),
+          getUserName(m.P3_Id),
+          getUserName(m.P4_Id),
+          getUserName(m.Winner_Id),
+        ]);
+        return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
+      }));
+    }
+
+    return reply.code(201).send({ matches });
+  } 
+  catch (e) {
+    return reply.code(500).send({ message: e.toString() });
+  }
+});
+
+
+import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
+import { userInfo } from "os";
+await registerDashboardRoutes_ayoub(fastify, dbcnx);
+
+const useHttps = process.env.USE_HTTPS === "true";
+const port = 3000;
+
+fastify.listen({ port, host: "0.0.0.0" });
+console.log(`Game server listening on port ${port} (${useHttps ? 'HTTPS' : 'HTTP'})`);

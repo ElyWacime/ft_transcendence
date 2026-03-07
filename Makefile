@@ -29,8 +29,7 @@ db2: rm
 	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite
 	
 db:
-	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite
-
+	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite && 	rm ./services/gateway/certs/certificate.crt && rm ./services/gateway/certs/private.key
 re: clean up
 
 ps:

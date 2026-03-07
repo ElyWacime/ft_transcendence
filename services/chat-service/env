@@ -1,2 +1,1 @@
-DOMAIN=localhost
-AUTH_SERVICE_URL=https://auth-service:8000
+DOMAIN=10.30.233.136
