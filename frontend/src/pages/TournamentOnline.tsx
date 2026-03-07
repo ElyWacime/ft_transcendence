@@ -69,7 +69,7 @@ export default function TournamentOnlinePage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/game/online-tournaments`, { credentials: "include" });
+        const res = await fetch(`${API_URL}/api/game/tournaments-online`, { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           // console.log("data>>>>>", data);

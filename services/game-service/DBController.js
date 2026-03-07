@@ -177,40 +177,7 @@ export class SQLiteDB {
         await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
         return this.db.get(`select * from Match where id  = ?;`, [x]);
     }
-
-    async deleteOngoingMatchByPlayerID(id) {
-        await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P1_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-        await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P2_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-        await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P3_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-        return await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P4_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-    }
-
-
-    async getCurrentMatchByPlayerID(id) {
-        return this.db.get(`SELECT *
-        FROM Match
-        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
-        gameStatus != 'FINISHED'
-        ORDER BY CreatedAt DESC
-        LIMIT 1;
-        `, [id, id, id, id]);
-    }
+    
     async getOngoingMatch(id) {
         return this.db.get(`SELECT *
         FROM Match
@@ -229,15 +196,7 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
-    async getFinishedMatchByPlayerID(id) {
-        return this.db.get(`SELECT *
-        FROM Match
-        WHERE  gameStatus = 'FINISHED' and 
-        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)
-        ORDER BY CreatedAt DESC
-        LIMIT 1;
-        `, [id, id, id, id]);
-    }
+
     async updateMatch(m) {
         await this.db.run(`
             UPDATE Match SET
@@ -282,10 +241,6 @@ export class SQLiteDB {
         FROM Match
         WHERE  gameStatus = 'PLAYING' and 
         (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [id,id,id,id]);
-    }
-
-    async deleteMatch(id) {
-        await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
     }
 
     async UserCountWins_ayoub(id) {

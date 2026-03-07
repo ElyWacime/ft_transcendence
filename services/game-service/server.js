@@ -6,7 +6,7 @@ import cors from "@fastify/cors";
 import * as fs from "fs";
 import https from "https";
 import { randomUUID } from "crypto"; // used to generate unique tournament ids for in-memory rooms; survives only while the process is alive
-import { Users, Match, SQLiteDB, GameState } from "./DBController.js";
+import { Match, SQLiteDB, GameState } from "./DBController.js";
 
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
   https: {
@@ -370,8 +370,8 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     g.count_players = 2;
     g.mode = 2;
     g.gameStatus = "PLAYING";
-    g.player1Name = await route(g.P1_Id);
-    g.player2Name = await route(g.P2_Id);
+    g.player1Name = await getUserName(g.P1_Id);
+    g.player2Name = await getUserName(g.P2_Id);
 
     matches.set(g.id, g);
 
@@ -491,7 +491,7 @@ const updateTournamentAfterMatch = async (gameState) => {
 
   const semMatch = semifinals.find((m) => m.matchId === gameState.id);
   if (semMatch) {
-    let wname = await route(Winner_Id);
+    let wname = await getUserName(Winner_Id);
     semMatch.winner = winnerParticipant || { id: Winner_Id, name: wname || "Winner" };
     // eliminate the losing participant and keep the bracket locked
     const p1Id = semMatch.player1?.id;
@@ -522,7 +522,7 @@ const updateTournamentAfterMatch = async (gameState) => {
       }
     }
   } else if (finalMatch && finalMatch.matchId === gameState.id) {
-    let wwname = await route(Winner_Id);
+    let wwname = await getUserName(Winner_Id);
     finalMatch.winner = winnerParticipant || { id: Winner_Id, name: wwname|| "Winner" };
     // eliminate the finalist who lost; keep tournament locked
     const p1Id = finalMatch.player1?.id;
@@ -582,7 +582,7 @@ const handelRoomQuiiting = async(id) => {
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
 
-    let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+    let [name1,name2,name3,name4] = await Promise.all([getUserName(m.P1_Id),getUserName(m.P2_Id),getUserName(m.P3_Id),getUserName(m.P4_Id)]);
     ngame.player1Name = name1;
     ngame.player2Name = name2;
     ngame.player3Name = name3;
@@ -644,7 +644,7 @@ const handelRegister = async(request,id) => {
     ngame.P2_Id = m.P2_Id;
     ngame.P3_Id = m.P3_Id;
     ngame.P4_Id = m.P4_Id;
-    let [name1,name2,name3,name4] = await Promise.all([route(m.P1_Id),route(m.P2_Id),route(m.P3_Id),route(m.P4_Id)]);
+    let [name1,name2,name3,name4] = await Promise.all([getUserName(m.P1_Id),getUserName(m.P2_Id),getUserName(m.P3_Id),getUserName(m.P4_Id)]);
     ngame.player1Name = name1;
     ngame.player2Name = name2;
     ngame.player3Name = name3;
@@ -746,7 +746,7 @@ const interval = setInterval(async () => {
   }
 }, 1000 / TICK_RATE);
 
-const route = async (id) => {
+const getUserName = async (id) => {
   try {
     if(!id)
       return null;
@@ -757,11 +757,9 @@ const route = async (id) => {
         'Content-Type': 'application/json',
       },
     };
-    
     if (httpsAgent) {
       fetchOptions.agent = httpsAgent;
     }
-    
     const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
     if (!response.ok) {
       console.error(`Auth service returned status ${response.status}`);
@@ -786,15 +784,16 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           let decoded;
           try {
             decoded = req.jwt.verify(token);
+            if(!decoded)
+              connection.send(JSON.stringify({ error: "Bad Token" }));
           } catch (jwtError) {
-            console.error("JWT verification failed:", jwtError.message);
             connection.send(JSON.stringify({ error: "JWT verification failed" }));
             return;
           }
           const id = decoded.id;
           await handelDup(connection,id);
           clients.set(id, connection);
-          const name = await route(id);
+          const name = await getUserName(id);
           if (request.type == "REGISTER") 
             await handelRegister(request,id);
           else if (request.type == "MOVE") 
@@ -856,25 +855,13 @@ fastify.post('/invite', async (request, reply) => {
     if (!token)
       return reply.code(403).send({ message: 'Not Log in' });
     const decoded = request.jwt.verify(token);
+    if(!decoded)
+      return reply.code(405).send({ message: "Coudnt Decode Token" });
     let P1 = request.body.P1;
     let P2 = request.body.P2;
-    let [name1, name2, m1, m2]= await Promise.all([ route(P1), route(P2), dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
+    let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
     if (!(m1 || m2))
     {
-      let u = new Users();
-      u.id = P1; 
-      u.User_name = name1;
-      u.email = P1; 
-      await dbcnx.createUsers(u);
-      clients_info.set(P1,name1);
-
-      u = new Users();
-      u.id = P2; 
-      u.User_name = name2;
-      u.email = P2; 
-      await dbcnx.createUsers(u);
-      clients_info.set(P2,name2);
-
       let m = new Match();
       m.P1_Id = P1;
       m.P2_Id = P2;
@@ -888,35 +875,6 @@ fastify.post('/invite', async (request, reply) => {
   }
 });
 
-// fastify.post('/tournament', async (request, reply) => {
-//   try 
-//   {
-//     let token = request.body.token;
-//     if (!token)
-//       return reply.code(403).send({ message: 'Not Log in' });
-//     const decoded = request.jwt.verify(token);
-//     let P1 = request.body.P1;
-//     let P2 = request.body.P2;
-//     let tournement = request.body.tournement;
-//     let [ m1, m2]= await Promise.all([ dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
-//     let m = null;
-//     if (!(m1 || m2))
-//     {
-//       m = new Match();
-//       m.P1_Id = P1;
-//       m.P2_Id = P2;
-//       m.T_Id = tournement;
-//       m.count_players = 2;
-//       await  dbcnx.createVIPMatch(m);
-//       return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
-//     }
-//     return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
-//   } 
-//   catch (e) 
-//   {
-//     return reply.code(404).send({ message: e });
-//   }
-// });
 
 fastify.post('/check', async (request, reply) => {
   try {
@@ -924,6 +882,8 @@ fastify.post('/check', async (request, reply) => {
     if (!token)
       return reply.code(403).send({ message: 'Not Log in' });
     const decoded = request.jwt.verify(token);
+    if(!decoded)
+      return reply.code(405).send({ message: "Coudnt Decode Token" });
     const id = decoded.id;
     let m = await dbcnx.getAvaiable(id);
   
@@ -943,6 +903,8 @@ fastify.post('/endmatch', async (request, reply) => {
     if (!token)
       return reply.code(403).send({ message: 'Not Log in' });
     const decoded = request.jwt.verify(token);
+    if(!decoded)
+      return reply.code(405).send({ message: "Coudnt Decode Token" });
     const id = decoded.id;
     let m = await dbcnx.getcurrentmatch(id);
     if (m)
@@ -966,15 +928,21 @@ fastify.post('/endmatch', async (request, reply) => {
 
 fastify.post('/allmatch', async (request, reply) => {
   try {
+    let token = request.body.token;
+    if (!token)
+      return reply.code(403).send({ message: 'Not Log in' });
+    const decoded = request.jwt.verify(token);
+    if(!decoded)
+      return reply.code(405).send({ message: "Coudnt Decode Token" });
     let matches = await dbcnx.getPlayerMatches(request.body.id);
     if (matches) {
       matches = await Promise.all(matches.map(async (m) => {
         const [P1, P2, P3, P4, Winner] = await Promise.all([
-          route(m.P1_Id),
-          route(m.P2_Id),
-          route(m.P3_Id),
-          route(m.P4_Id),
-          route(m.Winner_Id),
+          getUserName(m.P1_Id),
+          getUserName(m.P2_Id),
+          getUserName(m.P3_Id),
+          getUserName(m.P4_Id),
+          getUserName(m.Winner_Id),
         ]);
         return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
       }));
