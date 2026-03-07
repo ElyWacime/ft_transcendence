@@ -81,11 +81,13 @@ const Dashboard_ayoub = () => {
       }
 
       try {
+        console.log("Fetched dashboard data:", userIdentifier);
         const data = await playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier);
-        
+        console.log("Received dashboard data:", data);
         setDashboardData(data);
         setAvatarKey(Date.now());
-      } catch (err: any) {
+      }
+      catch (err: any) {
         console.error("Failed to fetch dashboard:", err);
         console.error("Error details:", err.message);
         if (err.message.includes("Not Found") || err.message.includes("404")) {

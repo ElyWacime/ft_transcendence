@@ -14,10 +14,16 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         return reply.code(401).send({ message: "Couldn't decode token" });
 
       const { identifier } = request.params;
-      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'https://auth-service:8000';
-      const searchUrl = `${authServiceUrl}/api/auth/search-this-name`;
-      
-      const authResponse = await fetch(searchUrl, {
+
+      if (!identifier) {
+        return reply.code(400).send({ error: 'Missing identifier.' });
+      }
+
+      const authServiceBaseUrl = process.env.AUTH_SERVICE_URL.replace(/\/+$/, '');
+      console.log('Dashboard request for identifier:', identifier);
+      let userId = identifier;
+
+      const searchResponse = await fetch(`${authServiceBaseUrl}/search-this-name`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,16 +32,29 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         body: JSON.stringify({ name: identifier })
       });
 
+      if (searchResponse.ok) {
+        const searchResult = await searchResponse.json();
+        userId = searchResult.user_id;
+      }
+
+      // Fetch full user info using resolved user ID
+      const authResponse = await fetch(`${authServiceBaseUrl}/user-info/${encodeURIComponent(userId)}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
       if (!authResponse.ok) {
         return reply.code(404).send({ error: 'User not found.' });
       }
       const authUser = await authResponse.json();
-      const userId = authUser.id;
+
       const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
-        Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [userId, userId, userId, userId]);
-      const winsCount = await dbcnx.UserCountWins_ayoub(userId);
-      const tournParticipation = await dbcnx.UserCountTournParticipation_ayoub(userId);
-      const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(userId);
+        Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [authUser.id, authUser.id, authUser.id, authUser.id]);
+      const winsCount = await dbcnx.UserCountWins_ayoub(authUser.id);
+      const tournParticipation = await dbcnx.UserCountTournParticipation_ayoub(authUser.id);
+      const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(authUser.id);
       const totalMatches = matchesCount?.Played || 0;
       const totalWins = winsCount?.Winned || 0;
       const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
@@ -43,9 +62,9 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
         user: {
           id: authUser.id,
           email: authUser.email,
-          User_name: authUser.User_name,
+          User_name: authUser.name,
           avatar: authUser.avatar,
-          isOnline: authUser.isOnline,
+          isOnline: authUser.loggedIn,
           Auto_Match: authUser.Auto_Match,
           CreatedAt: authUser.CreatedAt
         },

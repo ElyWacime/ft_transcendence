@@ -223,7 +223,7 @@ const ProfileSettings = () => {
                       <p className="profile-result-email">{searchResult.user.email}</p>
                     </div>
                     <div className="profile-result-actions">
-                      <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user.User_name}`, {state : {id : searchResult.user.id}})}}>
+                      <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user.User_name}`)}}>
                         View dashboard
                       </button>
                       {String(getUserInfoFromToken()?.id) !== String(searchResult.user.id) && (
