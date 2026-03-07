@@ -46,22 +46,13 @@ const MAX_Score = 5;
 await dbcnx.connect();
 
 
-const sendtoplayer = async (id, data) => {
-  console.log("******* sendtoplayer ************");
-  console.log("Clients count :", clients.size);
+const sendtoplayer = async (id, data) => 
+{
   if (id) {
     let socket = (clients.get(id));
-    if (socket) {
-      if (socket.readyState === 1) {
-        socket.send(data);
-        console.log("Sent data to player:", id, "readyState:", socket.readyState);
-      } else {
-        console.log("Cannot send to player:", id, "readyState:", socket.readyState, "(expected 1)");
-      }
-    } else {
-      console.log("Socket not found for player:", id);
+    if (socket && socket.readyState === 1)
+      socket.send(data);
     }
-  }
 }
 
 // ---
