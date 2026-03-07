@@ -35,8 +35,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Silent refresh: Restore session on app load/refresh
-  // Refresh token is in httpOnly cookie, so we just call /refresh
   useEffect(() => {
     const restoreSession = async () => {
       try {

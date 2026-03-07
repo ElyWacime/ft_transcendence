@@ -234,3 +234,74 @@ VITE_API_URL=https://your-domain.com
 3. **Logout** - Test logout clears cookies and redirects properly
 4. **GitHub OAuth** - Test social login flow
 5. **Other Components** - Check ProfileSettings, Dashboard, ChangePassword pages
+
+---
+
+## Follow-up Cleanup Update - March 7, 2026 (Later Session)
+
+### Objective
+Audit the full codebase for remaining old auth flow usage (`localStorage` tokens) and migrate everything to the new secure flow:
+- Access token in memory (`AuthContext`)
+- Refresh token in `httpOnly` cookie
+
+### Frontend Cleanup Completed ✅
+
+#### Removed old localStorage token reads/writes from active code
+
+**Updated files:**
+- `frontend/src/pages/Chat.tsx`
+- `frontend/src/pages/Home.tsx`
+- `frontend/src/pages/MatchHistory.tsx`
+- `frontend/src/pages/TournamentOnline.tsx`
+- `frontend/src/pages/MatchMacking.tsx`
+- `frontend/src/pages/GameOnline.tsx`
+- `frontend/src/pages/Game.tsx`
+- `frontend/src/pages/GameAI.tsx`
+- `frontend/src/components/PongCanvasOnline.tsx`
+- `frontend/src/context/WebSocketContext.tsx`
+- `frontend/src/pages/Dashboard_ayoub.tsx`
+- `frontend/src/pages/ProfileSettings_ayoub.tsx`
+- `frontend/src/pages/change-picture.tsx`
+- `frontend/src/pages/Change_email_page.tsx`
+
+#### AuthContext enhanced
+- `frontend/src/context/AuthContext.tsx`
+   - Added `updateUser()` helper to update in-memory user data (e.g., after email update)
+
+#### Old backup files neutralized
+Legacy `.old` files were converted to empty modules to avoid accidental usage of old flow:
+- `frontend/src/context/AuthContext.old.tsx`
+- `frontend/src/lib/tokenRefresh.old.ts`
+- `frontend/src/pages/Login.old.tsx`
+
+### Backend Security Fix Completed ✅
+
+#### GitHub OAuth refresh token handling fixed
+- `services/auth-service/src/modules/user/oauth.route.ts`
+
+**Before:** OAuth callback included `refreshToken` in URL query params (insecure / old flow)
+
+**After:**
+- Sets `refresh_token` as `httpOnly` cookie (`secure`, `sameSite=lax`, `maxAge=7d`)
+- Redirect URL now contains only:
+   - access token
+   - user email
+   - user name
+   - user id
+
+### Validation Result
+
+Workspace scan confirms:
+- No active frontend code still using localStorage for auth tokens
+- Remaining `localStorage` mentions are documentation/comments only
+
+### Current Status
+
+✅ Migration cleanup complete for old token storage pattern
+
+### Recommended Next Tests
+
+1. Full login + page refresh session restore
+2. Token auto-refresh after access token expiry
+3. Logout flow and cookie clearing
+4. GitHub OAuth flow end-to-end after callback cookie fix
