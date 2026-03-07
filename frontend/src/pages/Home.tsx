@@ -25,19 +25,23 @@ const Home = () => {
   });
 
   const checkhandel = async (mode: number) => {
-    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/check`, {
+    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
-      credentials: "include"
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include",
+      body: JSON.stringify({ mode }),
     });
   };
 
   const endmatchhandel = async () => {
-    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/endmatch`, {
+    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/endmatch`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: localStorage.getItem("token") }),
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
       credentials: "include"
     });
   };
@@ -52,14 +56,6 @@ const Home = () => {
       page: "/loading?mode=2",
     },
     {
-      // entry point into the new websocket-backed online tournament lobby
-      icon: Trophy,
-      title: "Online Tournament",
-      type:"page",
-      description: "Join live brackets with other players",
-      page: "/tournament",
-    },
-    {
       icon: Gamepad2,
       title: "2 vs 2 Online",
       type:"onlinegame",
@@ -67,14 +63,6 @@ const Home = () => {
       description: "Team up and play against another team",
       page: "/loading?mode=4",
     },
-    {
-      icon: Trophy,
-      title: "Local Tournament",
-      type:"page",
-      description: "4-player offline bracket on one device",
-      page: "/local-tournament",
-    },
-
     {
       icon: Users,
       title: "1 vs 1",
@@ -135,11 +123,11 @@ const Home = () => {
             Compete, dominate, and become the Pong champion!
           </p>
           <button
-            onClick={() => navigate("/local-tournament")}
+            onClick={() => navigate("/online-tournament")}
             className="hero-button animate-pulse-glow"
           >
             <Trophy className="button-icon" />
-            Start Local Tournament
+            Start Tournament
           </button>
         </div>
       </section>

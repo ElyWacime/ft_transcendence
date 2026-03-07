@@ -11,41 +11,6 @@ const DB_FOLDER = path.resolve(__dirname, "./db");
 const DB_PATH = path.join(DB_FOLDER, "database.sqlite");
 const SCHEMA_FILE = path.join(__dirname, "game.sql");
 
-export class Users {
-    constructor() {
-        this.id = null;
-        this.email = null;
-        this.User_name = null;
-        this.User_password = null;
-        this.loggedIn = true;
-        this.Auto_Match = true;
-        this.isOnline = true;
-        this.avatar = 'https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg';
-        this.CreatedAt = new Date();
-    }
-}
-
-export class Tournament {
-    constructor() {
-        this.id = 0;
-        this.Label = "";
-        this.CreatedAt = new Date();
-        this.count_players = 0;
-        this.max_players = 8;
-        this.result = "WIN";
-        this.Winner_Id = null;
-    }
-}
-
-export class Participate_Tournament {
-    constructor() {
-        this.id = 0;
-        this.P_Id = 0;
-        this.T_Id = 0;
-        this.CreatedAt = new Date();
-    }
-}
-
 export class GameState {
     constructor() {
         this.id = 0;
@@ -149,27 +114,7 @@ export class SQLiteDB {
             throw err;
         }
     }
-    async createTournament(t) {
-        let now = new Date();
-        let nowf = now.toLocaleString("fr-FR");
-        const result = await this.db.run(`INSERT INTO Tournament (Label, CreatedAt, result, Winner_Id)
-             VALUES (?, ?, ?, NULL);`, [t.Label, nowf, t.result]);
-        return result.lastID;
-    }
-    async getTournaments() {
-        return this.db.all(`SELECT * FROM Tournament;`);
-    }
-    async getTournamentById(id) {
-        return this.db.get(`SELECT * FROM Tournament WHERE id = ?;`, [id]);
-    }
-    async updateTournament(id, t) {
-        await this.db.run(`UPDATE Tournament 
-             SET Label=?, count_players=?, result=?, Winner_Id=? 
-             WHERE id = ?;`, [t.Label, t.count_players, t.result, t.Winner_Id, id]);
-    }
-    async deleteTournament(id) {
-        await this.db.run(`DELETE FROM Tournament WHERE id = ?;`, [id]);
-    }
+
     async createVIPMatch(m) {
         const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players,T_Id) VALUES (?, ?,?,?);`, [m.P1_Id, m.P2_Id,2,m.T_Id]);
         return result.lastID;
@@ -232,40 +177,7 @@ export class SQLiteDB {
         await this.db.get(`DELETE FROM Match WHERE count_players <= 0;`);
         return this.db.get(`select * from Match where id  = ?;`, [x]);
     }
-
-    async deleteOngoingMatchByPlayerID(id) {
-        await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P1_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-        await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P2_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-        await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P3_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-        return await this.db.get(`UPDATE
-        Match SET  gameStatus = 'FINISHED'
-        WHERE (P4_Id = ?)
-        AND 
-        gameStatus != 'FINISHED';`, [id]);
-    }
-
-
-    async getCurrentMatchByPlayerID(id) {
-        return this.db.get(`SELECT *
-        FROM Match
-        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) and 
-        gameStatus != 'FINISHED'
-        ORDER BY CreatedAt DESC
-        LIMIT 1;
-        `, [id, id, id, id]);
-    }
+    
     async getOngoingMatch(id) {
         return this.db.get(`SELECT *
         FROM Match
@@ -284,15 +196,7 @@ export class SQLiteDB {
         LIMIT 1;
         `, [id, id, id, id]);
     }
-    async getFinishedMatchByPlayerID(id) {
-        return this.db.get(`SELECT *
-        FROM Match
-        WHERE  gameStatus = 'FINISHED' and 
-        (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)
-        ORDER BY CreatedAt DESC
-        LIMIT 1;
-        `, [id, id, id, id]);
-    }
+
     async updateMatch(m) {
         await this.db.run(`
             UPDATE Match SET
@@ -339,113 +243,6 @@ export class SQLiteDB {
         (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [id,id,id,id]);
     }
 
-    async deleteMatch(id) {
-        await this.db.run(`DELETE FROM Match WHERE id = ?`, [id]);
-    }
-
-    async createParticipate(p) {
-        const result = await this.db.run(`INSERT INTO Participate_Tournament (P_Id, T_Id)
-             VALUES (?, ?)`, p.P_Id, p.T_Id);
-        return result.lastID;
-    }
-    async getParticipations() {
-        return this.db.all(`SELECT * FROM Participate_Tournament`);
-    }
-    async getParticipationById(id) {
-        return this.db.get(`SELECT * FROM Participate_Tournament WHERE id = ?`, [id]);
-    }
-    async updateParticipation(id, p) {
-        await this.db.run(`UPDATE Participate_Tournament SET 
-                P_Id=?, T_Id=?
-             WHERE id = ?`, p.P_Id, p.T_Id, id);
-    }
-    async deleteParticipation(id) {
-        await this.db.run(`DELETE FROM Participate_Tournament WHERE id = ?`, [id]);
-    }
-
-    async updateUsers(u) {
-        await this.db.run(`UPDATE Users 
-             SET 
-             email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
-             WHERE id = ?`, [u.email, u.User_name, u.User_password, u.loggedIn, u.Auto_Match, u.isOnline, u.avatar, u.id]);
-    }
-    
-    async getUserById(id) {
-        return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
-    }
-    async insertUser(u) {
-        return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
-        VALUES (?,?, ?, ?, ?, ?)`, [u.id, u.email, u.User_name, u.User_password, 1 , u.avatar]);
-    }
-    async createUsers(t) {
-        let a = await this.db.get(`SELECT * FROM Users WHERE  id = ? `, [t.id]);
-        if (a) {
-            return await this.db.run(`UPDATE Users 
-            SET 
-            email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
-            WHERE id = ?`, [t.email, t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.id]);
-        } else {
-            try {
-                return await this.db.run(`INSERT INTO Users (id, email, User_name,User_password, Auto_Match,avatar)
-                VALUES (?,?, ?, ?, ?, ?)`, [t.id, t.email, t.User_name, t.User_password, 1 , t.avatar]);
-            } catch (err) {
-                // If insert fails due to unique constraint on email, update instead
-                if (err.code === 'SQLITE_CONSTRAINT') {
-                    console.log("User with email already exists, updating:", t.email);
-                    return await this.db.run(`UPDATE Users 
-                    SET 
-                    User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
-                    WHERE email = ?`, [t.User_name, t.User_password, t.loggedIn, t.Auto_Match, t.isOnline, t.avatar, t.email]);
-                } else {
-                    throw err;
-                }
-            }
-        }
-    }
-
-    async getUserss() {
-        return this.db.all(`SELECT * FROM Users`);
-    }
-
-    async getUser(id) {
-        return this.db.get(`SELECT * FROM Users WHERE id = ?`, [id]);
-    }
-    async getUserByEmail(email) {
-        return this.db.get(`SELECT * FROM Users WHERE email =  ?`, [email]);
-    }
-    async getUserByName(username) {
-        return this.db.get(`SELECT * FROM Users WHERE User_name = ?`, [username]);
-    }
-    async updateUsers(id, u) {
-        await this.db.run(`UPDATE Users 
-             SET 
-             email = ? , User_name = ?,User_password = ?, loggedIn = ?,Auto_Match = ?,isOnline = ?,avatar = ? 
-             WHERE id = ?`, [u.email, u.User_name, u.User_password, u.loggedIn, u.Auto_Match, u.isOnline, u.avatar, u.id]);
-    }
-    async deleteUsers(id) {
-        await this.db.run(`DELETE FROM Users WHERE id = ?`, [id]);
-    }
-
-
-    async UserCountMatches(id) {
-        await this.db.run(`SELECT count(*) as Played  FROM  Match 
-        Where (P1_Id = ?  OR P2_Id = ?  OR P3_Id = ?  OR P4_Id = ?);`, [id,id,id,id]);
-    }
-
-    async UserCountWins(id) {
-        await this.db.run(`SELECT count(*) as Winned  FROM  Match 
-        Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
-    }
-
-    async UserCountTournWins(id) {
-        await this.db.run(`SELECT count(*) as Winned  FROM  Match 
-        Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
-    }
-
-    async UserCountTournParticipation(id) {
-        await this.db.run(`SELECT count(*) as Participate  FROM  Participate_Tournament   Where P_Id = ?;`,[id]);
-    }
-
     async UserCountWins_ayoub(id) {
         return await this.db.get(`SELECT count(*) as Winned  FROM  Match 
         Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
@@ -457,7 +254,7 @@ export class SQLiteDB {
     }
 
     async UserCountTournParticipation_ayoub(id) {
-        return await this.db.get(`SELECT count(*) as Participate  FROM  Participate_Tournament   Where P_Id = ?;`,[id]);
+        return 0;
     }
     
     async UserCountMatches_ayoub(id) {

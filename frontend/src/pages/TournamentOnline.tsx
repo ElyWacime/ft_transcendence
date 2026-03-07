@@ -64,14 +64,30 @@ export default function TournamentOnlinePage() {
     ? tournaments.find((tour) => tour.participants?.some((p) => p.id === currentUser.id))?.id || null
     : null;
 
+  // helper to send authed websocket actions to game-service
+  // all tournament mutations (create/join/ready) flow through the existing WS channel used by gameplay
+  const sendAction = (payload: Record<string, unknown>) => {
+    const socket = wsRef?.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      toast.error("Socket not connected");
+      return false;
+    }
+    socket.send(JSON.stringify({ token: localStorage.getItem("token"), ...payload }));
+    return true;
+  };
+
+  // request a fresh tournaments snapshot from the server; used after we trigger a mutation
+  const requestTournaments = () => {
+    sendAction({ type: "REQUEST_TOURNAMENTS" });
+  };
+
   // initial load: fetch tournament list from game-service REST endpoint
   // REST gives us a snapshot even if websocket connects a tick later or user refreshes mid-flow
   useEffect(() => {
-
-   
+    requestTournaments();
     const load = async () => {
       try {
-        const res = await fetch(`${API_URL}/tournaments-online`, { credentials: "include" });
+        const res = await fetch(`${API_URL}/api/game/tournaments-online`, { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           // console.log("data>>>>>", data);
@@ -114,23 +130,6 @@ export default function TournamentOnlinePage() {
     ws.addEventListener("message", handleMessage);
     return () => ws.removeEventListener("message", handleMessage);
   }, [ws, isReady, currentUser, navigate]);
-
-  // helper to send authed websocket actions to game-service
-  // all tournament mutations (create/join/ready) flow through the existing WS channel used by gameplay
-  const sendAction = (payload: Record<string, unknown>) => {
-    const socket = wsRef?.current;
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-      toast.error("Socket not connected");
-      return false;
-    }
-    socket.send(JSON.stringify({ token: localStorage.getItem("token"), ...payload }));
-    return true;
-  };
-
-  // request a fresh tournaments snapshot from the server; used after we trigger a mutation
-  const requestTournaments = () => {
-    sendAction({ type: "REQUEST_TOURNAMENTS" });
-  };
 
   // create a new online tournament (server adds creator as first participant)
   // if socket is down we bail fast to avoid confusing UX

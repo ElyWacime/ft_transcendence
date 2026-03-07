@@ -103,7 +103,7 @@ const router = createBrowserRouter(
         { path: "game-online", element: <GameOnline /> },
         // { path: "local-tournament", element: <LocalTournament /> },
         {
-          path: "tournament",
+          path: "online-tournament",
           element: (
             <ProtectedRoute>
               <TournamentOnline />
