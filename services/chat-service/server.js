@@ -48,10 +48,25 @@ const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
 async function desToken(request)
 {
    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+   
+   // Get token from Authorization header (Bearer token) or fallback to cookie for backward compatibility
+   let token = null;
+   const authHeader = request.headers.authorization;
+   
+   if (authHeader && authHeader.startsWith('Bearer ')) {
+     token = authHeader.substring(7); // Remove 'Bearer ' prefix
+   } else if (request.cookies.access_token) {
+     token = request.cookies.access_token; // Fallback for old implementation
+   }
+   
+   if (!token) {
+     return { status: 401, json: async () => ({ error: 'No token provided' }) };
+   }
+   
    const fetchOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: request.cookies.access_token }),
+      body: JSON.stringify({ token }),
    };
    
    if (httpsAgent) {

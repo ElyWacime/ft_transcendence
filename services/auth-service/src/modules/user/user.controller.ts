@@ -70,8 +70,10 @@ export async function login(
     name: user.name,
   };
   
+  // Short-lived access token (15 minutes)
   const accessToken = req.jwt.sign(payload, { expiresIn: "15m" });
   
+  // Long-lived refresh token (7 days)
   const refreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
 
   await prisma.user.update({
@@ -79,23 +81,22 @@ export async function login(
     data: { loggedIn: true, refreshToken },
   });
 
-  reply.setCookie("access_token", accessToken, {
-    path: "/",
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
+  const isProduction = process.env.NODE_ENV === "production";
+  const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
   
+  // Store refresh token in httpOnly cookie (XSS protection)
   reply.setCookie("refresh_token", refreshToken, {
     path: "/",
     httpOnly: true,
-    secure: false,
+    secure: secureCookie,
     sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
   });
   
+  // Return access token in response body (to be stored in memory on frontend)
+  // Also return user info for immediate use
   return { 
-    accessToken, 
-    refreshToken,
+    accessToken,
     user: {
       id: user.id,
       email: user.email,
@@ -188,25 +189,21 @@ export async function update_email(
       data: { refreshToken },
     });
   
-    reply.setCookie("access_token", accessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    const isProduction = process.env.NODE_ENV === "production";
+    const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
 
     reply.setCookie("refresh_token", refreshToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: secureCookie,
       sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
     });
   
     return {
       success: true,
       message: "Email updated successfully",
       accessToken,
-      refreshToken,
       newEmail: updatedUser.email,
     };
      
@@ -353,25 +350,21 @@ export async function update_username(
       data: { refreshToken },
     });
 
-    reply.setCookie("access_token", accessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    const isProduction = process.env.NODE_ENV === "production";
+    const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
 
     reply.setCookie("refresh_token", refreshToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: secureCookie,
       sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     return reply.send({
       success: true,
       message: "Username updated successfully",
       accessToken,
-      refreshToken,
       newUsername: updatedUser.name,
     });
   } catch (err) {
@@ -402,8 +395,7 @@ export async function logout(
     where: { email },
     data: { loggedIn: false, refreshToken: null },
   });
-  reply.clearCookie("access_token");
-  reply.clearCookie("refresh_token");
+  // Clear the refresh token cookie
   return reply.send({ message: "Logout successful" });
 }
 
@@ -411,14 +403,8 @@ export async function refreshToken(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  let refreshToken = req.cookies.refresh_token;
-  
-  if (!refreshToken) {
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      refreshToken = authHeader.substring(7);
-    }
-  }
+  // Refresh token should ONLY come from httpOnly cookie (security best practice)
+  const refreshToken = req.cookies.refresh_token;
 
   if (!refreshToken) {
     return reply.code(401).send({ message: "Refresh token required" });
@@ -435,7 +421,9 @@ export async function refreshToken(
       where: { id: decoded.id },
     });
 
+    // Validate refresh token against database (prevents token reuse)
     if (!user || user.refreshToken !== refreshToken) {
+      reply.clearCookie("refresh_token");
       return reply.code(401).send({ message: "Invalid refresh token" });
     }
 
@@ -445,33 +433,43 @@ export async function refreshToken(
       name: user.name,
     };
 
+    // Generate new access token (short-lived)
     const newAccessToken = req.jwt.sign(payload, { expiresIn: "15m" });
     
+    // REFRESH TOKEN ROTATION: Generate new refresh token
+    // This invalidates the old one, improving security
     await new Promise(resolve => setTimeout(resolve, 1));
-    
     const newRefreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
 
+    // Store new refresh token in database
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshToken: newRefreshToken },
     });
 
-    reply.setCookie("access_token", newAccessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    const isProduction = process.env.NODE_ENV === "production";
+    const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
 
+    // Update refresh token cookie with new rotated token
     reply.setCookie("refresh_token", newRefreshToken, {
       path: "/",
       httpOnly: true,
-      secure: false,
+      secure: secureCookie,
       sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+    // Return only access token in body (stored in memory on frontend)
+    return { 
+      accessToken: newAccessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      }
+    };
   } catch (err) {
+    reply.clearCookie("refresh_token");
     return reply.code(401).send({ message: "Invalid or expired refresh token" });
   }
 }

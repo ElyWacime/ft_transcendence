@@ -33,7 +33,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     const [blockedConversations, setBlockedConversations] = useState<any>({})
 
 
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, accessToken, updateAccessToken } = useAuth();
 
 
   useEffect(() => {
@@ -46,7 +46,12 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     setSocket(chatSocket);
     chatSocket.on("connect", async () => {
         try {
-          const res = await fetchWithAuth(`${SERVER_URL}/api/chat/getCookieValue`, { method: 'GET', credentials: 'include' });
+          const res = await fetchWithAuth(
+            `${SERVER_URL}/api/chat/getCookieValue`, 
+            { method: 'GET', credentials: 'include' },
+            accessToken,
+            updateAccessToken
+          );
           const usercookie = await res.json();
           const userId = usercookie.user_id;
           setCurrentUser({ id: userId });

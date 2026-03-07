@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useChatSocket } from "../context/ChatSocketContext"
 import "../components/chat/App.css"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
+import { useAuth } from "@/context/AuthContext"
 import { fetchWithAuth } from "@/lib/tokenRefresh"
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
@@ -25,6 +26,7 @@ let inviteHandle = async (P1, P2) =>
 
 export default function Chat() {
   const { socket, isConnected, pendingInvitations, setPendingInvitations, invitePrompt, setInvitePrompt, currentUser, friendsList, setFriendsList, blockedConversations, setBlockedConversations } = useChatSocket()
+  const { accessToken, updateAccessToken } = useAuth()
   const [conversations, setConversations] = useState<any[]>([])
   const [messages, setMessages] = useState<any[]>([])
   const navigate = useNavigate()
@@ -66,7 +68,7 @@ export default function Chat() {
 
   const fetchConversations = async () => {
       try {
-        const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations`, { method: 'GET', credentials: 'include' })
+        const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations`, { method: 'GET', credentials: 'include' }, accessToken, updateAccessToken)
         const conversationsData = await res.json()
         setConversations(conversationsData)        
         for (const conversation of conversationsData) {
@@ -99,7 +101,7 @@ export default function Chat() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id, invitation_type: invitationType })
-    })
+    }, accessToken, updateAccessToken)
     const re = await response.json()
 
     setPendingInvitations((prev: any) => ({
@@ -127,7 +129,7 @@ export default function Chat() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id, invitation_type: invitationType })
-    })
+    }, accessToken, updateAccessToken)
     
     const re = await response.json()    
 
@@ -167,7 +169,7 @@ export default function Chat() {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: invitePrompt.fromUserId, invitation_type: invitationType })
-          })
+          }, accessToken, updateAccessToken)
     
           const res = await response.json()
 
@@ -184,7 +186,7 @@ export default function Chat() {
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: invitePrompt.fromUserId })
-              })
+              }, accessToken, updateAccessToken)
         
               if (response.ok) {
                 setFriendsList((prev: any) => ({
@@ -225,7 +227,7 @@ export default function Chat() {
       return
     }
     try {
-      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/${conversationId}/messages`, { method: 'GET', credentials: 'include' })
+      const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/${conversationId}/messages`, { method: 'GET', credentials: 'include' }, accessToken, updateAccessToken)
       const historyData = await res.json()
       setMessages(historyData)
     } catch (error) {
@@ -246,7 +248,7 @@ export default function Chat() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: other_user_id })
-      })
+      }, accessToken, updateAccessToken)
       const data = await res.json()
       
       if (res.ok) {
@@ -281,7 +283,7 @@ export default function Chat() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id, invitationType: invitationType })
-      })
+      }, accessToken, updateAccessToken)
 
       const data = await res.json()
 
