@@ -47,6 +47,8 @@ await dbcnx.connect();
 
 
 const sendtoplayer = async (id, data) => {
+  console.log("******* sendtoplayer ************");
+  console.log("Clients count :", clients.size);
   if (id) {
     let socket = (clients.get(id));
     if (socket) {
@@ -826,7 +828,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         }
       }
       else 
-        console.log("No token provided, proceeding without authentication");
+      {
+        console.log("No token provided, proceeding on Closing connection");
+        connection.close();
+      }
    }
    catch (e)
    {
@@ -842,7 +847,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         console.log("Server OnClosed Socket for ",id);
         break;
        } catch (e) {
-        return reply.code(404).send({ message: e });
+          console.error("Server OnClosed Socket error:", e);
        }
       }
     }
@@ -880,8 +885,6 @@ fastify.post('/invite', async (request, reply) => {
     return reply.code(405).send({ message: 'Error ' + e });
   }
 });
-
-
 
 fastify.post('/check', async (request, reply) => {
   try {
