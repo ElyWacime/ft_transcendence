@@ -16,6 +16,10 @@ export default defineConfig(({ mode }) => {
     watch: {
       usePolling: true,
     },
+    hmr: {
+      host: process.env.VITE_HMR_HOST, // <- LAN IP of your dev machine
+      protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws",
+    },
   };
 
   // Add HTTPS support when USE_HTTPS is true
@@ -42,3 +46,4 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
+
