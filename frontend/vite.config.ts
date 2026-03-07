@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => {
       usePolling: true,
     },
     hmr: {
-      host: process.env.VITE_HMR_HOST, // <- LAN IP of your dev machine
-      protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws",
-    },
+      host: process.env.VITE_HMR_HOST || process.env.DOMAIN,
+      protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws"
+    }
   };
 
   // Add HTTPS support when USE_HTTPS is true

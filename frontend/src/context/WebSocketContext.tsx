@@ -67,6 +67,18 @@ export const WebSocketProvider = ({ children }) => {
   );
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      const socket = wsRef.current;
+  
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: "PING" , token:localStorage.getItem("token")}));
+      }
+    }, 25000);
+  
+    return () => clearInterval(interval);
+  }, []);
+  
+  useEffect(() => {
     if (!isLoggedIn) {
       if (wsRef.current) {
         console.log("Closing WS because user logged out");
@@ -82,9 +94,6 @@ export const WebSocketProvider = ({ children }) => {
     const host = import.meta.env.VITE_DOMAIN || window.location.hostname;
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const socket = new WebSocket(`${protocol}://${host}/ws`);
-    // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // const host = import.meta.env.VITE_DOMAIN || window.location.host;
-    // const socket = new WebSocket(`${protocol}//${host}/ws`);
     wsRef.current = socket;
     setWs(socket);
 
@@ -92,6 +101,10 @@ export const WebSocketProvider = ({ children }) => {
     {
       setIsReady(true);
       console.log("WebSocket connected and ready");
+      socket.send(JSON.stringify({
+              token:localStorage.getItem("token"),
+              type: "PING",
+            }));
     };
     socket.onclose = () => {
       console.log("WebSocket disconnected");
