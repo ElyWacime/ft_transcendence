@@ -52,7 +52,7 @@ export const PongCanvasAI = ({
   enableAI = false,
   aiDifficulty = Difficulty.HARD,
   player2Name = enableAI ? "AI Opponent" : "Player 2",
-  player1Name = localStorage.getItem("email") || "You",
+  player1Name = "You",
   onGameEnd,
   maxScore = 5,
 }: PongCanvasProps) => {

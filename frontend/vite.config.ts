@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
     },
   };
 
-  // Add HTTPS support when USE_HTTPS is true
   if (process.env.VITE_HTTPS === "true") {
     try {
       serverConfig.https = {

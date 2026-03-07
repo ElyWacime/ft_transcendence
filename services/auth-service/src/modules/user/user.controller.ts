@@ -395,7 +395,6 @@ export async function logout(
     where: { email },
     data: { loggedIn: false, refreshToken: null },
   });
-  // Clear the refresh token cookie
   return reply.send({ message: "Logout successful" });
 }
 
@@ -403,7 +402,6 @@ export async function refreshToken(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  // Refresh token should ONLY come from httpOnly cookie (security best practice)
   const refreshToken = req.cookies.refresh_token;
 
   if (!refreshToken) {
@@ -421,7 +419,6 @@ export async function refreshToken(
       where: { id: decoded.id },
     });
 
-    // Validate refresh token against database (prevents token reuse)
     if (!user || user.refreshToken !== refreshToken) {
       reply.clearCookie("refresh_token");
       return reply.code(401).send({ message: "Invalid refresh token" });
@@ -433,15 +430,11 @@ export async function refreshToken(
       name: user.name,
     };
 
-    // Generate new access token (short-lived)
     const newAccessToken = req.jwt.sign(payload, { expiresIn: "15m" });
     
-    // REFRESH TOKEN ROTATION: Generate new refresh token
-    // This invalidates the old one, improving security
     await new Promise(resolve => setTimeout(resolve, 1));
     const newRefreshToken = req.jwt.sign(payload, { expiresIn: "7d" });
 
-    // Store new refresh token in database
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshToken: newRefreshToken },
@@ -450,7 +443,6 @@ export async function refreshToken(
     const isProduction = process.env.NODE_ENV === "production";
     const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
 
-    // Update refresh token cookie with new rotated token
     reply.setCookie("refresh_token", newRefreshToken, {
       path: "/",
       httpOnly: true,
@@ -459,7 +451,6 @@ export async function refreshToken(
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    // Return only access token in body (stored in memory on frontend)
     return { 
       accessToken: newAccessToken,
       user: {

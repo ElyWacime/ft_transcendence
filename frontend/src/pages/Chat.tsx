@@ -10,20 +10,6 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
 const SERVER_URL = API_URL
 const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`
 
-let inviteHandle = async (P1, P2) => 
-{
-  const res = await fetch(`${GAME_SERVICE_URL}/api/game/invite`, {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-      credentials: "include",
-      body: JSON.stringify({ P1 ,P2 }),
-  });
-  return res;
-}
-
 export default function Chat() {
   const { socket, isConnected, pendingInvitations, setPendingInvitations, invitePrompt, setInvitePrompt, currentUser, friendsList, setFriendsList, blockedConversations, setBlockedConversations } = useChatSocket()
   const { accessToken, updateAccessToken } = useAuth()
@@ -32,6 +18,20 @@ export default function Chat() {
   const navigate = useNavigate()
   const { id } = useParams<{ id?: string }>()
   const selectedId = id ? parseInt(id, 10) : undefined
+
+  const inviteHandle = async (P1, P2) => 
+  {
+    const res = await fetch(`${GAME_SERVICE_URL}/api/game/invite`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { "Authorization": `Bearer ${accessToken}` } : {})
+        },
+        credentials: "include",
+        body: JSON.stringify({ P1 ,P2 }),
+    });
+    return res;
+  }
 
   useEffect(() => {
     if (!socket) return
@@ -323,7 +323,7 @@ export default function Chat() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id })
-      })
+      }, accessToken, updateAccessToken)
       const data = await res.json()
       if (res.ok) {
           setFriendsList((prev: any) => ({
@@ -344,7 +344,7 @@ export default function Chat() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id })
-      })
+      }, accessToken, updateAccessToken)
       const data = await res.json()
       if (res.ok) {
         if (data.blocked === true) {

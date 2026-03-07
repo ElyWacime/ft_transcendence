@@ -8,27 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import "../css/dashboard.css";
 
-function getUserIdFromToken(): string | null {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    const decoded = JSON.parse(jsonPayload);
-    return decoded.id || null;
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return null;
-  }
-}
-
 interface DashboardData {
   user: {
     id: string;
@@ -54,7 +33,7 @@ const Dashboard_ayoub = () => {
   const state = location.state || "";
   const { id} = state;
   const { identifier } = useParams<{ identifier?: string }>();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user: authUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +51,7 @@ const Dashboard_ayoub = () => {
       let userIdentifier = identifier;
       
       if (!userIdentifier) {
-        userIdentifier = getUserIdFromToken();
+        userIdentifier = authUser?.id || undefined;
         if (!userIdentifier) {
           setError("Unable to get user ID. Please provide a username/ID in the URL or log in.");
           setLoading(false);
@@ -104,7 +83,7 @@ const Dashboard_ayoub = () => {
 
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const userIdentifier = identifier || getUserIdFromToken();
+      const userIdentifier = identifier || authUser?.id;
       if (userIdentifier && !loading) {
         playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier)
           .then(data => {
@@ -117,7 +96,7 @@ const Dashboard_ayoub = () => {
 
     window.addEventListener('avatarUpdated', handleAvatarUpdate);
     return () => window.removeEventListener('avatarUpdated', handleAvatarUpdate);
-  }, [identifier, loading]);
+  }, [identifier, loading, authUser?.id]);
 
   if (loading) {
     return (

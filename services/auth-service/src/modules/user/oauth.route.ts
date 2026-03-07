@@ -93,10 +93,22 @@ export async function oauthRoutes(app: FastifyInstance) {
       data: { refreshToken: jwtRefreshToken },
     });
 
+    const isProduction = process.env.NODE_ENV === "production";
+    const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
+
+    reply.setCookie("refresh_token", jwtRefreshToken, {
+      path: "/",
+      httpOnly: true,
+      secure: secureCookie,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
     const redirectUrl = new URL(`https://${process.env.DOMAIN}/login`);
     redirectUrl.searchParams.set("token", jwtAccessToken);
-    redirectUrl.searchParams.set("refreshToken", jwtRefreshToken);
-    redirectUrl.searchParams.set("email", email);
+    redirectUrl.searchParams.set("email", dbUser.email);
+    redirectUrl.searchParams.set("name", dbUser.name || "");
+    redirectUrl.searchParams.set("id", dbUser.id.toString());
     reply.redirect(redirectUrl.toString());
 
   });

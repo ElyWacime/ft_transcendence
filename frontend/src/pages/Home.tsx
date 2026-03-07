@@ -3,18 +3,12 @@ import { useEffect,useState,useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { decodeJWT } from "@/lib/jwt-utils";
+import { useAuth } from "@/context/AuthContext";
+import { fetchWithAuth } from "@/lib/tokenRefresh";
 const Home = () => {
 
   const navigate = useNavigate();
-  let  id =null;
-  let token = localStorage.getItem("token");
-
-  if (token)
-  {
-    const decoded = decodeJWT(token);
-    id = decoded.id;
-  }
+  const { accessToken, updateAccessToken } = useAuth();
   
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
@@ -25,25 +19,21 @@ const Home = () => {
   });
 
   const checkhandel = async (mode: number) => {
-    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
+    return await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
+        "Content-Type": "application/json"
       },
       credentials: "include",
       body: JSON.stringify({ mode }),
-    });
+    }, accessToken, updateAccessToken);
   };
 
   const endmatchhandel = async () => {
-    return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/endmatch`, {
+    return await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/endmatch`, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
       credentials: "include"
-    });
+    }, accessToken, updateAccessToken);
   };
 
   const features = [

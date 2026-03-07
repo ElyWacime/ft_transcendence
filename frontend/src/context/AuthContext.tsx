@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (token: string, user: User) => void;
   logout: () => Promise<void>;
   updateAccessToken: (token: string) => void;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   login: () => {},
   logout: async () => {},
   updateAccessToken: () => {},
+  updateUser: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -91,6 +93,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setAccessToken(token);
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    setUser((prev) => (prev ? { ...prev, ...userData } : prev));
+  };
+
   const isLoggedIn = !!accessToken && !!user;
 
   return (
@@ -103,6 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         logout,
         updateAccessToken,
+        updateUser,
       }}
     >
       {children}

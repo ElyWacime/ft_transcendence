@@ -4,9 +4,11 @@ import { Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useState ,useRef, useCallback} from "react";
 import { useWebSocket } from "@/context/WebSocketContext";
+import { useAuth } from "@/context/AuthContext";
 
 const MatchMacking = () => {
     const { ws, isReady } = useWebSocket();
+  const { accessToken } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
@@ -82,7 +84,7 @@ const MatchMacking = () => {
       if (!ws || !isReady || ws.readyState != WebSocket.OPEN) return;
 
       ws.send(JSON.stringify({
-            token:localStorage.getItem("token"),
+        token: accessToken,
             type: "REGISTER",
             mode,
         }));
@@ -90,14 +92,14 @@ const MatchMacking = () => {
         return () => {
             if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {
                 ws.send(JSON.stringify({
-                    token:localStorage.getItem("token"),
+                  token: accessToken,
                     type: "DELETE",
                     matchId: matchref.current 
                 }));
             }
             ws.removeEventListener("message", handleMessage);
         };
-    }, [ws, isReady]);
+    }, [ws, isReady, accessToken]);
 
     return (
         <>

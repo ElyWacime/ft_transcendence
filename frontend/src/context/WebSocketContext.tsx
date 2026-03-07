@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
-import { decodeJWT } from "@/lib/jwt-utils";
 import { useLocation } from 'react-router-dom';
 
 const WebSocketContext = createContext(null);
@@ -10,14 +9,14 @@ const WebSocketContext = createContext(null);
 
 
 export const WebSocketProvider = ({ children }) => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, accessToken, user } = useAuth();
 
   const wsRef = useRef<WebSocket | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const token = localStorage.getItem("token");
-  const id = token ? decodeJWT(token).id : null;
+  const token = accessToken;
+  const id = user?.id || null;
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
