@@ -13,8 +13,12 @@ let inviteHandle = async (P1, P2) =>
 {
   const res = await fetch(`${GAME_SERVICE_URL}/api/game/invite`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({token:localStorage.getItem("token") , P1 ,P2 }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include",
+      body: JSON.stringify({ P1 ,P2 }),
   });
   return res;
 }

@@ -27,17 +27,21 @@ const Home = () => {
   const checkhandel = async (mode: number) => {
     return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: localStorage.getItem("token"), mode }),
-      credentials: "include"
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include",
+      body: JSON.stringify({ mode }),
     });
   };
 
   const endmatchhandel = async () => {
     return await fetch(`https://${import.meta.env.VITE_DOMAIN}/api/game/endmatch`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: localStorage.getItem("token") }),
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
       credentials: "include"
     });
   };

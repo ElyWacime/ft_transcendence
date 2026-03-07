@@ -24,8 +24,11 @@ const MatchHistory = () => {
     const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
     let matchess =  await fetch(`${GAME_SERVICE_URL}/api/game/allmatch`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: localStorage.getItem("token") ,id:id}),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({ id:id}),
       credentials: "include"
     });
     const data = await matchess.json();  

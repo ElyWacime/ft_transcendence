@@ -851,12 +851,18 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
 fastify.post('/invite', async (request, reply) => {
   try {
-    let token = request.body.token;
-    if (!token)
-      return reply.code(403).send({ message: 'Not Log in' });
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
     const decoded = request.jwt.verify(token);
-    if(!decoded)
-      return reply.code(405).send({ message: "Coudnt Decode Token" });
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
     let P1 = request.body.P1;
     let P2 = request.body.P2;
     let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
@@ -876,14 +882,21 @@ fastify.post('/invite', async (request, reply) => {
 });
 
 
+
 fastify.post('/check', async (request, reply) => {
   try {
-    let token = request.body.token;
-    if (!token)
-      return reply.code(403).send({ message: 'Not Log in' });
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
     const decoded = request.jwt.verify(token);
-    if(!decoded)
-      return reply.code(405).send({ message: "Coudnt Decode Token" });
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
     const id = decoded.id;
     let m = await dbcnx.getAvaiable(id);
   
@@ -899,12 +912,18 @@ fastify.post('/check', async (request, reply) => {
 
 fastify.post('/endmatch', async (request, reply) => {
   try {
-    let token = request.body.token;
-    if (!token)
-      return reply.code(403).send({ message: 'Not Log in' });
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
     const decoded = request.jwt.verify(token);
-    if(!decoded)
-      return reply.code(405).send({ message: "Coudnt Decode Token" });
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
     const id = decoded.id;
     let m = await dbcnx.getcurrentmatch(id);
     if (m)
@@ -928,12 +947,18 @@ fastify.post('/endmatch', async (request, reply) => {
 
 fastify.post('/allmatch', async (request, reply) => {
   try {
-    let token = request.body.token;
-    if (!token)
-      return reply.code(403).send({ message: 'Not Log in' });
+    const auth = request.headers.authorization;
+
+    if (!auth)
+      return reply.code(403).send({ message: 'Not logged in' });
+
+    const token = auth.split(' ')[1]; // remove "Bearer "
+
     const decoded = request.jwt.verify(token);
-    if(!decoded)
-      return reply.code(405).send({ message: "Coudnt Decode Token" });
+
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+
     let matches = await dbcnx.getPlayerMatches(request.body.id);
     if (matches) {
       matches = await Promise.all(matches.map(async (m) => {
