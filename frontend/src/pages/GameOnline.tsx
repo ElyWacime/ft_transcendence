@@ -1,10 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { PongCanvasOnline } from "@/components/PongCanvasOnline";
-import { useEffect ,useCallback} from "react";
+import { useEffect ,useCallback, useRef} from "react";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
 import { decodeJWT } from "@/lib/jwt-utils";
 import Home from "./Home";
+import { useChatSocket } from "@/context/ChatSocketContext";
 
 interface GameOnlineProps {
   player1Name: string;
@@ -17,6 +18,8 @@ interface GameOnlineProps {
 const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser } = useChatSocket();
+  let id = useRef(null);
   const state = location.state as GameOnlineProps;
   if(!state)
   {
@@ -29,30 +32,11 @@ const GameOnline = () => {
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady, wsRef } = useWebSocket();
-  let token = localStorage.getItem("token");
-  let id = null;
-  if (token)
-  {
-   try {
-    const decoded = decodeJWT(token);
-    id = decoded.id;
-   } catch (e) {
-      console.log("ERROR :: ",e);
-   }
-  }
 
-  // const endGame = useCallback((id) => {
-  //   if (ws && isReady && ws.readyState == WebSocket.OPEN)
-  //     ws.send(JSON.stringify({
-  //       token:localStorage.getItem("token"),
-  //       type: "FINISHED",
-  //       mode: mode,
-  //       matchId:id
-  //     }));
-  //   }
-  // );
-
-
+  useEffect(() => {
+    console.log(currentUser?.id);
+    id = currentUser?.id;
+  }, [currentUser]);
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
@@ -74,11 +58,6 @@ const GameOnline = () => {
           else
             x = `You Lost the match!`;
         }
-        // setmessage(x);
-        // setflag(false);
-        // endGame(data.id);
-
-        // if its a match tournament navigate back to tournament page.
         if (!data.T_Id){
           navigate("/result", { 
           state: { 
@@ -97,19 +76,6 @@ const GameOnline = () => {
 
 
         }
-        // }
-        // else{
-        //   navigate("/tournament-online", {
-        //     state: { 
-        //       tournamentId: data.T_Id, 
-        //     } 
-        //   });
-        // }
-        // navigate("/");
-        // toast.success(`${winner} wins the match!`, {
-        //   duration: 2000,
-        //   onAutoClose: () => navigate("/"),
-        // });
       }
     }
   );

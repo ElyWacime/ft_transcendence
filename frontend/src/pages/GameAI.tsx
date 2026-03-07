@@ -1,7 +1,7 @@
 import { PongCanvasAI } from "@/components/PongCanvasAI";
 
 const GameAI = () => {
-  const player1 = localStorage.getItem("name") || "You";
+  const player1 =  "You";
   const player2 = "AI Opponent" ;
   return (
     <div className="ai-game-page">

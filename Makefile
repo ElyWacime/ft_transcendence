@@ -29,7 +29,7 @@ db2: rm
 	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite
 	
 db:
-	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite && 	rm ./services/gateway/certs/certificate.crt && rm ./services/gateway/certs/private.key
+	rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite && rm ./services/gateway/certs/certificate.crt && rm ./services/gateway/certs/private.key
 re: clean up
 
 ps:
@@ -39,5 +39,5 @@ certs:
 	chmod +x generate-certs.sh
 	./generate-certs.sh
 
-saad:
-	(rm -f services/chat-service/dev.db && rm -f services/auth-service/prisma/db/data.db && rm -rf services/game-service/db/database.sqlite && docker stop $$(docker ps -qa) &&  docker rm $$(docker ps -qa) &&  docker rmi -f $$(docker images -qa) &&  docker volume rm $$(docker volume ls -q) &&  docker system prune -a --volumes -f &&  docker network rm $$(docker network ls -q)) 2>/dev/null || true
+saad:db
+	(docker stop $$(docker ps -qa) &&  docker rm $$(docker ps -qa) &&  docker rmi -f $$(docker images -qa) &&  docker volume rm $$(docker volume ls -q) &&  docker system prune -a --volumes -f &&  docker network rm $$(docker network ls -q)) 2>/dev/null || true

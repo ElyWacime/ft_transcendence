@@ -43,7 +43,7 @@ const accelerateSpeed = 1.2;
 const max_Speed = 25;
 
 export const PongCanvas = ({
-  player1Name = localStorage.getItem("name") || "Player 1",
+  player1Name =  "You",
   player2Name =  "Player 2",
   onGameEnd,
   maxScore = 5,

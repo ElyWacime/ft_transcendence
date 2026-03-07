@@ -26,15 +26,9 @@ export const WebSocketProvider = ({ children }) => {
       // tournament notification for absent players
       // console.log("path", window.location.pathname );
       if (window.location.pathname !== "/online-tournaments" && data?.waitingMatch) {
-        // toast.info("you have a match waiting. Go to the arena to play.");
         toast.info("you have a match waiting in the tournament", {position:"top-right"});
 
       }
-      // if (data?.waitingMatch) {
-      //   // toast.info("Tournament: you have a match waiting. Go to the arena to play.");
-      // toast.info("you have a match waiting in the tournament", {position:"top-right",color:"blue"});
-
-      // }
 
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
@@ -65,9 +59,9 @@ export const WebSocketProvider = ({ children }) => {
     },
     [id, token]
   );
-
+  let interval;
   useEffect(() => {
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
       const socket = wsRef.current;
   
       if (socket && socket.readyState === WebSocket.OPEN) {

@@ -4,14 +4,17 @@ import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { fetchWithAuth } from "@/lib/tokenRefresh";
+import { useChatSocket } from "@/context/ChatSocketContext";
 
-interface CurrentUser {
-  id: string;
-  name: string;
-}
+// interface CurrentUser {
+//   id: string;
+//   name: string;
+// }
 
 const Home = () => {
   const navigate = useNavigate();
+  const { currentUser } = useChatSocket();
+  let id = useRef(null);
   
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
@@ -21,32 +24,13 @@ const Home = () => {
     action: null,
   });
 
-  let userdata = useRef<CurrentUser>();
-  const API_DOMAIN = `https://${import.meta.env.VITE_DOMAIN}`;
-  const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`
-  // fetch current user from server using HttpOnly cookie
   useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        await fetchWithAuth(`${GAME_SERVICE_URL}/api/user/refresh`, {
-          method: "GET",
-          credentials: "include", // sends HttpOnly cookie automatically
-        });
- 
-        const res = await fetch(`${GAME_SERVICE_URL}/api/game/me`, {
-          method: "GET",
-          credentials: "include", // sends HttpOnly cookie automatically
-        });
-        if (res.ok) {
-          let data = await res.json();
-          userdata = data.message;
-        }
-      } catch (err) {
-        console.error("Failed to fetch user", err);
-      }
-    };
-    fetchMe();
-  }, []);
+    console.log(currentUser?.id);
+    id = currentUser?.id;
+  }, [currentUser]);
+
+  // let userdata = useRef<CurrentUser>();
+  const API_DOMAIN = `https://${import.meta.env.VITE_DOMAIN}`;
 
   const checkhandel = async (mode: number) => {
     return await fetch(`${API_DOMAIN}/api/game/check`, {
@@ -106,8 +90,8 @@ const Home = () => {
       navigate(feature.page);
       return;
     }
-    console.log("userdata >>>" ,userdata, userdata.id);
-    if (userdata && userdata.id)
+    console.log("userdata >>>" ,id);
+    if (id)
     {
       let res = await checkhandel(feature.mode);
         if (res.status === 403) {

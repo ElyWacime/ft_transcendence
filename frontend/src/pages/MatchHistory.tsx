@@ -3,30 +3,29 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import Home from "./Home";
 import { decodeJWT } from "@/lib/jwt-utils";
+import { useChatSocket } from "@/context/ChatSocketContext";
 
 const MatchHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser } = useChatSocket();
   const stat = location.state || "";
 
   const [features, setFeatures] = useState([]);
   let  {id} = stat;
-  let token = localStorage.getItem("token");
 
-  if (token)
-  {
-    const decoded = decodeJWT(token);
-    if(id == "" || id == null || id == undefined)
-      id = decoded.id;
-  }
+  useEffect(() => {
+    console.log(currentUser?.id);
+    if(currentUser && (id == "" || id == null || id == undefined))
+      id = currentUser.id;
+  }, [currentUser]);
 
   const getall = async () => {
     const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
     let matchess =  await fetch(`${GAME_SERVICE_URL}/api/game/allmatch`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({ id:id}),
       credentials: "include"

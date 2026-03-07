@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
 import { decodeJWT } from "@/lib/jwt-utils";
+import { useChatSocket } from "@/context/ChatSocketContext";
 
 
 export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode,isReady }) => {
@@ -9,6 +10,8 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
     const keys = useRef({ ArrowUp: false, ArrowDown: false });
     let matchref = useRef(null);
     const animationRef = useRef(0);
+    const { currentUser } = useChatSocket();
+    let id = useRef(null);
     const [gameState, setGameState] = useState({
       ball: { x: 400, y: 300, dx: 1, dy: 1, radius: 8 },
       paddle1: { x: 20, y: 250 },
@@ -28,14 +31,10 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       P4_Id:  "",
       gameStatus: "PENDING",
     });
-    let token = localStorage.getItem("token");
-    let id = null;
-    if (token)
-    {
-      const decoded = decodeJWT(token);
-      id = decoded.id;
-    }
-    
+    useEffect(() => {
+      console.log(currentUser?.id);
+      id = currentUser?.id;
+    }, [currentUser]);
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 const Game = () => {
 
 
-  const player1 = localStorage.getItem("name") || "You";
+  const player1 =  "You";
   const player2 = "Player 2" ;
 
   const handleGameEnd = async (player1Score: number, player2Score: number) => {
