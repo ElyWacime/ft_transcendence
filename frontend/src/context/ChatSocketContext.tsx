@@ -33,10 +33,16 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     const [blockedConversations, setBlockedConversations] = useState<any>({})
 
 
-    const { isLoggedIn, accessToken, updateAccessToken } = useAuth();
+    const { isLoggedIn, isLoading, accessToken, updateAccessToken } = useAuth();
 
 
   useEffect(() => {
+    // Wait for auth to finish loading before attempting connection
+    if (isLoading) {
+      console.log("[ChatSocket] Waiting for auth to finish loading...");
+      return;
+    }
+
     if (!isLoggedIn) {
       return;
     }
@@ -166,7 +172,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       chatSocket.off('blockStatusChanged', handleBlockStatusChanged)
 
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isLoading]);
 
   return (
     <ChatSocketContext.Provider value={{ socket, currentUser, isConnected, invitePrompt, setInvitePrompt, pendingInvitations, setPendingInvitations, friendsList, setFriendsList, blockedConversations, setBlockedConversations }}>

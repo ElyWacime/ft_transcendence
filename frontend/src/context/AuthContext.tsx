@@ -30,39 +30,51 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // Access token stored ONLY in memory (React state) - never in localStorage
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const restoreSession = async () => {
+      console.log("[AuthContext] Attempting to restore session...");
       try {
-        // Call refresh endpoint - browser automatically sends refresh_token cookie
         const response = await fetch(
           `${import.meta.env.VITE_API_URL || ""}/api/users/refresh`,
           {
             method: "POST",
-            credentials: "include", // Important: send cookies
+            credentials: "include", 
           }
         );
 
+        console.log("[AuthContext] Refresh response status:", response.status);
+
         if (response.ok) {
-          const data = await response.json();
+          const text = await response.text();
+          console.log("[AuthContext] Raw response text:", text);
+          const data = JSON.parse(text);
+          console.log("[AuthContext] Parsed response data:", data);
+          console.log("[AuthContext] data.user:", data.user);
+          console.log("[AuthContext] Session restored successfully", data);
           setAccessToken(data.accessToken);
           if (data.user) {
             setUser(data.user);
+          } else {
+            console.warn("[AuthContext] WARNING: No user data in response!");
           }
+          console.log("[AuthContext] State updated - accessToken:", !!data.accessToken, "user:", !!data.user);
         } else {
           // No valid session - user needs to log in
+          const errorText = await response.text();
+          console.log("[AuthContext] No valid session, user needs to log in. Error:", errorText);
           setAccessToken(null);
           setUser(null);
         }
       } catch (err) {
-        console.error("Session restore failed:", err);
+        console.error("[AuthContext] Session restore failed:", err);
         setAccessToken(null);
         setUser(null);
       } finally {
+        console.log("[AuthContext] Setting isLoading to false");
         setIsLoading(false);
       }
     };
@@ -71,6 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = (token: string, userData: User) => {
+    console.log("[AuthContext] Login called with token:", !!token, "user:", userData);
     setAccessToken(token);
     setUser(userData);
   };
@@ -96,6 +109,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isLoggedIn = !!accessToken && !!user;
+
+  console.log("[AuthContext] Current state - isLoggedIn:", isLoggedIn, "isLoading:", isLoading, "accessToken:", !!accessToken, "user:", !!user);
 
   return (
     <AuthContext.Provider

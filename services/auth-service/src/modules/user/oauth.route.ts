@@ -100,7 +100,7 @@ export async function oauthRoutes(app: FastifyInstance) {
       path: "/",
       httpOnly: true,
       secure: secureCookie,
-      sameSite: "lax",
+      sameSite: secureCookie ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60,
     });
 

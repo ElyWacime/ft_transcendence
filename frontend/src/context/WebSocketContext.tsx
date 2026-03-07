@@ -9,7 +9,7 @@ const WebSocketContext = createContext(null);
 
 
 export const WebSocketProvider = ({ children }) => {
-  const { isLoggedIn, accessToken, user } = useAuth();
+  const { isLoggedIn, isLoading, accessToken, user } = useAuth();
 
   const wsRef = useRef<WebSocket | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
@@ -66,6 +66,12 @@ export const WebSocketProvider = ({ children }) => {
   );
 
   useEffect(() => {
+    // Wait for auth to finish loading before attempting connection
+    if (isLoading) {
+      console.log("[WebSocket] Waiting for auth to finish loading...");
+      return;
+    }
+
     if (!isLoggedIn) {
       if (wsRef.current) {
         console.log("Closing WS because user logged out");
@@ -105,7 +111,7 @@ export const WebSocketProvider = ({ children }) => {
       socket.close();
       wsRef.current = null;
     };
-  }, [isLoggedIn, handleMessage]);
+  }, [isLoggedIn, isLoading, handleMessage]);
 
   return <WebSocketContext.Provider value={{ ws, isReady, wsRef }}>{children}</WebSocketContext.Provider>;
 };
