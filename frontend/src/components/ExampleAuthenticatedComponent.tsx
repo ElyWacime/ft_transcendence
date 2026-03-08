@@ -81,7 +81,6 @@ export function ExampleAuthenticatedComponent() {
     }
   };
 
-  // Example: POST request
   const createPost = async (content: string) => {
     try {
       const response = await api.post('/api/posts', {

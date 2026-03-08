@@ -458,7 +458,7 @@ export async function refreshToken(
       httpOnly: true,
       secure: secureCookie,
       sameSite: secureCookie ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     const responseData = { 

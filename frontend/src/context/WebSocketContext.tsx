@@ -22,19 +22,10 @@ export const WebSocketProvider = ({ children }) => {
     (event: MessageEvent) => {
 
       const data = JSON.parse(event.data);
-      // tournament notification for absent players
-      // console.log("path", window.location.pathname );
       if (window.location.pathname !== "/online-tournaments" && data?.waitingMatch) {
-        // toast.info("you have a match waiting. Go to the arena to play.");
         toast.info("you have a match waiting in the tournament", {position:"top-right"});
 
       }
-      // if (data?.waitingMatch) {
-      //   // toast.info("Tournament: you have a match waiting. Go to the arena to play.");
-      // toast.info("you have a match waiting in the tournament", {position:"top-right",color:"blue"});
-
-      // }
-
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
         let vs = "";
@@ -58,23 +49,18 @@ export const WebSocketProvider = ({ children }) => {
           toast.success(message + vs);
         else
           toast.error(message + vs);
-        // if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN)
-        //   wsRef.current.send(JSON.stringify({ token, type: "FINISHED", mode: data.mode,  matchId: data.id}));
       }
     },
     [id, token]
   );
 
   useEffect(() => {
-    // Wait for auth to finish loading before attempting connection
     if (isLoading) {
-      console.log("[WebSocket] Waiting for auth to finish loading...");
       return;
     }
 
     if (!isLoggedIn) {
       if (wsRef.current) {
-        console.log("Closing WS because user logged out");
         wsRef.current.close();
         wsRef.current = null;
         setWs(null);
@@ -94,10 +80,8 @@ export const WebSocketProvider = ({ children }) => {
     socket.onopen = () => 
     {
       setIsReady(true);
-      console.log("WebSocket connected and ready");
     };
     socket.onclose = () => {
-      console.log("WebSocket disconnected");
       setIsReady(false);
       wsRef.current = null;
       setWs(null);

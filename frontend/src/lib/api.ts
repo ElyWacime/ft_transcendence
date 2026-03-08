@@ -166,7 +166,7 @@ class TournamentAPI {
 
 export const api = new TournamentAPI();
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost';
+const API_URL = import.meta.env.VITE_API_URL;
 class UserAPI {
   private baseUrl = `${API_URL}/api/users`;
   
