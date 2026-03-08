@@ -19,7 +19,7 @@ import {
   friendsSchema,
   blockSchema,
   invitationsSchema,
-} from './schemas.js';
+} from './schema.js';
 
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
   https: {
