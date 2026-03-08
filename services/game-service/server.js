@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+  import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
@@ -7,7 +7,7 @@ import * as fs from "fs";
 import https from "https";
 import { randomUUID } from "crypto"; // used to generate unique tournament ids for in-memory rooms; survives only while the process is alive
 import { Match, SQLiteDB, GameState } from "./DBController.js";
-import jwt from "jsonwebtoken";
+
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
   https: {
     key: fs.readFileSync("/app/certs/private.key"),
@@ -26,14 +26,13 @@ const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
 }) : undefined;
 
 await fastify.register(websocket);
+
 await fastify.register(cors, {
   origin: true,
   credentials: true,
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
 });
-
-
 
 let dbcnx = new SQLiteDB();
 let clients = new Map();
@@ -551,18 +550,8 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
-fastify.get('/tournaments-online', async (request, reply) => {
+fastify.get('/tournaments-online', async (_request, reply) => {
   try {
-    const accessToken = request.cookies.access_token;
-
-    if (!accessToken) {
-      return reply.code(403).send({ message: 'Not logged in' });
-    }
-
-    const decoded = request.jwt.verify(accessToken);
-    if (!decoded)
-      return reply.code(401).send({ message: "Couldn't decode token" });
-
     const snapshot = Array.from(tournaments.values());
     return snapshot;
   } catch (e) {
@@ -777,21 +766,52 @@ const getUserName = async (id) => {
   }
 };
 
-fastify.get("/me", async (request, reply) => {
+// fastify.post("/me", async (request, reply) => {
+//   try {
+//     const accessToken = request.cookies.access_token;
+//     console.log("accessToken >> ", accessToken);
+//     if (!accessToken) {
+//       return reply.code(403).send({ message: 'Not logged in' });
+//     }
+
+//     const decoded = request.jwt.verify(accessToken);
+//     if (!decoded)
+//       return reply.code(401).send({ message: "Couldn't decode token" });
+//     let user = { id: decoded.id, name: await getUserName(decoded.id) };
+//     // return only id and name (or whatever you want in frontend)
+//     console.log("This is /me >> ", user);
+//     return reply.code(201).send({ message: {id: user.id, name: user.name }});
+//   } catch (err) {
+//     return reply.code(401).send({ error: err });
+//   }
+// });
+
+fastify.post("/me", async (request, reply) => {
   try {
-    const token = request.cookies.access_token; // read HttpOnly cookie
-    if (!token) {
-      return reply.code(401).send({ error: "Not logged in" });
+    let accessToken = request.cookies.refresh_token;
+    console.log("refresh_token  >> ", accessToken);
+    if (!accessToken && request.headers.authorization) {
+      accessToken = request.headers.authorization.split(" ")[1];
+      console.log("accessToken 2>> ", accessToken);
     }
 
-    // verify JWT
-    const user = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-    // return only id and name (or whatever you want in frontend)
-    return reply.code(201).send({ message: {id: user.id, name: user.name }});
+    if (!accessToken)
+      return reply.code(403).send({ message: "Not logged in" });
+
+    const decoded = request.jwt.verify(accessToken);
+    if (!decoded)
+      return reply.code(401).send({ message: "Couldn't decode token" });
+    const user = {
+      id: decoded.id,
+      name: await getUserName(decoded.id),
+    };
+    console.log("This is /me >> ", user);
+    return reply.send(user);
   } catch (err) {
-    return reply.code(401).send({ error: err });
+    return reply.code(401).send({ error: err.message });
   }
 });
+
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
    try
@@ -873,11 +893,15 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
 fastify.post('/invite', async (request, reply) => {
   try {
-    const accessToken = request.cookies.access_token;
-
-    if (!accessToken) {
-      return reply.code(403).send({ message: 'Not logged in' });
+    let accessToken = request.cookies.refresh_token;
+    console.log("refresh_token  >> ", accessToken);
+    if (!accessToken && request.headers.authorization) {
+      accessToken = request.headers.authorization.split(" ")[1];
+      console.log("accessToken 2>> ", accessToken);
     }
+
+    if (!accessToken)
+      return reply.code(403).send({ message: "Not logged in" });
 
     const decoded = request.jwt.verify(accessToken);
     if (!decoded)
@@ -903,16 +927,19 @@ fastify.post('/invite', async (request, reply) => {
 
 fastify.post('/check', async (request, reply) => {
   try {
-    const accessToken = request.cookies.access_token;
-
-    if (!accessToken) {
-      return reply.code(403).send({ message: 'Not logged in' });
+    let accessToken = request.cookies.refresh_token;
+    console.log("refresh_token  >> ", accessToken);
+    if (!accessToken && request.headers.authorization) {
+      accessToken = request.headers.authorization.split(" ")[1];
+      console.log("accessToken 2>> ", accessToken);
     }
+
+    if (!accessToken)
+      return reply.code(403).send({ message: "Not logged in" });
 
     const decoded = request.jwt.verify(accessToken);
     if (!decoded)
       return reply.code(401).send({ message: "Couldn't decode token" });
-
     const id = decoded.id;
     let m = await dbcnx.getAvaiable(id);
   
@@ -928,11 +955,15 @@ fastify.post('/check', async (request, reply) => {
 
 fastify.post('/endmatch', async (request, reply) => {
   try {
-    const accessToken = request.cookies.access_token;
-
-    if (!accessToken) {
-      return reply.code(403).send({ message: 'Not logged in' });
+    let accessToken = request.cookies.refresh_token;
+    console.log("refresh_token  >> ", accessToken);
+    if (!accessToken && request.headers.authorization) {
+      accessToken = request.headers.authorization.split(" ")[1];
+      console.log("accessToken 2>> ", accessToken);
     }
+
+    if (!accessToken)
+      return reply.code(403).send({ message: "Not logged in" });
 
     const decoded = request.jwt.verify(accessToken);
     if (!decoded)
@@ -961,17 +992,22 @@ fastify.post('/endmatch', async (request, reply) => {
 
 fastify.post('/allmatch', async (request, reply) => {
   try {
-    const accessToken = request.cookies.access_token;
-
-    if (!accessToken) {
-      return reply.code(403).send({ message: 'Not logged in' });
+    let accessToken = request.cookies.refresh_token;
+    console.log("refresh_token  >> ", accessToken);
+    if (!accessToken && request.headers.authorization) {
+      accessToken = request.headers.authorization.split(" ")[1];
+      console.log("accessToken 2>> ", accessToken);
     }
+
+    if (!accessToken)
+      return reply.code(403).send({ message: "Not logged in" });
 
     const decoded = request.jwt.verify(accessToken);
     if (!decoded)
       return reply.code(401).send({ message: "Couldn't decode token" });
-
+    
     let matches = await dbcnx.getPlayerMatches(request.body.id);
+    console.log("This is all matches >> ", matches);
     if (matches) {
       matches = await Promise.all(matches.map(async (m) => {
         const [P1, P2, P3, P4, Winner] = await Promise.all([
@@ -983,6 +1019,7 @@ fastify.post('/allmatch', async (request, reply) => {
         ]);
         return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
       }));
+      console.log("This is all matches with names >> ", matches);
     }
     } catch (err) {
       return reply.code(401).send({ message: 'Invalid token' });

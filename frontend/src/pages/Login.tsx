@@ -16,12 +16,17 @@ const Login = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-    const email = params.get("email");
-    const refreshToken = params.get("refreshToken");
+    const userEmail = params.get("email");
+    const userName = params.get("name");
+    const userId = params.get("id");
 
-    if (token && email) {
-      login(token, email, refreshToken || undefined);
-
+    if (token && userEmail && userName && userId) {
+      const user = {
+        id: userId,
+        email: userEmail,
+        name: userName,
+      };
+      login(token, user);
       toast.success("Successfully logged in with GitHub!");
       navigate("/tournament", { replace: true });
     }
@@ -34,10 +39,10 @@ const Login = () => {
 
     try {
       const res = await userApi.login(email, password);
-      if (res.accessToken) {
-        // Use email from server response, not from form input
-        const userEmail = res.user?.email || email;
-        login(res.accessToken, userEmail, res.refreshToken);
+      if (res.accessToken && res.user) {
+        // Store access token in memory (via context)
+        // Refresh token is already in httpOnly cookie from backend
+        login(res.accessToken, res.user);
         toast.success("Welcome back!");
         navigate("/");
       } else {

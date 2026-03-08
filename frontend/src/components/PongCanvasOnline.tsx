@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
-import { decodeJWT } from "@/lib/jwt-utils";
-import { useChatSocket } from "@/context/ChatSocketContext";
+import { useAuth } from "@/context/AuthContext";
 
 
 export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode,isReady }) => {
@@ -10,8 +9,6 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
     const keys = useRef({ ArrowUp: false, ArrowDown: false });
     let matchref = useRef(null);
     const animationRef = useRef(0);
-    const { currentUser } = useChatSocket();
-    let id = useRef(null);
     const [gameState, setGameState] = useState({
       ball: { x: 400, y: 300, dx: 1, dy: 1, radius: 8 },
       paddle1: { x: 20, y: 250 },
@@ -31,10 +28,9 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       P4_Id:  "",
       gameStatus: "PENDING",
     });
-    useEffect(() => {
-      console.log(currentUser?.id);
-      id = currentUser?.id;
-    }, [currentUser]);
+    const { accessToken, user } = useAuth();
+    const id = user?.id || null;
+    
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -97,14 +93,14 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       if (!ws || !isReady || ws.readyState !== WebSocket.OPEN) return;
     
       ws.send(JSON.stringify({
-        token: localStorage.getItem("token"),
+        token: accessToken,
         type: "MOVE",
         direction,
         keys: keys.current,
         mode,
         matchId: matchref.current
       }));
-    }, [ws, isReady]);
+    }, [ws, isReady, accessToken]);
 
     const handleMessage = useCallback(
       (event: MessageEvent) => {

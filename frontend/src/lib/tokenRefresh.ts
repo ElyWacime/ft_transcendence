@@ -1,28 +1,22 @@
 const API_URL = import.meta.env.VITE_API_URL || "";
 
 let isRefreshing = false;
-let refreshPromise: Promise<any> | null = null;
+let refreshPromise: Promise<{ accessToken: string } | null> | null = null;
 
-export async function refreshToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
-  const refreshToken = localStorage.getItem("refreshToken");
-  if (!refreshToken) return null;
-
+/**
+ * Refresh the access token using the httpOnly refresh_token cookie
+ * The browser automatically sends the cookie - we don't need to handle it manually
+ */
+export async function refreshToken(): Promise<{ accessToken: string } | null> {
   try {
     const res = await fetch(`${API_URL}/api/users/refresh`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-      },
-      credentials: "include",
+      credentials: "include", // Send cookies (including refresh_token)
     });
 
     if (res.ok) {
       const data = await res.json();
-      localStorage.setItem("token", data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem("refreshToken", data.refreshToken);
-      }
-      return data;
+      return { accessToken: data.accessToken };
     }
     return null;
   } catch (error) {
@@ -31,28 +25,46 @@ export async function refreshToken(): Promise<{ accessToken: string; refreshToke
   }
 }
 
-export async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = localStorage.getItem("token");
-  
-  // Build headers - only add Content-Type if body exists
+/**
+ * Make an authenticated fetch request with automatic token refresh on 401
+ * @param url - The URL to fetch
+ * @param options - Fetch options
+ * @param accessToken - Current access token (from context/state) - optional for backwards compatibility
+ * @param onTokenRefresh - Callback to update the access token in state - optional
+ */
+export async function fetchWithAuth(
+  url: string,
+  options: RequestInit = {},
+  accessToken: string | null = null,
+  onTokenRefresh?: (newToken: string) => void
+): Promise<Response> {
+  // Build headers with access token
   const headers: HeadersInit = {
-    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
     ...options.headers,
   };
 
   // Add Content-Type only for requests with body and if not already set
-  if (options.body) {
-    const hasContentType = options.headers && 
-      Object.keys(options.headers).some(key => key.toLowerCase() === 'content-type');
+  if (options.body && typeof options.body === "string") {
+    const hasContentType =
+      options.headers &&
+      Object.keys(options.headers).some(
+        (key) => key.toLowerCase() === "content-type"
+      );
     if (!hasContentType) {
-      headers['Content-Type'] = 'application/json';
+      headers["Content-Type"] = "application/json";
     }
   }
 
-  let response = await fetch(url, { ...options, headers });
+  let response = await fetch(url, {
+    ...options,
+    headers,
+    credentials: "include", // Always send cookies
+  });
 
-  // If 401 and we have a refresh token, try to refresh
-  if (response.status === 401 && localStorage.getItem("refreshToken")) {
+  // If 401, try to refresh the token
+  if (response.status === 401) {
+    // Prevent multiple simultaneous refresh calls
     if (!isRefreshing) {
       isRefreshing = true;
       refreshPromise = refreshToken();
@@ -63,17 +75,24 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}): Pro
     refreshPromise = null;
 
     if (refreshResult) {
+      // Update the access token in the calling context
+      if (onTokenRefresh) {
+        onTokenRefresh(refreshResult.accessToken);
+      }
+
       // Retry the original request with new token
       const retryHeaders: HeadersInit = {
         ...headers,
         Authorization: `Bearer ${refreshResult.accessToken}`,
       };
-      response = await fetch(url, { ...options, headers: retryHeaders });
+      response = await fetch(url, {
+        ...options,
+        headers: retryHeaders,
+        credentials: "include",
+      });
     } else {
-      // Refresh failed, clear tokens and redirect to login
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("email");
+      // Refresh failed - redirect to login
+      console.error("Session expired, redirecting to login");
       window.location.href = "/login";
     }
   }

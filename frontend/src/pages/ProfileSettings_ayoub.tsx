@@ -5,31 +5,10 @@ import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
+import { handleStartConversation } from "@/components/chat/MessagesPageLayout";
 import "../css/profile.css";
 import { useChatSocket } from "@/context/ChatSocketContext";
-import { handleStartConversation } from "./Chat";
-
-
-
-function getUserInfoFromToken() {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return null;
-  }
-}
+import { useAuth } from "@/context/AuthContext";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
@@ -55,12 +34,12 @@ const ProfileSettings = () => {
   const [loading, setLoading] = useState(true);
   const [avatarKey, setAvatarKey] = useState(Date.now());
   const { socket } = useChatSocket();
+  const { user } = useAuth();
     
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const tokenData = getUserInfoFromToken();
-        const userId = tokenData?.id;
+        const userId = user?.id;
         
         if (userId) {
           const data = await userApi.getUserById(userId);
@@ -72,17 +51,14 @@ const ProfileSettings = () => {
           });
           setAvatarKey(Date.now());
         } else {
-          // Always get email from localStorage first (most up-to-date after email change)
-          const email = localStorage.getItem("email") || tokenData?.email || "";
-          const username = localStorage.getItem("username") || tokenData?.username || "Player";
+          const email = user?.email || "";
+          const username = user?.name || "Player";
           setUserInfo({ email, username, avatar: "" });
         }
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        const tokenData = getUserInfoFromToken();
-        // Always get email from localStorage first (most up-to-date after email change)
-        const email = localStorage.getItem("email") || tokenData?.email || "";
-        const username = localStorage.getItem("username") || tokenData?.username || "Player";
+        const email = user?.email || "";
+        const username = user?.name || "Player";
         setUserInfo({ email, username, avatar: "" });
       } finally {
         setLoading(false);
@@ -90,7 +66,7 @@ const ProfileSettings = () => {
     };
     
     fetchUserData();
-  }, [location.pathname]); // Re-fetch when route changes
+  }, [location.pathname, user?.id, user?.email, user?.name]); // Re-fetch when route changes
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -147,6 +123,7 @@ const ProfileSettings = () => {
       color: "text-green-500",
       path: "/profile/change-username"
     }
+
   ];
 
   if (loading) {
@@ -235,9 +212,9 @@ const ProfileSettings = () => {
                       <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user.User_name}`, {state : {id : searchResult.user.id}})}}>
                         View dashboard
                       </button>
-                      {String(getUserInfoFromToken()?.id) !== String(searchResult.user.id) && (
+                      {String(user?.id) !== String(searchResult.user.id) && (
                         <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
-                          const conversationId =  await handleStartConversation({ userId: searchResult.user.id, socket: socket })
+                          const conversationId =  await handleStartConversation({ userId: searchResult.user.id, socket: socket, onFetchConversations: null })
                           navigate(`/chat/${conversationId}`)
                         }}>Message
                         </button>
@@ -253,9 +230,8 @@ const ProfileSettings = () => {
           <div className="profile-settings-grid">
             {settingsOptions.map((option) => {
               const IconComponent = option.icon;
-              const iconColorClass = option.color === 'text-blue-500' ? 'icon-blue' : 
-                                     option.color === 'text-green-500' ? 'icon-green' : 
-                                     option.color === 'text-orange-500' ? 'icon-orange' : 'icon-purple';
+                          const iconColorClass = option.color === 'text-blue-500' ? 'icon-blue' : 
+                                                  option.color === 'text-green-500' ? 'icon-green' : 'icon-purple';
               return (
                 <Card
                   key={option.path}

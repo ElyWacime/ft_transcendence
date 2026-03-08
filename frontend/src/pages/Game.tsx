@@ -1,11 +1,12 @@
 import { PongCanvas } from "@/components/PongCanvas";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 
 const Game = () => {
+  const { user } = useAuth();
 
-
-  const player1 =  "You";
+  const player1 = user?.name || user?.email || "You";
   const player2 = "Player 2" ;
 
   const handleGameEnd = async (player1Score: number, player2Score: number) => {

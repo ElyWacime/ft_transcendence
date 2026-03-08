@@ -42,17 +42,17 @@ interface Prediction {
 }
 
 export class AIOpponent {
+
   private targetY: number | null = null;
   private timeToReachAI: number = 0;
-  private lastBallVx: number = 0;
-  private lastBallVy: number = 0;
 
   private difficulty: Difficulty;
   private predictionNoise: number;
   private paddleSpeed: number = 10;
   private lastCalculationTime: number = 0;
 
-  constructor(difficulty: Difficulty = Difficulty.HARD) {
+  constructor(difficulty: Difficulty = Difficulty.HARD)
+  {
     this.difficulty = difficulty;
     if (difficulty === Difficulty.EASY) {
       this.predictionNoise = 40;
@@ -70,13 +70,9 @@ export class AIOpponent {
     let action: AIAction = { moveUp: false, moveDown: false };
     const currentTime = Date.now();
 
-    // Re-evaluate calculation ONLY if the ball direction flips, or it accelerates, or 1 second passes
-    const isBallReset = Math.sign(ball.velocityX) !== Math.sign(this.lastBallVx) && ball.x > 300 && ball.x < 500;
-    const isPaddleHit = Math.sign(ball.velocityX) !== Math.sign(this.lastBallVx);
-    const hasAccelerated = Math.abs(ball.velocityX) > Math.abs(this.lastBallVx) + 0.1 || Math.abs(ball.velocityY) > Math.abs(this.lastBallVy) + 0.1;
-
-    // We only predict when necessary, predicting the opponent's hit and exactly where we should stand
-    const needsRecalculation = this.targetY === null || isBallReset || isPaddleHit || hasAccelerated || (currentTime - this.lastCalculationTime > 1000);
+    // AI can only refresh its view of the game once per second (subject requirement)
+    // It must predict ball trajectory from that single snapshot
+    const needsRecalculation = this.targetY === null || (currentTime - this.lastCalculationTime >= 1000);
 
     if (needsRecalculation) {
       const pred = this.calculateExactDestination(gameState);
@@ -84,7 +80,7 @@ export class AIOpponent {
       this.timeToReachAI = pred.timeToReachAI;
       this.lastCalculationTime = currentTime;
     } else {
-      // Decrease time to reach AI by 1 frame (approx)
+      // Continue moving toward the predicted position without observing the ball
       this.timeToReachAI = Math.max(0, this.timeToReachAI - 1);
     }
 
@@ -111,9 +107,6 @@ export class AIOpponent {
         }
       }
     }
-
-    this.lastBallVx = ball.velocityX;
-    this.lastBallVy = ball.velocityY;
 
     return action;
   }
@@ -146,18 +139,16 @@ export class AIOpponent {
 
         let remainingTime = timeX;
         while (remainingTime > 0) {
+          // If ball has no vertical velocity, it stays at same Y
+          if (simulatedVY === 0) {
+            break;
+          }
+
           let timeToWall;
           if (simulatedVY > 0) {
             timeToWall = (gameState.gameHeight - ball.radius - simulatedY) / simulatedVY;
-          } else if (simulatedVY < 0) {
-            timeToWall = (ball.radius - simulatedY) / simulatedVY;
           } else {
-            timeToWall = Infinity;
-          }
-
-          if (simulatedVY === 0) {
-            simulatedY += simulatedVY * remainingTime;
-            break;
+            timeToWall = (ball.radius - simulatedY) / simulatedVY;
           }
 
           if (timeToWall < remainingTime) {
@@ -178,18 +169,16 @@ export class AIOpponent {
 
         let remainingTime = timeX;
         while (remainingTime > 0) {
+          // If ball has no vertical velocity, it stays at same Y
+          if (simulatedVY === 0) {
+            break;
+          }
+
           let timeToWall;
           if (simulatedVY > 0) {
             timeToWall = (gameState.gameHeight - ball.radius - simulatedY) / simulatedVY;
-          } else if (simulatedVY < 0) {
-            timeToWall = (ball.radius - simulatedY) / simulatedVY;
           } else {
-            timeToWall = Infinity;
-          }
-
-          if (simulatedVY === 0) {
-            simulatedY += simulatedVY * remainingTime;
-            break;
+            timeToWall = (ball.radius - simulatedY) / simulatedVY;
           }
 
           if (timeToWall < remainingTime) {

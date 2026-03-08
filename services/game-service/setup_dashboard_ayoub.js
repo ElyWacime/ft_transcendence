@@ -12,4 +12,3 @@ export async function setupDashboard_ayoub(fastify, dbcnx) {
 
   await registerDashboardRoutes_ayoub(fastify, dbcnx);
 }
-

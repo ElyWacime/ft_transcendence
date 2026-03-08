@@ -22,11 +22,9 @@ import ProfileSettings from "./pages/ProfileSettings_ayoub";
 import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
-import ChangeUsername from "./pages/Change_username_page";
 import Chat from "./pages/Chat";
 import Result from "./pages/Result";
-import LocalTournament from "./pages/LocalTournament";
-
+import ChangeUsername from "./pages/Change_username_page";
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { ChatSocketProvider } from "./context/ChatSocketContext";
 
@@ -100,16 +98,9 @@ const router = createBrowserRouter(
             </ProtectedRoute>
           ),
         },
-        {
-          path: "game-online",
-          element: (
-            <ProtectedRoute children={undefined}>
-              <GameOnline />
-            </ProtectedRoute>
-          ),
-        },
         { path: "game", element: <Game /> },
         { path: "result", element: <Result /> },
+        { path: "game-online", element: <GameOnline /> },
         {
           path: "online-tournament",
           element: (

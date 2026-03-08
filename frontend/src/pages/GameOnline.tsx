@@ -1,11 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { PongCanvasOnline } from "@/components/PongCanvasOnline";
-import { useEffect ,useCallback, useRef} from "react";
+import { useEffect ,useCallback} from "react";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
-import { decodeJWT } from "@/lib/jwt-utils";
+import { useAuth } from "@/context/AuthContext";
 import Home from "./Home";
-import { useChatSocket } from "@/context/ChatSocketContext";
 
 interface GameOnlineProps {
   player1Name: string;
@@ -18,8 +17,6 @@ interface GameOnlineProps {
 const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentUser } = useChatSocket();
-  let id = useRef(null);
   const state = location.state as GameOnlineProps;
   if(!state)
   {
@@ -32,11 +29,8 @@ const GameOnline = () => {
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady, wsRef } = useWebSocket();
-
-  useEffect(() => {
-    console.log(currentUser?.id);
-    id = currentUser?.id;
-  }, [currentUser]);
+  const { user } = useAuth();
+  const id = user?.id;
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
@@ -65,7 +59,6 @@ const GameOnline = () => {
           } 
         });
         }
-        
         else{
           navigate("/online-tournament", {
 
@@ -73,8 +66,6 @@ const GameOnline = () => {
               tournamentId: data.T_Id, 
             } 
           });
-
-
         }
       }
     }

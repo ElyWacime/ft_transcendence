@@ -1,10 +1,9 @@
-import { useEffect, useState,useRef } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../css/tournament-online.css";
-import { decodeJWT } from "@/lib/jwt-utils";
 import { useWebSocket } from "@/context/WebSocketContext";
-import { useChatSocket } from "@/context/ChatSocketContext";
+import { useAuth } from "@/context/AuthContext";
 
 // game-service base URL (used for initial tournament snapshot fetch before sockets sync)
 // sockets keep the page live, but we still seed the UI with the latest known state on first load
@@ -48,25 +47,16 @@ interface CurrentUser {
 export default function TournamentOnlinePage() {
   const navigate = useNavigate();
   const { ws, isReady, wsRef } = useWebSocket();
+  const { accessToken, user } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isConnected = isReady && wsRef?.current?.readyState === WebSocket.OPEN;
-  const { data } = useChatSocket();
-  let id = useRef(null);
-  // derive current user from stored JWT so we can personalize joins/ready buttons
-  // this keeps the page purely client-side; no extra auth fetch round-trip just to know who we are
 
-
-  useEffect(() => {
-    console.log(data?.id);
-    id = currentUser?.id;
-  }, [data]);
-
-
-  // const token = localStorage.getItem("token");
-  // const decoded = token ? decodeJWT(token) : null;
-  const currentUser: CurrentUser | null = id;
+  // derive current user from auth context
+  const currentUser: CurrentUser | null = user
+    ? { id: user.id, name: user.name || user.email || "You" }
+    : null;
 
   const myTournamentId = currentUser
     ? tournaments.find((tour) => tour.participants?.some((p) => p.id === currentUser.id))?.id || null
@@ -80,7 +70,7 @@ export default function TournamentOnlinePage() {
       toast.error("Socket not connected");
       return false;
     }
-    socket.send(JSON.stringify({ token: localStorage.getItem("token"), ...payload }));
+    socket.send(JSON.stringify({ token: accessToken, ...payload }));
     return true;
   };
 

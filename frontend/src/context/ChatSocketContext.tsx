@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
+import { fetchWithAuth } from "@/lib/tokenRefresh";
 
 type ChatSocketContextValue = {
   socket: Socket | null;
@@ -31,9 +32,17 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     const [pendingInvitations, setPendingInvitations] = useState<any>({})
     const [blockedConversations, setBlockedConversations] = useState<any>({})
 
-    const { isLoggedIn } = useAuth();
+
+    const { isLoggedIn, isLoading, accessToken, updateAccessToken } = useAuth();
+
 
   useEffect(() => {
+    // Wait for auth to finish loading before attempting connection
+    if (isLoading) {
+      console.log("[ChatSocket] Waiting for auth to finish loading...");
+      return;
+    }
+
     if (!isLoggedIn) {
       return;
     }
@@ -43,17 +52,22 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     setSocket(chatSocket);
     chatSocket.on("connect", async () => {
         try {
-          chatSocket.emit('authenticate');
+          const res = await fetchWithAuth(
+            `${SERVER_URL}/api/chat/getCookieValue`, 
+            { method: 'GET', credentials: 'include' },
+            accessToken,
+            updateAccessToken
+          );
+          const usercookie = await res.json();
+          const userId = usercookie.user_id;
+          setCurrentUser({ id: userId });
+          chatSocket.emit('authenticate', userId);
           setIsConnected(true);
         } catch (error) {
           console.error('Failed to authenticate:', error);
         }
       }
     );
-
-    chatSocket.on("authenticate", (data: any) => {
-      setCurrentUser({ id: data.userId });
-    });
 
     chatSocket.on("disconnect", () => {
       setFriendsList({});
@@ -90,7 +104,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       }));
     });
 
-    const handleInviteResponse = (data: any) => {
+    const handleGameInviteResponse = (data: any) => {
       if (data.invitationType === "game_request") {
         if (data.accepted) {
           navigate(`/loading?mode=2`);
@@ -111,9 +125,9 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
         }
       }))
     }    
-    chatSocket.on('InviteResponse', handleInviteResponse)
+    chatSocket.on('InviteResponse', handleGameInviteResponse)
 
-    const handleCancelInvite = async () => {
+    const handleCancelInvite = async ({invitationType}) => {
       setInvitePrompt(null);
     }
     chatSocket.on("cancelInvite", handleCancelInvite);
@@ -154,11 +168,11 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       chatSocket.disconnect();
       chatSocket.off('unfriend', handleUnfriend)
-      chatSocket.off('InviteResponse', handleInviteResponse)
+      chatSocket.off('InviteResponse', handleGameInviteResponse)
       chatSocket.off('blockStatusChanged', handleBlockStatusChanged)
 
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isLoading]);
 
   return (
     <ChatSocketContext.Provider value={{ socket, currentUser, isConnected, invitePrompt, setInvitePrompt, pendingInvitations, setPendingInvitations, friendsList, setFriendsList, blockedConversations, setBlockedConversations }}>

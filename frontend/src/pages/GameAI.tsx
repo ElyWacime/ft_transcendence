@@ -1,7 +1,9 @@
 import { PongCanvasAI } from "@/components/PongCanvasAI";
+import { useAuth } from "@/context/AuthContext";
 
 const GameAI = () => {
-  const player1 =  "You";
+  const { user } = useAuth();
+  const player1 = user?.name || user?.email || "You";
   const player2 = "AI Opponent" ;
   return (
     <div className="ai-game-page">

@@ -2,36 +2,33 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import Home from "./Home";
-import { decodeJWT } from "@/lib/jwt-utils";
-import { useChatSocket } from "@/context/ChatSocketContext";
+import { useAuth } from "@/context/AuthContext";
+import { fetchWithAuth } from "@/lib/tokenRefresh";
 
 const MatchHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser } = useChatSocket();
+  const { user, accessToken, updateAccessToken } = useAuth();
   const stat = location.state || "";
 
   const [features, setFeatures] = useState([]);
   let  {id} = stat;
-
-  useEffect(() => {
-    console.log(currentUser?.id);
-    if(currentUser && (id == "" || id == null || id == undefined))
-      id = currentUser.id;
-  }, [currentUser]);
+  if(id == "" || id == null || id == undefined)
+    id = user?.id;
 
   const getall = async () => {
     const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
-    let matchess =  await fetch(`${GAME_SERVICE_URL}/api/game/allmatch`, {
+    let matchess =  await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/allmatch`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ id:id}),
       credentials: "include"
-    });
+    }, accessToken, updateAccessToken);
     const data = await matchess.json();  
     let res = data.matches;
+    console.log("res >>> ",res);
     setFeatures(res);
   };
 

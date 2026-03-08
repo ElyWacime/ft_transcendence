@@ -5,31 +5,12 @@ import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Camera, ArrowLeft, Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/context/AuthContext";
 import "../css/change-password.css";
-
-function getUserIdFromToken(): string | null {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    const decoded = JSON.parse(jsonPayload);
-    return decoded.id || null;
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return null;
-  }
-}
 
 const ChangePicture = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -40,7 +21,7 @@ const ChangePicture = () => {
   useEffect(() => {
     const fetchCurrentAvatar = async () => {
       try {
-        const userId = getUserIdFromToken();
+        const userId = user?.id;
         if (userId) {
           const data = await userApi.getUserById(userId);
           setCurrentAvatar(data.avatar || "");
@@ -55,7 +36,7 @@ const ChangePicture = () => {
     };
 
     fetchCurrentAvatar();
-  }, []);
+  }, [user?.id]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,9 +67,9 @@ const ChangePicture = () => {
       return;
     }
     
-    const maxSize = 6 * 1024 * 1024;
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error("Image size should be less than 6MB");
+      toast.error("Image size should be less than 2MB");
       return;
     }
     

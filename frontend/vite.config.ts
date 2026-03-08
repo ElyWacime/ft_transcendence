@@ -16,13 +16,8 @@ export default defineConfig(({ mode }) => {
     watch: {
       usePolling: true,
     },
-    hmr: {
-      host: process.env.VITE_HMR_HOST || process.env.DOMAIN,
-      protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws"
-    }
   };
 
-  // Add HTTPS support when USE_HTTPS is true
   if (process.env.VITE_HTTPS === "true") {
     try {
       serverConfig.https = {
@@ -46,4 +41,3 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
-
