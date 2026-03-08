@@ -7,8 +7,5 @@ build/
 .env
 .env.local
 .env.*.local
-.DS_Store
 
-
-*.db
-db/
+prisma/db/

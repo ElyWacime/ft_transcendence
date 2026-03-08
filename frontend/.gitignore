@@ -2,13 +2,11 @@ node_modules/
 package-lock.json
 
 dist/
-build/
+dist-ssr/
+*.local
 
 .env
 .env.local
 .env.*.local
+
 .DS_Store
-
-
-*.db
-db/

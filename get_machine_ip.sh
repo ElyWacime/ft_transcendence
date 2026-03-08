@@ -17,7 +17,7 @@ sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "
 echo "Done"
 
 
-### for linux ####
+## for linux ####
 
 # Get local IP
 # NEW_IP=$(ip route get 1 | awk '{print $7; exit}')
