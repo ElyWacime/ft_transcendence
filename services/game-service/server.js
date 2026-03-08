@@ -833,36 +833,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           await handelDup(connection,id);
           clients.set(id, connection);
           const name = await getUserName(id);
-          if (request.type == "REGISTER") 
-            await handelRegister(request,id);
-          else if (request.type == "MOVE") 
-            await handelMove(request,id);
-          else if (request.type == "FINISHED") 
-            await  handelFinish(request.matchId) ;
-          else if (request.type == "DELETE") 
-            await handelRoomQuiiting(id);
-          else if (request.type == "TOURNAMENT_CREATE") {
-          const creator = { id, name  };
-          createTournamentRoom(creator);
-        }
-        else if (request.type == "TOURNAMENT_LEAVE") 
-        {
-        const participant = { id, name};
-        leaveTournamentRoom(request.tournamentId, participant);
-        }
-        else if (request.type == "TOURNAMENT_JOIN") {
-          const participant = { id, name };
-          joinTournamentRoom(request.tournamentId, participant);
-        }
-        else if (request.type == "TOURNAMENT_READY") {
-          await handleTournamentReady(request.tournamentId, request.matchId, id);
-        }
-        else if (request.type == "TOURNAMENT_REPORT_MISSING") {
-          handleReportMissingOpponent(request.tournamentId, request.matchId, id);
-        }
-        else if (request.type == "REQUEST_TOURNAMENTS") {
-          sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
-        }
       }
       else 
       {

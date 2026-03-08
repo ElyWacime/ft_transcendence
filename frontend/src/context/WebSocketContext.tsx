@@ -22,19 +22,9 @@ export const WebSocketProvider = ({ children }) => {
     (event: MessageEvent) => {
 
       const data = JSON.parse(event.data);
-      // tournament notification for absent players
-      // console.log("path", window.location.pathname );
       if (window.location.pathname !== "/online-tournaments" && data?.waitingMatch) {
-        // toast.info("you have a match waiting. Go to the arena to play.");
         toast.info("you have a match waiting in the tournament", {position:"top-right"});
-
       }
-      // if (data?.waitingMatch) {
-      //   // toast.info("Tournament: you have a match waiting. Go to the arena to play.");
-      // toast.info("you have a match waiting in the tournament", {position:"top-right",color:"blue"});
-
-      // }
-
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
         let vs = "";
@@ -58,8 +48,6 @@ export const WebSocketProvider = ({ children }) => {
           toast.success(message + vs);
         else
           toast.error(message + vs);
-        // if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN)
-        //   wsRef.current.send(JSON.stringify({ token, type: "FINISHED", mode: data.mode,  matchId: data.id}));
       }
     },
     [id, token]
@@ -67,9 +55,8 @@ export const WebSocketProvider = ({ children }) => {
 
 
   useEffect(() => {
-    // Wait for auth to finish loading before attempting connection
     if (isLoading) {
-      console.log("[WebSocket] Waiting for auth to finish loading...");
+      // console.log("[WebSocket] Waiting for auth to finish loading...");
       return;
     }
 
@@ -120,14 +107,13 @@ export const WebSocketProvider = ({ children }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       const socket = wsRef.current;
-
       if (socket && socket.readyState === WebSocket.OPEN) {
-              socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
+          socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
       }
     }, 25000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [accessToken]);
 
   return <WebSocketContext.Provider value={{ ws, isReady, wsRef }}>{children}</WebSocketContext.Provider>;
 };
