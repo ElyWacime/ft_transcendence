@@ -479,7 +479,6 @@ export async function refreshToken(
   }
 }
 
-
 interface UpdateImageBody {
   image: string;
   image_name: string;
