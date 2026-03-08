@@ -4,10 +4,12 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { Mail, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import "../css/change-password.css";
 
 const ChangeEmail = () => {
   const navigate = useNavigate();
+  const { updateAccessToken, updateUser } = useAuth();
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,12 +22,10 @@ const ChangeEmail = () => {
       const res = await userApi.update_email(newEmail, password);
       if (res.success) {
         toast.success("Email updated successfully!");
-        // Update stored credentials with new email and tokens
-        localStorage.setItem("email", res.newEmail);
-        localStorage.setItem("token", res.accessToken);
-        if (res.refreshToken) {
-          localStorage.setItem("refreshToken", res.refreshToken);
+        if (res.accessToken) {
+          updateAccessToken(res.accessToken);
         }
+        updateUser({ email: res.newEmail || newEmail });
         navigate("/profile");
       } else {
         toast.error(res.message || "Email update failed.");

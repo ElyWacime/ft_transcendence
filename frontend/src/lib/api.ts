@@ -169,14 +169,6 @@ export const api = new TournamentAPI();
 const API_URL = import.meta.env.VITE_API_URL || 'https://localhost';
 class UserAPI {
   private baseUrl = `${API_URL}/api/users`;
-  async updateUsername(current_password: string, new_username: string) {
-    const res = await fetchWithAuth(`${this.baseUrl}/update_username`, {
-      method: "PUT",
-      body: JSON.stringify({ current_password, new_username }),
-      credentials: 'include',
-    });
-        return await res.json();
-  }
 
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
@@ -207,6 +199,7 @@ class UserAPI {
   async login(email: string, password: string) {
     const res = await fetch(`${this.baseUrl}/login`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });

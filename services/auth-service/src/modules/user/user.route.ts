@@ -102,6 +102,14 @@ export async function userRoutes(app: FastifyInstance) {
           properties: {
             accessToken: { type: "string" },
             refreshToken: { type: "string" },
+            user: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                email: { type: "string" },
+                name: { type: "string" },
+              },
+            },
           },
         },
       },

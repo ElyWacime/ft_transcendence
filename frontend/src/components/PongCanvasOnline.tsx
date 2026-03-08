@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
-import { decodeJWT } from "@/lib/jwt-utils";
+import { useAuth } from "@/context/AuthContext";
 
 
 export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player4Name, ws, mode,isReady }) => {
@@ -28,13 +28,8 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       P4_Id:  "",
       gameStatus: "PENDING",
     });
-    let token = localStorage.getItem("token");
-    let id = null;
-    if (token)
-    {
-      const decoded = decodeJWT(token);
-      id = decoded.id;
-    }
+    const { accessToken, user } = useAuth();
+    const id = user?.id || null;
     
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -98,14 +93,14 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       if (!ws || !isReady || ws.readyState !== WebSocket.OPEN) return;
     
       ws.send(JSON.stringify({
-        token: localStorage.getItem("token"),
+        token: accessToken,
         type: "MOVE",
         direction,
         keys: keys.current,
         mode,
         matchId: matchref.current
       }));
-    }, [ws, isReady]);
+    }, [ws, isReady, accessToken]);
 
     const handleMessage = useCallback(
       (event: MessageEvent) => {

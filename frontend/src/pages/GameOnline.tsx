@@ -3,7 +3,7 @@ import { PongCanvasOnline } from "@/components/PongCanvasOnline";
 import { useEffect ,useCallback} from "react";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
-import { decodeJWT } from "@/lib/jwt-utils";
+import { useAuth } from "@/context/AuthContext";
 import Home from "./Home";
 
 interface GameOnlineProps {
@@ -29,22 +29,13 @@ const GameOnline = () => {
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady, wsRef } = useWebSocket();
-  let token = localStorage.getItem("token");
-  let id = null;
-  if (token)
-  {
-   try {
-    const decoded = decodeJWT(token);
-    id = decoded.id;
-   } catch (e) {
-      console.log("ERROR :: ",e);
-   }
-  }
+    const { user } = useAuth();
+    const id = user?.id;
 
   // const endGame = useCallback((id) => {
   //   if (ws && isReady && ws.readyState == WebSocket.OPEN)
   //     ws.send(JSON.stringify({
-  //       token:localStorage.getItem("token"),
+  //       token: accessToken,
   //       type: "FINISHED",
   //       mode: mode,
   //       matchId:id

@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
-import { decodeJWT } from "@/lib/jwt-utils";
 import { useLocation } from 'react-router-dom';
 
 const WebSocketContext = createContext(null);
@@ -10,14 +9,14 @@ const WebSocketContext = createContext(null);
 
 
 export const WebSocketProvider = ({ children }) => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isLoading, accessToken, user } = useAuth();
 
   const wsRef = useRef<WebSocket | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const token = localStorage.getItem("token");
-  const id = token ? decodeJWT(token).id : null;
+  const token = accessToken;
+  const id = user?.id || null;
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
@@ -67,18 +66,12 @@ export const WebSocketProvider = ({ children }) => {
   );
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const socket = wsRef.current;
-  
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: "PING" , token:localStorage.getItem("token")}));
-      }
-    }, 25000);
-  
-    return () => clearInterval(interval);
-  }, []);
-  
-  useEffect(() => {
+    // Wait for auth to finish loading before attempting connection
+    if (isLoading) {
+      console.log("[WebSocket] Waiting for auth to finish loading...");
+      return;
+    }
+
     if (!isLoggedIn) {
       if (wsRef.current) {
         console.log("Closing WS because user logged out");
@@ -91,9 +84,10 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     if (wsRef.current) return; 
-    const host = import.meta.env.VITE_DOMAIN || window.location.hostname;
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const socket = new WebSocket(`${protocol}://${host}/ws`);
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = import.meta.env.VITE_DOMAIN || window.location.host;
+    const socket = new WebSocket(`${protocol}//${host}/ws`);
     wsRef.current = socket;
     setWs(socket);
 
@@ -101,10 +95,6 @@ export const WebSocketProvider = ({ children }) => {
     {
       setIsReady(true);
       console.log("WebSocket connected and ready");
-      socket.send(JSON.stringify({
-              token:localStorage.getItem("token"),
-              type: "PING",
-            }));
     };
     socket.onclose = () => {
       console.log("WebSocket disconnected");
@@ -121,7 +111,7 @@ export const WebSocketProvider = ({ children }) => {
       socket.close();
       wsRef.current = null;
     };
-  }, [isLoggedIn, handleMessage]);
+  }, [isLoggedIn, isLoading, handleMessage]);
 
   return <WebSocketContext.Provider value={{ ws, isReady, wsRef }}>{children}</WebSocketContext.Provider>;
 };
