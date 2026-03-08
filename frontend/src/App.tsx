@@ -10,7 +10,7 @@ import { Toaster } from "sonner"
 import GameOnline from "./pages/GameOnline";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import TournamentOnline from "./pages/TournamentOnline"; // online tournament lobby/bracket page leveraging game-service websocket
+import TournamentOnline from "./pages/TournamentOnline"; 
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";

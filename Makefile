@@ -43,5 +43,6 @@ certs:
 	chmod +x get_machine_ip.sh
 	./get_machine_ip.sh && ./generate-certs.sh
 
+
 saad:db
 	(docker stop $$(docker ps -qa) &&  docker rm $$(docker ps -qa) &&  docker rmi -f $$(docker images -qa) &&  docker volume rm $$(docker volume ls -q) &&  docker system prune -a --volumes -f &&  docker network rm $$(docker network ls -q)) 2>/dev/null || true
