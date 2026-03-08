@@ -13,9 +13,11 @@ const MatchHistory = () => {
 
   const [features, setFeatures] = useState([]);
   let  {id} = stat;
+  console.log("id from location state:", id);
   if(id == "" || id == null || id == undefined)
     id = user?.id;
 
+  console.log("new id in location state:", id);
   const getall = async () => {
     const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
     let matchess =  await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/allmatch`, {
@@ -26,10 +28,12 @@ const MatchHistory = () => {
       body: JSON.stringify({ id:id}),
       credentials: "include"
     }, accessToken, updateAccessToken);
-    const data = await matchess.json();  
-    let res = data.matches;
-    console.log("res >>> ",res);
-    setFeatures(res);
+
+    if (matchess.ok)
+    {
+      let ndata = await matchess.json();
+      setFeatures(ndata.matches || []);
+    }
   };
 
 useEffect(() => {

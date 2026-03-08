@@ -10,6 +10,30 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
 const SERVER_URL = API_URL
 const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`
 
+type StartConversationParams = {
+  userId: number
+  socket?: Socket | null
+}
+
+export const handleStartConversation = async ({ userId, socket, }: StartConversationParams) => {
+  try {
+    const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/start`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receipentId: userId })
+    })
+    const data = await res.json()
+    if (data.conversationId) {
+      socket?.emit("newConversation", { userId })
+      return data.conversationId as number
+    }
+  } catch (error) {
+    console.error('Failed to start conversation:', error)
+  }
+  return null
+}
+
 export default function Chat() {
   const { socket, isConnected, pendingInvitations, setPendingInvitations, invitePrompt, setInvitePrompt, currentUser, friendsList, setFriendsList, blockedConversations, setBlockedConversations } = useChatSocket()
   const { accessToken, updateAccessToken } = useAuth()
