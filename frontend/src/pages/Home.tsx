@@ -97,16 +97,14 @@ const Home = () => {
       return;
     }
     // let dat = await whoami();
-    console.log(" id >>>>> ",id);
+    // console.log(" id >>>>> ",id);
     if (id)
     {
       let res = await checkhandel(feature.mode);
-
       if (res.status === 403) {
         navigate(feature.page);
         return;
       }
-  
       if (!res.ok) {
         setConfirmState({
           open: true,

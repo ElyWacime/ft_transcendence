@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const restoreSession = async () => {
-      console.log("[AuthContext] Attempting to restore session...");
+      // console.log("[AuthContext] Attempting to restore session...");
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL || ""}/api/users/refresh`,
@@ -46,26 +46,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         );
 
-        console.log("[AuthContext] Refresh response status:", response.status);
+        // console.log("[AuthContext] Refresh response status:", response.status);
 
         if (response.ok) {
           const text = await response.text();
-          console.log("[AuthContext] Raw response text:", text);
+          // console.log("[AuthContext] Raw response text:", text);
           const data = JSON.parse(text);
-          console.log("[AuthContext] Parsed response data:", data);
-          console.log("[AuthContext] data.user:", data.user);
-          console.log("[AuthContext] Session restored successfully", data);
+          // console.log("[AuthContext] Parsed response data:", data);
+          // console.log("[AuthContext] data.user:", data.user);
+          // console.log("[AuthContext] Session restored successfully", data);
           setAccessToken(data.accessToken);
           if (data.user) {
             setUser(data.user);
           } else {
             console.warn("[AuthContext] WARNING: No user data in response!");
           }
-          console.log("[AuthContext] State updated - accessToken:", !!data.accessToken, "user:", !!data.user);
+          // console.log("[AuthContext] State updated - accessToken:", !!data.accessToken, "user:", !!data.user);
         } else {
           // No valid session - user needs to log in
           const errorText = await response.text();
-          console.log("[AuthContext] No valid session, user needs to log in. Error:", errorText);
+          // console.log("[AuthContext] No valid session, user needs to log in. Error:", errorText);
           setAccessToken(null);
           setUser(null);
         }
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setAccessToken(null);
         setUser(null);
       } finally {
-        console.log("[AuthContext] Setting isLoading to false");
+        // console.log("[AuthContext] Setting isLoading to false");
         setIsLoading(false);
       }
     };
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = (token: string, userData: User) => {
-    console.log("[AuthContext] Login called with token:", !!token, "user:", userData);
+    // console.log("[AuthContext] Login called with token:", !!token, "user:", userData);
     setAccessToken(token);
     setUser(userData);
   };
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const isLoggedIn = !!accessToken && !!user;
 
-  console.log("[AuthContext] Current state - isLoggedIn:", isLoggedIn, "isLoading:", isLoading, "accessToken:", !!accessToken, "user:", !!user);
+  // console.log("[AuthContext] Current state - isLoggedIn:", isLoggedIn, "isLoading:", isLoading, "accessToken:", !!accessToken, "user:", !!user);
 
   return (
     <AuthContext.Provider
