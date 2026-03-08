@@ -115,7 +115,15 @@ const ProfileSettings = () => {
       icon: Camera,
       color: "text-purple-500",
       path: "/profile/change-picture"
+    },
+    {
+      title: "Change username",
+      description: "Update your username",
+      icon: User,
+      color: "text-green-500",
+      path: "/profile/change-username"
     }
+
   ];
 
   if (loading) {

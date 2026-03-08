@@ -29,21 +29,8 @@ const GameOnline = () => {
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
 
   const { ws, isReady, wsRef } = useWebSocket();
-    const { user } = useAuth();
-    const id = user?.id;
-
-  // const endGame = useCallback((id) => {
-  //   if (ws && isReady && ws.readyState == WebSocket.OPEN)
-  //     ws.send(JSON.stringify({
-  //       token: accessToken,
-  //       type: "FINISHED",
-  //       mode: mode,
-  //       matchId:id
-  //     }));
-  //   }
-  // );
-
-
+  const { user } = useAuth();
+  const id = user?.id;
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
@@ -65,11 +52,6 @@ const GameOnline = () => {
           else
             x = `You Lost the match!`;
         }
-        // setmessage(x);
-        // setflag(false);
-        // endGame(data.id);
-
-        // if its a match tournament navigate back to tournament page.
         if (!data.T_Id){
           navigate("/result", { 
           state: { 
@@ -77,7 +59,6 @@ const GameOnline = () => {
           } 
         });
         }
-        
         else{
           navigate("/online-tournament", {
 
@@ -85,22 +66,7 @@ const GameOnline = () => {
               tournamentId: data.T_Id, 
             } 
           });
-
-
         }
-        // }
-        // else{
-        //   navigate("/tournament-online", {
-        //     state: { 
-        //       tournamentId: data.T_Id, 
-        //     } 
-        //   });
-        // }
-        // navigate("/");
-        // toast.success(`${winner} wins the match!`, {
-        //   duration: 2000,
-        //   onAutoClose: () => navigate("/"),
-        // });
       }
     }
   );
