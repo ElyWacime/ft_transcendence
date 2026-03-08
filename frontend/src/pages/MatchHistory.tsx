@@ -29,23 +29,11 @@ const MatchHistory = () => {
       credentials: "include"
     }, accessToken, updateAccessToken);
 
-    // Safely parse JSON
     if (matchess.ok)
     {
-      // console.log("matchess  >>>>:", matchess);
       let ndata = await matchess.json();
-      console.log("matchess >>>>  :", ndata);
-      const text = await matchess.text();
-      console.log(">>>> >>>> >>>> Raw response text:", text);
-      const data = text ? JSON.parse(text) : { matches: [] };
-      console.log(">>>> >>>> >>>>response data:", data);
-      setFeatures(data.matches || []);
-
+      setFeatures(ndata.matches || []);
     }
-      
-    // const data = await matchess.json();  
-    // let res = data.matches;
-    // setFeatures(res);
   };
 
 useEffect(() => {

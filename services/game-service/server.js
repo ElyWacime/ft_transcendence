@@ -1018,6 +1018,7 @@ fastify.post('/allmatch', async (request, reply) => {
         return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
       }));
       console.log("This is all matches with names >> ", matches);
+      return reply.code(201).send({ matches: matches});
     }
     } 
     catch (err) {
