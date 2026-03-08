@@ -37,7 +37,6 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    // Wait for auth to finish loading before attempting connection
     if (isLoading) {
       console.log("[ChatSocket] Waiting for auth to finish loading...");
       return;
@@ -50,24 +49,12 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       autoConnect: true,
     });
     setSocket(chatSocket);
-    chatSocket.on("connect", async () => {
-        try {
-          const res = await fetchWithAuth(
-            `${SERVER_URL}/api/chat/getCookieValue`, 
-            { method: 'GET', credentials: 'include' },
-            accessToken,
-            updateAccessToken
-          );
-          const usercookie = await res.json();
-          const userId = usercookie.user_id;
-          setCurrentUser({ id: userId });
-          chatSocket.emit('authenticate', userId);
-          setIsConnected(true);
-        } catch (error) {
-          console.error('Failed to authenticate:', error);
-        }
-      }
-    );
+    chatSocket.on("connect", () => {});
+
+    chatSocket.on("authenticate", (data: any) => {
+      setCurrentUser({ id: data.userId });
+      setIsConnected(true);
+    });
 
     chatSocket.on("disconnect", () => {
       setFriendsList({});

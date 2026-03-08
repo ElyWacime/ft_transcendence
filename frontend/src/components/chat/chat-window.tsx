@@ -89,6 +89,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
 
   const handleSend = () => {
     if (isBlocked) return
+    console.log({isConnected})
     if (inputValue.trim() && activeConversationId && isConnected) {
       onSendMessage(inputValue, String(activeConversationId))
       setInputValue("")
