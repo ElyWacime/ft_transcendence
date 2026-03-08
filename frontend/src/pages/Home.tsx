@@ -17,6 +17,23 @@ const Home = () => {
     open: false,
     action: null
   });
+  const { user } = useAuth();
+  const id = user?.id;
+  
+  const whoami = async () => {
+    let res =  await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/me`, {
+      method: "POST",
+      headers: {
+      },
+      credentials: "include",
+    }, accessToken, updateAccessToken);
+    if (!res.ok) {
+      return null;
+    }
+    let data =  await res.json();
+    // console.log(" >>>>> ",data.id);
+    return data;
+  };
 
   const checkhandel = async (mode: number) => {
     return await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
@@ -79,24 +96,33 @@ const Home = () => {
       navigate(feature.page);
       return;
     }
+    // let dat = await whoami();
+    console.log(" id >>>>> ",id);
+    if (id)
+    {
+      let res = await checkhandel(feature.mode);
 
-    let res = await checkhandel(feature.mode);
-
-    if (res.status === 403) {
-      navigate(feature.page);
-      return;
-    }
-
-    if (!res.ok) {
-      setConfirmState({
-        open: true,
-        action: async () => {
-          await endmatchhandel();
+      if (res.status === 403) {
+        navigate(feature.page);
+        return;
+      }
+  
+      if (!res.ok) {
+        setConfirmState({
+          open: true,
+          action: async () => {
+            await endmatchhandel();
+            navigate(feature.page);
+          }
+        });
+        } else {
           navigate(feature.page);
         }
-      });
-    } else {
+    }
+    else
+    {
       navigate(feature.page);
+      return;
     }
   };
 
