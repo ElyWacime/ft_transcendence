@@ -1,15 +1,5 @@
-node_modules/
-package-lock.json
-
 .env
-.env.local
-.env.*.local
-
-dist/
-build/
-
-.DS_Store
-
+node_modules
 auth-service/prisma/db/
 chat-service/dev.db
 game-service/db/

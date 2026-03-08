@@ -2,5 +2,4 @@ docker exec -it ft_transcendence-game-server-1 bash
 sqlite3 db/database.sqlite 
 .header on
 .mode column
-select * from Users;
 select * from match;

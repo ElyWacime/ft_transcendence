@@ -5,11 +5,9 @@ import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
+import { handleStartConversation } from "@/components/chat/MessagesPageLayout";
 import "../css/profile.css";
 import { useChatSocket } from "@/context/ChatSocketContext";
-import { handleStartConversation } from "./Chat";
-
-
 import { useAuth } from "@/context/AuthContext";
 
 const ProfileSettings = () => {
@@ -216,7 +214,7 @@ const ProfileSettings = () => {
                       </button>
                       {String(user?.id) !== String(searchResult.user.id) && (
                         <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
-                          const conversationId =  await handleStartConversation({ userId: searchResult.user.id, socket: socket })
+                          const conversationId =  await handleStartConversation({ userId: searchResult.user.id, socket: socket, onFetchConversations: null })
                           navigate(`/chat/${conversationId}`)
                         }}>Message
                         </button>

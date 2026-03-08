@@ -789,10 +789,10 @@ const getUserName = async (id) => {
 fastify.post("/me", async (request, reply) => {
   try {
     let accessToken = request.cookies.refresh_token;
-    console.log("refresh_token  >> ", accessToken);
+    // console.log("refresh_token  >> ", accessToken);
     if (!accessToken && request.headers.authorization) {
       accessToken = request.headers.authorization.split(" ")[1];
-      console.log("accessToken 2>> ", accessToken);
+      // console.log("accessToken 2>> ", accessToken);
     }
 
     if (!accessToken)
@@ -805,7 +805,7 @@ fastify.post("/me", async (request, reply) => {
       id: decoded.id,
       name: await getUserName(decoded.id),
     };
-    console.log("This is /me >> ", user);
+    // console.log("This is /me >> ", user);
     return reply.send(user);
   } catch (err) {
     return reply.code(401).send({ error: err.message });
@@ -894,10 +894,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 fastify.post('/invite', async (request, reply) => {
   try {
     let accessToken = request.cookies.refresh_token;
-    console.log("refresh_token  >> ", accessToken);
+    // console.log("refresh_token  >> ", accessToken);
     if (!accessToken && request.headers.authorization) {
       accessToken = request.headers.authorization.split(" ")[1];
-      console.log("accessToken 2>> ", accessToken);
+      // console.log("accessToken 2>> ", accessToken);
     }
 
     if (!accessToken)
@@ -928,10 +928,10 @@ fastify.post('/invite', async (request, reply) => {
 fastify.post('/check', async (request, reply) => {
   try {
     let accessToken = request.cookies.refresh_token;
-    console.log("refresh_token  >> ", accessToken);
+    // console.log("refresh_token  >> ", accessToken);
     if (!accessToken && request.headers.authorization) {
       accessToken = request.headers.authorization.split(" ")[1];
-      console.log("accessToken 2>> ", accessToken);
+      // console.log("accessToken 2>> ", accessToken);
     }
 
     if (!accessToken)
@@ -956,10 +956,10 @@ fastify.post('/check', async (request, reply) => {
 fastify.post('/endmatch', async (request, reply) => {
   try {
     let accessToken = request.cookies.refresh_token;
-    console.log("refresh_token  >> ", accessToken);
+    // console.log("refresh_token  >> ", accessToken);
     if (!accessToken && request.headers.authorization) {
       accessToken = request.headers.authorization.split(" ")[1];
-      console.log("accessToken 2>> ", accessToken);
+      // console.log("accessToken 2>> ", accessToken);
     }
 
     if (!accessToken)
@@ -993,20 +993,18 @@ fastify.post('/endmatch', async (request, reply) => {
 fastify.post('/allmatch', async (request, reply) => {
   try {
     let accessToken = request.cookies.refresh_token;
-    console.log("refresh_token  >> ", accessToken);
+    // console.log("refresh_token  >> ", accessToken);
     if (!accessToken && request.headers.authorization) {
       accessToken = request.headers.authorization.split(" ")[1];
-      console.log("accessToken 2>> ", accessToken);
+      // console.log("accessToken 2>> ", accessToken);
     }
-
     if (!accessToken)
       return reply.code(403).send({ message: "Not logged in" });
-
     const decoded = request.jwt.verify(accessToken);
     if (!decoded)
       return reply.code(401).send({ message: "Couldn't decode token" });
-    
     let matches = await dbcnx.getPlayerMatches(request.body.id);
+    console.log("This is all matches >> ", matches);
     if (matches) {
       matches = await Promise.all(matches.map(async (m) => {
         const [P1, P2, P3, P4, Winner] = await Promise.all([
@@ -1018,8 +1016,10 @@ fastify.post('/allmatch', async (request, reply) => {
         ]);
         return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
       }));
+      console.log("This is all matches with names >> ", matches);
     }
-    } catch (err) {
+    } 
+    catch (err) {
       return reply.code(401).send({ message: 'Invalid token' });
     }
 
