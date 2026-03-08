@@ -95,7 +95,7 @@ export const Navigation = () => {
                         to={mode.path}
                         onClick={() => setIsGamesOpen(false)}
                         className={({ isActive }) =>
-                          `nav-dropdown-item ${isActive ? 'nav-dropdown-item-active' : ''}`
+                          `nav-dropdown-item nav-dropdown-item-active}`
                         }
                       >
                         <mode.icon className="nav-icon" />
