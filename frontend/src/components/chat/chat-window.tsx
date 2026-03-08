@@ -32,6 +32,12 @@ type ChatWindowProps = {
   socket?: Socket | null
 }
 
+const formatTime = (timestamp: string) => {
+                      if (!timestamp) return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      const date = new Date(timestamp)
+                      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
 export default function ChatWindow({ conversation, messages, onSendMessage,  isFriend, isOnline, pendingAddFriend, onGetHistory, isConnected, currentUser, isBlocked, blockedBy, canUnblock, incomingInvite, onInvite, onRespondInvite, onCancelInvite, onBlockConversation, onUnblockConversation, onAddFriend, onUnfriend, socket, pendingInvite}: ChatWindowProps) {
   const [inputValue, setInputValue] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -116,10 +122,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
   const peerName = conversation.other_user_username
   const userProfileLink = `/dashboard/${peerName}`
   const filteredMessages = activeConversationId
-    ? messages.filter((message) => {
-        const messageConversationId = message.conversation_id ?? message.conversationId
-        return messageConversationId === activeConversationId
-      })
+    ? messages.filter((message) => message.conversation_id === activeConversationId)
     : []
 
   return (
@@ -155,7 +158,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
           ) : isFriend ? (
             <button 
               className="add-friend-button warning-button" 
-              onClick={() => conversation?.other_user_id && onUnfriend?.(conversation)}
+              onClick={() => conversation?.other_user_id && onUnfriend(conversation)}
               disabled={!activeConversationId || isBlocked}
             >
               Unfriend
@@ -219,11 +222,6 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
         {filteredMessages.map((message) => {
           const senderId = message.sender_id 
           const isOwnMessage = senderId === currentUser?.id
-          const formatTime = (timestamp: string) => {
-            if (!timestamp) return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            const date = new Date(timestamp)
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
           return (
             <div key={message.id} className={`message ${isOwnMessage ? "user-message" : "other-message"}`}>
               <div className="message-bubble">{message.body}</div>

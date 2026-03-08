@@ -28,7 +28,6 @@ const MatchHistory = () => {
     }, accessToken, updateAccessToken);
     const data = await matchess.json();  
     let res = data.matches;
-    console.log("res >>> ",res);
     setFeatures(res);
   };
 

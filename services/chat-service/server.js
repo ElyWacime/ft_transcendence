@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cookie from "@fastify/cookie"
+import cookieParser from 'cookie';
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
 import * as fs from 'fs';
@@ -8,8 +9,17 @@ import initializeDb from './setup-db.js';
 import { getInvitationStatus, createInvitation, cancelInvitation } from './dbAccess/invitation-q.js';
 import { getBlockingStatus, blockUser, unblockUser } from './dbAccess/block-q.js';
 import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './dbAccess/friends-q.js';
-import { insertUsers, getUserByUsername, updateUsername } from './dbAccess/user-q.js';
+import { insertUsers, updateUsername } from './dbAccess/user-q.js';
 import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './dbAccess/conversations-q.js';
+import {
+  usersAddSchema,
+  userUpdateSchema,
+  conversationsStartSchema,
+  conversationMessagesSchema,
+  friendsSchema,
+  blockSchema,
+  invitationsSchema,
+} from './schemas.js';
 
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
   https: {
@@ -40,7 +50,6 @@ const io = new Server(fastify.server, {
 
 const connectedUsers = new Map();
 
-// Create HTTPS agent for self-signed certificates
 const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
   rejectUnauthorized: false
 }) : undefined;
@@ -49,14 +58,13 @@ async function desToken(request)
 {
    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
    
-   // Get token from Authorization header (Bearer token) or fallback to cookie for backward compatibility
    let token = null;
    const authHeader = request.headers.authorization;
    
    if (authHeader && authHeader.startsWith('Bearer ')) {
-     token = authHeader.substring(7); // Remove 'Bearer ' prefix
+     token = authHeader.substring(7); 
    } else if (request.cookies.access_token) {
-     token = request.cookies.access_token; // Fallback for old implementation
+     token = request.cookies.access_token; 
    }
    
    if (!token) {
@@ -77,54 +85,41 @@ async function desToken(request)
   return res;
 }
 
-fastify.get("/getCookieValue", async (request, reply) => {
-    const res =  await desToken(request);
+async function validateSocketToken(token) {
+  if (!token) {
+    return null;
+  }
+  
+  const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+  const fetchOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  };
+  
+  if (httpsAgent) {
+    fetchOptions.agent = httpsAgent;
+  }
+  
+  try {
+    const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
     
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
+    if (res.status === 200) {
+      const data = await res.json();
+      return data;
     }
-    
-    const token = await res.json();
-    return token;
-})
+    return null;
+  } catch (error) {
+    fastify.log.error(error, 'Error validating socket token');
+    return null;
+  }
+}
 
-fastify.post("/users/add", async (request) => {
+fastify.post("/users/add", { schema: usersAddSchema }, async (request) => {
   return await insertUsers(request.body.id, request.body.username);
 })
 
-fastify.post("/user", async (request, reply) => {
-    const res = await desToken(request);
-    
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    
-    const token = await res.json();
-
-    const currentUsername = token.user_name;
-    const searchUsername = request.body.username;
-
-    const user = await getUserByUsername(searchUsername);
-
-    if (!user) {
-      return reply.code(404).send({ error: 'User not found' });
-    }
-
-    if (user.username === currentUsername) {
-      return {
-        isSelf: true,
-        message: 'This is your own account'
-      };
-    }
-
-    return {
-      isSelf: false,
-      username: user.username,
-      userId: user.id
-    };
-});
-
-fastify.post("/user/update", async (request, reply) => {
+fastify.post("/user/update", { schema: userUpdateSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -158,7 +153,7 @@ fastify.get("/conversations", async (request, reply) => {
     return conv;
 })
 
-fastify.post("/conversations/start", async (request, reply) => { 
+fastify.post("/conversations/start", { schema: conversationsStartSchema }, async (request, reply) => { 
   const res = await desToken(request);  
   
   if (res.status === 401) {
@@ -185,7 +180,7 @@ fastify.post("/conversations/start", async (request, reply) => {
   return { conversationId: conv.id };
 })
 
-fastify.get("/conversations/:id/messages", async (request) => {
+fastify.get("/conversations/:id/messages", { schema: conversationMessagesSchema }, async (request) => {
   const conversationId = request.params.id;
 
   const messages = await getChatHistory(conversationId);
@@ -196,7 +191,7 @@ fastify.get("/conversations/:id/messages", async (request) => {
   return messages;
 })
 
-fastify.post("/friends/status", async (request, reply) => {
+fastify.post("/friends/status", { schema: friendsSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -234,7 +229,7 @@ fastify.get("/friends", async (request, reply) => {
   return { friends };
 });-
 
-fastify.post("/friends/add", async (request, reply) => {
+fastify.post("/friends/add", { schema: friendsSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -253,7 +248,7 @@ fastify.post("/friends/add", async (request, reply) => {
   };
 })
 
-fastify.post("/friends/remove", async (request, reply) => {
+fastify.post("/friends/remove", { schema: friendsSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -271,7 +266,7 @@ fastify.post("/friends/remove", async (request, reply) => {
   };
 })
 
-fastify.post("/block/status", async (request, reply) => {
+fastify.post("/block/status", { schema: blockSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -300,7 +295,7 @@ fastify.post("/block/status", async (request, reply) => {
   };
 });
 
-fastify.post("/block", async (request, reply) => {
+fastify.post("/block", { schema: blockSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -322,7 +317,7 @@ fastify.post("/block", async (request, reply) => {
   };
 });
 
-fastify.post("/unblock", async (request, reply) => {
+fastify.post("/unblock", { schema: blockSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -348,7 +343,7 @@ fastify.post("/unblock", async (request, reply) => {
   };
 });
 
-fastify.post("/invitations/status", async (request, reply) => {
+fastify.post("/invitations/status", { schema: invitationsSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -378,7 +373,7 @@ fastify.post("/invitations/status", async (request, reply) => {
     };
 });
 
-fastify.post("/invite", async (request, reply) => {
+fastify.post("/invite", { schema: invitationsSchema }, async (request, reply) => {
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -402,7 +397,7 @@ fastify.post("/invite", async (request, reply) => {
   };
 });
 
-fastify.post("/uninvite", async (request, reply) => {        
+fastify.post("/uninvite", { schema: invitationsSchema }, async (request, reply) => {        
   const res = await desToken(request);
   
   if (res.status === 401) {
@@ -425,37 +420,63 @@ fastify.post("/uninvite", async (request, reply) => {
   };
 });
 
-io.on('connection', (socket) => {
-  let myId;
-  
-  socket.on('authenticate', async (userId) => {
-    myId = userId;
-    socket.join(`user:${myId}`);
-    connectedUsers.set(userId, true);
-
-    const friendIds = await getAllFriends(userId);
+io.use(async (socket, next) => {
+  try {
+    const cookieHeader = socket.handshake.headers.cookie;
+    if (!cookieHeader) {
+      return next(new Error('No cookies found'));
+    }
     
-    const onlineFriends = friendIds.filter(friendId => connectedUsers.has(friendId));
-  
-    socket.emit('onlineFriends', { onlineFriends });
+    const cookies = cookieParser.parse(cookieHeader);
 
-    onlineFriends.forEach(friendId => {
-      socket.to(`user:${friendId}`).emit('friendOnline', { userId: myId });
-    });
+    const accessToken = cookies.access_token;
+    if (!accessToken) {
+      return next(new Error('No access token found'));
+    }
+
+    const userData = await validateSocketToken(accessToken);    
+    if (!userData) {
+      return next(new Error('Invalid or expired token'));
+    }
+
+    socket.userId = userData.user_id;
+
+    fastify.log.info(`Socket authenticated for user: ${socket.userId}`);
+    next();
+  } catch (error) {
+    fastify.log.error(error, 'Socket authentication error');
+    next(new Error('Authentication failed'));
+  }
+});
+
+io.on('connection', async (socket) => {
+  const myId = socket.userId;
+
+  socket.emit('authenticate', { userId: myId });
+    
+  socket.join(`user:${myId}`);
+  
+  connectedUsers.set(myId, true);
+
+  const friendIds = await getAllFriends(myId);
+  const onlineFriends = friendIds.filter(friendId => connectedUsers.has(friendId));
+
+  socket.emit('onlineFriends', { onlineFriends });
+
+  onlineFriends.forEach(friendId => {
+    socket.to(`user:${friendId}`).emit('friendOnline', { userId: myId });
   });
 
   socket.on('disconnect', async () => {
-    if (myId) {
-      const friendIds = await getAllFriends(myId);
-      
-      friendIds.forEach(friendId => {
-        if (connectedUsers.has(friendId)) {
-          socket.to(`user:${friendId}`).emit('friendOffline', { userId: myId });
-        }
-      });
-      
-      connectedUsers.delete(myId);
-    }
+    const friendIds = await getAllFriends(myId);
+    
+    friendIds.forEach(friendId => {
+      if (connectedUsers.has(friendId)) {
+        socket.to(`user:${friendId}`).emit('friendOffline', { userId: myId });
+      }
+    });
+    
+    connectedUsers.delete(myId);    
   });  
 
   socket.on('AddFriendOnline', ({ userId }) => {
@@ -511,8 +532,8 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('cancelInvite', ({ toUserId, invitationType  }) => {
-    socket.to(`user:${toUserId}`).emit('cancelInvite', { invitationType });
+  socket.on('cancelInvite', ({ toUserId  }) => {
+    socket.to(`user:${toUserId}`).emit('cancelInvite', {});
   });
 
   socket.on('InviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {

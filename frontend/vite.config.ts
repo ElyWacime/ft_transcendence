@@ -16,10 +16,10 @@ export default defineConfig(({ mode }) => {
     watch: {
       usePolling: true,
     },
-      // hmr: {
-      //   host: process.env.VITE_HMR_HOST, 
-      //   protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws",
-      // },
+      hmr: {
+        host: process.env.VITE_HMR_HOST, 
+        protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws",
+      },
   };
   if (process.env.VITE_HTTPS === "true") {
     try {
