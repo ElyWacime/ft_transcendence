@@ -16,44 +16,14 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       if (!decoded)
         return reply.code(401).send({ message: "Couldn't decode token" });
 
-      // const authServiceBaseUrl = process.env.AUTH_SERVICE_URL.replace(/\/+$/, '');
-      // console.log('Dashboard request for identifier:', identifier);
-      // let userId = identifier;
-
-      // const searchResponse = await fetch(`${authServiceBaseUrl}/search-this-name`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${token}`
-      //   },
-      //   body: JSON.stringify({ name: identifier })
-      // });
-
-      // if (searchResponse.ok) {
-      //   const searchResult = await searchResponse.json();
-      //   userId = searchResult.user_id;
-      // }
-
-      // // Fetch full user info using resolved user ID
-      // const authResponse = await fetch(`${authServiceBaseUrl}/user-info/${encodeURIComponent(userId)}`, {
-      //   method: 'GET',
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`
-      //   }
-      // });
-
-      // if (!authResponse.ok) {
-      //   return reply.code(404).send({ error: 'User not found.' });
-      // }
-      // const authUser = await authResponse.json();
-
       const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
         Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [decoded.id, decoded.id, decoded.id, decoded.id]);
       const winsCount = await dbcnx.UserCountWins_ayoub(decoded.id);
-      const tournParticipation = await dbcnx.UserCountTournParticipation_ayoub(decoded.id);
       const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(decoded.id);
       const totalMatches = matchesCount?.Played || 0;
       const totalWins = winsCount?.Winned || 0;
+      const totalTournaments  = await dbcnx.UserCountTournPlayed_ayoub(decoded.id);
+      const totalTourWins = await dbcnx.UserCountTournWin_ayoub(decoded.id);
       const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
       return {
         user: {
@@ -70,7 +40,8 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
           totalWins: totalWins,
           totalLosses: totalMatches - totalWins,
           winRate: parseFloat(winRate),
-          tournamentParticipations: tournParticipation?.Participate || 0
+          totalTournaments: totalTournaments?.Played || 0,
+          totalTourWins: totalTourWins?.Winned || 0,
         },
         lastMatch: lastMatch || null
       };

@@ -37,7 +37,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isLoading) {
-      console.log("[ChatSocket] Waiting for auth to finish loading...");
+      // console.log("[ChatSocket] Waiting for auth to finish loading...");
       return;
     }
 
