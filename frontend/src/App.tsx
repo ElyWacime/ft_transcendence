@@ -24,7 +24,8 @@ import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
 import Chat from "./pages/Chat";
 import Result from "./pages/Result";
-import ChangeUsername from "./pages/Change_username_page";
+// import ChangeUsername from "./pages/Change_username_page";
+// import ChangeUsername from "./pages/Change_username_page";
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { ChatSocketProvider } from "./context/ChatSocketContext";
 
@@ -81,7 +82,7 @@ const router = createBrowserRouter(
         { path: "profile/change-email", element: <ChangeEmail /> },
         { path: "profile/change-password", element: <ChangePassword /> },
         { path: "profile/change-picture", element: <ChangePicture /> },
-        { path: "profile/change-username", element: <ChangeUsername /> },
+        // { path: "profile/change-username", element: <ChangeUsername /> },
         {
           path: "dashboard/:identifier?",
           element: (

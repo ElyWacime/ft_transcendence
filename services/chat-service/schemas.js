@@ -3,17 +3,7 @@ export const usersAddSchema = {
     type: 'object',
     required: ['id', 'username'],
     properties: {
-      id: { type: 'integer' },
-      username: { type: 'string' }
-    }
-  }
-};
-
-const userSchema = {
-  body: {
-    type: 'object',
-    required: ['username'],
-    properties: {
+      id: { type: 'string' },
       username: { type: 'string' }
     }
   }
@@ -24,7 +14,7 @@ export const userUpdateSchema = {
     type: 'object',
     required: ['user_id', 'username'],
     properties: {
-      user_id: { type: 'integer' },
+      user_id: { type: 'string' },
       username: { type: 'string' }
     }
   }
@@ -35,7 +25,7 @@ export const conversationsStartSchema = {
     type: 'object',
     required: ['receipentId'],
     properties: {
-      receipentId: { type: 'integer' }
+      receipentId: { type: 'string' }
     }
   }
 };
@@ -55,7 +45,7 @@ export const friendsSchema = {
     type: 'object',
     required: ['user_id'],
     properties: {
-      user_id: { type: 'integer' }
+      user_id: { type: 'string' }
     }
   }
 };
@@ -65,7 +55,7 @@ export const blockSchema = {
     type: 'object',
     required: ['user_id'],
     properties: {
-      user_id: { type: 'integer' }
+      user_id: { type: 'string' }
     }
   }
 };
@@ -75,7 +65,7 @@ export const invitationsSchema = {
     type: 'object',
     required: ['user_id', 'invitationType'],
     properties: {
-      user_id: { type: 'integer' },
+      user_id: { type: 'string' },
       invitationType: { type: 'string' }
     }
   }

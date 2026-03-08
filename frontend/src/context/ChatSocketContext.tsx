@@ -32,11 +32,10 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     const [blockedConversations, setBlockedConversations] = useState<any>({})
 
 
-    const { isLoggedIn, isLoading, accessToken, updateAccessToken } = useAuth();
+    const { isLoggedIn, isLoading } = useAuth();
 
 
   useEffect(() => {
-    // Wait for auth to finish loading before attempting connection
     if (isLoading) {
       console.log("[ChatSocket] Waiting for auth to finish loading...");
       return;

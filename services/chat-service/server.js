@@ -58,14 +58,13 @@ async function desToken(request)
 {
    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
    
-   // Get token from Authorization header (Bearer token) or fallback to cookie for backward compatibility
    let token = null;
    const authHeader = request.headers.authorization;
    
    if (authHeader && authHeader.startsWith('Bearer ')) {
-     token = authHeader.substring(7); // Remove 'Bearer ' prefix
+     token = authHeader.substring(7); 
    } else if (request.cookies.access_token) {
-     token = request.cookies.access_token; // Fallback for old implementation
+     token = request.cookies.access_token; 
    }
    
    if (!token) {
