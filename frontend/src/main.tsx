@@ -10,6 +10,5 @@ import './css/pongCanvas.css'
 import './css/aiGame.css'
 import './css/login.css'
 import './css/register.css'
-import './css/LocalTournament.css'
 
 createRoot(document.getElementById("root")!).render(<App />);
