@@ -67,4 +67,4 @@ The application uses a microservices architecture:
 - Chat Service: Manages real-time messaging
 - Gateway: Routes requests to appropriate services
 
-Services communicate via HTTPS and WebSocket protocols.
+Services communicate via HTTP and WebSocket protocols.
