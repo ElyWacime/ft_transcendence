@@ -33,55 +33,6 @@ export default function Chat() {
     return res;
   }
 
-  // const inviteHandle = async (P1, P2) => 
-  // {
-  //   let currentToken = accessToken;
-    
-  //   const res = await fetch(`${GAME_SERVICE_URL}/api/game/invite`, {
-  //       method: 'POST',
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         ...(currentToken ? { "Authorization": `Bearer ${currentToken}` } : {})
-  //       },
-  //       credentials: "include",
-  //       body: JSON.stringify({ P1 ,P2 }),
-  //   });
-    
-  //   if (res.status === 401) {
-  //     try {
-  //       const refreshRes = await fetch(`${AUTH_SERVICE_URL}/api/users/refresh`, {
-  //         method: 'POST',
-  //         credentials: 'include',
-  //       });
-        
-  //       if (refreshRes.ok) {
-  //         const refreshData = await refreshRes.json();
-  //         const newToken = refreshData.accessToken;
-          
-  //         if (newToken) {
-  //           updateAccessToken(newToken);
-            
-  //           const retryRes = await fetch(`${GAME_SERVICE_URL}/api/game/invite`, {
-  //             method: 'POST',
-  //             headers: {
-  //               "Content-Type": "application/json",
-  //               "Authorization": `Bearer ${newToken}`
-  //             },
-  //             credentials: "include",
-  //             body: JSON.stringify({ P1 ,P2 }),
-  //           });
-            
-  //           return retryRes;
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('Token refresh failed:', error);
-  //     }
-  //   }
-    
-  //   return res;
-  // }
-
   useEffect(() => {
     if (!socket) return
 

@@ -3,7 +3,6 @@ import { open } from "sqlite";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-// import { line } from "strip-comments";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -253,9 +252,17 @@ export class SQLiteDB {
     }
 
     async UserCountTournWin_ayoub(id) {
-        return await this.db.get(`SELECT count(DISTINCT T_Id) as Winned  FROM  Match Where (P1_Id = ? OR P2_Id = ?)  AND T_Id is NOT NULL and gameStatus = 'FINISHED'  GROUP BY T_Id having count(T_Id) = 2`,[id,id]);
+        return await this.db.get(`SELECT COUNT(*) AS tournaments_won
+        FROM (
+            SELECT T_Id
+            FROM Match
+            WHERE Winner_Id = ?
+              AND T_Id IS NOT NULL
+            GROUP BY T_Id
+            HAVING COUNT(*) = 2
+        ) t;`,[id]);
     }
-
+    
     async UserCountTournWins_ayoub(id) {
         return await this.db.get(`SELECT count(*) as Winned  FROM  Match 
         Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
@@ -269,7 +276,6 @@ export class SQLiteDB {
         return await this.db.run(`SELECT count(*) as Played  FROM  Match 
         Where (P1_Id = ?  OR P2_Id = ?  OR P3_Id = ?  OR P4_Id = ?);`, [id,id,id,id]);
     }
-
 
     async getLasttMatchByPlayerID_ayoub(id) {
         return this.db.get(`SELECT *
