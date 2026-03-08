@@ -1,13 +1,7 @@
 import { useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
 import { Socket } from 'socket.io-client'
 import ChatSidebar from "./chat-sidebar"
 import ChatWindow from "./chat-window"
-import { useAuth } from "@/context/AuthContext"
-import { fetchWithAuth } from "@/lib/tokenRefresh"
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
-const SERVER_URL = API_URL
 
 type MessagesPageLayoutProps = {
   conversations: any[]
@@ -17,7 +11,6 @@ type MessagesPageLayoutProps = {
   onGetHistory: (conversationId: number) => void
   isConnected: boolean
   currentUser?: any
-  onFetchConversations: () => void
   blockedConversations: any
   pendingInvitations: any
   onBlockConversation: (conversationId: number) => void
@@ -33,41 +26,7 @@ type MessagesPageLayoutProps = {
   socket?: Socket | null
 }
 
-type StartConversationParams = {
-  userId: number
-  socket?: Socket | null
-  onFetchConversations?: () => void | Promise<void>
-}
-
-export const handleStartConversation = async ({ userId, socket, onFetchConversations }: StartConversationParams) => {
-  try {
-    const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/start`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ receipentId: userId })
-    })
-    const data = await res.json()
-    if (data.conversationId) {
-      socket?.emit("newConversation", { userId })
-      if (onFetchConversations) {
-        await onFetchConversations()
-      }
-      return data.conversationId as number
-    }
-  } catch (error) {
-    console.error('Failed to start conversation:', error)
-  }
-  return null
-}
-
-export default function MessagesPageLayout ({ conversations, selectedId, onUnfriend, friendsList, messages, onSendMessage, onGetHistory, isConnected, currentUser, onFetchConversations, blockedConversations, pendingInvitations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    onFetchConversations()
-  }, [])
-
+export default function MessagesPageLayout ({ conversations, selectedId, onUnfriend, friendsList, messages, onSendMessage, onGetHistory, isConnected, currentUser, blockedConversations, pendingInvitations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
   const selectedConversation = conversations.find((c) => c.id === selectedId)
   const blockStatus = selectedConversation ? blockedConversations[selectedConversation.id] : null
   const friendstatus = selectedConversation ? friendsList[selectedConversation.other_user_id] : null
@@ -82,24 +41,15 @@ export default function MessagesPageLayout ({ conversations, selectedId, onUnfri
   const pendingFriendRequest = conversationPendingStatus?.friend_request ?? false
 
   useEffect(() => {
-    if (!selectedConversation || !onCheckBlockStatus) return
-    const cachedBlockingStatus = blockedConversations?.[selectedConversation.id]
-    const cachedInvitationStatus  = pendingInvitations?.[selectedConversation.id]
-    if (!cachedBlockingStatus) {
+    if (!selectedConversation) return
+    if (!blockStatus) {
       onCheckBlockStatus(selectedConversation)
     }
-    if (!cachedInvitationStatus) {
+    if (!conversationPendingStatus) {
       onCheckInvitationStatus(selectedConversation, "friend_request")
       onCheckInvitationStatus(selectedConversation, "game_request")
     }
   }, [selectedConversation])
-
-  const startConversation = async (userId: number) => {
-    const conversationId = await handleStartConversation({ userId, socket, onFetchConversations })
-    if (conversationId) {
-      navigate(`/chat/${conversationId}`)
-    }
-  }
 
   return (
     <div className="chat-page-wrapper">

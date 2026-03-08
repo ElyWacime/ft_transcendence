@@ -1,14 +1,49 @@
-import { useCallback, useEffect, useState } from "react"
+import {  useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useChatSocket } from "../context/ChatSocketContext"
 import "../components/chat/App.css"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
 import { useAuth } from "@/context/AuthContext"
 import { fetchWithAuth } from "@/lib/tokenRefresh"
+import { Socket } from 'socket.io-client'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
 const SERVER_URL = API_URL
 const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`
+
+let inviteHandle = async (P1, P2) => 
+{
+  const res = await fetch(`${GAME_SERVICE_URL}/invite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({token:localStorage.getItem("token") , P1 ,P2 }),
+  });
+  return res;
+}
+
+type StartConversationParams = {
+  userId: number
+  socket?: Socket | null
+}
+
+export const handleStartConversation = async ({ userId, socket, }: StartConversationParams) => {
+  try {
+    const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/start`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receipentId: userId })
+    })
+    const data = await res.json()
+    if (data.conversationId) {
+      socket?.emit("newConversation", { userId })
+      return data.conversationId as number
+    }
+  } catch (error) {
+    console.error('Failed to start conversation:', error)
+  }
+  return null
+}
 
 export default function Chat() {
   const { socket, isConnected, pendingInvitations, setPendingInvitations, invitePrompt, setInvitePrompt, currentUser, friendsList, setFriendsList, blockedConversations, setBlockedConversations } = useChatSocket()
@@ -66,6 +101,10 @@ export default function Chat() {
     }
   }, [socket, navigate])
 
+  useEffect(() => {
+    fetchConversations()
+  }, [])
+
   const fetchConversations = async () => {
       try {
         const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations`, { method: 'GET', credentials: 'include' }, accessToken, updateAccessToken)
@@ -95,29 +134,29 @@ export default function Chat() {
   const sendInvite = async (conversation: any, invitationType: string) => {
     if (!socket || !isConnected || !conversation?.other_user_id) return
 
-
     const response = await fetchWithAuth(`${SERVER_URL}/api/chat/invite`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id, invitation_type: invitationType })
-    }, accessToken, updateAccessToken)
-    const re = await response.json()
-
-    setPendingInvitations((prev: any) => ({
-      ...prev,
-      [conversation.id]: {
-        ...prev[conversation.id],
-        [invitationType]: true
-      }
-    }))
-    
-    socket.emit('Invite', {
-      conversationId: conversation.id,
-      toUserId: conversation.other_user_id,
-      fromUserId: currentUser?.id,
-      invitationType: invitationType
     })
+
+    if (response.ok) {
+      setPendingInvitations((prev: any) => ({
+        ...prev,
+        [conversation.id]: {
+          ...prev[conversation.id],
+          [invitationType]: true
+        }
+      }))
+      
+      socket.emit('Invite', {
+        conversationId: conversation.id,
+        toUserId: conversation.other_user_id,
+        fromUserId: currentUser?.id,
+        invitationType: invitationType
+      })
+    }
   }
 
   const cancelInvite = async (conversation: any, invitationType: string) => {
@@ -129,23 +168,23 @@ export default function Chat() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id, invitation_type: invitationType })
-    }, accessToken, updateAccessToken)
-    
-    const re = await response.json()    
-
-    setPendingInvitations((prev: any) => ({
-      ...prev,
-      [conversation.id]: {
-        ...prev[conversation.id],
-        [invitationType]: false
-      }
-    }))
-    
-    setInvitePrompt(null)
-    socket.emit('cancelInvite', {
-      toUserId: conversation.other_user_id,
-      invitationType: invitationType
     })
+  
+    if (response.ok) {
+      setPendingInvitations((prev: any) => ({
+        ...prev,
+        [conversation.id]: {
+          ...prev[conversation.id],
+          [invitationType]: false
+        }
+      }))
+      
+      setInvitePrompt(null)
+      socket.emit('cancelInvite', {
+        toUserId: conversation.other_user_id,
+        invitationType: invitationType
+      })
+    }
   }
 
   const respondInvite = async (accepted: boolean, invitationType: string) => {
@@ -373,14 +412,12 @@ export default function Chat() {
       onGetHistory={getChatHistory}
       isConnected={isConnected}
       currentUser={currentUser}
-      onFetchConversations={fetchConversations}
       blockedConversations={blockedConversations}
       pendingInvitations={pendingInvitations}
       onBlockConversation={handleBlockConversation}
       onUnblockConversation={handleUnblockConversation}
       onCheckBlockStatus={checkBlockStatus}
       onCheckInvitationStatus={checkInvitationStatus}
-      onCheckFriendshipStatus={checkFriendshipStatus}
       friendsList={friendsList}
       invitePrompt={invitePrompt}
       onInvite={sendInvite}
