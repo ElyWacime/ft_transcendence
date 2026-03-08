@@ -106,18 +106,10 @@ const Home = () => {
         navigate(feature.page);
         return;
       }
-  
-      if (!res.ok) {
-        setConfirmState({
-          open: true,
-          action: async () => {
-            await endmatchhandel();
-            navigate(feature.page);
-          }
-        });
-        } else {
-          navigate(feature.page);
-        }
+      if (res.ok) 
+        navigate(feature.page);
+      else
+        toast.error("You Have an Ongoing Match");
     }
     else
     {
