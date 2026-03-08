@@ -2,6 +2,7 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
 
   fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     try {
+      const { identifier } = request.params;
       let accessToken = request.cookies.refresh_token;
       console.log("refresh_token  >> ", accessToken);
       if (!accessToken && request.headers.authorization) {
@@ -16,14 +17,16 @@ export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
       if (!decoded)
         return reply.code(401).send({ message: "Couldn't decode token" });
 
+      const targetUserId = identifier || decoded.id;
+
       const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
-        Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [decoded.id, decoded.id, decoded.id, decoded.id]);
-      const winsCount = await dbcnx.UserCountWins_ayoub(decoded.id);
-      const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(decoded.id);
+        Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
+      const winsCount = await dbcnx.UserCountWins_ayoub(targetUserId);
+      const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(targetUserId);
       const totalMatches = matchesCount?.Played || 0;
       const totalWins = winsCount?.Winned || 0;
-      const totalTournaments  = await dbcnx.UserCountTournPlayed_ayoub(decoded.id);
-      const totalTourWins = await dbcnx.UserCountTournWin_ayoub(decoded.id);
+      const totalTournaments  = await dbcnx.UserCountTournPlayed_ayoub(targetUserId);
+      const totalTourWins = await dbcnx.UserCountTournWin_ayoub(targetUserId);
       const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
       return {
         user: {

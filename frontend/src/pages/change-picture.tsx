@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
+import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
 import { Camera, ArrowLeft, Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
@@ -23,10 +24,11 @@ const ChangePicture = () => {
       try {
         const userId = user?.id;
         if (userId) {
-          const data = await userApi.getUserById(userId);
-          setCurrentAvatar(data.avatar || "");
-          setPreviewUrl(data.avatar || "");
-          setUsername(data.User_name || data.user_name || "");
+          
+          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId);
+          setCurrentAvatar(data.user.avatar || "");
+          setPreviewUrl(data.user.avatar || "");
+          setUsername(data.user.User_name || "");
         }
       } catch (error) {
         console.error("Failed to fetch current avatar:", error);

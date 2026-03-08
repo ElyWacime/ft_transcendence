@@ -1,33 +1,88 @@
 import { fetchWithAuth } from './tokenRefresh';
 
+interface UserData {
+  id: string;
+  email: string;
+  User_name: string;
+  avatar: string;
+  isOnline: boolean;
+  Auto_Match: boolean;
+  CreatedAt: string;
+}
+
+interface GameStatistics {
+  totalMatches: number;
+  totalWins: number;
+  totalLosses: number;
+  winRate: number;
+  totalTournaments?: number;
+  totalTourWins?: number;
+}
+
+interface CombinedUserData {
+  user: UserData;
+  statistics: GameStatistics;
+  lastMatch: any | null;
+}
+
 class PlayerDashboardAPI_ayoub {
 
   private baseUrl = "/api";
 
-  async getPlayerDashboard(identifier: string) {
-    const url = `${this.baseUrl}/dashboard/${identifier}`;
-    
+  // Main method: Fetch ALL data combined (auth + game)
+  async getCompleteUserData(userId: string): Promise<CombinedUserData> {
     try {
-      const res = await fetchWithAuth(url, {
-        method: "GET",
-      });
+      // Fetch both auth and game data in parallel
+      const [authRes, gameRes] = await Promise.all([
+        fetchWithAuth(`/api/users/user-info/${userId}`, { method: "GET" }),
+        fetchWithAuth(`${this.baseUrl}//dashboard/${userId}`, { method: "GET" })
+      ]);
 
-      if (!res.ok)
-        {
-        const errorText = await res.text();
-        console.error("Dashboard API Error:", res.status, errorText);
-        let errorMessage = `Failed to fetch dashboard: ${res.statusText}`;
-        if (res.status === 404) {
-          errorMessage = `User not found. The user ID may not exist in the database.`;
-        }
-        throw new Error(errorMessage);
+      if (!authRes.ok) {
+        const errorText = await authRes.text();
+        console.error("Auth API Error:", authRes.status, errorText);
+        throw new Error(`Failed to fetch user data: ${authRes.statusText}`);
       }
 
-      return await res.json();
+      if (!gameRes.ok) {
+        const errorText = await gameRes.text();
+        console.error("Game API Error:", gameRes.status, errorText);
+        throw new Error(`Failed to fetch game data: ${gameRes.statusText}`);
+      }
+
+      const authData = await authRes.json();
+      const gameData = await gameRes.json();
+
+      // Combine all data with proper field mapping
+      return {
+        user: {
+          id: authData.id || "",
+          email: authData.email || "",
+          User_name: authData.name || "Player",
+          avatar: authData.avatar || "",
+          isOnline: authData.loggedIn || false,
+          Auto_Match: authData.Auto_Match || false,
+          CreatedAt: authData.CreatedAt || new Date().toISOString(),
+        },
+        statistics: gameData.statistics || {
+          totalMatches: 0,
+          totalWins: 0,
+          totalLosses: 0,
+          winRate: 0,
+          totalTournaments: 0,
+          totalTourWins: 0,
+        },
+        lastMatch: gameData.lastMatch || null
+      };
     } catch (error: any) {
-      console.error("Dashboard API Fetch Error:", error);
+      console.error("Complete User Data Fetch Error:", error);
       throw error;
     }
+  }
+
+  // Alias for backward compatibility
+  async getPlayerDashboard(identifier: string) {
+    return this.getCompleteUserData(identifier);
   }
 }
 

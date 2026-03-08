@@ -306,6 +306,7 @@ export async function userRoutes(app: FastifyInstance) {
   });
 
   app.post("/search-this-name", {
+    preHandler: app.authenticate,
     schema: {
       body: {
         type: "object",
@@ -315,35 +316,8 @@ export async function userRoutes(app: FastifyInstance) {
         }
       }
     }
-  }, async (req, reply) => {
+  }, async (req: any, reply) => {
     try {
-      const authHeader = req.headers.authorization || '';
-      const parts = authHeader.split(' ');
-      const token = parts.length === 2 && parts[0].toLowerCase() === 'bearer' ? parts[1] : null;
-      
-      if (!token) {
-        return reply.status(401).send({
-          valid: false,
-          error: "Missing authorization token"
-        });
-      }
-      
-      let decoded;
-      try {
-        decoded = app.jwt.verify(token) as any;
-      } catch (verifyErr) {
-        return reply.status(401).send({
-          valid: false,
-          error: "Invalid or expired token"
-        });
-      }
-      
-      if (!decoded) {
-        return reply.status(401).send({
-          valid: false,
-          error: "Invalid token"
-        });
-      }
       const current_user = await prisma.user.findFirst({
         where: { name: req.body.name }
       });

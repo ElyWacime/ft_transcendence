@@ -168,6 +168,9 @@ export const api = new TournamentAPI();
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://localhost';
 class UserAPI {
+
+
+  
   private baseUrl = `${API_URL}/api/users`;
   
   async updateUsername(current_password: string, new_username: string) {
@@ -291,17 +294,69 @@ class UserAPI {
   }
 
   async searchByName(name: string) {
-    const res = await fetchWithAuth(`/api/dashboard/${name}`, {
+    const res = await fetchWithAuth(`/api/users/search-this-name`, {
+      method: "POST",
+      body: JSON.stringify({ name }),
+      credentials: 'include',
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData?.error || "User not found");
+    }
+
+    const data = await res.json();
+
+    let avatar = "";
+    try {
+      const infoRes = await fetchWithAuth(`/api/users/user-info/${data.user_id}`, {
+        method: "GET",
+        credentials: 'include',
+      });
+      if (infoRes.ok) {
+        const infoData = await infoRes.json();
+        avatar = infoData.avatar || "";
+      }
+    } catch {
+      // keep search working even if avatar fetch fails
+    }
+
+    return {
+      user: {
+        id: data.user_id,
+        User_name: data.user_name,
+        email: data.user_email,
+        avatar,
+      },
+      statistics: null,
+      lastMatch: null,
+    };
+  }
+
+  // Fetch user data from auth service
+  async getAuthUserById(userId: string) {
+    const res = await fetchWithAuth(`/api/users/user-info/${userId}`, {
       method: "GET",
       credentials: 'include',
     });
-    const data = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(data?.error || "User not found");
+      const errorText = await res.text();
+      console.error("Get auth user error:", res.status, errorText);
+      throw new Error(`Failed to fetch user from auth service: ${res.statusText}`);
     }
 
-    return data;
+    const data = await res.json();
+    // Map auth service fields to expected format
+    return {
+      id: data.id,
+      email: data.email,
+      User_name: data.name,
+      avatar: data.avatar,
+      isOnline: data.loggedIn,
+      Auto_Match: data.Auto_Match,
+      CreatedAt: data.CreatedAt
+    };
   }
 }
 

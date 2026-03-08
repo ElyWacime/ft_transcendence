@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
 import { userApi } from "@/lib/api";
 import { handleStartConversation } from "@/components/chat/MessagesPageLayout";
 import "../css/profile.css";
@@ -14,9 +15,13 @@ const ProfileSettings = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userInfo, setUserInfo] = useState({
+    id: "",
     email: "",
-    username: "",
-    avatar: ""
+    User_name: "",
+    avatar: "",
+    Auto_Match: null as boolean | null,
+    CreatedAt: null as string | null,
+    isOnline: false
   });
   const [searchName, setSearchName] = useState("");
   const [searchResult, setSearchResult] = useState<{
@@ -42,24 +47,42 @@ const ProfileSettings = () => {
         const userId = user?.id;
         
         if (userId) {
-          const data = await userApi.getUserById(userId);
-
+          // Fetch all data combined, but use only user info
+          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId);
+          console.log("Fetched user data:", data.user);
+          
           setUserInfo({
-            email: data.email || data.user_email || "",
-            username: data.User_name || data.user_name || "Player",
-            avatar: data.avatar || ""
+            id: data.user.id || "",
+            email: data.user.email || "",
+            User_name: data.user.User_name || "Player",
+            avatar: data.user.avatar || "",
+            Auto_Match: data.user.Auto_Match ?? null,
+            CreatedAt: data.user.CreatedAt ?? null,
+            isOnline: data.user.isOnline || false
           });
           setAvatarKey(Date.now());
         } else {
-          const email = user?.email || "";
-          const username = user?.name || "Player";
-          setUserInfo({ email, username, avatar: "" });
+          setUserInfo({
+            id: "",
+            email: user?.email || "",
+            User_name: user?.name || "Player",
+            avatar: "",
+            Auto_Match: null,
+            CreatedAt: null,
+            isOnline: false
+          });
         }
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        const email = user?.email || "";
-        const username = user?.name || "Player";
-        setUserInfo({ email, username, avatar: "" });
+        setUserInfo({
+          id: "",
+          email: user?.email || "",
+          User_name: user?.name || "Player",
+          avatar: "",
+          Auto_Match: null,
+          CreatedAt: null,
+          isOnline: false
+        });
       } finally {
         setLoading(false);
       }
@@ -154,11 +177,11 @@ const ProfileSettings = () => {
               <Avatar key={avatarKey} className="profile-avatar">
                 <AvatarImage src={userInfo.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"} />
                 <AvatarFallback className="profile-avatar-fallback">
-                  {userInfo.username?.charAt(0)?.toUpperCase() || "U"}
+                  {userInfo.User_name?.charAt(0)?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="profile-user-info">
-                <h2 className="profile-user-name">{userInfo.username}</h2>
+                <h2 className="profile-user-name">{userInfo.User_name}</h2>
                 <p className="profile-user-email">{userInfo.email}</p>
                 <button
                   variant="outline"

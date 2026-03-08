@@ -23,6 +23,8 @@ interface DashboardData {
     totalWins: number;
     totalLosses: number;
     winRate: number;
+    totalTournaments?: number;
+    totalTourWins?: number;
   };
   lastMatch: any | null;
 }
@@ -30,15 +32,18 @@ interface DashboardData {
 const Dashboard_ayoub = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state || "";
-  const { id} = state;
+  const state = (location.state as { id?: string }) || {};
+  const { id: stateUserId } = state;
   const { identifier } = useParams<{ identifier?: string }>();
   const { isLoggedIn, user: authUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now());
-  const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image") ? dashboardData?.user.avatar: `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
+
+  const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
+    ? dashboardData?.user.avatar
+    : `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
 
   useEffect(() => {
     if (!identifier && !isLoggedIn) {
@@ -46,10 +51,9 @@ const Dashboard_ayoub = () => {
       return;
     }
 
-
     const fetchDashboardData = async () => {
-      let userIdentifier = identifier;
-      
+      let userIdentifier = stateUserId || identifier;
+
       if (!userIdentifier) {
         userIdentifier = authUser?.id || undefined;
         if (!userIdentifier) {
@@ -60,8 +64,7 @@ const Dashboard_ayoub = () => {
       }
 
       try {
-        const data = await playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier);
-        
+        const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier);
         setDashboardData(data);
         setAvatarKey(Date.now());
       } catch (err: any) {
@@ -79,24 +82,24 @@ const Dashboard_ayoub = () => {
     };
 
     fetchDashboardData();
-  }, [identifier, isLoggedIn, navigate]);
+  }, [stateUserId, identifier, isLoggedIn, navigate, authUser?.id]);
 
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const userIdentifier = identifier || authUser?.id;
+      const userIdentifier = stateUserId || identifier || authUser?.id;
       if (userIdentifier && !loading) {
-        playerDashboardApi_ayoub.getPlayerDashboard(userIdentifier)
-          .then(data => {
+        playerDashboardApi_ayoub.getCompleteUserData(userIdentifier)
+          .then((data) => {
             setDashboardData(data);
             setAvatarKey(Date.now());
           })
-          .catch(err => console.error('Failed to refresh avatar:', err));
+          .catch((err) => console.error("Failed to refresh avatar:", err));
       }
     };
 
-    window.addEventListener('avatarUpdated', handleAvatarUpdate);
-    return () => window.removeEventListener('avatarUpdated', handleAvatarUpdate);
-  }, [identifier, loading, authUser?.id]);
+    window.addEventListener("avatarUpdated", handleAvatarUpdate);
+    return () => window.removeEventListener("avatarUpdated", handleAvatarUpdate);
+  }, [stateUserId, identifier, loading, authUser?.id]);
 
   if (loading) {
     return (
@@ -124,7 +127,6 @@ const Dashboard_ayoub = () => {
   return (
     <div className="dashboard-page">
       <div className="dashboard-container">
-        {}
         <div className="dashboard-header">
           <h1 className="dashboard-title glow-text">
             <span>Player Dashboard</span>
@@ -132,7 +134,6 @@ const Dashboard_ayoub = () => {
         </div>
 
         <div className="dashboard-grid">
-          {}
           <Card className="dashboard-card">
             <div className="profile-container">
               <Avatar key={avatarKey} className="profile-avatar">
@@ -148,7 +149,6 @@ const Dashboard_ayoub = () => {
             </div>
           </Card>
 
-          {}
           <Card className="dashboard-card">
             <div className="stat-section">
               <h3 className="section-title">
@@ -156,9 +156,9 @@ const Dashboard_ayoub = () => {
                 <span>Statistics</span>
               </h3>
               <div className="dashboard-stats">
-                <div className="stat-row" style={{cursor: "pointer"}} onClick = {()=>{navigate("/history",{state:{id}})}}>
+                <div className="stat-row" style={{ cursor: "pointer" }} onClick={() => { navigate("/history", { state: { id: user.id } }); }}>
                   <span className="stat-label">Match History</span>
-                  <ExternalLink className="stat-icon" style={{width: "1rem", height: "1rem"}} />
+                  <ExternalLink className="stat-icon" style={{ width: "1rem", height: "1rem" }} />
                 </div>
                 <div className="stat-row">
                   <span className="stat-label">Total Matches</span>
@@ -176,11 +176,18 @@ const Dashboard_ayoub = () => {
                   <span className="stat-label">Win Rate</span>
                   <span className="stat-value stat-value-primary">{statistics.winRate}%</span>
                 </div>
+                <div className="stat-row">
+                  <span className="stat-label">Tournaments Played</span>
+                  <span className="stat-value">{statistics.totalTournaments ?? 0}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Tournament Wins</span>
+                  <span className="stat-value stat-value-success">{statistics.totalTourWins ?? 0}</span>
+                </div>
               </div>
             </div>
           </Card>
 
-          {}
           <Card className="dashboard-card">
             <div className="card-sections">
               <div className="card-section">
@@ -192,7 +199,7 @@ const Dashboard_ayoub = () => {
                   <div className="match-details">
                     <div className="stat-row">
                       <span className="stat-label">Status</span>
-                      <span className={`badge-status ${lastMatch.gameStatus === 'FINISHED' ? 'finished' : 'pending'}`}>
+                      <span className={`badge-status ${lastMatch.gameStatus === "FINISHED" ? "finished" : "pending"}`}>
                         {lastMatch.gameStatus}
                       </span>
                     </div>
@@ -203,8 +210,7 @@ const Dashboard_ayoub = () => {
                       </div>
                       <div className="stat-row">
                         <span className="player-name">{lastMatch.player2Name || "Player 2"}</span>
-                        <span className="stat-value">{lastMatch.score2 || 0}
-                        </span>
+                        <span className="stat-value">{lastMatch.score2 || 0}</span>
                       </div>
                     </div>
                     {lastMatch.Winner_Id && (
@@ -214,9 +220,9 @@ const Dashboard_ayoub = () => {
                           Winner
                         </span>
                         <span className="stat-value">
-                          {lastMatch.Winner_Id === lastMatch.P1_Id ? lastMatch.player1Name : 
-                           lastMatch.Winner_Id === lastMatch.P2_Id ? lastMatch.player2Name : 
-                           "Unknown"}
+                          {lastMatch.Winner_Id === lastMatch.P1_Id ? lastMatch.player1Name :
+                            lastMatch.Winner_Id === lastMatch.P2_Id ? lastMatch.player2Name :
+                              "Unknown"}
                         </span>
                       </div>
                     )}
