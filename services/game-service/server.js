@@ -1003,7 +1003,8 @@ fastify.post('/allmatch', async (request, reply) => {
     const decoded = request.jwt.verify(accessToken);
     if (!decoded)
       return reply.code(401).send({ message: "Couldn't decode token" });
-    let matches = await dbcnx.getPlayerMatches(request.body.id);
+    let matches = await dbcnx.getPlayerMatches(decoded.id);
+    console.log("decoded.id>> ", decoded.id);
     console.log("This is all matches >> ", matches);
     if (matches) {
       matches = await Promise.all(matches.map(async (m) => {
