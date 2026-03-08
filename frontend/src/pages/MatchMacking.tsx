@@ -99,7 +99,7 @@ const MatchMacking = () => {
             }
             ws.removeEventListener("message", handleMessage);
         };
-    }, [ws, isReady, accessToken]);
+    }, [ws, isReady, accessToken, mode]);
 
     return (
         <>
