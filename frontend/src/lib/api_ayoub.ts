@@ -30,30 +30,36 @@ class PlayerDashboardAPI_ayoub {
   private baseUrl = "/api";
 
   // Main method: Fetch ALL data combined (auth + game)
-  async getCompleteUserData(userId: string, accessToken: string, updateAccessToken: (newToken: string) => void): Promise<CombinedUserData> {
+  // Takes a username, searches for it, gets the ID, then fetches dashboard data
+  async getCompleteUserData(userName: string, accessToken: string, updateAccessToken: (newToken: string) => void): Promise<CombinedUserData> {
     try {
-      // First fetch auth data (supports both ID and username lookup)
+      // First: Search for user by name to get their ID
+      const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
+        method: "POST",
+        body: JSON.stringify({ name: userName }),
+      }, accessToken, updateAccessToken);
+
+      if (!searchRes.ok) {
+        throw new Error(`User "${userName}" not found`);
+      }
+
+      const searchData = await searchRes.json();
+      const userId = searchData.user_id;
+
+      // Second: Fetch auth data using the resolved user ID
       const authRes = await fetchWithAuth(`/api/users/user-info/${encodeURIComponent(userId)}`, { method: "GET" }, accessToken, updateAccessToken);
 
       if (!authRes.ok) {
-        const errorText = await authRes.text();
-        console.error("Auth API Error:", authRes.status, errorText);
-        if (authRes.status === 404) {
-          throw new Error("User not found. Please check the username or ID.");
-        }
-        throw new Error(`Failed to fetch user data (${authRes.status})`);
+        throw new Error("Failed to fetch user data");
       }
 
       const authData = await authRes.json();
 
-      // Use the resolved ID for the game service (which needs the actual user ID)
-      const resolvedId = authData.id || userId;
-      const gameRes = await fetchWithAuth(`${this.baseUrl}//dashboard/${resolvedId}`, { method: "GET" },accessToken, updateAccessToken);
+      // Third: Fetch game/dashboard data using the resolved user ID
+      const gameRes = await fetchWithAuth(`${this.baseUrl}//dashboard/${userId}`, { method: "GET" }, accessToken, updateAccessToken);
 
       if (!gameRes.ok) {
-        const errorText = await gameRes.text();
-        console.error("Game API Error:", gameRes.status, errorText);
-        throw new Error(`Failed to fetch game data: ${gameRes.statusText}`);
+        throw new Error(`Failed to fetch game data (${gameRes.status})`);
       }
 
       const gameData = await gameRes.json();
@@ -80,7 +86,6 @@ class PlayerDashboardAPI_ayoub {
         lastMatch: gameData.lastMatch || null
       };
     } catch (error: any) {
-      // console.error("Complete User Data Fetch Error:", error);
       throw error;
     }
   }

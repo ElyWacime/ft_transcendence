@@ -56,28 +56,12 @@ const Dashboard_ayoub = () => {
       let userIdentifier = stateUserId || identifier;
 
       if (!userIdentifier) {
-        userIdentifier = authUser?.id || undefined;
+        userIdentifier = authUser?.name || undefined;
         if (!userIdentifier) {
-          setError("Unable to get user ID. Please provide a username/ID in the URL or log in.");
+          setError("Unable to get username. Please provide a username in the URL or log in.");
           setLoading(false);
           return;
         }
-      }
-
-      // Try to resolve identifier as a username first
-      try {
-        const { fetchWithAuth } = await import("@/lib/tokenRefresh");
-        const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
-          method: "POST",
-          body: JSON.stringify({ name: userIdentifier }),
-        }, accessToken, updateAccessToken);
-        if (searchRes.ok) {
-          const searchData = await searchRes.json();
-          userIdentifier = searchData.user_id; // Found by name, use the real ID
-        }
-        // If 404, it's not a name — assume it's already an ID and continue
-      } catch {
-        // Network error — just continue with the original identifier
       }
 
       try {
@@ -86,10 +70,8 @@ const Dashboard_ayoub = () => {
         setDashboardData(data);
         setAvatarKey(Date.now());
       } catch (err: any) {
-        // console.error("Failed to fetch dashboard:", err);
-        // console.error("Error details:", err.message);
-        if (err.message.includes("Not Found") || err.message.includes("404")) {
-          setError(`User not found. Identifier: ${userIdentifier}. Please make sure the username or ID is correct.`);
+        if (err.message.includes("not found")) {
+          setError(`Username "${userIdentifier}" not found. Please check the spelling.`);
         } else {
           setError(err.message || "Failed to load dashboard data");
         }
@@ -100,24 +82,26 @@ const Dashboard_ayoub = () => {
     };
 
     fetchDashboardData();
-  }, [stateUserId, identifier, isLoggedIn, navigate, authUser?.id]);
+  }, [stateUserId, identifier, isLoggedIn, navigate, authUser?.name]);
 
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const userIdentifier = stateUserId || identifier || authUser?.id;
+      const userIdentifier = stateUserId || identifier || authUser?.name;
       if (userIdentifier && !loading) {
         playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken)
           .then((data) => {
             setDashboardData(data);
             setAvatarKey(Date.now());
           })
-          .catch((err) => console.error("Failed to refresh avatar:", err));
+          .catch(() => {
+            // silent refresh failure
+          });
       }
     };
 
     window.addEventListener("avatarUpdated", handleAvatarUpdate);
     return () => window.removeEventListener("avatarUpdated", handleAvatarUpdate);
-  }, [stateUserId, identifier, loading, authUser?.id]);
+  }, [stateUserId, identifier, loading, authUser?.name]);
 
   if (loading) {
     return (
