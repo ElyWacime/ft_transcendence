@@ -212,9 +212,8 @@ export async function update_email(
     };
      
   } catch (error) {
-    console.error(error);
     return reply.code(401).send({ 
-      message: error,
+      message: "Unauthorized",
     });
   }
 }
