@@ -103,7 +103,7 @@ export class SQLiteDB {
                 console.log("[DB] Tables already exist:", tables.map(t => t.name).join(", "));
             }
             this.db.on("trace", sql => {
-                // console.log("[SQL]:", sql);
+                console.log("[SQL]:", sql);
             });
 
             console.log(`[DB] Connected successfully at ${DB_PATH}`);
