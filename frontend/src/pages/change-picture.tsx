@@ -11,7 +11,7 @@ import "../css/change-password.css";
 
 const ChangePicture = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, accessToken, updateAccessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -24,8 +24,7 @@ const ChangePicture = () => {
       try {
         const userId = user?.id;
         if (userId) {
-          
-          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId);
+          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId, accessToken, updateAccessToken);
           setCurrentAvatar(data.user.avatar || "");
           setPreviewUrl(data.user.avatar || "");
           setUsername(data.user.User_name || "");
@@ -99,7 +98,7 @@ const ChangePicture = () => {
         file_size: file.size
       };
       
-      const res = await userApi.update_image(imageData);
+      const res = await userApi.update_image(imageData, accessToken, updateAccessToken);
       
       if (res.success) {
         toast.success("Profile image updated successfully!");
