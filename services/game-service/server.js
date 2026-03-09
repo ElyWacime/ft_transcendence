@@ -366,20 +366,37 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
   if (bothReady) {
 
     let [m1, m2]= await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
-    if (!(m1 || m2)){
-  // if he is ready. but he has an ongoing match, we cant start his new match, so we reset his ready state and ask him to ready up again when he is available
-    if (m1) {
-      matchSlot.ready[matchSlot.player1.id] = false;
-      matchSlot.readyAt[matchSlot.player1.id] = null;
-    }
-    if (m2) {
-      matchSlot.ready[matchSlot.player2.id] = false;
-      matchSlot.readyAt[matchSlot.player2.id] = null;
-    }
-    // console.log("cant play right now >> ", { m1, m2 });
-    broadcastTournamentState();
-    return;
-  }
+      if (m1 || m2) {
+      // if he is ready. but he has an ongoing match, we cant start his new match, so we reset his ready state and ask him to ready up again when he is available
+        if (m1) {
+          matchSlot.ready[matchSlot.player1.id] = false;
+          matchSlot.readyAt[matchSlot.player1.id] = null;
+        }
+        if (m2) {
+          matchSlot.ready[matchSlot.player2.id] = false;
+          matchSlot.readyAt[matchSlot.player2.id] = null;
+        }
+        // console.log("cant play right now >> ", { m1, m2 });
+        broadcastTournamentState();
+        return;
+      }
+
+  //   let [m1, m2]= await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
+  //   if (!(m1 || m2)){
+  //     console.log("both players are ready and available, starting match >> ", { m1, m2 });
+  // // if he is ready. but he has an ongoing match, we cant start his new match, so we reset his ready state and ask him to ready up again when he is available
+  //   if (m1) {x
+  //     matchSlot.ready[matchSlot.player1.id] = false;
+  //     matchSlot.readyAt[matchSlot.player1.id] = null;
+  //   }
+  //   if (m2) {
+  //     matchSlot.ready[matchSlot.player2.id] = false;
+  //     matchSlot.readyAt[matchSlot.player2.id] = null;
+  //   }
+  //   // console.log("cant play right now >> ", { m1, m2 });
+  //   broadcastTournamentState();
+  //   return;
+  // }
 
     // create/ensure DB match row
     const matchDbId = await ensureVipMatch(matchSlot, tournamentId);

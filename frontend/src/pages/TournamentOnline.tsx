@@ -258,7 +258,7 @@ export default function TournamentOnlinePage() {
                 {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
                   <button
                     className="ghost"
-                    disabled={isSubmitting || m.ready?.[currentUser.id]}
+                    disabled={isSubmitting || m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 && t.status == "finals") || t.status == "completed"}
                     onClick={() => markReady(t.id, m.id)}
                   >
                     {m.ready?.[currentUser.id] ? "ready" : "Ready"}
