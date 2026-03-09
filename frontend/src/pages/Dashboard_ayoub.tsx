@@ -63,6 +63,22 @@ const Dashboard_ayoub = () => {
         }
       }
 
+      // Try to resolve identifier as a username first
+      try {
+        const { fetchWithAuth } = await import("@/lib/tokenRefresh");
+        const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
+          method: "POST",
+          body: JSON.stringify({ name: userIdentifier }),
+        });
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          userIdentifier = searchData.user_id; // Found by name, use the real ID
+        }
+        // If 404, it's not a name — assume it's already an ID and continue
+      } catch {
+        // Network error — just continue with the original identifier
+      }
+
       try {
         const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier);
         setDashboardData(data);
