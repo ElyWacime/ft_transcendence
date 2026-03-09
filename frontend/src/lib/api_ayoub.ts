@@ -33,7 +33,7 @@ class PlayerDashboardAPI_ayoub {
   async getCompleteUserData(userId: string, accessToken: string, updateAccessToken: (newToken: string) => void): Promise<CombinedUserData> {
     try {
       // First fetch auth data (supports both ID and username lookup)
-      const authRes = await fetchWithAuth(`/api/users/user-info/${encodeURIComponent(userId)}`, { method: "GET" });
+      const authRes = await fetchWithAuth(`/api/users/user-info/${encodeURIComponent(userId)}`, { method: "GET" }, accessToken, updateAccessToken);
 
       if (!authRes.ok) {
         const errorText = await authRes.text();

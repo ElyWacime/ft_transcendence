@@ -70,7 +70,7 @@ const Dashboard_ayoub = () => {
         const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
           method: "POST",
           body: JSON.stringify({ name: userIdentifier }),
-        });
+        }, accessToken, updateAccessToken);
         if (searchRes.ok) {
           const searchData = await searchRes.json();
           userIdentifier = searchData.user_id; // Found by name, use the real ID
@@ -105,7 +105,7 @@ const Dashboard_ayoub = () => {
     const handleAvatarUpdate = () => {
       const userIdentifier = stateUserId || identifier || authUser?.id;
       if (userIdentifier && !loading) {
-        playerDashboardApi_ayoub.getCompleteUserData(userIdentifier)
+        playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken)
           .then((data) => {
             setDashboardData(data);
             setAvatarKey(Date.now());
