@@ -251,7 +251,6 @@ export default function Chat() {
     setBlockedConversations((prev: any) => ({ ...prev, [conversationId]: { blocked: true, blockedBy: 'you' } }))
   }
 
-
   const removeFriend = async (conversation: any) => {
     const other_user_id = conversation.other_user_id
     try {

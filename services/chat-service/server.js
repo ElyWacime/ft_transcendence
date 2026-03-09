@@ -429,14 +429,12 @@ io.use(async (socket, next) => {
       return next(new Error('No cookies found'));
     }
 
-    
     const cookies = cookieParser.parse(cookieHeader);
 
     const refreshToken = cookies.refresh_token;
     if (!refreshToken) {
       return next(new Error('No access token found'));
     }
-
 
     const userData = await validateSocketToken(refreshToken);    
     if (!userData) {
