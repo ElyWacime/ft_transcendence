@@ -5,12 +5,13 @@ import cors from "@fastify/cors"
 import { Server } from 'socket.io';
 import * as fs from 'fs';
 import https from 'https';
+import xss from 'xss';
 import initializeDb from './setup-db.js';
 import { getInvitationStatus, createInvitation, cancelInvitation } from './dbAccess/invitation-q.js';
 import { getBlockingStatus, blockUser, unblockUser } from './dbAccess/block-q.js';
 import { getFriendStatus, addFriend, deleteFriend, getAllFriends } from './dbAccess/friends-q.js';
 import { insertUsers, updateUsername } from './dbAccess/user-q.js';
-import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds } from './dbAccess/conversations-q.js';
+import { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds, isUserParticipantInConversation } from './dbAccess/conversations-q.js';
 import {
   usersAddSchema,
   userUpdateSchema,
@@ -115,7 +116,17 @@ async function validateSocketToken(token) {
   }
 }
 
-fastify.post("/users/add", { schema: usersAddSchema }, async (request) => {
+async function requireInternalServiceKey(request, reply) {
+  const rawKey = request.headers['x-internal-service-key'];
+  const providedKey = Array.isArray(rawKey) ? rawKey[0] : rawKey;
+  const expectedKey = process.env.INTERNAL_SERVICE_KEY;
+
+  if (!expectedKey || !providedKey || providedKey !== expectedKey) {
+    return reply.code(403).send({ error: 'Forbidden' });
+  }
+}
+
+fastify.post("/users/add", { schema: usersAddSchema, preHandler: requireInternalServiceKey }, async (request) => {
   return await insertUsers(request.body.id, request.body.username);
 })
 
@@ -182,8 +193,22 @@ fastify.post("/conversations/start", { schema: conversationsStartSchema }, async
   return { conversationId: conv.id };
 })
 
-fastify.get("/conversations/:id/messages", { schema: conversationMessagesSchema }, async (request) => {
+fastify.get("/conversations/:id/messages", { schema: conversationMessagesSchema }, async (request, reply) => {
+  const res = await desToken(request);
+  
+  if (res.status === 401) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+
+  const token = await res.json();
+  const userId = token.user_id;
+
   const conversationId = request.params.id;
+
+  const isParticipant = await isUserParticipantInConversation(conversationId, userId);
+  if (!isParticipant) {
+    return reply.code(403).send({ error: 'Forbidden: you are not a participant in this conversation' });
+  }
 
   const messages = await getChatHistory(conversationId);
 
@@ -229,7 +254,7 @@ fastify.get("/friends", async (request, reply) => {
   const friends = await getAllFriends(userId);
   
   return { friends };
-});-
+});
 
 fastify.post("/friends/add", { schema: friendsSchema }, async (request, reply) => {
   const res = await desToken(request);
@@ -242,8 +267,11 @@ fastify.post("/friends/add", { schema: friendsSchema }, async (request, reply) =
   const user_a = token.user_id;
   const user_b = request.body.user_id;
   
+  if (user_a === user_b) {
+    return reply.code(400).send({ error: 'Cannot add yourself as a friend' });
+  }
+
   await addFriend(user_a, user_b);
-  
   
   return {
     message: 'Friend added successfully'
@@ -497,7 +525,18 @@ io.on('connection', async (socket) => {
     try {
       const { conversationId, content } = data;
 
-      const message = await saveMessage(conversationId, myId, content.trim());
+      const isParticipant = await isUserParticipantInConversation(conversationId, myId);
+      if (!isParticipant) {
+        fastify.log.warn(`User ${myId} tried to send message to conversation ${conversationId} without being a participant`);
+        return;
+      }
+
+      if (!content || content.length > 1000) {
+        return;
+      }
+
+      const sanitizedContent = xss(content.trim());
+      const message = await saveMessage(conversationId, myId, sanitizedContent);
 
       const participantIds = await getConversationParticipantIds(conversationId);
       participantIds.forEach((pid) => {

@@ -69,17 +69,6 @@ class UserAPI {
     const response = await res.json();
 
     if (res.ok) {
-      try {
-        await fetch(`${API_URL}/api/chat/users/add`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: response.id, username: name })
-        });
-      } catch (err) {
-        console.error('Failed to add user to chat:', err);
-      }
-      
       return response;
     } else {
       throw new Error(response.message || "Registration failed");
