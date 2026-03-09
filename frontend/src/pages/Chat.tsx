@@ -13,16 +13,18 @@ const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${imp
 type StartConversationParams = {
   userId: number
   socket?: Socket | null
+  accessToken?: string
+  updateAccessToken?: (newToken: string) => void
 }
 
-export const handleStartConversation = async ({ userId, socket, }: StartConversationParams) => {
+export const handleStartConversation = async ({ userId, socket, accessToken, updateAccessToken }: StartConversationParams) => {
   try {
     const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations/start`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ receipentId: userId })
-    })
+    }, accessToken, updateAccessToken)
     const data = await res.json()
     if (data.conversationId) {
       socket?.emit("newConversation", { userId })

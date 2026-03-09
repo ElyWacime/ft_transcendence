@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
 import { userApi } from "@/lib/api";
-import { handleStartConversation } from "@/components/chat/MessagesPageLayout";
+import { handleStartConversation } from "./Chat";
 import "../css/profile.css";
 import { useChatSocket } from "@/context/ChatSocketContext";
 import { useAuth } from "@/context/AuthContext";
@@ -39,7 +39,8 @@ const ProfileSettings = () => {
   const [loading, setLoading] = useState(true);
   const [avatarKey, setAvatarKey] = useState(Date.now());
   const { socket } = useChatSocket();
-  const { user } = useAuth();
+  const { user, accessToken, updateAccessToken } = useAuth();
+
     
   useEffect(() => {
     const fetchUserData = async () => {
@@ -237,7 +238,7 @@ const ProfileSettings = () => {
                       </button>
                       {String(user?.id) !== String(searchResult.user.id) && (
                         <button type="button" className="profile-dashboard-btn dashboard-btn" onClick={async () => {
-                          const conversationId =  await handleStartConversation({ userId: searchResult.user.id, socket: socket, onFetchConversations: null })
+                          const conversationId =  await handleStartConversation({ userId: searchResult.user.id, socket: socket, accessToken, updateAccessToken })
                           navigate(`/chat/${conversationId}`)
                         }}>Message
                         </button>
