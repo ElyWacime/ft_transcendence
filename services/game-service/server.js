@@ -1,4 +1,4 @@
-  import Fastify from "fastify";
+import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
@@ -45,6 +45,36 @@ const MAX_Score = 5;
 
 await dbcnx.connect();
 
+async function desToken(request)
+{
+   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+   
+   let token = null;
+   const authHeader = request.headers.authorization;
+   
+   if (authHeader && authHeader.startsWith('Bearer ')) {
+     token = authHeader.substring(7); 
+   } else if (request.cookies.access_token) {
+     token = request.cookies.access_token; 
+   }
+   
+   if (!token) {
+     return { status: 401, json: async () => ({ error: 'No token provided' }) };
+   }
+   
+   const fetchOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+   };
+   
+   if (httpsAgent) {
+     fetchOptions.agent = httpsAgent;
+   }
+   
+   const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
+  return res;
+}
 
 const sendtoplayer = async (id, data) => 
 {
@@ -164,9 +194,8 @@ function tick(m,dt) {
     m.gameStatus = "FINISHED";
     m.Winner_Id = m.P2_Id;
     if (m.score1 >= m.score2)
-    m.Winner_Id = m.P1_Id;
+      m.Winner_Id = m.P1_Id;
     updateTournamentAfterMatch(m);
-
     dbcnx.updateMatch(m);
     matches.delete(m.id);
   }
@@ -353,8 +382,6 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     dbMatch.count_players = 2;
     dbMatch.mode = 2;
     dbMatch.T_Id = tournamentId;
-    await dbcnx.updateMatch(dbMatch);
-
     const g = new GameState();
     g.id = matchDbId;
     g.P1_Id = matchSlot.player1.id;
@@ -365,9 +392,8 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     g.gameStatus = "PLAYING";
     g.player1Name = await getUserName(g.P1_Id);
     g.player2Name = await getUserName(g.P2_Id);
-
     matches.set(g.id, g);
-
+    await dbcnx.updateMatch(dbMatch);
     // immediately tell both players their match is ready so UI navigates and also seeds them with state
     notifyPlayersMatchReady(tournament, matchSlot, 2);
     const payload = JSON.stringify(g);
@@ -531,27 +557,17 @@ const updateTournamentAfterMatch = async (gameState) => {
   broadcastTournamentState();
 };
 
-
-fastify.register(fjwt, { 
-  secret: process.env.JWT_ACCESS_SECRET
-});
-
-fastify.addHook("preHandler", (req, _res, next) => {
-  req.jwt = fastify.jwt;
-  next();
-});
-
-fastify.register(fastifyCookie, {
-  secret: process.env.JWT_ACCESS_SECRET,
-  hook: "preHandler", 
-});
-
 fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
 fastify.get('/tournaments-online', async (_request, reply) => {
   try {
+    const res = await desToken(_request);
+  
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
+    }
     const snapshot = Array.from(tournaments.values());
     return snapshot;
   } catch (e) {
@@ -687,25 +703,6 @@ const handelMove = async (request,id) =>{
   }
 };
 
-const handelFinish = async (ID) =>  {
-  let m = matches.get(ID);
-  if (m) 
-  {
-    m.id = ID;
-    m.id_Match = ID;
-    if (m.score1 >= m.score2)
-      m.Winner_Id = m.P1_Id;
-    else
-      m.Winner_Id = m.P2_Id;
-    m.gameStatus = "FINISHED";
-    await dbcnx.updateMatch(m);
-    updateTournamentAfterMatch(m);
-    matches.delete(m.id);
-  }
-  else
-    console.log("Couldnt end request.matchId ",ID);
-};
-
 const handelDup = async (connection,id) => {
   if (clients.has(id)) 
   {
@@ -766,52 +763,6 @@ const getUserName = async (id) => {
   }
 };
 
-// fastify.post("/me", async (request, reply) => {
-//   try {
-//     const accessToken = request.cookies.access_token;
-//     console.log("accessToken >> ", accessToken);
-//     if (!accessToken) {
-//       return reply.code(403).send({ message: 'Not logged in' });
-//     }
-
-//     const decoded = request.jwt.verify(accessToken);
-//     if (!decoded)
-//       return reply.code(401).send({ message: "Couldn't decode token" });
-//     let user = { id: decoded.id, name: await getUserName(decoded.id) };
-//     // return only id and name (or whatever you want in frontend)
-//     console.log("This is /me >> ", user);
-//     return reply.code(201).send({ message: {id: user.id, name: user.name }});
-//   } catch (err) {
-//     return reply.code(401).send({ error: err });
-//   }
-// });
-
-fastify.post("/me", async (request, reply) => {
-  try {
-    let accessToken = request.cookies.refresh_token;
-    // console.log("refresh_token  >> ", accessToken);
-    if (!accessToken && request.headers.authorization) {
-      accessToken = request.headers.authorization.split(" ")[1];
-      // console.log("accessToken 2>> ", accessToken);
-    }
-
-    if (!accessToken)
-      return reply.code(403).send({ message: "Not logged in" });
-
-    const decoded = request.jwt.verify(accessToken);
-    if (!decoded)
-      return reply.code(401).send({ message: "Couldn't decode token" });
-    const user = {
-      id: decoded.id,
-      name: await getUserName(decoded.id),
-    };
-    // console.log("This is /me >> ", user);
-    return reply.send(user);
-  } catch (err) {
-    return reply.code(401).send({ error: err.message });
-  }
-});
-
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
    try
@@ -820,27 +771,29 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       let token = request.token;
       console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
-          let decoded;
-          try {
-            decoded = req.jwt.verify(token);
-            if(!decoded)
-              connection.send(JSON.stringify({ error: "Bad Token" }));
-          } catch (jwtError) {
-            connection.send(JSON.stringify({ error: "JWT verification failed" }));
-            return;
-          }
-          const id = decoded.id;
-          await handelDup(connection,id);
-          clients.set(id, connection);
-          const name = await getUserName(id);
-          if (request.type == "REGISTER") 
-            await handelRegister(request,id);
-          else if (request.type == "MOVE") 
-            await handelMove(request,id);
-          else if (request.type == "FINISHED") 
-            await  handelFinish(request.matchId) ;
-          else if (request.type == "DELETE") 
-            await handelRoomQuiiting(id);
+        const mockReq = {
+          headers: {
+            authorization: `Bearer ${token}`
+          },
+          cookies: {}
+        };
+        const res = await desToken(mockReq);
+        if (res.status === 401) {
+          console.log("Unauthorized, closing connection");
+          connection.close();
+          return;
+        }
+        const userData = await res.json();
+        const id = userData.user_id;
+        await handelDup(connection,id);
+        clients.set(id, connection);
+        const name = await getUserName(id);
+        if (request.type == "REGISTER") 
+          await handelRegister(request,id);
+        else if (request.type == "MOVE") 
+          await handelMove(request,id);
+        else if (request.type == "DELETE") 
+          await handelRoomQuiiting(id);
           else if (request.type == "TOURNAMENT_CREATE") {
           const creator = { id, name  };
           createTournamentRoom(creator);
@@ -893,22 +846,15 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 
 fastify.post('/invite', async (request, reply) => {
   try {
-    let accessToken = request.cookies.refresh_token;
-    // console.log("refresh_token  >> ", accessToken);
-    if (!accessToken && request.headers.authorization) {
-      accessToken = request.headers.authorization.split(" ")[1];
-      // console.log("accessToken 2>> ", accessToken);
+    const res = await desToken(request);
+    
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
     }
-
-    if (!accessToken)
-      return reply.code(403).send({ message: "Not logged in" });
-
-    const decoded = request.jwt.verify(accessToken);
-    if (!decoded)
-      return reply.code(401).send({ message: "Couldn't decode token" });
-
+    
     let P1 = request.body.P1;
     let P2 = request.body.P2;
+    console.log("invite  >> ",P1,P2);
     let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
     if (!(m1 || m2))
     {
@@ -927,22 +873,13 @@ fastify.post('/invite', async (request, reply) => {
 
 fastify.post('/check', async (request, reply) => {
   try {
-    let accessToken = request.cookies.refresh_token;
-    // console.log("refresh_token  >> ", accessToken);
-    if (!accessToken && request.headers.authorization) {
-      accessToken = request.headers.authorization.split(" ")[1];
-      // console.log("accessToken 2>> ", accessToken);
+    const res = await desToken(request);
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
     }
-
-    if (!accessToken)
-      return reply.code(403).send({ message: "Not logged in" });
-
-    const decoded = request.jwt.verify(accessToken);
-    if (!decoded)
-      return reply.code(401).send({ message: "Couldn't decode token" });
-    const id = decoded.id;
+    const token = await res.json();
+    const id = token.user_id;
     let m = await dbcnx.getAvaiable(id);
-  
     if (m && m.mode != request.body.mode)
     {
       return reply.code(409).send({ message: 'Not Available' });
@@ -953,57 +890,17 @@ fastify.post('/check', async (request, reply) => {
   }
 });
 
-fastify.post('/endmatch', async (request, reply) => {
-  try {
-    let accessToken = request.cookies.refresh_token;
-    // console.log("refresh_token  >> ", accessToken);
-    if (!accessToken && request.headers.authorization) {
-      accessToken = request.headers.authorization.split(" ")[1];
-      // console.log("accessToken 2>> ", accessToken);
-    }
-
-    if (!accessToken)
-      return reply.code(403).send({ message: "Not logged in" });
-
-    const decoded = request.jwt.verify(accessToken);
-    if (!decoded)
-      return reply.code(401).send({ message: "Couldn't decode token" });
-
-    const id = decoded.id;
-    let m = await dbcnx.getcurrentmatch(id);
-    if (m)
-    {
-      let ngame =  matches.get(m.id);
-      ngame.score1 = 5;
-      ngame.score2 = 0;
-      ngame.Winner_Id = ngame.P1_Id;
-      if (ngame.P1_Id == id || ngame.P3_Id == id)
-      {
-        ngame.score1 = 0;
-        ngame.score2 = 5;
-        ngame.Winner_Id = ngame.P2_Id;
-      }
-    }
-    return reply.code(201).send({ message: 'Good' });
-  } catch (e) {
-      return reply.code(405).send({ message: e });
-  }
-});
-
 fastify.post('/allmatch', async (request, reply) => {
   try {
-    let accessToken = request.cookies.refresh_token;
-    // console.log("refresh_token  >> ", accessToken);
-    if (!accessToken && request.headers.authorization) {
-      accessToken = request.headers.authorization.split(" ")[1];
-      // console.log("accessToken 2>> ", accessToken);
+    const res = await desToken(request);
+    
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
     }
-    if (!accessToken)
-      return reply.code(403).send({ message: "Not logged in" });
-    const decoded = request.jwt.verify(accessToken);
-    if (!decoded)
-      return reply.code(401).send({ message: "Couldn't decode token" });
-    let matches = await dbcnx.getPlayerMatches(decoded.id);
+    
+    const token = await res.json();
+    const id = token.user_id;
+    let matches = await dbcnx.getPlayerMatches(id);
     console.log("decoded.id>> ", decoded.id);
     console.log("This is all matches >> ", matches);
     if (matches) {
@@ -1028,9 +925,54 @@ fastify.post('/allmatch', async (request, reply) => {
 });
 
 
-import { registerDashboardRoutes_ayoub } from "./dashboard_ayoub.js";
-import { userInfo } from "os";
-await registerDashboardRoutes_ayoub(fastify, dbcnx);
+fastify.get('/api/dashboard/:identifier', async (request, reply) => {
+  try {
+    console.log("/gjfnfgnfg >>>>>>>>> " );
+    const res = await desToken(request);
+    console.log("/000000 >>>>>>>>> " );
+  
+    if (res.status === 401) {
+      return reply.code(401).send({ error: 'Unauthorized' });
+    }
+    
+    const token = await res.json();
+    const targetUserId = token.user_id;
+    console.log("targetUserId >>>>> " ,targetUserId);
+    const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
+      Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
+    const winsCount = await dbcnx.UserCountWins_ayoub(targetUserId);
+    const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(targetUserId);
+    const totalMatches = matchesCount?.Played || 0;
+    const totalWins = winsCount?.Winned || 0;
+    const totalTournaments  = await dbcnx.UserCountTournPlayed_ayoub(targetUserId);
+    const totalTourWins = await dbcnx.UserCountTournWin_ayoub(targetUserId);
+    const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
+    return {
+      user: {
+        id: null,
+        email: null,
+        User_name: null,
+        avatar: null,
+        isOnline: null,
+        Auto_Match: null,
+        CreatedAt: null,
+      },
+      statistics: {
+        totalMatches: totalMatches,
+        totalWins: totalWins,
+        totalLosses: totalMatches - totalWins,
+        winRate: parseFloat(winRate),
+        totalTournaments: totalTournaments?.Played || 0,
+        totalTourWins: totalTourWins?.Winned || 0,
+      },
+      lastMatch: lastMatch || null
+    };
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    return reply.code(500).send({ error: 'Internal server error' });
+  }
+});
+
 
 const useHttps = process.env.USE_HTTPS === "true";
 const port = 3000;

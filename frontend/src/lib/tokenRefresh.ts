@@ -96,6 +96,6 @@ export async function fetchWithAuth(
       window.location.href = "/login";
     }
   }
-  console.log(">>>>>>>>>>>> fetchWithAuth response status:", response);
+  // console.log(">>>>>>>>>>>> fetchWithAuth response status:", response);
   return response;
 }

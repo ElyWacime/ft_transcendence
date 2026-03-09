@@ -50,7 +50,7 @@ const ProfileSettings = () => {
         if (userId) {
           // Fetch all data combined, but use only user info
           const data = await playerDashboardApi_ayoub.getCompleteUserData(userId, accessToken, updateAccessToken);
-          console.log("Fetched user data:", data.user);
+          // console.log("Fetched user data:", data.user);
           
           setUserInfo({
             id: data.user.id || "",

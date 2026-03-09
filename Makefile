@@ -15,8 +15,8 @@ fclean: clean
 	sudo rm -f services/chat-service/dev.db
 	sudo rm -f services/auth-service/prisma/db/data.db
 	sudo rm -f services/game-service/db/database.sqlite
-	sudo rm ./services/gateway/certs/certificate.crt
-	sudo rm ./services/gateway/certs/private.key
+	sudo rm -f ./services/gateway/certs/certificate.crt
+	sudo rm -f ./services/gateway/certs/private.key
 
 
 rm:
@@ -39,9 +39,10 @@ ps:
 	docker compose ps
 
 certs:
-	chmod +x generate-certs.sh
-	chmod +x get_machine_ip.sh
-	./get_machine_ip.sh && ./generate-certs.sh
+	chmod +x ./scripts/generate-certs.sh
+	chmod +x ./scripts/get_machine_ip.sh
+	chmod +x ./scripts/generate-jwt-secrets.sh
+	./scripts/generate-jwt-secrets.sh && ./scripts/get_machine_ip.sh && ./scripts/generate-certs.sh
 
 saad:db
 	(docker stop $$(docker ps -qa) &&  docker rm $$(docker ps -qa) &&  docker rmi -f $$(docker images -qa) &&  docker volume rm $$(docker volume ls -q) &&  docker system prune -a --volumes -f &&  docker network rm $$(docker network ls -q)) 2>/dev/null || true

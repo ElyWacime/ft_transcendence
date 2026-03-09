@@ -60,8 +60,6 @@ app.decorate(
 
 app.get("/healthcheck", async () => ({ message: "Success" }));
 
-app.register(oauthRoutes, { prefix: "/auth" });
-
 app.register(userRoutes);
 
 for (const signal of ["SIGINT", "SIGTERM"]) {

@@ -82,11 +82,12 @@ const Dashboard_ayoub = () => {
 
       try {
         const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken);
+        // console.log("---------------------- Fetched dashboard data >>>> :", data);
         setDashboardData(data);
         setAvatarKey(Date.now());
       } catch (err: any) {
-        console.error("Failed to fetch dashboard:", err);
-        console.error("Error details:", err.message);
+        // console.error("Failed to fetch dashboard:", err);
+        // console.error("Error details:", err.message);
         if (err.message.includes("Not Found") || err.message.includes("404")) {
           setError(`User not found. Identifier: ${userIdentifier}. Please make sure the username or ID is correct.`);
         } else {

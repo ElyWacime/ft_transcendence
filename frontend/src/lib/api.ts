@@ -156,11 +156,11 @@ class UserAPI {
     return await res.json();
   }
 
-  async getUserById(userId: string) {
+  async getUserById(userId: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`/api/dashboard/${userId}`, {
       method: "GET",
       credentials: 'include',
-    });
+    },accessToken, updateAccessToken);
 
     if (!res.ok) {
       const errorText = await res.text();

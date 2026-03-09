@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
-import { Github } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
@@ -14,22 +13,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    const userEmail = params.get("email");
-    const userName = params.get("name");
-    const userId = params.get("id");
-
-    if (token && userEmail && userName && userId) {
-      const user = {
-        id: userId,
-        email: userEmail,
-        name: userName,
-      };
-      login(token, user);
-      toast.success("Successfully logged in with GitHub!");
-      navigate("/tournament", { replace: true });
-    }
+    // OAuth callback handling has been removed
   }, [navigate, login]);
 
 
