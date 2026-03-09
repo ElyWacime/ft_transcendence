@@ -27,7 +27,6 @@ const GameOnline = () => {
   }
   
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
-  console.log(">>>>>>>>>>>>>>>>>>>>>..... ",player1Name, player2Name,player3Name, player4Name, mode);
   const { ws, isReady, wsRef } = useWebSocket();
   const { user } = useAuth();
   const id = user?.id;
