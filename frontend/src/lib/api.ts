@@ -173,14 +173,23 @@ class UserAPI {
   
   private baseUrl = `${API_URL}/api/users`;
   
-  async updateUsername(current_password: string, new_username: string) {
+  async updateUsername(current_password: string, new_username: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`${this.baseUrl}/update_username`, {
       method: "PUT",
       body: JSON.stringify({ current_password, new_username }),
       credentials: 'include',
-    });
-        return await res.json();
+    }, accessToken, updateAccessToken);
+    if (res.ok) {
+      const res = await fetchWithAuth(`${API_URL}/api/chat/user/update`, {
+        method: "POST",
+        body: JSON.stringify({ username: new_username }),
+        credentials: 'include',
+      }, accessToken, updateAccessToken);
+    }
+
+    return await res.json();
   }
+
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
       method: "POST",
