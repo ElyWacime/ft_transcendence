@@ -4,7 +4,6 @@ import fjwt, { FastifyJWT } from "@fastify/jwt";
 import fCookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { oauthRoutes } from "./modules/user/oauth.route";
 import * as fs from "fs";
 
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
@@ -60,8 +59,6 @@ app.decorate(
 );
 
 app.get("/healthcheck", async () => ({ message: "Success" }));
-
-app.register(oauthRoutes, { prefix: "/auth" });
 
 app.register(userRoutes);
 
