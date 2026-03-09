@@ -5,10 +5,6 @@ import "../css/tournament-online.css";
 import { useWebSocket } from "@/context/WebSocketContext";
 import { useAuth } from "@/context/AuthContext";
 
-// game-service base URL (used for initial tournament snapshot fetch before sockets sync)
-// sockets keep the page live, but we still seed the UI with the latest known state on first load
-const API_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
-
 interface Participant {
   id: string;
   name: string;
@@ -67,7 +63,7 @@ export default function TournamentOnlinePage() {
   const sendAction = (payload: Record<string, unknown>) => {
     const socket = wsRef?.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      toast.error("Socket not connected");
+      // toast.error("Socket not connected");
       return false;
     }
     socket.send(JSON.stringify({ token: accessToken, ...payload }));
@@ -79,27 +75,19 @@ export default function TournamentOnlinePage() {
     sendAction({ type: "REQUEST_TOURNAMENTS" });
   };
 
-  // initial load: fetch tournament list from game-service REST endpoint
-  // REST gives us a snapshot even if websocket connects a tick later or user refreshes mid-flow
+  // initial load: request tournaments via websocket only (no REST fallback)
   useEffect(() => {
     requestTournaments();
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/game/tournaments-online`, { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          // console.log("data>>>>>", data);
-          setTournaments(Array.isArray(data) ? data : []);
-        }
-      } catch (e) {
-        console.error("Failed to load tournaments", e);
-        toast.error("Could not load tournaments");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
+    const timeout = setTimeout(() => setIsLoading(false), 3000);
+    return () => clearTimeout(timeout);
   }, []);
+
+  // whenever the websocket transitions to connected, ask for the latest tournaments snapshot
+  useEffect(() => {
+    if (isConnected) {
+      requestTournaments();
+    }
+  }, [isConnected]);
 
   // register websocket listener and handle tournament events
   // keeps UI live-synced; TOURNAMENT_MATCH_READY also redirects players into their match
@@ -112,6 +100,7 @@ export default function TournamentOnlinePage() {
         const data = JSON.parse(event.data);
         if (data.type === "TOURNAMENTS_STATE") {
           setTournaments(Array.isArray(data.tournaments) ? data.tournaments : []);
+          setIsLoading(false);
         }
         if (data.type === "TOURNAMENT_MATCH_READY") {
           const isPlayer =

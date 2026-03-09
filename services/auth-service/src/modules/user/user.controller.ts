@@ -84,7 +84,7 @@ export async function login(
   const isProduction = process.env.NODE_ENV === "production";
   const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
   
-  console.log("[LOGIN] Setting refresh_token cookie with sameSite:", secureCookie ? "none" : "lax");
+  // console.log("[LOGIN] Setting refresh_token cookie with sameSite:", secureCookie ? "none" : "lax");
   
   // Store refresh token in httpOnly cookie (XSS protection)
   reply.setCookie("refresh_token", refreshToken, {
@@ -95,7 +95,7 @@ export async function login(
     maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
   });
   
-  console.log("[LOGIN] Login successful, returning access token and user");
+  // console.log("[LOGIN] Login successful, returning access token and user");
   
   // Return access token in response body (to be stored in memory on frontend)
   // Also return user info for immediate use
@@ -408,11 +408,11 @@ export async function refreshToken(
 ) {
   const refreshToken = req.cookies.refresh_token;
 
-  console.log("[REFRESH] Cookies received:", Object.keys(req.cookies));
-  console.log("[REFRESH] refresh_token present:", !!refreshToken);
+  // console.log("[REFRESH] Cookies received:", Object.keys(req.cookies));
+  // console.log("[REFRESH] refresh_token present:", !!refreshToken);
 
   if (!refreshToken) {
-    console.log("[REFRESH] No refresh token in cookies - returning 401");
+    // console.log("[REFRESH] No refresh token in cookies - returning 401");
     return reply.code(401).send({ message: "Refresh token required" });
   }
 
@@ -451,7 +451,7 @@ export async function refreshToken(
     const isProduction = process.env.NODE_ENV === "production";
     const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
 
-    console.log("[REFRESH] Setting new refresh_token cookie with sameSite:", secureCookie ? "none" : "lax");
+    // console.log("[REFRESH] Setting new refresh_token cookie with sameSite:", secureCookie ? "none" : "lax");
 
     reply.setCookie("refresh_token", newRefreshToken, {
       path: "/",
@@ -470,7 +470,7 @@ export async function refreshToken(
       }
     };
 
-    console.log("[REFRESH] Returning response:", JSON.stringify(responseData));
+    // console.log("[REFRESH] Returning response:", JSON.stringify(responseData));
 
     return reply.send(responseData);
   } catch (err) {
