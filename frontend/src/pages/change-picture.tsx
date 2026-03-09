@@ -24,10 +24,9 @@ const ChangePicture = () => {
       try {
         const userId = user?.id;
         if (userId) {
-          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId, accessToken, updateAccessToken);
-          setCurrentAvatar(data.user.avatar || "");
-          setPreviewUrl(data.user.avatar || "");
-          setUsername(data.user.User_name || "");
+          setCurrentAvatar(user.avatar || "");
+          setPreviewUrl(user.avatar || "");
+          setUsername(user.User_name || "");
         }
       } catch (error) {
         console.error("Failed to fetch current avatar:", error);
