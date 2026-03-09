@@ -49,13 +49,9 @@ export default function Chat() {
   {
     const res = await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/invite`, {
         method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          ...(accessToken ? { "Authorization": `Bearer ${accessToken}` } : {})
-        },
         credentials: "include",
         body: JSON.stringify({ P1 ,P2 }),
-    });
+    }, accessToken, updateAccessToken);
     return res;
   }
 
