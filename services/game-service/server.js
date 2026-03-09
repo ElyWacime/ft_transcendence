@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
-// import fjwt from "@fastify/jwt";  
+import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
 import * as fs from "fs";
@@ -838,6 +838,64 @@ fastify.post("/me", async (request, reply) => {
   }
 });
 
+fastify.get("/game", { websocket: true }, async (connection, req) => {
+  connection.on("message", async (msg) => {
+    try {
+      const request = JSON.parse(msg);
+      let token = request.token;
+      
+      if (token) {
+        // Create a mock request object for desToken
+        const mockReq = {
+          headers: {
+            authorization: `Bearer ${token}`
+          },
+          cookies: {}
+        };
+        
+        const res = await desToken(mockReq);
+        
+        if (res.status === 401) {
+          console.log("Unauthorized, closing connection");
+          connection.close();
+          return;
+        }
+        
+        const userData = await res.json();
+        const id = userData.user_id;
+        
+        // Now you have the user id, you can use it
+        console.log(`User ${id} connected`);
+        
+        // You might want to store the connection with the user id
+        clients.set(id, connection);
+        
+      } else {
+        console.log("No token provided, proceeding on Closing connection");
+        connection.close();
+      }
+    } catch (e) {
+      console.error("WebSocket message handler error:", e);
+      connection.close();
+    }
+  });
+  
+  connection.on("close", async () => {
+    for (const [id, client] of clients) {
+      if (client == connection) {
+        try {
+          await handelRoomQuiiting(id);
+          clients.delete(id);
+          console.log("Server OnClosed Socket for ", id);
+          break;
+        } catch (e) {
+          console.error("Server OnClosed Socket error:", e);
+        }
+      }
+    }
+  });
+});
+
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
    try
@@ -846,13 +904,40 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       let token = request.token;
       console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
-        const res = await desToken(request);
+        // const res = await desToken(request);
     
+        // if (res.status === 401) {
+        //   return reply.code(401).send({ error: 'Unauthorized' });
+        // }
+        //   const token = await res.json();
+        //   const id = token.user_id;
+
+        const mockReq = {
+          headers: {
+            authorization: `Bearer ${token}`
+          },
+          cookies: {}
+        };
+        
+        const res = await desToken(mockReq);
+        
         if (res.status === 401) {
-          return reply.code(401).send({ error: 'Unauthorized' });
+          console.log("Unauthorized, closing connection");
+          connection.close();
+          return;
         }
-          const token = await res.json();
-          const id = token.user_id;
+        
+        const userData = await res.json();
+        const id = userData.user_id;
+        
+        // Now you have the user id, you can use it
+        console.log(`User ${id} connected`);
+        
+        // You might want to store the connection with the user id
+        clients.set(id, connection);
+
+
+          
           await handelDup(connection,id);
           clients.set(id, connection);
           const name = await getUserName(id);
