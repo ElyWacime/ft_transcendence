@@ -9,7 +9,7 @@ import { fetchWithAuth } from "@/lib/tokenRefresh";
 
 const MatchMacking = () => {
     const { ws, isReady } = useWebSocket();
-  const { accessToken, updateAccessToken } = useAuth();
+ 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const mode = searchParams.get("mode");
@@ -17,36 +17,27 @@ const MatchMacking = () => {
     let matchref = useRef(true);
     const [features, setFeatures] = useState([]);
 
-
+    const { accessToken, updateAccessToken } = useAuth();
     const getName = async (id: number) => {
-      if(!id)  return null;
-        return await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
+        if(!id)  return null;
+        let res =  await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
+        if (res.status === 200) {
+          let data = await res.json();
+          return data.name;
+        } else {
+          console.error(`Failed to fetch name for id ${id}: ${res.statusText}`);
+          return null;
+        }
     };
   
     const handleMessage = useCallback(async (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       matchref.current = data.id;
       let [res1, res2, res3, res4] = await Promise.all([getName(data.P1_Id),getName(data.P2_Id),getName(data.P3_Id),getName(data.P4_Id)]);
-      if(res1)
-      {
-        let player1Name = await res1.json();
-        data.player1Name = player1Name.name;
-      }
-      if(res2)
-      {
-        let player2Name = await res2.json();
-        data.player2Name = player2Name.name;
-      }
-      if(res3)
-      {
-        let player3Name = await res1.json();
-        data.player3Name = player3Name.name;
-      }
-      if(res4)
-      {
-        let player4Name = await res2.json();
-        data.player4Name = player4Name.name;
-      }
+      data.player1Name = res1;
+      data.player2Name = res2;
+      data.player3Name = res3;
+      data.player4Name = res4;
       setFeatures(() => {
           if (mode == "4")
           {
