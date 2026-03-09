@@ -20,12 +20,12 @@ const ChangeUsername = () => {
       const res = await userApi.updateUsername(password, newUsername);
       if (res.success) {
         toast.success("Username updated successfully!");
-        // Update stored credentials with new username and tokens
-        localStorage.setItem("username", res.newUsername);
-        localStorage.setItem("token", res.accessToken);
-        if (res.refreshToken) {
-          localStorage.setItem("refreshToken", res.refreshToken);
-        }
+        // // Update stored credentials with new username and tokens
+        // localStorage.setItem("username", res.newUsername);
+        // localStorage.setItem("token", res.accessToken);
+        // if (res.refreshToken) {
+        //   localStorage.setItem("refreshToken", res.refreshToken);
+        // }
         navigate("/profile");
       } else {
         toast.error(res.message || "Username update failed.");
