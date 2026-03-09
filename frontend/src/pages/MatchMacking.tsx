@@ -18,7 +18,7 @@ const MatchMacking = () => {
     const [features, setFeatures] = useState([]);
 
 
-    const getUserName = async (id: number) => {
+    const getName = async (id: number) => {
       if(!id)  return null;
         return await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
     };
@@ -26,7 +26,7 @@ const MatchMacking = () => {
     const handleMessage = useCallback(async (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       matchref.current = data.id;
-      let [res1, res2, res3, res4] = await Promise.all([getUserName(data.P1_Id),getUserName(data.P2_Id),getUserName(data.P3_Id),getUserName(data.P4_Id)]);
+      let [res1, res2, res3, res4] = await Promise.all([getName(data.P1_Id),getName(data.P2_Id),getName(data.P3_Id),getName(data.P4_Id)]);
       if(res1)
       {
         let player1Name = await res1.json();
