@@ -8,16 +8,7 @@ import { fetchWithAuth } from "@/lib/tokenRefresh";
 const Home = () => {
 
   const navigate = useNavigate();
-  const { accessToken, updateAccessToken } = useAuth();
-  
-  const [confirmState, setConfirmState] = useState<{
-    open: boolean;
-    action: null | (() => Promise<void>);
-  }>({
-    open: false,
-    action: null
-  });
-  const { user } = useAuth();
+  const { user, accessToken, updateAccessToken } = useAuth();
   const id = user?.id;
   
   const checkhandel = async (mode: number) => {
@@ -140,32 +131,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-      {confirmState.open && (
-        <div className="confirm-overlay">
-          <div className="confirm-modal">
-            <h2>Ongoing Match</h2>
-            <p>You already have an ongoing match.</p>
-            <p>If you continue, you will lose it.</p>
-            <div className="confirm-actions">
-              <button
-                className="confirm-cancel"
-                onClick={() => setConfirmState({ open: false, action: null })}
-              >
-                Cancel
-              </button>
-              <button
-                className="confirm-continue"
-                onClick={async () => {
-                  await confirmState.action?.();
-                  setConfirmState({ open: false, action: null });
-                }}
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

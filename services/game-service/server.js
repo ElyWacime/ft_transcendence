@@ -673,12 +673,10 @@ const handelRoomQuiiting = async(id) => {
     ngame.mode = m.mode;
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
-
-    let [name1,name2,name3,name4] = await Promise.all([getUserName(m.P1_Id),getUserName(m.P2_Id),getUserName(m.P3_Id),getUserName(m.P4_Id)]);
-    ngame.player1Name = name1;
-    ngame.player2Name = name2;
-    ngame.player3Name = name3;
-    ngame.player4Name = name4;
+    ngame.player1Name = null;
+    ngame.player2Name = null;
+    ngame.player3Name = null;
+    ngame.player4Name = null;
 
   let data = JSON.stringify(ngame);
   sendtoplayer(ngame.P1_Id, data);
@@ -733,11 +731,10 @@ const handelRegister = async(request,id) => {
     ngame.P2_Id = m.P2_Id;
     ngame.P3_Id = m.P3_Id;
     ngame.P4_Id = m.P4_Id;
-    let [name1,name2,name3,name4] = await Promise.all([getUserName(m.P1_Id),getUserName(m.P2_Id),getUserName(m.P3_Id),getUserName(m.P4_Id)]);
-    ngame.player1Name = name1;
-    ngame.player2Name = name2;
-    ngame.player3Name = name3;
-    ngame.player4Name = name4;
+    ngame.player1Name = null;
+    ngame.player2Name = null;
+    ngame.player3Name = null;
+    ngame.player4Name = null;
     ngame.T_Id = m.T_Id;
     ngame.count_players = m.count_players;
     ngame.mode = request.mode;
@@ -816,31 +813,31 @@ const interval = setInterval(async () => {
 }, 1000 / TICK_RATE);
 
 const getUserName = async (id) => {
-  return null;
-  // try {
-  //   if(!id)
-  //     return null;
-  //   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
-  //   const fetchOptions = {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //   };
-  //   if (httpsAgent) {
-  //     fetchOptions.agent = httpsAgent;
-  //   }
-  //   const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
-  //   if (!response.ok) {
-  //     console.error(`Auth service returned status ${response.status}`);
-  //     return null;
-  //   }
-  //   const user = await response.json();
-  //   return user ? user.name : null;
-  // } catch (error) {
-  //   console.error(`Error fetching user ${id} from auth service: `,error);
-  //   return null;
-  // }
+  // return null;
+  try {
+    if(!id)
+      return null;
+    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+    const fetchOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    if (httpsAgent) {
+      fetchOptions.agent = httpsAgent;
+    }
+    const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
+    if (!response.ok) {
+      console.error(`Auth service returned status ${response.status}`);
+      return null;
+    }
+    const user = await response.json();
+    return user ? user.name : null;
+  } catch (error) {
+    console.error(`Error fetching user ${id} from auth service: `,error);
+    return null;
+  }
 };
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
@@ -872,29 +869,29 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           await handelMove(request,id);
         else if (request.type == "DELETE") 
           await handelRoomQuiiting(id);
-          else if (request.type == "TOURNAMENT_CREATE") 
-          {
-            const creator = { id, name  };
-            createTournamentRoom(creator);
-          }
-          else if (request.type == "TOURNAMENT_LEAVE") 
-          {
-          const participant = { id, name};
-          leaveTournamentRoom(request.tournamentId, participant);
-          }
-          else if (request.type == "TOURNAMENT_JOIN") {
-            const participant = { id, name };
-            joinTournamentRoom(request.tournamentId, participant);
-          }
-          else if (request.type == "TOURNAMENT_READY") {
-            await handleTournamentReady(request.tournamentId, request.matchId, id);
-          }
-          else if (request.type == "TOURNAMENT_REPORT_MISSING") {
-            await handleReportMissingOpponent(request.tournamentId, request.matchId, id);
-          }
-          else if (request.type == "REQUEST_TOURNAMENTS") {
-            sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
-          }
+        else if (request.type == "TOURNAMENT_CREATE") 
+        {
+          const creator = { id, name  };
+          createTournamentRoom(creator);
+        }
+        else if (request.type == "TOURNAMENT_LEAVE") 
+        {
+        const participant = { id, name};
+        leaveTournamentRoom(request.tournamentId, participant);
+        }
+        else if (request.type == "TOURNAMENT_JOIN") {
+          const participant = { id, name };
+          joinTournamentRoom(request.tournamentId, participant);
+        }
+        else if (request.type == "TOURNAMENT_READY") {
+          await handleTournamentReady(request.tournamentId, request.matchId, id);
+        }
+        else if (request.type == "TOURNAMENT_REPORT_MISSING") {
+          await handleReportMissingOpponent(request.tournamentId, request.matchId, id);
+        }
+        else if (request.type == "REQUEST_TOURNAMENTS") {
+          sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
+        }
       }
       else 
       {
@@ -977,19 +974,7 @@ fastify.post('/allmatch', async (request, reply) => {
     const token = await res.json();
     const id = token.user_id;
     let matches = await dbcnx.getPlayerMatches(id);
-    // if (matches) {
-      // matches = await Promise.all(matches.map(async (m) => {
-      //   const [P1, P2, P3, P4, Winner] = await Promise.all([
-      //     getUserName(m.P1_Id),
-      //     getUserName(m.P2_Id),
-      //     getUserName(m.P3_Id),
-      //     getUserName(m.P4_Id),
-      //     getUserName(m.Winner_Id),
-      //   ]);
-      //   return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
-      // }));
       return reply.code(201).send({ matches: matches});
-    // }
     } 
     catch (err) {
       return reply.code(401).send({ message: 'Invalid token' });
