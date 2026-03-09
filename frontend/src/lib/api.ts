@@ -293,12 +293,12 @@ class UserAPI {
     return data.user;
   }
 
-  async searchByName(name: string) {
+  async searchByName(name: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`/api/users/search-this-name`, {
       method: "POST",
       body: JSON.stringify({ name }),
       credentials: 'include',
-    });
+    }, accessToken, updateAccessToken);
     
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
@@ -312,7 +312,7 @@ class UserAPI {
       const infoRes = await fetchWithAuth(`/api/users/user-info/${data.user_id}`, {
         method: "GET",
         credentials: 'include',
-      });
+      }, accessToken, updateAccessToken);
       if (infoRes.ok) {
         const infoData = await infoRes.json();
         avatar = infoData.avatar || "";

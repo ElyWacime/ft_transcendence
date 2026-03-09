@@ -30,12 +30,12 @@ class PlayerDashboardAPI_ayoub {
   private baseUrl = "/api";
 
   // Main method: Fetch ALL data combined (auth + game)
-  async getCompleteUserData(userId: string): Promise<CombinedUserData> {
+  async getCompleteUserData(userId: string, accessToken: string, updateAccessToken: (newToken: string) => void): Promise<CombinedUserData> {
     try {
       // Fetch both auth and game data in parallel
       const [authRes, gameRes] = await Promise.all([
-        fetchWithAuth(`/api/users/user-info/${userId}`, { method: "GET" }),
-        fetchWithAuth(`${this.baseUrl}//dashboard/${userId}`, { method: "GET" })
+        fetchWithAuth(`/api/users/user-info/${userId}`, { method: "GET" }, accessToken, updateAccessToken),
+        fetchWithAuth(`${this.baseUrl}//dashboard/${userId}`, { method: "GET" }, accessToken, updateAccessToken)
       ]);
 
       if (!authRes.ok) {
@@ -81,8 +81,8 @@ class PlayerDashboardAPI_ayoub {
   }
 
   // Alias for backward compatibility
-  async getPlayerDashboard(identifier: string) {
-    return this.getCompleteUserData(identifier);
+  async getPlayerDashboard(identifier: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
+    return this.getCompleteUserData(identifier, accessToken, updateAccessToken);
   }
 }
 

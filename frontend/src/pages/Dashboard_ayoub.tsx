@@ -40,6 +40,7 @@ const Dashboard_ayoub = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now());
+  const { accessToken, updateAccessToken } = useAuth();
 
   const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
     ? dashboardData?.user.avatar
@@ -64,7 +65,7 @@ const Dashboard_ayoub = () => {
       }
 
       try {
-        const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier);
+        const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken);
         setDashboardData(data);
         setAvatarKey(Date.now());
       } catch (err: any) {
