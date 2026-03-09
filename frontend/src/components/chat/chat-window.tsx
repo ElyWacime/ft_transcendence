@@ -7,6 +7,7 @@ import { Socket } from 'socket.io-client'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
 const SERVER_URL = API_URL
+const MAX_MESSAGE_LENGTH = 1000
 
 type ChatWindowProps = {
   conversation?: any
@@ -98,6 +99,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
 
   const handleSend = () => {
     if (isBlocked) return
+    if (inputValue.length > MAX_MESSAGE_LENGTH) return
     if (inputValue.trim() && activeConversationId && isConnected) {
       onSendMessage(inputValue, String(activeConversationId))
       setInputValue("")
@@ -238,11 +240,12 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
       <div className="input-area"  >
         <textarea
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => setInputValue(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
           onKeyPress={handleKeyPress}
           placeholder="Type a message..."
           className="message-input"
           rows={1}
+          maxLength={MAX_MESSAGE_LENGTH}
           disabled={isBlocked}
         />
         <button onClick={handleSend} className="send-button" disabled={isBlocked}>

@@ -121,4 +121,25 @@ async function getConversationParticipantIds(conversationId) {
     return rows.map(r => r.user_id);
 }
 
-export { getConversationsForUser, checkIfConvExist, createNewConversation, getChatHistory, saveMessage, getConversationParticipantIds };
+async function isUserParticipantInConversation(conversationId, userId) {
+    const stmt = `
+        SELECT 1
+        FROM conversation_participants
+        WHERE conversation_id = ? AND user_id = ?
+        LIMIT 1
+    `;
+
+    const row = await db.get(stmt, [conversationId, userId]);
+
+    return row !== undefined;
+}
+
+export {
+    getConversationsForUser,
+    checkIfConvExist,
+    createNewConversation,
+    getChatHistory,
+    saveMessage,
+    getConversationParticipantIds,
+    isUserParticipantInConversation
+};

@@ -157,8 +157,6 @@ export default function Chat() {
         body: JSON.stringify({ user_id: conversation.other_user_id, invitationType: invitationType })
     }, accessToken, updateAccessToken)
     
-    const re = await response.json()    
-
     setPendingInvitations((prev: any) => ({
       ...prev,
       [conversation.id]: {
