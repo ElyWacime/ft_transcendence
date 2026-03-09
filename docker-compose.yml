@@ -71,7 +71,7 @@ services:
       - ./services/gateway/certs:/etc/nginx/certs:ro
     networks:
       - transcendence
-    # restart: always
+    restart: always
   
   game-server:
     build:
@@ -93,7 +93,7 @@ services:
       - auth-service
     networks:
       - transcendence
-    # restart: always
+    restart: always
 
 networks:
   transcendence:
