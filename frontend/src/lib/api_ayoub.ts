@@ -48,7 +48,7 @@ class PlayerDashboardAPI_ayoub {
 
       // Use the resolved ID for the game service (which needs the actual user ID)
       const resolvedId = authData.id || userId;
-      const gameRes = await fetchWithAuth(`${this.baseUrl}//dashboard/${resolvedId}`, { method: "GET" });
+      const gameRes = await fetchWithAuth(`${this.baseUrl}//dashboard/${resolvedId}`, { method: "GET" },accessToken, updateAccessToken);
 
       if (!gameRes.ok) {
         const errorText = await gameRes.text();
@@ -80,7 +80,7 @@ class PlayerDashboardAPI_ayoub {
         lastMatch: gameData.lastMatch || null
       };
     } catch (error: any) {
-      console.error("Complete User Data Fetch Error:", error);
+      // console.error("Complete User Data Fetch Error:", error);
       throw error;
     }
   }
