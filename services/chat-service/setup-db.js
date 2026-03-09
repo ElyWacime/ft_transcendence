@@ -32,7 +32,7 @@ export default async function initializeDb() {
 
         await setupDatabase(db);
 
-        console.log('Database tables are ready.');
+        // console.log('Database tables are ready.');
 
     } catch (error) {
         console.error('Failed to initialize database:', error);

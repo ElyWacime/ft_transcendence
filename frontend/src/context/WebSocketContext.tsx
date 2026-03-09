@@ -62,7 +62,7 @@ export const WebSocketProvider = ({ children }) => {
 
     if (!isLoggedIn) {
       if (wsRef.current) {
-        console.log("Closing WS because user logged out");
+        // console.log("Closing WS because user logged out");
         wsRef.current.close();
         wsRef.current = null;
         setWs(null);

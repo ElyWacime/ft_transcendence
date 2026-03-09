@@ -277,7 +277,7 @@ const leaveTournamentRoom = (id, participant) => {
   }
 
   // delete empty tournaments to avoid clutter
-  console.log("This is leaveTournamentRoom >> ", tournament.participants.length);
+  // console.log("This is leaveTournamentRoom >> ", tournament.participants.length);
   if (tournament.participants.length === 0) {
     tournaments.delete(id);
   } else {
@@ -429,7 +429,7 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
 // player reports opponent missing; if reporter has been ready for >=1 minute and opponent not ready, auto-advance reporter
 const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) => {
   
-  console.log("This is handleReportMissingOpponent >> ", tournamentId, matchId, reporterId);
+  // console.log("This is handleReportMissingOpponent >> ", tournamentId, matchId, reporterId);
   const tournament = tournaments.get(tournamentId);
   if (!tournament) return;
 
@@ -576,7 +576,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   }
   if (!matchSlot.player1 || !matchSlot.player2) return;
 
-  console.log("after match check >> ", matchSlot);
+  // console.log("after match check >> ", matchSlot);
   matchSlot.readyAt = matchSlot.readyAt || {};
   matchSlot.ready = matchSlot.ready || {};
 
@@ -613,8 +613,6 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   dbMatch.score2 = reporterIsP1 ? 0 : 5;
   dbMatch.Winner_Id = reporterId;
   dbMatch.gameStatus = "PLAYING";
-  // await dbcnx.updateMatch(dbMatch);
-
   const g = new GameState();
   g.id = matchDbId;
   g.P1_Id = matchSlot.player1.id;
@@ -628,11 +626,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   g.Winner_Id = reporterId;
   g.player1Name = await getUserName(g.P1_Id);
   g.player2Name = await getUserName(g.P2_Id);
-  if(matches.get(g.id))
-    console.log("Warning: overwriting existing match in handleReportMissingOpponent >> ");
-  console.log("report missing opponent, auto-completing match >> ", g);
   matches.set(g.id, g);
-  //=----
 
   if (semifinals.includes(matchSlot)) {
     if (tournament.final) {
@@ -768,9 +762,6 @@ const handelRoomQuiiting = async(id) => {
   sendtoplayer(ngame.P3_Id, data);
   sendtoplayer(ngame.P4_Id, data);
   }
-  else
-    console.log("coudnt find this match :: ",id);
-
 };
 
 const handelRegister = async(request,id) => {
@@ -875,7 +866,6 @@ const handelDup = async (connection,id) => {
       if (clients.get(id) != connection) 
       {
         clients.get(id).close();
-        console.log("Server Closed Duplicate Socket for ",id);
       }
     }
     catch (e) 
@@ -934,7 +924,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    {
       const request = JSON.parse(msg);
       let token = request.token;
-      console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
         const mockReq = {
           headers: {
@@ -944,7 +933,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         };
         const res = await desToken(mockReq);
         if (res.status === 401) {
-          console.log("Unauthorized, closing connection");
+          // console.log("Unauthorized, closing connection");
           connection.close();
           return;
         }
@@ -1017,10 +1006,8 @@ fastify.post('/invite', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    
     let P1 = request.body.P1;
     let P2 = request.body.P2;
-    console.log("invite  >> ",P1,P2);
     let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
     if (!(m1 || m2))
     {
@@ -1063,12 +1050,9 @@ fastify.post('/allmatch', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    
     const token = await res.json();
     const id = token.user_id;
     let matches = await dbcnx.getPlayerMatches(id);
-    console.log("decoded.id>> ", decoded.id);
-    console.log("This is all matches >> ", matches);
     if (matches) {
       matches = await Promise.all(matches.map(async (m) => {
         const [P1, P2, P3, P4, Winner] = await Promise.all([
@@ -1080,7 +1064,6 @@ fastify.post('/allmatch', async (request, reply) => {
         ]);
         return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
       }));
-      console.log("This is all matches with names >> ", matches);
       return reply.code(201).send({ matches: matches});
     }
     } 
@@ -1093,17 +1076,12 @@ fastify.post('/allmatch', async (request, reply) => {
 
 fastify.get('/api/dashboard/:identifier', async (request, reply) => {
   try {
-    console.log("/gjfnfgnfg >>>>>>>>> " );
     const res = await desToken(request);
-    console.log("/000000 >>>>>>>>> " );
-  
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    
     const token = await res.json();
     const targetUserId = token.user_id;
-    console.log("targetUserId >>>>> " ,targetUserId);
     const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
       Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
     const winsCount = await dbcnx.UserCountWins_ayoub(targetUserId);

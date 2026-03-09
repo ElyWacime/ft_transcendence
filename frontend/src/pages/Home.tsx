@@ -97,7 +97,7 @@ const Home = () => {
       return;
     }
     // let dat = await whoami();
-    console.log(" id >>>>> ",id);
+    // console.log(" id >>>>> ",id);
     if (id)
     {
       let res = await checkhandel(feature.mode);
