@@ -20,7 +20,7 @@ export async function createUser(
   });
   if (user) {
     return reply.code(401).send({
-      message: "User already exists with this email",
+      message: "User already exists",
     });
   }
   const name_user = await prisma.user.findUnique({
@@ -30,7 +30,7 @@ export async function createUser(
   });
   if (name_user) {
     return reply.code(401).send({
-      message: "User already exists with this name",
+      message: "User already exists",
     });
   }
   try {
@@ -212,9 +212,8 @@ export async function update_email(
     };
      
   } catch (error) {
-    console.error(error);
     return reply.code(401).send({ 
-      message: error,
+      message: "Unauthorized",
     });
   }
 }
@@ -391,14 +390,23 @@ export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
 }
 
 export async function logout(
-  req: FastifyRequest<{ Body: { email: string } }>,
+  req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { email } = req.body;
-  const user = await prisma.user.update({
-    where: { email },
+  const userToken = req.user as {
+    id: string;
+    email: string;
+  };
+
+  await prisma.user.update({
+    where: { id: userToken.id },
     data: { loggedIn: false, refreshToken: null },
   });
+
+  reply.clearCookie("refresh_token", {
+    path: "/",
+  });
+
   return reply.send({ message: "Logout successful" });
 }
 

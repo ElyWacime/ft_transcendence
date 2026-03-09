@@ -90,9 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try {
-      if (user?.email) {
-        await userApi.logout(user.email);
-      }
+      await userApi.logout(accessToken, (newToken: string) => setAccessToken(newToken));
     } catch (e) {
       console.error("Logout failed", e);
     }
