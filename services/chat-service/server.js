@@ -383,7 +383,7 @@ fastify.post("/invite", { schema: invitationsSchema }, async (request, reply) =>
   const token = await res.json();
   const inviterId = token.user_id;
   const inviteeId = request.body.user_id;
-  const invitationType = request.body.invitation_type;
+  const invitationType = request.body.invitationType;
   
 
   await createInvitation(inviterId, inviteeId, invitationType); 
@@ -407,7 +407,7 @@ fastify.post("/uninvite", { schema: invitationsSchema }, async (request, reply) 
   const token = await res.json();
   const inviterId = token.user_id;
   const inviteeId = request.body.user_id;
-  const invitationType = request.body.invitation_type;
+  const invitationType = request.body.invitationType;
 
   await cancelInvitation(inviterId, inviteeId, invitationType);
 

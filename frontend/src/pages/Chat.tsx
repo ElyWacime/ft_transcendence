@@ -92,6 +92,10 @@ export default function Chat() {
     }
   }, [socket, navigate])
 
+  useEffect(() => {
+    fetchConversations()
+  }, [])
+
   const fetchConversations = async () => {
       try {
         const res = await fetchWithAuth(`${SERVER_URL}/api/chat/conversations`, { method: 'GET', credentials: 'include' }, accessToken, updateAccessToken)
@@ -126,7 +130,7 @@ export default function Chat() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: conversation.other_user_id, invitation_type: invitationType })
+        body: JSON.stringify({ user_id: conversation.other_user_id, invitationType: invitationType })
     }, accessToken, updateAccessToken)
     const re = await response.json()
 
@@ -154,7 +158,7 @@ export default function Chat() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: conversation.other_user_id, invitation_type: invitationType })
+        body: JSON.stringify({ user_id: conversation.other_user_id, invitationType: invitationType })
     }, accessToken, updateAccessToken)
     
     const re = await response.json()    
@@ -194,7 +198,7 @@ export default function Chat() {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: invitePrompt.fromUserId, invitation_type: invitationType })
+            body: JSON.stringify({ user_id: invitePrompt.fromUserId, invitationType: invitationType })
           }, accessToken, updateAccessToken)
     
           const res = await response.json()

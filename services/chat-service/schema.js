@@ -63,10 +63,10 @@ export const usersAddSchema = {
   export const invitationsSchema = {
     body: {
       type: 'object',
-      required: ['user_id', 'invitation_type'],
+      required: ['user_id', 'invitationType'],
       properties: {
         user_id: { type: 'string' },
-        invitation_type: { type: 'string' }
+        invitationType: { type: 'string' }
       }
     }
   };
