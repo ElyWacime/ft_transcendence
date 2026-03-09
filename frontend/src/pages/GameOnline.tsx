@@ -4,7 +4,6 @@ import { useEffect ,useCallback} from "react";
 import { toast } from "sonner";
 import { useWebSocket } from "@/context/WebSocketContext";
 import { useAuth } from "@/context/AuthContext";
-import Home from "./Home";
 
 interface GameOnlineProps {
   player1Name: string;
@@ -23,7 +22,7 @@ const GameOnline = () => {
       useEffect(()=>{
           navigate("/");
       },[]);
-      return <Home></Home>;
+      return <></>;
   }
   
   const { player1Name, player2Name,player3Name, player4Name, mode } = state;
@@ -35,7 +34,6 @@ const GameOnline = () => {
     (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       if (data.score1  >= 5 ||  data.score2  >= 5) {
-        
         let x = "";
         if (data.score1  > data.score2 )
         {
@@ -60,7 +58,6 @@ const GameOnline = () => {
         }
         else{
           navigate("/online-tournament", {
-
             state: { 
               tournamentId: data.T_Id, 
             } 

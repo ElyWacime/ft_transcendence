@@ -16,6 +16,7 @@ const MatchMacking = () => {
     let del = useRef(true);
     let matchref = useRef(true);
     const [features, setFeatures] = useState([]);
+    const [show, setShows] = useState(false);
 
     const { accessToken, updateAccessToken } = useAuth();
     const getName = async (id: number) => {
@@ -29,16 +30,34 @@ const MatchMacking = () => {
           return null;
         }
     };
-  
+    let cidx;
+    // setShows(false);
     const handleMessage = useCallback(async (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      setShows(false);
       matchref.current = data.id;
       let [res1, res2, res3, res4] = await Promise.all([getName(data.P1_Id),getName(data.P2_Id),getName(data.P3_Id),getName(data.P4_Id)]);
       data.player1Name = res1;
       data.player2Name = res2;
       data.player3Name = res3;
       data.player4Name = res4;
-      setFeatures(() => {
+  
+      if (data.count_players == mode) 
+      {
+        del.current = false;
+        navigate("/game-online", {
+            state: {
+                player1Name: data.player1Name,
+                player2Name: data.player2Name,
+                player3Name: data.player3Name,
+                player4Name: data.player4Name,
+                mode
+            },
+        });
+      }
+      else{
+        setShows(true);
+        setFeatures(() => {
           if (mode == "4")
           {
             return [
@@ -85,18 +104,6 @@ const MatchMacking = () => {
               }];
           }
       });
-      if (data.count_players == mode) 
-      {
-        del.current = false;
-          navigate("/game-online", {
-              state: {
-                  player1Name: data.player1Name,
-                  player2Name: data.player2Name,
-                  player3Name: data.player3Name,
-                  player4Name: data.player4Name,
-                  mode
-              },
-          });
       }
     });
 
@@ -110,6 +117,7 @@ const MatchMacking = () => {
         }));
         ws.addEventListener("message", handleMessage);
         return () => {
+          clearTimeout(cidx);
             if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                   token: accessToken,
@@ -122,7 +130,8 @@ const MatchMacking = () => {
     }, [ws, isReady, accessToken, mode]);
 
     return (
-        <>
+       <>
+       {show && (<>
           <div className="home-page">
             <section className="hero-section">
               <div className="hero-glow-overlay"></div>
@@ -136,7 +145,6 @@ const MatchMacking = () => {
                 </p>
               </div>
             </section>
-
             <section className="features-section">
               <div className="features-container">
                 <h2 className="features-title glow-text">
@@ -162,7 +170,8 @@ const MatchMacking = () => {
               </div>
             </section>
           </div>
-        </>
+        </>)}
+       </>
       );
 };
 

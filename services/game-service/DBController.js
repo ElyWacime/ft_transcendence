@@ -93,8 +93,7 @@ export class SQLiteDB {
                 filename: DB_PATH,
                 driver: sqlite3.Database,
             });
-            const tables = await this.db.all(`SELECT name FROM sqlite_master
-            WHERE type='table' AND name='Match';`);
+            const tables = await this.db.all(`SELECT name FROM sqlite_master WHERE type='table' AND name='Match';`);
             if (!tables.length) {
                 const schema = fs.readFileSync(SCHEMA_FILE, "utf8");
                 await this.db.exec(schema);

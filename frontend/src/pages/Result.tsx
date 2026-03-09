@@ -1,7 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import {useCallback,useEffect} from "react";
-import Home from "./Home";
-
 
 const Result = () => { 
     const navigate = useNavigate();
@@ -12,7 +10,7 @@ const Result = () => {
         useEffect(()=>{
             navigate("/");
         },[]);
-        return <Home></Home>;
+        return <></>;
     }
     let {message} = stat;
     const resetGame = useCallback(() => {navigate("/loading?mode=2")}, []);
