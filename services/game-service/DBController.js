@@ -99,7 +99,7 @@ export class SQLiteDB {
             } else {
             }
             this.db.on("trace", sql => {
-                console.log("[SQL]:", sql);
+                // console.log("[SQL]:", sql);
             });
         } catch (err) {
             console.error("[DB] Failed to initialize database:", err);
