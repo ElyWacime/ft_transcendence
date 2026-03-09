@@ -20,7 +20,7 @@ export async function createUser(
   });
   if (user) {
     return reply.code(401).send({
-      message: "User already exists with this email",
+      message: "User already exists",
     });
   }
   const name_user = await prisma.user.findUnique({
@@ -30,7 +30,7 @@ export async function createUser(
   });
   if (name_user) {
     return reply.code(401).send({
-      message: "User already exists with this name",
+      message: "User already exists",
     });
   }
   try {
