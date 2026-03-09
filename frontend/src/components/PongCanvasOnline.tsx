@@ -26,7 +26,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
       P2_Id:  "",
       P3_Id:  "",
       P4_Id:  "",
-      gameStatus: "PENDING",
+      gameStatus: "STARTING...",
     });
     const { accessToken, user } = useAuth();
     const id = user?.id || null;
@@ -34,7 +34,7 @@ export const PongCanvasOnline = ({ player1Name, player2Name, player3Name, player
     const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas || !ctx ||gameState.gameStatus == "STARTING...") return;
 
     ctx.fillStyle = 'hsl(222 47% 4%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
