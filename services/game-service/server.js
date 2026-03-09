@@ -441,6 +441,33 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
 
   // --- Final edge case: reporter is alone for >=3 minutes since tournament creation
   const isFinal = finalMatch && finalMatch.id === matchId;
+  // if (isFinal) {
+  //   const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
+  //   const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
+  //   const soloPlayer = reporterIsPlayer1 ? matchSlot.player1 : reporterIsPlayer2 ? matchSlot.player2 : null;
+  //   const opponent = reporterIsPlayer1 ? matchSlot.player2 : reporterIsPlayer2 ? matchSlot.player1 : null;
+
+  //   if (soloPlayer && !opponent) {
+  //     const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
+  //     const THREE_MINUTES_MS = 1_000;
+  //     const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
+  //     if (threeMinutesElapsed) {
+  //       finalMatch.winner = soloPlayer;
+  //       tournament.winner = soloPlayer;
+  //       tournament.status = "completed";
+
+  //       // remove any lingering participants who aren't the winner
+  //       const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
+  //       for (const leftover of remaining) {
+  //         eliminateParticipant(tournament, leftover.id);
+  //       }
+
+  //       tournaments.set(tournamentId, tournament);
+  //       broadcastTournamentState();
+  //       return;
+  //     }
+  //   }
+  // }
   if (isFinal) {
     const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
     const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
@@ -449,13 +476,92 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
 
     if (soloPlayer && !opponent) {
       const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
-      const THREE_MINUTES_MS = 1_000;
+      const THREE_MINUTES_MS = 60_000;
       const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
       if (threeMinutesElapsed) {
         finalMatch.winner = soloPlayer;
         tournament.winner = soloPlayer;
         tournament.status = "completed";
 
+        // persist a finished match in favor of the solo reporter (5-0)
+        const matchDbId = await ensureVipMatch(finalMatch, tournamentId);
+        finalMatch.matchId = matchDbId;
+        let dbMatch = await dbcnx.getMatchById(matchDbId);
+        if (!dbMatch) {
+          dbMatch = new Match();
+          dbMatch.id = matchDbId;
+        }
+        dbMatch.P1_Id = finalMatch.player1?.id || soloPlayer.id;
+        dbMatch.P2_Id = finalMatch.player2?.id || null;
+        dbMatch.count_players = 2;
+        dbMatch.mode = 2;
+        dbMatch.T_Id = tournamentId;
+        const reporterId = soloPlayer.id;
+        const reporterIsP1 = dbMatch.P1_Id === reporterId;
+        dbMatch.score1 = reporterIsP1 ? 5 : 0;
+        dbMatch.score2 = reporterIsP1 ? 0 : 5;
+        dbMatch.Winner_Id = reporterId;
+        dbMatch.gameStatus = "PLAYING";
+        await dbcnx.updateMatch(dbMatch);
+
+        const g = new GameState();
+        g.id = matchDbId;
+        g.P1_Id = dbMatch.P1_Id;
+        g.P2_Id = dbMatch.P2_Id;
+        g.T_Id = tournamentId;
+        g.count_players = 2;
+        g.mode = 2;
+        g.gameStatus = "PLAYING";
+        g.score1 = dbMatch.score1;
+        g.score2 = dbMatch.score2;
+        g.Winner_Id = reporterId;
+        g.player1Name = await getUserName(g.P1_Id);
+        g.player2Name = g.P2_Id ? await getUserName(g.P2_Id) : null;
+        matches.set(g.id, g);
+        //----
+
+        // also force-complete any semifinal that still has no winner (keeps history consistent)
+        for (const semi of semifinals) {
+          if (!semi || semi.winner) continue;
+          const semiWinner = semi.player1 || semi.player2;
+          if (!semiWinner) continue;
+          const semiMatchId = await ensureVipMatch(semi, tournamentId);
+          semi.matchId = semiMatchId;
+          let semiDb = await dbcnx.getMatchById(semiMatchId);
+          if (!semiDb) {
+            semiDb = new Match();
+            semiDb.id = semiMatchId;
+          }
+          semiDb.P1_Id = semi.player1?.id || semiWinner.id;
+          semiDb.P2_Id = semi.player2?.id || null;
+          semiDb.count_players = 2;
+          semiDb.mode = 2;
+          semiDb.T_Id = tournamentId;
+          const semiWinnerIsP1 = semiDb.P1_Id === semiWinner.id;
+          semiDb.score1 = semiWinnerIsP1 ? 5 : 0;
+          semiDb.score2 = semiWinnerIsP1 ? 0 : 5;
+          semiDb.Winner_Id = semiWinner.id;
+          semiDb.gameStatus = "PLAYING";
+          await dbcnx.updateMatch(semiDb);
+
+          const sg = new GameState();
+          sg.id = semiMatchId;
+          sg.P1_Id = semiDb.P1_Id;
+          sg.P2_Id = semiDb.P2_Id;
+          sg.T_Id = tournamentId;
+          sg.count_players = 2;
+          sg.mode = 2;
+          sg.gameStatus = "PLAYING";
+          sg.score1 = semiDb.score1;
+          sg.score2 = semiDb.score2;
+          sg.Winner_Id = semiWinner.id;
+          sg.player1Name = await getUserName(sg.P1_Id);
+          sg.player2Name = sg.P2_Id ? await getUserName(sg.P2_Id) : null;
+          matches.set(sg.id, sg);
+          semi.winner = semiWinner;
+        }
+        //----
+        
         // remove any lingering participants who aren't the winner
         const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
         for (const leftover of remaining) {
@@ -468,7 +574,6 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
       }
     }
   }
-
   if (!matchSlot.player1 || !matchSlot.player2) return;
 
   console.log("after match check >> ", matchSlot);
@@ -1023,10 +1128,10 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
         totalWins: totalWins,
         totalLosses: totalMatches - totalWins,
         winRate: parseFloat(winRate),
-        totalTournaments: totalTournaments?.Played || 0,
-        totalTourWins: totalTourWins?.Winned || 0,
+        totalTournaments: totalTournaments ? totalTournaments.Played : 0,
+        totalTourWins: totalTourWins ? totalTourWins.Winned  :  0,
       },
-      lastMatch: lastMatch || null
+      lastMatch: lastMatch ? lastMatch :  null
     };
   } catch (error) {
     console.error('Dashboard error:', error);
