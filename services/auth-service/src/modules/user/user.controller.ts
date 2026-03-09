@@ -391,14 +391,23 @@ export async function getUsers(req: FastifyRequest, reply: FastifyReply) {
 }
 
 export async function logout(
-  req: FastifyRequest<{ Body: { email: string } }>,
+  req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { email } = req.body;
-  const user = await prisma.user.update({
-    where: { email },
+  const userToken = req.user as {
+    id: string;
+    email: string;
+  };
+
+  await prisma.user.update({
+    where: { id: userToken.id },
     data: { loggedIn: false, refreshToken: null },
   });
+
+  reply.clearCookie("refresh_token", {
+    path: "/",
+  });
+
   return reply.send({ message: "Logout successful" });
 }
 

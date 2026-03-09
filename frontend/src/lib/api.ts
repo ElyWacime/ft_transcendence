@@ -97,11 +97,10 @@ class UserAPI {
     return await res.json();
   }
 
-  async logout(email: string) {
+  async logout(accessToken: string | null = null, updateAccessToken?: (newToken: string) => void) {
     const res = await fetchWithAuth(`${this.baseUrl}/logout`, {
       method: "POST",
-      body: JSON.stringify({ email }),
-    });
+    }, accessToken, updateAccessToken);
 
     return await res.json();
   }
