@@ -20,20 +20,6 @@ const Home = () => {
   const { user } = useAuth();
   const id = user?.id;
   
-  const whoami = async () => {
-    let res =  await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/me`, {
-      method: "POST",
-      headers: {
-      },
-      credentials: "include",
-    }, accessToken, updateAccessToken);
-    if (!res.ok) {
-      return null;
-    }
-    let data =  await res.json();
-    return data;
-  };
-
   const checkhandel = async (mode: number) => {
     return await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
       method: "POST",
@@ -45,12 +31,6 @@ const Home = () => {
     }, accessToken, updateAccessToken);
   };
 
-  const endmatchhandel = async () => {
-    return await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/endmatch`, {
-      method: "POST",
-      credentials: "include"
-    }, accessToken, updateAccessToken);
-  };
 
   const features = [
     {

@@ -94,7 +94,7 @@ const ProfileSettings = () => {
     };
     
     fetchUserData();
-  }, [location.pathname, user?.id, user?.email, user?.name]); // Re-fetch when route changes
+  }, [location.pathname, user?.id, user?.email, user?.name]);
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

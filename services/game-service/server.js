@@ -816,30 +816,31 @@ const interval = setInterval(async () => {
 }, 1000 / TICK_RATE);
 
 const getUserName = async (id) => {
-  try {
-    if(!id)
-      return null;
-    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
-    const fetchOptions = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    if (httpsAgent) {
-      fetchOptions.agent = httpsAgent;
-    }
-    const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
-    if (!response.ok) {
-      console.error(`Auth service returned status ${response.status}`);
-      return null;
-    }
-    const user = await response.json();
-    return user ? user.name : null;
-  } catch (error) {
-    console.error(`Error fetching user ${id} from auth service: `,error);
-    return null;
-  }
+  return null;
+  // try {
+  //   if(!id)
+  //     return null;
+  //   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+  //   const fetchOptions = {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //   };
+  //   if (httpsAgent) {
+  //     fetchOptions.agent = httpsAgent;
+  //   }
+  //   const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
+  //   if (!response.ok) {
+  //     console.error(`Auth service returned status ${response.status}`);
+  //     return null;
+  //   }
+  //   const user = await response.json();
+  //   return user ? user.name : null;
+  // } catch (error) {
+  //   console.error(`Error fetching user ${id} from auth service: `,error);
+  //   return null;
+  // }
 };
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
@@ -864,7 +865,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         const id = userData.user_id;
         await handelDup(connection,id);
         clients.set(id, connection);
-        const name = await getUserName(id,);
+        const name = await getUserName(id);
         if (request.type == "REGISTER") 
           await handelRegister(request,id);
         else if (request.type == "MOVE") 
@@ -976,19 +977,19 @@ fastify.post('/allmatch', async (request, reply) => {
     const token = await res.json();
     const id = token.user_id;
     let matches = await dbcnx.getPlayerMatches(id);
-    if (matches) {
-      matches = await Promise.all(matches.map(async (m) => {
-        const [P1, P2, P3, P4, Winner] = await Promise.all([
-          getUserName(m.P1_Id),
-          getUserName(m.P2_Id),
-          getUserName(m.P3_Id),
-          getUserName(m.P4_Id),
-          getUserName(m.Winner_Id),
-        ]);
-        return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
-      }));
+    // if (matches) {
+      // matches = await Promise.all(matches.map(async (m) => {
+      //   const [P1, P2, P3, P4, Winner] = await Promise.all([
+      //     getUserName(m.P1_Id),
+      //     getUserName(m.P2_Id),
+      //     getUserName(m.P3_Id),
+      //     getUserName(m.P4_Id),
+      //     getUserName(m.Winner_Id),
+      //   ]);
+      //   return { ...m, Name1: P1, Name2: P2, Name3: P3, Name4: P4, NameW: Winner };
+      // }));
       return reply.code(201).send({ matches: matches});
-    }
+    // }
     } 
     catch (err) {
       return reply.code(401).send({ message: 'Invalid token' });
