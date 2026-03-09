@@ -1,3 +1,154 @@
+DJENTY_0_1
+djenty_boy_0_1
+Online
+
+resherra
+
+ — 3/7/26, 8:36 PM
+https://x.com/i/grok/share/2591cd8f0727493f9b0f4aa15dd537e7
+Dave — Yesterday at 4:52 AM
+\\\export async function registerDashboardRoutes_ayoub(fastify, dbcnx) {
+
+  fastify.get('/api/dashboard/:identifier', async (request, reply) => {
+    try {
+      const auth = request.headers.authorization;
+
+message.txt
+4 KB
+DJENTY_0_1 — Yesterday at 5:08 PM
+  const inviteHandle = async (P1, P2) => 
+  {
+    let currentToken = accessToken;
+    
+    const res = await fetch(`${GAME_SERVICE_URL}/api/game/invite`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          ...(currentToken ? { "Authorization": `Bearer ${currentToken}` } : {})
+        },
+        credentials: "include",
+        body: JSON.stringify({ P1 ,P2 }),
+    });
+    
+    if (res.status === 401) {
+      try {
+        const refreshRes = await fetch(`${AUTH_SERVICE_URL}/api/users/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+        
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          const newToken = refreshData.accessToken;
+          
+          if (newToken) {
+            updateAccessToken(newToken);
+            
+            const retryRes = await fetch(`${GAME_SERVICE_URL}/api/game/invite`, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${newToken}`
+              },
+              credentials: "include",
+              body: JSON.stringify({ P1 ,P2 }),
+            });
+            
+            return retryRes;
+          }
+        }
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+      }
+    }
+    
+    return res;
+  }
+DJENTY_0_1 — Yesterday at 11:46 PM
+import { useNavigate } from "react-router-dom";
+import { useEffect,useState,useCallback } from "react";
+import { Card } from "@/components/ui/card";
+import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+
+message.txt
+6 KB
+ael-krid — 12:49 AM
+let [m1, m2]= await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
+      if (m1 || m2) {
+      // if he is ready. but he has an ongoing match, we cant start his new match, so we reset his ready state and ask him to ready up again when he is available
+        if (m1) {
+          matchSlot.ready[matchSlot.player1.id] = false;
+          matchSlot.readyAt[matchSlot.player1.id] = null;
+        }
+        if (m2) {
+          matchSlot.ready[matchSlot.player2.id] = false;
+          matchSlot.readyAt[matchSlot.player2.id] = null;
+        }
+        // console.log("cant play right now >> ", { m1, m2 });
+        broadcastTournamentState();
+        return;
+      }
+}{!50|<@ — 1:54 AM
+async getAvaiable(id)
+    {
+        return await this.db.get(SELECT *
+        FROM Match
+        WHERE  ((gameStatus = 'PLAYING' OR (gameStatus = 'PENDING' AND count_players = mode) ) and (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?)) ;, [id,id,id,id]);
+    }
+Dave — 1:54 AM
+# 🔧 Things to Fix — ft_transcendence
+
+---
+
+## 🔴 Critical Bugs
+
+things-to-fix.md
+5 KB
+}{!50|<@ — 2:26 AM
+let ngame =  matches.get(m.id);
+      ngame.score1 = 5;
+      ngame.score2 = 0;
+      ngame.Winner_Id = ngame.P1_Id;
+      if (ngame.P1_Id == id || ngame.P3_Id == id)
+      {
+        ngame.score1 = 0;
+        ngame.score2 = 5;
+        ngame.Winner_Id = ngame.P2_Id;
+      }
+}{!50|<@ — 3:13 AM
+# Security Assessment Report — ft_transcendence (Pong Arena)
+
+**Date**: 2025-01-XX  
+**Assessor**: Automated Pentest + Manual Code Review  
+**Target**: ft_transcendence Pong Arena — Microservices Web Application  
+**Scope**: Full-stack (Gateway, Auth Service, Chat Service, Game Service, Frontend)
+
+security.md
+48 KB
+o rah kay PoC dyalhom bach tjarbohom bi idikom
+}{!50|<@ — 3:53 AM
+import Fastify from "fastify";
+import fastifyCookie from "@fastify/cookie";
+import fjwt from "@fastify/jwt";  
+import websocket from "@fastify/websocket";
+import cors from "@fastify/cors";
+import * as fs from "fs";
+
+message.txt
+36 KB
+}{!50|<@ — 4:01 AM
+import Fastify from "fastify";
+import fastifyCookie from "@fastify/cookie";
+// import fjwt from "@fastify/jwt";  
+import websocket from "@fastify/websocket";
+import cors from "@fastify/cors";
+import * as fs from "fs";
+
+message.txt
+36 KB
+﻿
 import Fastify from "fastify";
 import fastifyCookie from "@fastify/cookie";
 // import fjwt from "@fastify/jwt";  
@@ -1081,3 +1232,5 @@ const port = 3000;
 
 fastify.listen({ port, host: "0.0.0.0" });
 console.log(`Game server listening on port ${port} (${useHttps ? 'HTTPS' : 'HTTP'})`);
+message.txt
+36 KB
