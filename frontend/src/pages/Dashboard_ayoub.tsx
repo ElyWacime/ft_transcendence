@@ -42,6 +42,8 @@ const Dashboard_ayoub = () => {
   const [avatarKey, setAvatarKey] = useState(Date.now());
   const { accessToken, updateAccessToken } = useAuth();
 
+  const API_URL = import.meta.env.VITE_API_URL || 'https://localhost';
+
   const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
     ? dashboardData?.user.avatar
     : `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
@@ -64,20 +66,22 @@ const Dashboard_ayoub = () => {
         }
       }
 
-      // Try to resolve identifier as a username first
       try {
         const { fetchWithAuth } = await import("@/lib/tokenRefresh");
-        const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
+        const searchRes = await fetchWithAuth(`${API_URL}/api/users/search-this-name`, {
           method: "POST",
           body: JSON.stringify({ name: userIdentifier }),
         }, accessToken, updateAccessToken);
         if (searchRes.ok) {
           const searchData = await searchRes.json();
-          userIdentifier = searchData.user_id; // Found by name, use the real ID
+          userIdentifier = searchData.user_id; 
         }
-        // If 404, it's not a name — assume it's already an ID and continue
+        if (searchRes.status === 404) {
+          console.log(">>>>>> me");
+          userIdentifier = userIdentifier;
+        }
       } catch {
-        // Network error — just continue with the original identifier
+        console.error("ERROR");
       }
 
       try {
