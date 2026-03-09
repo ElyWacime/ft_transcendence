@@ -43,7 +43,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<any[]>([])
   const navigate = useNavigate()
   const { id } = useParams<{ id?: string }>()
-  const selectedId = id ? parseInt(id, 10) : undefined
+  const selectedId = id && /^\d+$/.test(id) ? parseInt(id, 10) : undefined
 
   const inviteHandle = async (P1, P2) => 
   {
