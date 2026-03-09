@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { CreateUserInput, LoginUserInput, UpdateEmailInput, UpdatePassInput } from "./user.schema";
 import bcrypt from "bcrypt";
+import fetch, { RequestInit } from "node-fetch";
 import prisma from "../../utils/prisma";
 import { getHttpsAgent } from "../../utils/https-agent";
 
@@ -42,6 +43,35 @@ export async function createUser(
         name,
       },
     });
+
+    try {
+      const chatServiceUrl = process.env.CHAT_SERVICE_URL || "https://chat-service:3700";
+      const httpsAgent = getHttpsAgent();
+      const fetchOptions: RequestInit = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-service-key": process.env.INTERNAL_SERVICE_KEY || "",
+        },
+        body: JSON.stringify({
+          id: user.id,
+          username: user.name,
+        }),
+      };
+
+      if (httpsAgent) {
+        (fetchOptions as any).agent = httpsAgent;
+      }
+
+      const chatServiceResponse = await fetch(`${chatServiceUrl}/users/add`, fetchOptions);
+
+      if (!chatServiceResponse.ok) {
+        console.error("Failed to sync user with chat service:", await chatServiceResponse.text());
+      }
+    } catch (syncError) {
+      console.error("Error syncing user with chat service:", syncError);
+    }
+
     return reply.code(201).send(user);
   } catch (e) {
     return reply.code(500).send(e);

@@ -69,17 +69,6 @@ class UserAPI {
     const response = await res.json();
 
     if (res.ok) {
-      try {
-        await fetch(`${API_URL}/api/chat/users/add`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: response.id, username: name })
-        });
-      } catch (err) {
-        console.error('Failed to add user to chat:', err);
-      }
-      
       return response;
     } else {
       throw new Error(response.message || "Registration failed");
@@ -105,17 +94,17 @@ class UserAPI {
     return await res.json();
   }
 
-  async update_email(new_email: string, password: string) {
+  async update_email(new_email: string, password: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`${this.baseUrl}/update_email`, {
       method: "PUT",
       body: JSON.stringify({ new_email, password }),
       credentials: 'include',
-    });
+    }, accessToken, updateAccessToken);
 
     return await res.json();
   }
 
-  async update_password(current_password: string, new_password: string) {
+  async update_password(current_password: string, new_password: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`${this.baseUrl}/update_password`, {
       method: "PUT",
       body: JSON.stringify({
@@ -123,7 +112,7 @@ class UserAPI {
         new_password,
       }),
       credentials: "include",
-    });
+    }, accessToken, updateAccessToken);
 
     return await res.json();
   }
@@ -135,12 +124,13 @@ class UserAPI {
 
     return await res.json();
   }
+
   async update_image(imageData: { 
     image: string;      
     image_name: string; 
     file_type?: string;
     file_size?: number;
-  }) {
+  }, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`${this.baseUrl}/update_image`, {
       method: "PUT",
       body: JSON.stringify({
@@ -150,7 +140,7 @@ class UserAPI {
         ...(imageData.file_size && { file_size: imageData.file_size }),
       }),
       credentials: 'include',
-    });
+    }, accessToken, updateAccessToken);
 
     return await res.json();
   }

@@ -4,12 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
 import { userApi } from "@/lib/api";
 import { handleStartConversation } from "./Chat";
 import "../css/profile.css";
 import { useChatSocket } from "@/context/ChatSocketContext";
 import { useAuth } from "@/context/AuthContext";
+import { fetchWithAuth } from "@/lib/tokenRefresh";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
@@ -48,18 +48,23 @@ const ProfileSettings = () => {
         const userId = user?.id;
         
         if (userId) {
-          // Fetch all data combined, but use only user info
-          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId, accessToken, updateAccessToken);
-          // console.log("Fetched user data:", data.user);
+          // Fetch user info directly from auth service by ID
+          const authRes = await fetchWithAuth(`/api/users/user-info/${userId}`, { method: "GET" }, accessToken, updateAccessToken);
+          
+          if (!authRes.ok) {
+            throw new Error("Failed to fetch user info");
+          }
+          
+          const authData = await authRes.json();
           
           setUserInfo({
-            id: data.user.id || "",
-            email: data.user.email || "",
-            User_name: data.user.User_name || "Player",
-            avatar: data.user.avatar || "",
-            Auto_Match: data.user.Auto_Match ?? null,
-            CreatedAt: data.user.CreatedAt ?? null,
-            isOnline: data.user.isOnline || false
+            id: authData.id || "",
+            email: authData.email || "",
+            User_name: authData.name || "Player",
+            avatar: authData.avatar || "",
+            Auto_Match: authData.Auto_Match ?? null,
+            CreatedAt: authData.CreatedAt ?? null,
+            isOnline: authData.loggedIn || false
           });
           setAvatarKey(Date.now());
         } else {
@@ -105,8 +110,42 @@ const ProfileSettings = () => {
     }
 
     try {
-      const data = await userApi.searchByName(trimmed, accessToken, updateAccessToken);
-      setSearchResult(data);
+      const { fetchWithAuth } = await import("@/lib/tokenRefresh");
+
+      // Search by username only
+      const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
+        method: "POST",
+        body: JSON.stringify({ name: trimmed }),
+      }, accessToken, updateAccessToken);
+
+      if (!searchRes.ok) {
+        throw new Error(`Username "${trimmed}" not found. Please check the spelling.`);
+      }
+
+      const searchData = await searchRes.json();
+      const userId = searchData.user_id;
+
+      // Fetch full user info
+      const infoRes = await fetchWithAuth(`/api/users/user-info/${userId}`, {
+        method: "GET",
+      }, accessToken, updateAccessToken);
+
+      if (!infoRes.ok) {
+        throw new Error("Failed to fetch user info");
+      }
+
+      const infoData = await infoRes.json();
+
+      setSearchResult({
+        user: {
+          id: infoData.id || "",
+          User_name: infoData.name || "Player",
+          email: infoData.email || "",
+          avatar: infoData.avatar || "",
+        },
+        statistics: null,
+        lastMatch: null,
+      });
       setSearchError(null);
       toast.success("User found");
     } catch (err: any) {
@@ -233,7 +272,7 @@ const ProfileSettings = () => {
                       <p className="profile-result-email">{searchResult.user.email}</p>
                     </div>
                     <div className="profile-result-actions">
-                      <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user.User_name}`, {state : {id : searchResult.user.id}})}}>
+                      <button className="profile-dashboard-btn dashboard-btn" onClick={() => {navigate(`/dashboard/${searchResult.user.User_name}`)}}>
                         View dashboard
                       </button>
                       {String(user?.id) !== String(searchResult.user.id) && (

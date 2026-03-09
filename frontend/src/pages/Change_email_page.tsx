@@ -9,7 +9,7 @@ import "../css/change-password.css";
 
 const ChangeEmail = () => {
   const navigate = useNavigate();
-  const { updateAccessToken, updateUser } = useAuth();
+  const { accessToken, updateAccessToken, updateUser } = useAuth();
   const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ const ChangeEmail = () => {
     
     setLoading(true);
     try {
-      const res = await userApi.update_email(newEmail, password);
+      const res = await userApi.update_email(newEmail, password, accessToken, updateAccessToken);
       if (res.success) {
         toast.success("Email updated successfully!");
         if (res.accessToken) {

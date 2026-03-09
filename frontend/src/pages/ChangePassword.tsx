@@ -9,7 +9,7 @@ import "../css/change-password.css";
 
 const ChangePassword = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, accessToken, updateAccessToken } = useAuth();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,7 +25,7 @@ const ChangePassword = () => {
 
     setLoading(true);
     try {
-      const res = await userApi.update_password(oldPassword, newPassword);
+      const res = await userApi.update_password(oldPassword, newPassword, accessToken, updateAccessToken);
       if (res.success) {
         toast.success("Password updated successfully!");
         await logout();
