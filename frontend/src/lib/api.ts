@@ -186,7 +186,6 @@ class UserAPI {
         avatar = infoData.avatar || "";
       }
     } catch {
-      // keep search working even if avatar fetch fails
     }
 
     return {
@@ -201,7 +200,6 @@ class UserAPI {
     };
   }
 
-  // Fetch user data from auth service
   async getAuthUserById(userId: string) {
     const res = await fetchWithAuth(`/api/users/user-info/${userId}`, {
       method: "GET",
@@ -215,7 +213,6 @@ class UserAPI {
     }
 
     const data = await res.json();
-    // Map auth service fields to expected format
     return {
       id: data.id,
       email: data.email,

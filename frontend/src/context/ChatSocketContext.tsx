@@ -161,7 +161,6 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
 
     };
   }, [isLoggedIn, isLoading]);
-  // }, [isLoggedIn, isLoading]);
 
   return (
     <ChatSocketContext.Provider value={{ socket, currentUser, isConnected, invitePrompt, setInvitePrompt, pendingInvitations, setPendingInvitations, friendsList, setFriendsList, blockedConversations, setBlockedConversations }}>

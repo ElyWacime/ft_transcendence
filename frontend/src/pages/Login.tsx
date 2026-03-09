@@ -13,7 +13,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // OAuth callback handling has been removed
   }, [navigate, login]);
 
 
@@ -24,8 +23,6 @@ const Login = () => {
     try {
       const res = await userApi.login(email, password);
       if (res.accessToken && res.user) {
-        // Store access token in memory (via context)
-        // Refresh token is already in httpOnly cookie from backend
         login(res.accessToken, res.user);
         toast.success("Welcome back!");
         navigate("/");

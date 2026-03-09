@@ -68,7 +68,6 @@ const Dashboard_ayoub = () => {
 
       try {
         const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken);
-        // console.log("---------------------- Fetched dashboard data >>>> :", data);
         setDashboardData(data);
         setAvatarKey(Date.now());
       } catch (err: any) {
@@ -96,7 +95,6 @@ const Dashboard_ayoub = () => {
             setAvatarKey(Date.now());
           })
           .catch(() => {
-            // silent refresh failure
           });
       }
     };

@@ -275,7 +275,6 @@
   transform: translateY(-1px);
 }
 
-/* Global button styles to reuse for bracket actions (ready/report) */
 .ghost {
   background: #111827;
   color: #e4e8f0;

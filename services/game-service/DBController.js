@@ -87,7 +87,6 @@ export class SQLiteDB {
         try {
             if (!fs.existsSync(DB_FOLDER)) {
                 fs.mkdirSync(DB_FOLDER, { recursive: true });
-                // console.log(`[DB] Created folder: ${DB_FOLDER}`);
             }
             this.db = await open({
                 filename: DB_PATH,
@@ -95,19 +94,13 @@ export class SQLiteDB {
             });
             const tables = await this.db.all(`SELECT name FROM sqlite_master WHERE type='table';`);
             if (!tables.length) {
-                // console.log("[DB] No tables found. Initializing schema...");
                 const schema = fs.readFileSync(SCHEMA_FILE, "utf8");
                 await this.db.exec(schema);
-                // console.log("[DB] Schema created!");
             } else {
-                // console.log("[DB] Tables already exist:", tables.map(t => t.name).join(", "));
             }
             this.db.on("trace", sql => {
-                // console.log("[SQL]:", sql);
+                console.log("[SQL]:", sql);
             });
-
-            // console.log(`[DB] Connected successfully at ${DB_PATH}`);
-
         } catch (err) {
             console.error("[DB] Failed to initialize database:", err);
             throw err;
@@ -263,15 +256,6 @@ export class SQLiteDB {
         ) t;`,[id]);
     }
 
-    // async (id) {
-    //     return await this.db.get(`SELECT count(*) as Winned  FROM  Match 
-    //     Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
-    // }
-
-    // async (id) {
-    //     return 0;
-    // }
-    
     async UserCountMatches_ayoub(id) {
         return await this.db.run(`SELECT count(*) as Played  FROM  Match 
         Where (P1_Id = ?  OR P2_Id = ?  OR P3_Id = ?  OR P4_Id = ?);`, [id,id,id,id]);

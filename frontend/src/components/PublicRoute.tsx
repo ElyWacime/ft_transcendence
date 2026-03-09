@@ -8,8 +8,6 @@ interface PublicRouteProps {
 
 export const PublicRoute = ({ children, redirectTo = '/profile' }: PublicRouteProps) => {
   const { isLoggedIn, isLoading } = useAuth();
-
-  // Avoid rendering auth pages while session restore is running.
   if (isLoading) {
     return null;
   }

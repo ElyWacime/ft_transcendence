@@ -142,7 +142,6 @@
 }
 .feature-card2 {
   background-image: linear-gradient(135deg, hsl(222 47% 6%), hsl(222 47% 12%));
-  /* background-image: linear-gradient(135deg, hsl(217, 68%, 16%), hsl(222 47% 12%)); */
   border: 1px solid hsl(var(--border));
   padding: 1.5rem; 
   border-radius: 4rem;

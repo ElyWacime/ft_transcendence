@@ -70,8 +70,6 @@ export class AIOpponent {
     let action: AIAction = { moveUp: false, moveDown: false };
     const currentTime = Date.now();
 
-    // AI can only refresh its view of the game once per second (subject requirement)
-    // It must predict ball trajectory from that single snapshot
     const needsRecalculation = this.targetY === null || (currentTime - this.lastCalculationTime >= 1000);
 
     if (needsRecalculation) {
@@ -80,7 +78,6 @@ export class AIOpponent {
       this.timeToReachAI = pred.timeToReachAI;
       this.lastCalculationTime = currentTime;
     } else {
-      // Continue moving toward the predicted position without observing the ball
       this.timeToReachAI = Math.max(0, this.timeToReachAI - 1);
     }
 
@@ -90,7 +87,6 @@ export class AIOpponent {
 
       let shouldMove = true;
 
-      // Ensure we don't start moving until we need to, preserving movement logic simplicity
       const margin = 10;
       const framesNeededToMove = distanceToTarget / this.paddleSpeed;
 
@@ -128,7 +124,6 @@ export class AIOpponent {
     const accelerateSpeed = 1.2;
 
     let iterations = 0;
-    // Iterate to find exactly where the ball ends up
     while (iterations < 100) {
       iterations++;
 
@@ -139,7 +134,6 @@ export class AIOpponent {
 
         let remainingTime = timeX;
         while (remainingTime > 0) {
-          // If ball has no vertical velocity, it stays at same Y
           if (simulatedVY === 0) {
             break;
           }
@@ -169,7 +163,6 @@ export class AIOpponent {
 
         let remainingTime = timeX;
         while (remainingTime > 0) {
-          // If ball has no vertical velocity, it stays at same Y
           if (simulatedVY === 0) {
             break;
           }

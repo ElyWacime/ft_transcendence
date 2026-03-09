@@ -1,13 +1,3 @@
-/**
- * Example component showing how to use the new secure JWT authentication
- * 
- * This demonstrates:
- * 1. Using useAuth hook to access auth state
- * 2. Using useAuthenticatedFetch for API calls
- * 3. Handling loading states
- * 4. Automatic token refresh (happens behind the scenes)
- */
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthenticatedFetch } from '@/lib/useAuthenticatedFetch';
@@ -27,14 +17,12 @@ export function ExampleAuthenticatedComponent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Example: Load data on component mount
   useEffect(() => {
     if (isLoggedIn) {
       loadProfile();
     }
   }, [isLoggedIn]);
 
-  // Example: GET request
   const loadProfile = async () => {
     setLoading(true);
     setError(null);
@@ -56,7 +44,6 @@ export function ExampleAuthenticatedComponent() {
     }
   };
 
-  // Example: PUT request (update profile)
   const updateProfileName = async (newName: string) => {
     setLoading(true);
     setError(null);
@@ -81,7 +68,6 @@ export function ExampleAuthenticatedComponent() {
     }
   };
 
-  // Example: POST request
   const createPost = async (content: string) => {
     try {
       const response = await api.post('/api/posts', {
@@ -98,7 +84,6 @@ export function ExampleAuthenticatedComponent() {
     }
   };
 
-  // Example: DELETE request
   const deleteAccount = async () => {
     if (!confirm('Are you sure?')) return;
     
@@ -114,12 +99,10 @@ export function ExampleAuthenticatedComponent() {
     }
   };
 
-  // Show loading spinner while checking auth state
   if (isLoading) {
     return <div>Loading authentication...</div>;
   }
 
-  // Redirect to login if not authenticated
   if (!isLoggedIn) {
     return (
       <div>
@@ -133,7 +116,7 @@ export function ExampleAuthenticatedComponent() {
     <div style={{ padding: '20px' }}>
       <h1>Authenticated Component Example</h1>
       
-      {/* Show current user info from context */}
+
       <div style={{ background: '#f0f0f0', padding: '10px', marginBottom: '20px' }}>
         <h2>Current User (from context)</h2>
         <p><strong>ID:</strong> {user?.id}</p>
@@ -141,7 +124,7 @@ export function ExampleAuthenticatedComponent() {
         <p><strong>Name:</strong> {user?.name}</p>
       </div>
 
-      {/* Show profile data loaded from API */}
+
       <div style={{ background: '#e8f4f8', padding: '10px', marginBottom: '20px' }}>
         <h2>Profile Data (from API)</h2>
         {loading && <p>Loading...</p>}
@@ -158,7 +141,6 @@ export function ExampleAuthenticatedComponent() {
         )}
       </div>
 
-      {/* Action buttons */}
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <button onClick={loadProfile} disabled={loading}>
           Reload Profile
@@ -188,7 +170,6 @@ export function ExampleAuthenticatedComponent() {
         </button>
       </div>
 
-      {/* Info about automatic token refresh */}
       <div style={{ marginTop: '30px', padding: '15px', background: '#fffbea', border: '1px solid #f0e68c' }}>
         <h3>🔐 Security Features Active:</h3>
         <ul>
@@ -208,47 +189,3 @@ export function ExampleAuthenticatedComponent() {
     </div>
   );
 }
-
-/**
- * ALTERNATIVE: Using fetchWithAuth directly (without hook)
- * 
- * import { useAuth } from '@/context/AuthContext';
- * import { fetchWithAuth } from '@/lib/tokenRefresh';
- * 
- * function MyComponent() {
- *   const { accessToken, updateAccessToken } = useAuth();
- *   
- *   const loadData = async () => {
- *     const response = await fetchWithAuth(
- *       '/api/users/profile',
- *       { method: 'GET' },
- *       accessToken,
- *       updateAccessToken
- *     );
- *     const data = await response.json();
- *   };
- * }
- */
-
-/**
- * ALTERNATIVE: Using raw fetch (less recommended, but works)
- * 
- * function MyComponent() {
- *   const { accessToken } = useAuth();
- *   
- *   const loadData = async () => {
- *     const response = await fetch('/api/users/profile', {
- *       headers: {
- *         Authorization: `Bearer ${accessToken}`,
- *       },
- *       credentials: 'include',  // Important: send cookies
- *     });
- *     
- *     if (response.status === 401) {
- *       // Handle 401 manually - not recommended, use interceptor instead
- *     }
- *     
- *     const data = await response.json();
- *   };
- * }
- */

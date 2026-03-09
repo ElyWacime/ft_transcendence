@@ -31,7 +31,6 @@ const Home = () => {
       return null;
     }
     let data =  await res.json();
-    // console.log(" >>>>> ",data.id);
     return data;
   };
 
@@ -96,8 +95,6 @@ const Home = () => {
       navigate(feature.page);
       return;
     }
-    // let dat = await whoami();
-    // console.log(" id >>>>> ",id);
     if (id)
     {
       let res = await checkhandel(feature.mode);

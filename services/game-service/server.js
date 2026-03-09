@@ -5,7 +5,7 @@ import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
 import * as fs from "fs";
 import https from "https";
-import { randomUUID } from "crypto"; // used to generate unique tournament ids for in-memory rooms; survives only while the process is alive
+import { randomUUID } from "crypto"; 
 import { Match, SQLiteDB, GameState } from "./DBController.js";
 
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
@@ -20,7 +20,6 @@ const fastify = Fastify({
   ...httpsOptions
 });
 
-// Create HTTPS agent for self-signed certificates
 const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
   rejectUnauthorized: false
 }) : undefined;
@@ -37,7 +36,7 @@ await fastify.register(cors, {
 let dbcnx = new SQLiteDB();
 let clients = new Map();
 let matches = new Map();
-let tournaments = new Map(); // in-memory store for online tournament state (blown away on restart; persistence not required for quick-fire brackets)
+let tournaments = new Map();
 const TICK_RATE = 60;
 const PADDLE_SPEED = 8;
 const MAX_Speed = 25;
@@ -85,10 +84,6 @@ const sendtoplayer = async (id, data) =>
     }
 }
 
-// ---
-
-// broadcast a payload to every connected websocket client
-// this is intentionally dumb fan-out: every player gets the same snapshot so UIs stay eventually consistent
 function broadcastAll(data) {
   const payload = typeof data === "string" ? data : JSON.stringify(data);
   for (const [, socket] of clients) {
@@ -98,21 +93,18 @@ function broadcastAll(data) {
   }
 }
 
-// push current tournaments snapshot to all players so UIs stay live-synced
-// we send a flat array; clients reconcile on their side (no diffing server-side to keep logic simple)
 const broadcastTournamentState = () => {
   const snapshot = Array.from(tournaments.values());
   broadcastAll({ type: "TOURNAMENTS_STATE", tournaments: snapshot });
 };
-// remove a participant from a tournament after elimination without unlocking the room
-// we intentionally keep the tournament marked as full so no new joins are allowed mid-bracket
+
 const eliminateParticipant = (tournament, participantId) => {
   if (!participantId || !tournament) return;
   tournament.participants = tournament.participants.filter((p) => p.id !== participantId);
-  // keep the room locked once it had 4 players; do NOT flip full back to false
+
   tournament.full = true;
 };
-// ---------
+
 function moveplayer(m,y,up,down,id,dt)
 {
   if (!id) return null;
@@ -209,10 +201,6 @@ function resetBall(direction = 1, m) {
   m.Ball_dy = 2;
 }
 
-// ----------------- Tournament helpers -----------------
-
-// build two semifinal slots once 4 participants join
-// slot ids are stable and namespaced with tournament id to avoid clashes across rooms
 const buildSemifinals = (participants, tournamentId) => {
   const [p1, p2, p3, p4] = participants;
   return [
@@ -221,8 +209,6 @@ const buildSemifinals = (participants, tournamentId) => {
   ];
 };
 
-// create a new in-memory tournament room seeded with the creator as first participant
-// no DB write here: tournaments are ephemeral and only need to exist for the lifetime of matches
 const createTournamentRoom = (creator) => {
   const id = randomUUID();
   const tournament = {
@@ -243,12 +229,10 @@ const createTournamentRoom = (creator) => {
   return tournament;
 };
 
-// handle leave tournament (only allowed before the bracket is full)
 const leaveTournamentRoom = (id, participant) => {
   const tournament = tournaments.get(id);
   if (!tournament) return null;
 
-  // if the tournament is finished and the winner is the last remaining participant, delete the room
   if (
     tournament.status === "completed" &&
     tournament.winner?.id === participant.id &&
@@ -259,18 +243,14 @@ const leaveTournamentRoom = (id, participant) => {
     return null;
   }
 
-  // once 4 players are locked in, don't allow leaving to keep brackets stable
-  // BUT allow leaving if the tournament has already been completed / winner decided (e.g., reporter auto-advanced)
   const tournamentLocked = tournament.full || tournament.participants.length >= 4;
   const tournamentFinished = tournament.status === "completed" || Boolean(tournament.winner);
   if (tournamentLocked && !tournamentFinished) {
     return tournament;
   }
 
-  // remove the participant by id
   tournament.participants = tournament.participants.filter((p) => p.id !== participant.id);
 
-  // reset state since we are back to a waiting room
   tournament.full = tournament.participants.length >= 4;
   tournament.status = tournament.full ? tournament.status : "waiting";
   if (!tournament.full) {
@@ -279,8 +259,6 @@ const leaveTournamentRoom = (id, participant) => {
     tournament.winner = null;
   }
 
-  // delete empty tournaments to avoid clutter
-  // console.log("This is leaveTournamentRoom >> ", tournament.participants.length);
   if (tournament.participants.length === 0) {
     tournaments.delete(id);
   } else {
@@ -291,8 +269,6 @@ const leaveTournamentRoom = (id, participant) => {
   return tournament;
 };
 
-// add a player to a tournament; when full, auto-generate bracket scaffolding
-// we gate at 4 participants and immediately build semis + a final placeholder
 const joinTournamentRoom = (id, participant) => {
   const tournament = tournaments.get(id);
   if (!tournament || tournament.full) return tournament;
@@ -302,7 +278,6 @@ const joinTournamentRoom = (id, participant) => {
   }
   tournament.full = tournament.participants.length >= 4;
   if (tournament.full && tournament.participants.length >= 4) {
-    // notify all four participants that semifinals are waiting
     const firstFour = tournament.participants.slice(0, 4);
     for (const p of firstFour) {
       const waiting = new GameState();
@@ -318,8 +293,6 @@ const joinTournamentRoom = (id, participant) => {
   return tournament;
 };
 
-// notify the two players in a bracket slot that their match is ready
-// front-end listens for this payload and self-navigates to the arena (/loading?mode=2) with its own token
 const notifyPlayersMatchReady = (tournament, matchSlot, mode = 2) => {
   const payload = {
     type: "TOURNAMENT_MATCH_READY",
@@ -334,8 +307,6 @@ const notifyPlayersMatchReady = (tournament, matchSlot, mode = 2) => {
   sendtoplayer(matchSlot.player2?.id, JSON.stringify(payload));
 };
 
-// create a VIP match row for this bracket slot if not already created and cache its id on the slot
-// VIP matches let us run isolated 1v1 games tied to a tournament without polluting general matchmaking
 const ensureVipMatch = async (matchSlot, tournamentId) => {
   if (matchSlot.matchId) return matchSlot.matchId;
   const m = new Match();
@@ -348,8 +319,6 @@ const ensureVipMatch = async (matchSlot, tournamentId) => {
   return newId;
 };
 
-// mark a player as ready for their bracket match; once both ready, spin up/attach VIP match and notify
-// ready state is stored on the match slot to avoid per-user global flags
 const handleTournamentReady = async (tournamentId, matchId, playerId) => {
   const tournament = tournaments.get(tournamentId);
   if (!tournament) return;
@@ -370,7 +339,6 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
 
     let [m1, m2]= await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
       if (m1 || m2) {
-      // if he is ready. but he has an ongoing match, we cant start his new match, so we reset his ready state and ask him to ready up again when he is available
         if (m1) {
           matchSlot.ready[matchSlot.player1.id] = false;
           matchSlot.readyAt[matchSlot.player1.id] = null;
@@ -379,33 +347,15 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
           matchSlot.ready[matchSlot.player2.id] = false;
           matchSlot.readyAt[matchSlot.player2.id] = null;
         }
-        // console.log("cant play right now >> ", { m1, m2 });
         broadcastTournamentState();
         return;
       }
 
-  //   let [m1, m2]= await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
-  //   if (!(m1 || m2)){
-  //     console.log("both players are ready and available, starting match >> ", { m1, m2 });
-  // // if he is ready. but he has an ongoing match, we cant start his new match, so we reset his ready state and ask him to ready up again when he is available
-  //   if (m1) {x
-  //     matchSlot.ready[matchSlot.player1.id] = false;
-  //     matchSlot.readyAt[matchSlot.player1.id] = null;
-  //   }
-  //   if (m2) {
-  //     matchSlot.ready[matchSlot.player2.id] = false;
-  //     matchSlot.readyAt[matchSlot.player2.id] = null;
-  //   }
-  //   // console.log("cant play right now >> ", { m1, m2 });
-  //   broadcastTournamentState();
-  //   return;
-  // }
 
-    // create/ensure DB match row
+
     const matchDbId = await ensureVipMatch(matchSlot, tournamentId);
     matchSlot.matchId = matchDbId;
 
-    // hydrate runtime game state and start it immediately so tick loop can drive the ball
     let dbMatch = await dbcnx.getMatchById(matchDbId);
     if (!dbMatch) {
       dbMatch = new Match();
@@ -435,21 +385,17 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
 
     matches.set(g.id, g);
 
-    // immediately tell both players their match is ready so UI navigates and also seeds them with state
     notifyPlayersMatchReady(tournament, matchSlot, 2);
     const payload = JSON.stringify(g);
     sendtoplayer(g.P1_Id, payload);
     sendtoplayer(g.P2_Id, payload);
   }
 
-  // always broadcast the latest ready state so UIs reflect button disabled/ready indicators
   broadcastTournamentState();
 };
 
-// player reports opponent missing; if reporter has been ready for >=1 minute and opponent not ready, auto-advance reporter
 const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) => {
   
-  // console.log("This is handleReportMissingOpponent >> ", tournamentId, matchId, reporterId);
   const tournament = tournaments.get(tournamentId);
   if (!tournament) return;
 
@@ -459,35 +405,8 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   const matchSlot = allMatches.find((m) => m.id === matchId);
   if (!matchSlot) return;
 
-  // --- Final edge case: reporter is alone for >=3 minutes since tournament creation
   const isFinal = finalMatch && finalMatch.id === matchId;
-  // if (isFinal) {
-  //   const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
-  //   const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
-  //   const soloPlayer = reporterIsPlayer1 ? matchSlot.player1 : reporterIsPlayer2 ? matchSlot.player2 : null;
-  //   const opponent = reporterIsPlayer1 ? matchSlot.player2 : reporterIsPlayer2 ? matchSlot.player1 : null;
-
-  //   if (soloPlayer && !opponent) {
-  //     const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
-  //     const THREE_MINUTES_MS = 1_000;
-  //     const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
-  //     if (threeMinutesElapsed) {
-  //       finalMatch.winner = soloPlayer;
-  //       tournament.winner = soloPlayer;
-  //       tournament.status = "completed";
-
-  //       // remove any lingering participants who aren't the winner
-  //       const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
-  //       for (const leftover of remaining) {
-  //         eliminateParticipant(tournament, leftover.id);
-  //       }
-
-  //       tournaments.set(tournamentId, tournament);
-  //       broadcastTournamentState();
-  //       return;
-  //     }
-  //   }
-  // }
+  
   if (isFinal) {
     const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
     const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
@@ -503,7 +422,6 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
         tournament.winner = soloPlayer;
         tournament.status = "completed";
 
-        // persist a finished match in favor of the solo reporter (5-0)
         const matchDbId = await ensureVipMatch(finalMatch, tournamentId);
         finalMatch.matchId = matchDbId;
         let dbMatch = await dbcnx.getMatchById(matchDbId);
@@ -538,9 +456,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
         g.player1Name = await getUserName(g.P1_Id);
         g.player2Name = g.P2_Id ? await getUserName(g.P2_Id) : null;
         matches.set(g.id, g);
-        //----
 
-        // also force-complete any semifinal that still has no winner (keeps history consistent)
         for (const semi of semifinals) {
           if (!semi || semi.winner) continue;
           const semiWinner = semi.player1 || semi.player2;
@@ -580,9 +496,6 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
           matches.set(sg.id, sg);
           semi.winner = semiWinner;
         }
-        //----
-        
-        // remove any lingering participants who aren't the winner
         const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
         for (const leftover of remaining) {
           eliminateParticipant(tournament, leftover.id);
@@ -596,27 +509,24 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   }
   if (!matchSlot.player1 || !matchSlot.player2) return;
 
-  // console.log("after match check >> ", matchSlot);
   matchSlot.readyAt = matchSlot.readyAt || {};
   matchSlot.ready = matchSlot.ready || {};
 
   const reporterReadyAt = matchSlot.readyAt[reporterId];
   const reporterReady = Boolean(matchSlot.ready[reporterId]);
-  if (!reporterReady || !reporterReadyAt) return; // reporter never readied or timestamp missing
+  if (!reporterReady || !reporterReadyAt) return; 
 
   const opponent = matchSlot.player1.id === reporterId ? matchSlot.player2 : matchSlot.player1;
   if (!opponent) return;
   const opponentReady = Boolean(matchSlot.ready[opponent.id]);
-  if (opponentReady) return; // opponent already ready; nothing to report
+  if (opponentReady) return; 
 
   const diffMs = Date.now() - new Date(reporterReadyAt).getTime();
-  if (diffMs < 60_000) return; // less than 1 minute wait
+  if (diffMs < 60_000) return;
 
-  // advance reporter, drop opponent
   matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
   eliminateParticipant(tournament, opponent.id);
 
-  // force-complete the match in favor of reporter so bracket + history stay consistent
   const reporterIsP1 = matchSlot.player1.id === reporterId;
   const matchDbId = await ensureVipMatch(matchSlot, tournamentId);
   let dbMatch = await dbcnx.getMatchById(matchDbId);
@@ -672,8 +582,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   broadcastTournamentState();
 };
 
-// after a match finishes, advance bracket (promote semifinal winners to final or crown winner)
-// we accept GameState from the running match tick loop and reflect winners back into the tournament map
+
 const updateTournamentAfterMatch = async (gameState) => {
   if (!gameState?.T_Id) return;
   const tournamentId = gameState.T_Id;
@@ -690,26 +599,22 @@ const updateTournamentAfterMatch = async (gameState) => {
   if (semMatch) {
     let wname = await getUserName(Winner_Id);
     semMatch.winner = winnerParticipant || { id: Winner_Id, name: wname || "Winner" };
-    // eliminate the losing participant and keep the bracket locked
     const p1Id = semMatch.player1?.id;
     const p2Id = semMatch.player2?.id;
     const loserId = Winner_Id === p1Id ? p2Id : p1Id;
     if (loserId) eliminateParticipant(tournament, loserId);
 
     if (tournament.final) {
-      // only fill an empty slot; avoid showing the same semifinal winner on both sides before the second semi finishes
       if (!tournament.final.player1) {
         tournament.final.player1 = semMatch.winner;
       } else if (!tournament.final.player2 && tournament.final.player1.id !== semMatch.winner.id) {
         tournament.final.player2 = semMatch.winner;
       }
-      // finalists must ready-up again; also force a fresh match id for the final once both sides are known
       tournament.final.ready = {};
       if (tournament.final.player1 && tournament.final.player2) {
         tournament.final.matchId = null;
         tournament.status = "finals";
 
-        // notify both finalists that there's a match waiting for them(if they are not in the tournamnt page)
         const finalists = [tournament.final.player1, tournament.final.player2].filter(Boolean);
         for (const p of finalists) {
           const waiting = new GameState();
@@ -721,8 +626,7 @@ const updateTournamentAfterMatch = async (gameState) => {
   } else if (finalMatch && finalMatch.matchId === gameState.id) {
     let wwname = await getUserName(Winner_Id);
     finalMatch.winner = winnerParticipant || { id: Winner_Id, name: wwname|| "Winner" };
-    // eliminate the finalist who lost; keep tournament locked
-    const p1Id = finalMatch.player1?.id;
+   const p1Id = finalMatch.player1?.id;
     const p2Id = finalMatch.player2?.id;
     const loserId = Winner_Id === p1Id ? p2Id : p1Id;
     if (loserId) eliminateParticipant(tournament, loserId);
@@ -953,7 +857,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         };
         const res = await desToken(mockReq);
         if (res.status === 401) {
-          // console.log("Unauthorized, closing connection");
           connection.close();
           return;
         }

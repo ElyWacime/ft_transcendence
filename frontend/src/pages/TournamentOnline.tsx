@@ -49,7 +49,6 @@ export default function TournamentOnlinePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isConnected = isReady && wsRef?.current?.readyState === WebSocket.OPEN;
 
-  // derive current user from auth context
   const currentUser: CurrentUser | null = user
     ? { id: user.id, name: user.name || user.email || "You" }
     : null;
@@ -58,39 +57,31 @@ export default function TournamentOnlinePage() {
     ? tournaments.find((tour) => tour.participants?.some((p) => p.id === currentUser.id))?.id || null
     : null;
 
-  // helper to send authed websocket actions to game-service
-  // all tournament mutations (create/join/ready) flow through the existing WS channel used by gameplay
   const sendAction = (payload: Record<string, unknown>) => {
     const socket = wsRef?.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      // toast.error("Socket not connected");
       return false;
     }
     socket.send(JSON.stringify({ token: accessToken, ...payload }));
     return true;
   };
 
-  // request a fresh tournaments snapshot from the server; used after we trigger a mutation
   const requestTournaments = () => {
     sendAction({ type: "REQUEST_TOURNAMENTS" });
   };
 
-  // initial load: request tournaments via websocket only (no REST fallback)
   useEffect(() => {
     requestTournaments();
     const timeout = setTimeout(() => setIsLoading(false), 3000);
     return () => clearTimeout(timeout);
   }, []);
 
-  // whenever the websocket transitions to connected, ask for the latest tournaments snapshot
   useEffect(() => {
     if (isConnected) {
       requestTournaments();
     }
   }, [isConnected]);
 
-  // register websocket listener and handle tournament events
-  // keeps UI live-synced; TOURNAMENT_MATCH_READY also redirects players into their match
   useEffect(() => {
     const socket = wsRef?.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
@@ -118,8 +109,6 @@ export default function TournamentOnlinePage() {
     return () => ws.removeEventListener("message", handleMessage);
   }, [ws, isReady, currentUser, navigate]);
 
-  // create a new online tournament (server adds creator as first participant)
-  // if socket is down we bail fast to avoid confusing UX
   const createTournament = () => {
     if (!currentUser) {
       toast.error("Login to create a tournament");
@@ -135,7 +124,6 @@ export default function TournamentOnlinePage() {
   };
 
 
-  //leave the tournament you're currently in; if you're the last one, the tournament is deleted
   const leaveTournament = (tournamentId: string) => {
     
     if (!currentUser) {
@@ -152,7 +140,6 @@ export default function TournamentOnlinePage() {
     
 
     }
-  // join an existing tournament; server tracks bracket slots and will broadcast updated participant list
   const joinTournament = (tournamentId: string) => {
     if (!currentUser) {
       toast.error("Login to join a tournament");
@@ -167,8 +154,6 @@ export default function TournamentOnlinePage() {
     setIsSubmitting(false);
   };
 
-  // mark current user ready for their bracket match; once both ready, server triggers match-ready event
-  // client doesn’t navigate immediately; it waits for the server-issued TOURNAMENT_MATCH_READY payload
   const markReady = (tournamentId: string, matchId: string) => {
     setIsSubmitting(true);
     const ok = sendAction({ type: "TOURNAMENT_READY", tournamentId, matchId });
@@ -193,8 +178,6 @@ export default function TournamentOnlinePage() {
     setIsSubmitting(false);
   };
 
-  // render a single tournament card (participants, bracket, ready buttons)
-  // keeps UI logic colocated so both semifinals and final sections read from the same Tournament shape
   const renderTournamentCard = (t: Tournament) => {
     const status = t.status || (t.full ? "semifinals" : "waiting");
     const statusLabel = (() => {
@@ -214,12 +197,11 @@ export default function TournamentOnlinePage() {
           <span className={`status-pill ${t.full ? "full" : "active"}`}>{statusLabel}</span>
         </div>
 
-        {/* <div className="tournament-state"> */}
+
           <div>
-            {/* <p className="label">Created at</p> */}
             <p className="created-at">{t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}</p>
           </div>
-        {/* </div> */}
+
 
         <div className="participants">
           <div className="participants-header">
@@ -236,9 +218,6 @@ export default function TournamentOnlinePage() {
                   <span className="name">{p.name}</span>
 
                 </div>
-                // <button>
-
-                // <button/>
               ))
             )}
           </div>
@@ -250,7 +229,6 @@ export default function TournamentOnlinePage() {
             <p className="muted">Semifinals</p>
             {(t.semifinals ?? []).map((m) => (
               <div key={m.id} className="participant">
-                {/* <span className="badge">{m.id}</span> */}
                 <span className="name">
                   {(m.player1?.name || "?")} <span className="vs">vs</span> {(m.player2?.name || "?")}
                 </span>
@@ -268,7 +246,6 @@ export default function TournamentOnlinePage() {
                   <button
                     title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
                     className="primary"
-                    // className="ghost"
                     disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 && t.status == "finals") || t.status == "completed"}
                     onClick={() => reportMissing(t.id, m.id)}
                   >
@@ -277,7 +254,6 @@ export default function TournamentOnlinePage() {
                 )}
               </div>
             ))}
-            {/* {(t.semifinals ?? []).length === 0 && <p className="muted">Waiting for 4 players...</p>} */}
           </div>
 
           <div className="bracket-section">
@@ -301,7 +277,6 @@ export default function TournamentOnlinePage() {
                 <button
                   className="primary"
                   title="Report if your opponent didnt show up - for more than 30 minutes since the beginning of the tournamament , or if your opponent present but remains unready for more than 5 minutes."
-                  // className="ghost"
                   disabled={isSubmitting ||  !iAmInside || t.status == "completed"}
                   onClick={() => reportMissing(t.id, t.final?.id || "final")}
                 >

@@ -56,13 +56,11 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isLoading) {
-      // console.log("[WebSocket] Waiting for auth to finish loading...");
       return;
     }
 
     if (!isLoggedIn) {
       if (wsRef.current) {
-        // console.log("Closing WS because user logged out");
         wsRef.current.close();
         wsRef.current = null;
         setWs(null);
@@ -82,18 +80,16 @@ export const WebSocketProvider = ({ children }) => {
     socket.onopen = () => 
     {
       setIsReady(true);
-      // console.log("WebSocket connected and ready");
       if (socket && socket.readyState === WebSocket.OPEN) 
           socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
     };
     socket.onclose = () => {
-      // console.log("WebSocket disconnected");
       setIsReady(false);
       wsRef.current = null;
       setWs(null);
     };
     socket.onerror = (err) => {
-      // console.log("WebSocket error:", err);
+      console.log("WebSocket error:", err);
     };
 
     socket.addEventListener("message", handleMessage);

@@ -29,11 +29,8 @@ class PlayerDashboardAPI_ayoub {
 
   private baseUrl = "/api";
 
-  // Main method: Fetch ALL data combined (auth + game)
-  // Takes a username, searches for it, gets the ID, then fetches dashboard data
   async getCompleteUserData(userName: string, accessToken: string, updateAccessToken: (newToken: string) => void): Promise<CombinedUserData> {
     try {
-      // First: Search for user by name to get their ID
       const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
         method: "POST",
         body: JSON.stringify({ name: userName }),
@@ -46,7 +43,6 @@ class PlayerDashboardAPI_ayoub {
       const searchData = await searchRes.json();
       const userId = searchData.user_id;
 
-      // Second: Fetch auth data using the resolved user ID
       const authRes = await fetchWithAuth(`/api/users/user-info/${encodeURIComponent(userId)}`, { method: "GET" }, accessToken, updateAccessToken);
 
       if (!authRes.ok) {
@@ -55,7 +51,6 @@ class PlayerDashboardAPI_ayoub {
 
       const authData = await authRes.json();
 
-      // Third: Fetch game/dashboard data using the resolved user ID
       const gameRes = await fetchWithAuth(`${this.baseUrl}//dashboard/${userId}`, { method: "GET" }, accessToken, updateAccessToken);
 
       if (!gameRes.ok) {
@@ -64,7 +59,6 @@ class PlayerDashboardAPI_ayoub {
 
       const gameData = await gameRes.json();
 
-      // Combine all data with proper field mapping
       return {
         user: {
           id: authData.id || "",
@@ -90,7 +84,6 @@ class PlayerDashboardAPI_ayoub {
     }
   }
 
-  // Alias for backward compatibility
   async getPlayerDashboard(identifier: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     return this.getCompleteUserData(identifier, accessToken, updateAccessToken);
   }

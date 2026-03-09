@@ -104,22 +104,6 @@
   }
 }
 
-/* .reset-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.5rem; 
-  font-size: 0.875rem; 
-  background: transparent;
-  color: hsl(var(--foreground));
-  border: 1px solid hsl(var(--border));
-  border-radius: calc(var(--radius) - 4px);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  gap: 0.5rem; 
-  white-space: nowrap;
-} */
-
 
 .reset-icon {
   width: 1rem; 

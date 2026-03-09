@@ -48,7 +48,6 @@ const ProfileSettings = () => {
         const userId = user?.id;
         
         if (userId) {
-          // Fetch user info directly from auth service by ID
           const authRes = await fetchWithAuth(`/api/users/user-info/${userId}`, { method: "GET" }, accessToken, updateAccessToken);
           
           if (!authRes.ok) {
@@ -112,7 +111,6 @@ const ProfileSettings = () => {
     try {
       const { fetchWithAuth } = await import("@/lib/tokenRefresh");
 
-      // Search by username only
       const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
         method: "POST",
         body: JSON.stringify({ name: trimmed }),
@@ -125,7 +123,6 @@ const ProfileSettings = () => {
       const searchData = await searchRes.json();
       const userId = searchData.user_id;
 
-      // Fetch full user info
       const infoRes = await fetchWithAuth(`/api/users/user-info/${userId}`, {
         method: "GET",
       }, accessToken, updateAccessToken);
