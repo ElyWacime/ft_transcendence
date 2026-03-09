@@ -1,6 +1,5 @@
 
 import React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { Navigation } from "@/components/navigation";
 import Home from "./pages/Home";
@@ -10,7 +9,7 @@ import { Toaster } from "sonner"
 import GameOnline from "./pages/GameOnline";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import TournamentOnline from "./pages/TournamentOnline"; // online tournament lobby/bracket page leveraging game-service websocket
+import TournamentOnline from "./pages/TournamentOnline";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "./components/PublicRoute";
@@ -27,8 +26,6 @@ import Result from "./pages/Result";
 import ChangeUsername from "./pages/Change_username_page";
 import { WebSocketProvider } from "./context/WebSocketContext";
 import { ChatSocketProvider } from "./context/ChatSocketContext";
-
-const queryClient = new QueryClient();
 
 const RootLayout = () => (
   <ChatSocketProvider>
@@ -134,14 +131,14 @@ const router = createBrowserRouter(
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-      <Toaster />
-      <AuthProvider children={undefined}>
-        <WebSocketProvider>
-          <RouterProvider router={router} />
+  <>
+    <Toaster />
+    <AuthProvider children={undefined}>
+      <WebSocketProvider>
+        <RouterProvider router={router} />
         </WebSocketProvider>
-      </AuthProvider>
-  </QueryClientProvider>
+    </AuthProvider>    
+  </>
 );
 
 export default App;

@@ -56,10 +56,6 @@ const Login = () => {
     }
   };
 
-  const handleGitHubLogin = () => {
-    window.location.href = `${window.location.origin}/api/users/auth/github`;
-  };
-
   return (
     <div className="login-page">
       <div className="login-header">
@@ -108,20 +104,6 @@ const Login = () => {
           disabled={loading}
         >
           {loading ? "Logging in..." : "Login"}
-        </button>
-        <div className="form-divider">
-          <div className="divider-line" />
-          <span className="divider-text">or</span>
-          <div className="divider-line" />
-        </div>
-        <button
-          type="button"
-          variant="outline"
-          className="github-login-button"
-          onClick={handleGitHubLogin}
-        >
-          <Github className="github-icon" />
-          Continue with GitHub
         </button>
       </form>
       <p className="login-footer">
