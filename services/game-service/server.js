@@ -194,9 +194,8 @@ function tick(m,dt) {
     m.gameStatus = "FINISHED";
     m.Winner_Id = m.P2_Id;
     if (m.score1 >= m.score2)
-    m.Winner_Id = m.P1_Id;
+      m.Winner_Id = m.P1_Id;
     updateTournamentAfterMatch(m);
-
     dbcnx.updateMatch(m);
     matches.delete(m.id);
   }
@@ -277,7 +276,7 @@ const leaveTournamentRoom = (id, participant) => {
   }
 
   // delete empty tournaments to avoid clutter
-  // console.log("This is leaveTournamentRoom >> ", tournament.participants.length);
+  console.log("This is leaveTournamentRoom >> ", tournament.participants.length);
   if (tournament.participants.length === 0) {
     tournaments.delete(id);
   } else {
@@ -364,23 +363,6 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
   const bothReady = p1Ready && p2Ready;
 
   if (bothReady) {
-
-    let [m1, m2]= await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
-    if (!(m1 || m2)){
-  // if he is ready. but he has an ongoing match, we cant start his new match, so we reset his ready state and ask him to ready up again when he is available
-    if (m1) {
-      matchSlot.ready[matchSlot.player1.id] = false;
-      matchSlot.readyAt[matchSlot.player1.id] = null;
-    }
-    if (m2) {
-      matchSlot.ready[matchSlot.player2.id] = false;
-      matchSlot.readyAt[matchSlot.player2.id] = null;
-    }
-    // console.log("cant play right now >> ", { m1, m2 });
-    broadcastTournamentState();
-    return;
-  }
-
     // create/ensure DB match row
     const matchDbId = await ensureVipMatch(matchSlot, tournamentId);
     matchSlot.matchId = matchDbId;
@@ -400,8 +382,6 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     dbMatch.count_players = 2;
     dbMatch.mode = 2;
     dbMatch.T_Id = tournamentId;
-    await dbcnx.updateMatch(dbMatch);
-
     const g = new GameState();
     g.id = matchDbId;
     g.P1_Id = matchSlot.player1.id;
@@ -412,9 +392,8 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     g.gameStatus = "PLAYING";
     g.player1Name = await getUserName(g.P1_Id);
     g.player2Name = await getUserName(g.P2_Id);
-
     matches.set(g.id, g);
-
+    await dbcnx.updateMatch(dbMatch);
     // immediately tell both players their match is ready so UI navigates and also seeds them with state
     notifyPlayersMatchReady(tournament, matchSlot, 2);
     const payload = JSON.stringify(g);
@@ -427,9 +406,9 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
 };
 
 // player reports opponent missing; if reporter has been ready for >=1 minute and opponent not ready, auto-advance reporter
-const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) => {
+const handleReportMissingOpponent = (tournamentId, matchId, reporterId) => {
   
-  // console.log("This is handleReportMissingOpponent >> ", tournamentId, matchId, reporterId);
+  console.log("This is handleReportMissingOpponent >> ", tournamentId, matchId, reporterId);
   const tournament = tournaments.get(tournamentId);
   if (!tournament) return;
 
@@ -441,33 +420,6 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
 
   // --- Final edge case: reporter is alone for >=3 minutes since tournament creation
   const isFinal = finalMatch && finalMatch.id === matchId;
-  // if (isFinal) {
-  //   const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
-  //   const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
-  //   const soloPlayer = reporterIsPlayer1 ? matchSlot.player1 : reporterIsPlayer2 ? matchSlot.player2 : null;
-  //   const opponent = reporterIsPlayer1 ? matchSlot.player2 : reporterIsPlayer2 ? matchSlot.player1 : null;
-
-  //   if (soloPlayer && !opponent) {
-  //     const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
-  //     const THREE_MINUTES_MS = 1_000;
-  //     const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
-  //     if (threeMinutesElapsed) {
-  //       finalMatch.winner = soloPlayer;
-  //       tournament.winner = soloPlayer;
-  //       tournament.status = "completed";
-
-  //       // remove any lingering participants who aren't the winner
-  //       const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
-  //       for (const leftover of remaining) {
-  //         eliminateParticipant(tournament, leftover.id);
-  //       }
-
-  //       tournaments.set(tournamentId, tournament);
-  //       broadcastTournamentState();
-  //       return;
-  //     }
-  //   }
-  // }
   if (isFinal) {
     const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
     const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
@@ -483,85 +435,6 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
         tournament.winner = soloPlayer;
         tournament.status = "completed";
 
-        // persist a finished match in favor of the solo reporter (5-0)
-        const matchDbId = await ensureVipMatch(finalMatch, tournamentId);
-        finalMatch.matchId = matchDbId;
-        let dbMatch = await dbcnx.getMatchById(matchDbId);
-        if (!dbMatch) {
-          dbMatch = new Match();
-          dbMatch.id = matchDbId;
-        }
-        dbMatch.P1_Id = finalMatch.player1?.id || soloPlayer.id;
-        dbMatch.P2_Id = finalMatch.player2?.id || null;
-        dbMatch.count_players = 2;
-        dbMatch.mode = 2;
-        dbMatch.T_Id = tournamentId;
-        const reporterId = soloPlayer.id;
-        const reporterIsP1 = dbMatch.P1_Id === reporterId;
-        dbMatch.score1 = reporterIsP1 ? 5 : 0;
-        dbMatch.score2 = reporterIsP1 ? 0 : 5;
-        dbMatch.Winner_Id = reporterId;
-        dbMatch.gameStatus = "PLAYING";
-        await dbcnx.updateMatch(dbMatch);
-
-        const g = new GameState();
-        g.id = matchDbId;
-        g.P1_Id = dbMatch.P1_Id;
-        g.P2_Id = dbMatch.P2_Id;
-        g.T_Id = tournamentId;
-        g.count_players = 2;
-        g.mode = 2;
-        g.gameStatus = "PLAYING";
-        g.score1 = dbMatch.score1;
-        g.score2 = dbMatch.score2;
-        g.Winner_Id = reporterId;
-        g.player1Name = await getUserName(g.P1_Id);
-        g.player2Name = g.P2_Id ? await getUserName(g.P2_Id) : null;
-        matches.set(g.id, g);
-        //----
-
-        // also force-complete any semifinal that still has no winner (keeps history consistent)
-        for (const semi of semifinals) {
-          if (!semi || semi.winner) continue;
-          const semiWinner = semi.player1 || semi.player2;
-          if (!semiWinner) continue;
-          const semiMatchId = await ensureVipMatch(semi, tournamentId);
-          semi.matchId = semiMatchId;
-          let semiDb = await dbcnx.getMatchById(semiMatchId);
-          if (!semiDb) {
-            semiDb = new Match();
-            semiDb.id = semiMatchId;
-          }
-          semiDb.P1_Id = semi.player1?.id || semiWinner.id;
-          semiDb.P2_Id = semi.player2?.id || null;
-          semiDb.count_players = 2;
-          semiDb.mode = 2;
-          semiDb.T_Id = tournamentId;
-          const semiWinnerIsP1 = semiDb.P1_Id === semiWinner.id;
-          semiDb.score1 = semiWinnerIsP1 ? 5 : 0;
-          semiDb.score2 = semiWinnerIsP1 ? 0 : 5;
-          semiDb.Winner_Id = semiWinner.id;
-          semiDb.gameStatus = "PLAYING";
-          await dbcnx.updateMatch(semiDb);
-
-          const sg = new GameState();
-          sg.id = semiMatchId;
-          sg.P1_Id = semiDb.P1_Id;
-          sg.P2_Id = semiDb.P2_Id;
-          sg.T_Id = tournamentId;
-          sg.count_players = 2;
-          sg.mode = 2;
-          sg.gameStatus = "PLAYING";
-          sg.score1 = semiDb.score1;
-          sg.score2 = semiDb.score2;
-          sg.Winner_Id = semiWinner.id;
-          sg.player1Name = await getUserName(sg.P1_Id);
-          sg.player2Name = sg.P2_Id ? await getUserName(sg.P2_Id) : null;
-          matches.set(sg.id, sg);
-          semi.winner = semiWinner;
-        }
-        //----
-        
         // remove any lingering participants who aren't the winner
         const remaining = tournament.participants.filter((p) => p.id !== soloPlayer.id);
         for (const leftover of remaining) {
@@ -574,9 +447,10 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
       }
     }
   }
+
   if (!matchSlot.player1 || !matchSlot.player2) return;
 
-  // console.log("after match check >> ", matchSlot);
+  console.log("after match check >> ", matchSlot);
   matchSlot.readyAt = matchSlot.readyAt || {};
   matchSlot.ready = matchSlot.ready || {};
 
@@ -595,38 +469,6 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   // advance reporter, drop opponent
   matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
   eliminateParticipant(tournament, opponent.id);
-
-  // force-complete the match in favor of reporter so bracket + history stay consistent
-  const reporterIsP1 = matchSlot.player1.id === reporterId;
-  const matchDbId = await ensureVipMatch(matchSlot, tournamentId);
-  let dbMatch = await dbcnx.getMatchById(matchDbId);
-  if (!dbMatch) {
-    dbMatch = new Match();
-    dbMatch.id = matchDbId;
-  }
-  dbMatch.P1_Id = matchSlot.player1.id;
-  dbMatch.P2_Id = matchSlot.player2.id;
-  dbMatch.count_players = 2;
-  dbMatch.mode = 2;
-  dbMatch.T_Id = tournamentId;
-  dbMatch.score1 = reporterIsP1 ? 5 : 0;
-  dbMatch.score2 = reporterIsP1 ? 0 : 5;
-  dbMatch.Winner_Id = reporterId;
-  dbMatch.gameStatus = "PLAYING";
-  const g = new GameState();
-  g.id = matchDbId;
-  g.P1_Id = matchSlot.player1.id;
-  g.P2_Id = matchSlot.player2.id;
-  g.T_Id = tournamentId;
-  g.count_players = 2;
-  g.mode = 2;
-  g.gameStatus = "PLAYING";
-  g.score1 = dbMatch.score1;
-  g.score2 = dbMatch.score2;
-  g.Winner_Id = reporterId;
-  g.player1Name = await getUserName(g.P1_Id);
-  g.player2Name = await getUserName(g.P2_Id);
-  matches.set(g.id, g);
 
   if (semifinals.includes(matchSlot)) {
     if (tournament.final) {
@@ -715,7 +557,6 @@ const updateTournamentAfterMatch = async (gameState) => {
   broadcastTournamentState();
 };
 
-
 fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
@@ -762,6 +603,9 @@ const handelRoomQuiiting = async(id) => {
   sendtoplayer(ngame.P3_Id, data);
   sendtoplayer(ngame.P4_Id, data);
   }
+  else
+    console.log("coudnt find this match :: ",id);
+
 };
 
 const handelRegister = async(request,id) => {
@@ -866,6 +710,7 @@ const handelDup = async (connection,id) => {
       if (clients.get(id) != connection) 
       {
         clients.get(id).close();
+        console.log("Server Closed Duplicate Socket for ",id);
       }
     }
     catch (e) 
@@ -924,6 +769,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    {
       const request = JSON.parse(msg);
       let token = request.token;
+      console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
         const mockReq = {
           headers: {
@@ -933,7 +779,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         };
         const res = await desToken(mockReq);
         if (res.status === 401) {
-          // console.log("Unauthorized, closing connection");
+          console.log("Unauthorized, closing connection");
           connection.close();
           return;
         }
@@ -941,36 +787,35 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         const id = userData.user_id;
         await handelDup(connection,id);
         clients.set(id, connection);
-        const name = await getUserName(id,);
+        const name = await getUserName(id);
         if (request.type == "REGISTER") 
           await handelRegister(request,id);
         else if (request.type == "MOVE") 
           await handelMove(request,id);
         else if (request.type == "DELETE") 
           await handelRoomQuiiting(id);
-          else if (request.type == "TOURNAMENT_CREATE") 
-          {
-            const creator = { id, name  };
-            createTournamentRoom(creator);
-          }
-          else if (request.type == "TOURNAMENT_LEAVE") 
-          {
-          const participant = { id, name};
-          leaveTournamentRoom(request.tournamentId, participant);
-          }
-          else if (request.type == "TOURNAMENT_JOIN") {
-            const participant = { id, name };
-            joinTournamentRoom(request.tournamentId, participant);
-          }
-          else if (request.type == "TOURNAMENT_READY") {
-            await handleTournamentReady(request.tournamentId, request.matchId, id);
-          }
-          else if (request.type == "TOURNAMENT_REPORT_MISSING") {
-            await handleReportMissingOpponent(request.tournamentId, request.matchId, id);
-          }
-          else if (request.type == "REQUEST_TOURNAMENTS") {
-            sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
-          }
+          else if (request.type == "TOURNAMENT_CREATE") {
+          const creator = { id, name  };
+          createTournamentRoom(creator);
+        }
+        else if (request.type == "TOURNAMENT_LEAVE") 
+        {
+        const participant = { id, name};
+        leaveTournamentRoom(request.tournamentId, participant);
+        }
+        else if (request.type == "TOURNAMENT_JOIN") {
+          const participant = { id, name };
+          joinTournamentRoom(request.tournamentId, participant);
+        }
+        else if (request.type == "TOURNAMENT_READY") {
+          await handleTournamentReady(request.tournamentId, request.matchId, id);
+        }
+        else if (request.type == "TOURNAMENT_REPORT_MISSING") {
+          handleReportMissingOpponent(request.tournamentId, request.matchId, id);
+        }
+        else if (request.type == "REQUEST_TOURNAMENTS") {
+          sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
+        }
       }
       else 
       {
@@ -1006,8 +851,10 @@ fastify.post('/invite', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
+    
     let P1 = request.body.P1;
     let P2 = request.body.P2;
+    console.log("invite  >> ",P1,P2);
     let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
     if (!(m1 || m2))
     {
@@ -1050,6 +897,7 @@ fastify.post('/allmatch', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
+    
     const token = await res.json();
     const id = token.user_id;
     let matches = await dbcnx.getPlayerMatches(id);
@@ -1080,14 +928,15 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
+    
     const token = await res.json();
     const targetUserId = token.user_id;
     const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
       Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
     const winsCount = await dbcnx.UserCountWins_ayoub(targetUserId);
     const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(targetUserId);
-    const totalMatches = matchesCount?.Played || 0;
-    const totalWins = winsCount?.Winned || 0;
+    const totalMatches = matchesCount?matchesCount.Played : 0;
+    const totalWins = winsCount? winsCount.Winned :  0;
     const totalTournaments  = await dbcnx.UserCountTournPlayed_ayoub(targetUserId);
     const totalTourWins = await dbcnx.UserCountTournWin_ayoub(targetUserId);
     const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
@@ -1106,10 +955,10 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
         totalWins: totalWins,
         totalLosses: totalMatches - totalWins,
         winRate: parseFloat(winRate),
-        totalTournaments: totalTournaments ? totalTournaments.Played : 0,
-        totalTourWins: totalTourWins ? totalTourWins.Winned  :  0,
+        totalTournaments: totalTournaments? totalTournaments.Played : 0,
+        totalTourWins: totalTourWins? totalTourWins.Winned : 0,
       },
-      lastMatch: lastMatch ? lastMatch :  null
+      lastMatch: lastMatch || null
     };
   } catch (error) {
     console.error('Dashboard error:', error);
