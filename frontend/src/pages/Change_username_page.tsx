@@ -5,22 +5,23 @@ import { toast } from "sonner";
 import { userApi } from "@/lib/api";
 import { User, ArrowLeft } from "lucide-react";
 import "../css/change-password.css";
+import { useAuth } from "@/context/AuthContext";
 
 const ChangeUsername = () => {
   const navigate = useNavigate();
   const [newUsername, setNewUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { accessToken, updateAccessToken } = useAuth();
 
   const updateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
     
     setLoading(true);
     try {
-      const res = await userApi.updateUsername(password, newUsername);
+      const res = await userApi.updateUsername(password, newUsername, accessToken, updateAccessToken);
       if (res.success) {
         toast.success("Username updated successfully!");
-        
         navigate("/profile");
       } else {
         toast.error(res.message || "Username update failed.");

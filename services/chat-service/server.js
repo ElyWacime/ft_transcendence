@@ -125,10 +125,12 @@ fastify.post("/user/update", { schema: userUpdateSchema }, async (request, reply
   if (res.status === 401) {
     return reply.code(401).send({ error: 'Unauthorized' });
   }
+
+  const token = await res.json();
+  const senderId = token.user_id;
   
-  const userId = request.body.user_id;
   const newUsername = request.body.username;
-  const updatedUser = await updateUsername(userId, newUsername);
+  const updatedUser = await updateUsername(senderId, newUsername);
 
   return {
     message: 'Username updated successfully',
@@ -427,14 +429,12 @@ io.use(async (socket, next) => {
       return next(new Error('No cookies found'));
     }
 
-    
     const cookies = cookieParser.parse(cookieHeader);
 
     const refreshToken = cookies.refresh_token;
     if (!refreshToken) {
       return next(new Error('No access token found'));
     }
-
 
     const userData = await validateSocketToken(refreshToken);    
     if (!userData) {

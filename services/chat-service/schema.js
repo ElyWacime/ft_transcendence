@@ -12,9 +12,8 @@ export const usersAddSchema = {
   export const userUpdateSchema = {
     body: {
       type: 'object',
-      required: ['user_id', 'username'],
+      required: ['username'],
       properties: {
-        user_id: { type: 'string' },
         username: { type: 'string' }
       }
     }

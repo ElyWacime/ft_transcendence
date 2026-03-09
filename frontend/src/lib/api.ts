@@ -173,14 +173,23 @@ class UserAPI {
   
   private baseUrl = `${API_URL}/api/users`;
   
-  async updateUsername(current_password: string, new_username: string) {
+  async updateUsername(current_password: string, new_username: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`${this.baseUrl}/update_username`, {
       method: "PUT",
       body: JSON.stringify({ current_password, new_username }),
       credentials: 'include',
-    });
-        return await res.json();
+    }, accessToken, updateAccessToken);
+    if (res.ok) {
+      const res = await fetchWithAuth(`${API_URL}/api/chat/user/update`, {
+        method: "POST",
+        body: JSON.stringify({ username: new_username }),
+        credentials: 'include',
+      }, accessToken, updateAccessToken);
+    }
+
+    return await res.json();
   }
+
   async register(email: string, password: string, name: string) {
     const res = await fetch(`${this.baseUrl}/register`, {
       method: "POST",
@@ -277,11 +286,11 @@ class UserAPI {
     return await res.json();
   }
 
-  async getUserById(userId: string) {
+  async getUserById(userId: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`/api/dashboard/${userId}`, {
       method: "GET",
       credentials: 'include',
-    });
+    },accessToken, updateAccessToken);
 
     if (!res.ok) {
       const errorText = await res.text();
@@ -293,12 +302,12 @@ class UserAPI {
     return data.user;
   }
 
-  async searchByName(name: string) {
+  async searchByName(name: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
     const res = await fetchWithAuth(`/api/users/search-this-name`, {
       method: "POST",
       body: JSON.stringify({ name }),
       credentials: 'include',
-    });
+    }, accessToken, updateAccessToken);
     
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
@@ -312,7 +321,7 @@ class UserAPI {
       const infoRes = await fetchWithAuth(`/api/users/user-info/${data.user_id}`, {
         method: "GET",
         credentials: 'include',
-      });
+      }, accessToken, updateAccessToken);
       if (infoRes.ok) {
         const infoData = await infoRes.json();
         avatar = infoData.avatar || "";

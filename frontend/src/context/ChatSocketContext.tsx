@@ -46,7 +46,8 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     const chatSocket = io(SERVER_URL, {
-      autoConnect: true,
+      withCredentials: true,
+      reconnection: true
     });
     setSocket(chatSocket);
     chatSocket.on("connect", () => {});

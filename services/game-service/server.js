@@ -194,9 +194,8 @@ function tick(m,dt) {
     m.gameStatus = "FINISHED";
     m.Winner_Id = m.P2_Id;
     if (m.score1 >= m.score2)
-    m.Winner_Id = m.P1_Id;
+      m.Winner_Id = m.P1_Id;
     updateTournamentAfterMatch(m);
-
     dbcnx.updateMatch(m);
     matches.delete(m.id);
   }
@@ -383,8 +382,6 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     dbMatch.count_players = 2;
     dbMatch.mode = 2;
     dbMatch.T_Id = tournamentId;
-    await dbcnx.updateMatch(dbMatch);
-
     const g = new GameState();
     g.id = matchDbId;
     g.P1_Id = matchSlot.player1.id;
@@ -395,9 +392,8 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     g.gameStatus = "PLAYING";
     g.player1Name = await getUserName(g.P1_Id);
     g.player2Name = await getUserName(g.P2_Id);
-
     matches.set(g.id, g);
-
+    await dbcnx.updateMatch(dbMatch);
     // immediately tell both players their match is ready so UI navigates and also seeds them with state
     notifyPlayersMatchReady(tournament, matchSlot, 2);
     const payload = JSON.stringify(g);
@@ -561,21 +557,6 @@ const updateTournamentAfterMatch = async (gameState) => {
   broadcastTournamentState();
 };
 
-
-// fastify.register(fjwt, { 
-//   secret: process.env.JWT_ACCESS_SECRET
-// });
-
-// fastify.addHook("preHandler", (req, _res, next) => {
-//   req.jwt = fastify.jwt;
-//   next();
-// });
-
-// fastify.register(fastifyCookie, {
-//   secret: process.env.JWT_ACCESS_SECRET,
-//   hook: "preHandler", 
-// });
-
 fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
@@ -722,25 +703,6 @@ const handelMove = async (request,id) =>{
   }
 };
 
-const handelFinish = async (ID) =>  {
-  let m = matches.get(ID);
-  if (m) 
-  {
-    m.id = ID;
-    m.id_Match = ID;
-    if (m.score1 >= m.score2)
-      m.Winner_Id = m.P1_Id;
-    else
-      m.Winner_Id = m.P2_Id;
-    m.gameStatus = "FINISHED";
-    await dbcnx.updateMatch(m);
-    updateTournamentAfterMatch(m);
-    matches.delete(m.id);
-  }
-  else
-    console.log("Couldnt end request.matchId ",ID);
-};
-
 const handelDup = async (connection,id) => {
   if (clients.has(id)) 
   {
@@ -801,101 +763,6 @@ const getUserName = async (id) => {
   }
 };
 
-// fastify.post("/me", async (request, reply) => {
-//   try {
-//     const accessToken = request.cookies.access_token;
-//     console.log("accessToken >> ", accessToken);
-//     if (!accessToken) {
-//       return reply.code(403).send({ message: 'Not logged in' });
-//     }
-
-//     const decoded = request.jwt.verify(accessToken);
-//     if (!decoded)
-//       return reply.code(401).send({ message: "Couldn't decode token" });
-//     let user = { id: decoded.id, name: await getUserName(decoded.id) };
-//     // return only id and name (or whatever you want in frontend)
-//     console.log("This is /me >> ", user);
-//     return reply.code(201).send({ message: {id: user.id, name: user.name }});
-//   } catch (err) {
-//     return reply.code(401).send({ error: err });
-//   }
-// });
-
-fastify.post("/me", async (request, reply) => {
-  try {
-    const res = await desToken(request);
-    
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    
-    const token = await res.json();
-    const id = token.user_id;
-
-    return reply.send(id);
-  } catch (err) {
-    return reply.code(401).send({ error: err.message });
-  }
-});
-
-fastify.get("/game", { websocket: true }, async (connection, req) => {
-  connection.on("message", async (msg) => {
-    try {
-      const request = JSON.parse(msg);
-      let token = request.token;
-      
-      if (token) {
-        // Create a mock request object for desToken
-        const mockReq = {
-          headers: {
-            authorization: `Bearer ${token}`
-          },
-          cookies: {}
-        };
-        
-        const res = await desToken(mockReq);
-        
-        if (res.status === 401) {
-          console.log("Unauthorized, closing connection");
-          connection.close();
-          return;
-        }
-        
-        const userData = await res.json();
-        const id = userData.user_id;
-        
-        // Now you have the user id, you can use it
-        console.log(`User ${id} connected`);
-        
-        // You might want to store the connection with the user id
-        clients.set(id, connection);
-        
-      } else {
-        console.log("No token provided, proceeding on Closing connection");
-        connection.close();
-      }
-    } catch (e) {
-      console.error("WebSocket message handler error:", e);
-      connection.close();
-    }
-  });
-  
-  connection.on("close", async () => {
-    for (const [id, client] of clients) {
-      if (client == connection) {
-        try {
-          await handelRoomQuiiting(id);
-          clients.delete(id);
-          console.log("Server OnClosed Socket for ", id);
-          break;
-        } catch (e) {
-          console.error("Server OnClosed Socket error:", e);
-        }
-      }
-    }
-  });
-});
-
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
    try
@@ -904,51 +771,29 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
       let token = request.token;
       console.log("<<<<<<<< <<<<<<<< This is server.js  >>>>>>>>>>>>",request.type);
       if (token) {
-        // const res = await desToken(request);
-    
-        // if (res.status === 401) {
-        //   return reply.code(401).send({ error: 'Unauthorized' });
-        // }
-        //   const token = await res.json();
-        //   const id = token.user_id;
-
         const mockReq = {
           headers: {
             authorization: `Bearer ${token}`
           },
           cookies: {}
         };
-        
         const res = await desToken(mockReq);
-        
         if (res.status === 401) {
           console.log("Unauthorized, closing connection");
           connection.close();
           return;
         }
-        
         const userData = await res.json();
         const id = userData.user_id;
-        
-        // Now you have the user id, you can use it
-        console.log(`User ${id} connected`);
-        
-        // You might want to store the connection with the user id
+        await handelDup(connection,id);
         clients.set(id, connection);
-
-
-          
-          await handelDup(connection,id);
-          clients.set(id, connection);
-          const name = await getUserName(id);
-          if (request.type == "REGISTER") 
-            await handelRegister(request,id);
-          else if (request.type == "MOVE") 
-            await handelMove(request,id);
-          else if (request.type == "FINISHED") 
-            await  handelFinish(request.matchId) ;
-          else if (request.type == "DELETE") 
-            await handelRoomQuiiting(id);
+        const name = await getUserName(id);
+        if (request.type == "REGISTER") 
+          await handelRegister(request,id);
+        else if (request.type == "MOVE") 
+          await handelMove(request,id);
+        else if (request.type == "DELETE") 
+          await handelRoomQuiiting(id);
           else if (request.type == "TOURNAMENT_CREATE") {
           const creator = { id, name  };
           createTournamentRoom(creator);
@@ -1028,19 +873,13 @@ fastify.post('/invite', async (request, reply) => {
 
 fastify.post('/check', async (request, reply) => {
   try {
-    console.log("////check  >> ");
     const res = await desToken(request);
-    
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    
     const token = await res.json();
     const id = token.user_id;
-
-    console.log("check  >> ",id);
     let m = await dbcnx.getAvaiable(id);
-  
     if (m && m.mode != request.body.mode)
     {
       return reply.code(409).send({ message: 'Not Available' });
@@ -1048,37 +887,6 @@ fastify.post('/check', async (request, reply) => {
     return reply.code(201).send({ message: 'Available' });
   } catch (e) {
     return reply.code(405).send({ message: e });
-  }
-});
-
-fastify.post('/endmatch', async (request, reply) => {
-  try {
-    const res = await desToken(request);
-    
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    
-    const token = await res.json();
-    const id = token.user_id;
-
-    let m = await dbcnx.getcurrentmatch(id);
-    if (m)
-    {
-      let ngame =  matches.get(m.id);
-      ngame.score1 = 5;
-      ngame.score2 = 0;
-      ngame.Winner_Id = ngame.P1_Id;
-      if (ngame.P1_Id == id || ngame.P3_Id == id)
-      {
-        ngame.score1 = 0;
-        ngame.score2 = 5;
-        ngame.Winner_Id = ngame.P2_Id;
-      }
-    }
-    return reply.code(201).send({ message: 'Good' });
-  } catch (e) {
-      return reply.code(405).send({ message: e });
   }
 });
 
@@ -1116,9 +924,12 @@ fastify.post('/allmatch', async (request, reply) => {
 
 });
 
+
 fastify.get('/api/dashboard/:identifier', async (request, reply) => {
   try {
+    console.log("/gjfnfgnfg >>>>>>>>> " );
     const res = await desToken(request);
+    console.log("/000000 >>>>>>>>> " );
   
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
@@ -1126,6 +937,7 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     
     const token = await res.json();
     const targetUserId = token.user_id;
+    console.log("targetUserId >>>>> " ,targetUserId);
     const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
       Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
     const winsCount = await dbcnx.UserCountWins_ayoub(targetUserId);
@@ -1160,6 +972,7 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     return reply.code(500).send({ error: 'Internal server error' });
   }
 });
+
 
 const useHttps = process.env.USE_HTTPS === "true";
 const port = 3000;

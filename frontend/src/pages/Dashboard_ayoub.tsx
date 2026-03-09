@@ -40,6 +40,7 @@ const Dashboard_ayoub = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now());
+  const { accessToken, updateAccessToken } = useAuth();
 
   const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
     ? dashboardData?.user.avatar
@@ -63,13 +64,30 @@ const Dashboard_ayoub = () => {
         }
       }
 
+      // Try to resolve identifier as a username first
       try {
-        const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier);
+        const { fetchWithAuth } = await import("@/lib/tokenRefresh");
+        const searchRes = await fetchWithAuth(`/api/users/search-this-name`, {
+          method: "POST",
+          body: JSON.stringify({ name: userIdentifier }),
+        }, accessToken, updateAccessToken);
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          userIdentifier = searchData.user_id; // Found by name, use the real ID
+        }
+        // If 404, it's not a name — assume it's already an ID and continue
+      } catch {
+        // Network error — just continue with the original identifier
+      }
+
+      try {
+        const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken);
+        // console.log("---------------------- Fetched dashboard data >>>> :", data);
         setDashboardData(data);
         setAvatarKey(Date.now());
       } catch (err: any) {
-        console.error("Failed to fetch dashboard:", err);
-        console.error("Error details:", err.message);
+        // console.error("Failed to fetch dashboard:", err);
+        // console.error("Error details:", err.message);
         if (err.message.includes("Not Found") || err.message.includes("404")) {
           setError(`User not found. Identifier: ${userIdentifier}. Please make sure the username or ID is correct.`);
         } else {
@@ -88,7 +106,7 @@ const Dashboard_ayoub = () => {
     const handleAvatarUpdate = () => {
       const userIdentifier = stateUserId || identifier || authUser?.id;
       if (userIdentifier && !loading) {
-        playerDashboardApi_ayoub.getCompleteUserData(userIdentifier)
+        playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken)
           .then((data) => {
             setDashboardData(data);
             setAvatarKey(Date.now());

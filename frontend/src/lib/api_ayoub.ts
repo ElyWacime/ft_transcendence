@@ -30,19 +30,25 @@ class PlayerDashboardAPI_ayoub {
   private baseUrl = "/api";
 
   // Main method: Fetch ALL data combined (auth + game)
-  async getCompleteUserData(userId: string): Promise<CombinedUserData> {
+  async getCompleteUserData(userId: string, accessToken: string, updateAccessToken: (newToken: string) => void): Promise<CombinedUserData> {
     try {
-      // Fetch both auth and game data in parallel
-      const [authRes, gameRes] = await Promise.all([
-        fetchWithAuth(`/api/users/user-info/${userId}`, { method: "GET" }),
-        fetchWithAuth(`${this.baseUrl}//dashboard/${userId}`, { method: "GET" })
-      ]);
+      // First fetch auth data (supports both ID and username lookup)
+      const authRes = await fetchWithAuth(`/api/users/user-info/${encodeURIComponent(userId)}`, { method: "GET" }, accessToken, updateAccessToken);
 
       if (!authRes.ok) {
         const errorText = await authRes.text();
         console.error("Auth API Error:", authRes.status, errorText);
-        throw new Error(`Failed to fetch user data: ${authRes.statusText}`);
+        if (authRes.status === 404) {
+          throw new Error("User not found. Please check the username or ID.");
+        }
+        throw new Error(`Failed to fetch user data (${authRes.status})`);
       }
+
+      const authData = await authRes.json();
+
+      // Use the resolved ID for the game service (which needs the actual user ID)
+      const resolvedId = authData.id || userId;
+      const gameRes = await fetchWithAuth(`${this.baseUrl}//dashboard/${resolvedId}`, { method: "GET" },accessToken, updateAccessToken);
 
       if (!gameRes.ok) {
         const errorText = await gameRes.text();
@@ -50,7 +56,6 @@ class PlayerDashboardAPI_ayoub {
         throw new Error(`Failed to fetch game data: ${gameRes.statusText}`);
       }
 
-      const authData = await authRes.json();
       const gameData = await gameRes.json();
 
       // Combine all data with proper field mapping
@@ -75,14 +80,14 @@ class PlayerDashboardAPI_ayoub {
         lastMatch: gameData.lastMatch || null
       };
     } catch (error: any) {
-      console.error("Complete User Data Fetch Error:", error);
+      // console.error("Complete User Data Fetch Error:", error);
       throw error;
     }
   }
 
   // Alias for backward compatibility
-  async getPlayerDashboard(identifier: string) {
-    return this.getCompleteUserData(identifier);
+  async getPlayerDashboard(identifier: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
+    return this.getCompleteUserData(identifier, accessToken, updateAccessToken);
   }
 }
 

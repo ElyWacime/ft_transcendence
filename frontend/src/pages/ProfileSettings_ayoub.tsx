@@ -49,8 +49,8 @@ const ProfileSettings = () => {
         
         if (userId) {
           // Fetch all data combined, but use only user info
-          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId);
-          console.log("Fetched user data:", data.user);
+          const data = await playerDashboardApi_ayoub.getCompleteUserData(userId, accessToken, updateAccessToken);
+          // console.log("Fetched user data:", data.user);
           
           setUserInfo({
             id: data.user.id || "",
@@ -105,7 +105,7 @@ const ProfileSettings = () => {
     }
 
     try {
-      const data = await userApi.searchByName(trimmed);
+      const data = await userApi.searchByName(trimmed, accessToken, updateAccessToken);
       setSearchResult(data);
       setSearchError(null);
       toast.success("User found");

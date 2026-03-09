@@ -43,19 +43,15 @@ export default function Chat() {
   const [messages, setMessages] = useState<any[]>([])
   const navigate = useNavigate()
   const { id } = useParams<{ id?: string }>()
-  const selectedId = id ? parseInt(id, 10) : undefined
+  const selectedId = id && /^\d+$/.test(id) ? parseInt(id, 10) : undefined
 
   const inviteHandle = async (P1, P2) => 
   {
     const res = await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/invite`, {
         method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          ...(accessToken ? { "Authorization": `Bearer ${accessToken}` } : {})
-        },
         credentials: "include",
         body: JSON.stringify({ P1 ,P2 }),
-    });
+    }, accessToken, updateAccessToken);
     return res;
   }
 
@@ -181,62 +177,49 @@ export default function Chat() {
   const respondInvite = async (accepted: boolean, invitationType: string) => {
     if (!socket || !invitePrompt) return
     
-    try 
-    {
-      let res = await inviteHandle(invitePrompt.fromUserId,  currentUser.id);
-      socket.emit('InviteResponse', {
+    await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: invitePrompt.fromUserId, invitationType: invitationType })
+    }, accessToken, updateAccessToken)
+
+    socket.emit('InviteResponse', {
             conversationId: invitePrompt.conversationId,
             toUserId: invitePrompt.fromUserId,
             fromUserId: currentUser.id,
             invitationType: invitationType,
             accepted,
-      })
-
-      if (res.ok)
-      {
-          const response = await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: invitePrompt.fromUserId, invitationType: invitationType })
-          }, accessToken, updateAccessToken)
+    })
     
-          const res = await response.json()
-
-
-          if (accepted)
-          {
-            if (invitationType === "game_request")
-            {
-              navigate(`/loading?mode=2`);
-            } else if (invitationType === "friend_request")
-            {
-              const response = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/add`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: invitePrompt.fromUserId })
-              }, accessToken, updateAccessToken)
-        
-              if (response.ok) {
-                setFriendsList((prev: any) => ({
-                  ...prev,
-                  [invitePrompt.fromUserId]: { ...prev[invitePrompt.fromUserId], isFriend: true }
-                }))
-              }
-
-              socket.emit('AddFriendOnline', { userId: invitePrompt.fromUserId })
-            }              
-          }
-      }
-    }
-    catch (e)
+    if (accepted)
     {
-      console.log("catch Error" ,e);
+      if (invitationType === "game_request")
+      {
+        let res = await inviteHandle(invitePrompt.fromUserId,  currentUser.id);
+        if (res.ok)
+          navigate(`/loading?mode=2`);
+      } else if (invitationType === "friend_request")
+      {
+        const response = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/add`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: invitePrompt.fromUserId })
+        }, accessToken, updateAccessToken)
+  
+        if (response.ok) {
+          setFriendsList((prev: any) => ({
+            ...prev,
+            [invitePrompt.fromUserId]: { ...prev[invitePrompt.fromUserId], isFriend: true }
+          }))
+        }
+        socket.emit('AddFriendOnline', { userId: invitePrompt.fromUserId })
+      }              
     }
 
-    setInvitePrompt(null)
-    
+    setInvitePrompt(null)    
+
     const respondingConversation = conversations.find(c => c.other_user_id === invitePrompt?.fromUserId)
     if (respondingConversation) {
       setPendingInvitations((prev: any) => ({
@@ -249,7 +232,6 @@ export default function Chat() {
     
     }
   }
-
 
   const getChatHistory = async (conversationId: number) => {
     if (!conversationId) {
@@ -268,7 +250,6 @@ export default function Chat() {
   const handleBlockConversation = (conversationId: number) => {
     setBlockedConversations((prev: any) => ({ ...prev, [conversationId]: { blocked: true, blockedBy: 'you' } }))
   }
-
 
   const removeFriend = async (conversation: any) => {
     const other_user_id = conversation.other_user_id

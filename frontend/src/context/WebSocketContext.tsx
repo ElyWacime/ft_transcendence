@@ -82,17 +82,19 @@ export const WebSocketProvider = ({ children }) => {
     socket.onopen = () => 
     {
       setIsReady(true);
-      console.log("WebSocket connected and ready");
+      // console.log("WebSocket connected and ready");
       if (socket && socket.readyState === WebSocket.OPEN) 
           socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
     };
     socket.onclose = () => {
-      console.log("WebSocket disconnected");
+      // console.log("WebSocket disconnected");
       setIsReady(false);
       wsRef.current = null;
       setWs(null);
     };
-    socket.onerror = (err) => console.log("WebSocket error:", err);
+    socket.onerror = (err) => {
+      // console.log("WebSocket error:", err);
+    };
 
     socket.addEventListener("message", handleMessage);
 
