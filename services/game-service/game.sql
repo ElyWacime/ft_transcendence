@@ -13,3 +13,11 @@ CREATE TABLE IF NOT EXISTS Match (
     Winner_Id TEXT DEFAULT NULL,
     T_Id TEXT DEFAULT NULL
 );
+
+
+CREATE INDEX idx_match_p1 ON Match(P1_Id);
+CREATE INDEX idx_match_p2 ON Match(P2_Id);
+CREATE INDEX idx_match_p3 ON Match(P3_Id);
+CREATE INDEX idx_match_p4 ON Match(P4_Id);
+CREATE INDEX idx_match_status ON Match(gameStatus);
+CREATE INDEX idx_match_tid ON Match(T_Id);

@@ -8,6 +8,7 @@ import https from "https";
 import { randomUUID } from "crypto"; 
 import { Match, SQLiteDB, GameState } from "./DBController.js";
 
+
 const httpsOptions = process.env.USE_HTTPS === "true" ? {
   https: {
     key: fs.readFileSync("/app/certs/private.key"),
@@ -673,22 +674,18 @@ const handelRoomQuiiting = async(id) => {
     ngame.mode = m.mode;
     ngame.id = m.id;
     ngame.gameStatus = m.gameStatus;
-    ngame.player1Name = null;
-    ngame.player2Name = null;
-    ngame.player3Name = null;
-    ngame.player4Name = null;
-
-  let data = JSON.stringify(ngame);
-  sendtoplayer(ngame.P1_Id, data);
-  sendtoplayer(ngame.P2_Id, data);
-  sendtoplayer(ngame.P3_Id, data);
-  sendtoplayer(ngame.P4_Id, data);
+    let data = JSON.stringify(ngame);
+    sendtoplayer(ngame.P1_Id, data);
+    sendtoplayer(ngame.P2_Id, data);
+    sendtoplayer(ngame.P3_Id, data);
+    sendtoplayer(ngame.P4_Id, data);
   }
 };
 
-const handelRegister = async(request,id) => {
+async function handelRegister(request, id) {
   try {
-
+    if (request.mode < 2 || request.mode > 4) 
+      return;
     let ngame = new GameState();
     let m = await dbcnx.getOngoingMatch(id);
     if (!m) 
@@ -707,20 +704,20 @@ const handelRegister = async(request,id) => {
       {
         if (request.mode == 2) 
         {
-          if (m.P1_Id == null) 
+          if (!m.P1_Id) 
             m.P1_Id = id;
-          else
+          else if (!m.P2_Id) 
             m.P2_Id = id;
         }
         else
         {
-          if (m.P1_Id == null) 
+          if (!m.P1_Id ) 
             m.P1_Id = id;
-          else if (m.P2_Id == null) 
+          else if (!m.P2_Id) 
             m.P2_Id = id;
-          else if (m.P3_Id == null) 
+          else if (!m.P3_Id) 
             m.P3_Id = id;
-          else 
+          else if (!m.P4_Id) 
             m.P4_Id = id;
         }
         m.count_players = m.count_players + 1;
@@ -755,7 +752,8 @@ const handelRegister = async(request,id) => {
   } catch (error) {
     console.error("Error in handelRegister for user:", id, "-", error);
   }
-};
+}
+
 
 const handelMove = async (request,id) =>{
   let match = matches.get(request.matchId);
