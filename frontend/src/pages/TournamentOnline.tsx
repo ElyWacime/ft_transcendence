@@ -264,7 +264,7 @@ export default function TournamentOnlinePage() {
                     {m.ready?.[currentUser.id] ? "ready" : "Ready"}
                   </button>
                 )}
-                {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
+                {/* {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
                   <button
                  title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
                   className="primary"
@@ -274,7 +274,7 @@ export default function TournamentOnlinePage() {
                   >
                     Report
                   </button>
-                )}
+                )} */}
               </div>
             ))}
             {/* {(t.semifinals ?? []).length === 0 && <p className="muted">Waiting for 4 players...</p>} */}
@@ -297,7 +297,7 @@ export default function TournamentOnlinePage() {
                   {t.final?.ready?.[currentUser.id] ? "ready" : "Ready"}
                 </button>
               )}
-              {currentUser && [t.final?.player1?.id, t.final?.player2?.id].includes(currentUser.id) && (
+              {/* {currentUser && [t.final?.player1?.id, t.final?.player2?.id].includes(currentUser.id) && (
                 <button
                   className="primary"
                   title="Report if your opponent didnt show up - for more than 30 minutes since the beginning of the tournamament , or if your opponent present but remains unready for more than 5 minutes."
@@ -307,7 +307,7 @@ export default function TournamentOnlinePage() {
                 >
                   Report
                 </button>
-              )}
+              )} */}
             </div>
           </div>
 
@@ -380,8 +380,3 @@ export default function TournamentOnlinePage() {
     </div>
   );
 }
-
-
-
-
-
