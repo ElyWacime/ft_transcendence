@@ -5,7 +5,6 @@ set -e
 echo "Generating JWT and Cookie secrets..."
 
 JWT_ACCESS_SECRET=$(openssl rand -base64 64 | tr -d '\n')
-JWT_REFRESH_SECRET=$(openssl rand -base64 64 | tr -d '\n')
 COOKIE_SECRET=$(openssl rand -base64 64 | tr -d '\n')
 
 echo "✓ Secrets generated"
@@ -13,7 +12,6 @@ echo "✓ Secrets generated"
 ENV_FILE_1="$PWD/services/.env"
 if [ -f "$ENV_FILE_1" ]; then
     sed -i.bak "s|^JWT_ACCESS_SECRET=.*|JWT_ACCESS_SECRET=$JWT_ACCESS_SECRET|" "$ENV_FILE_1"
-    sed -i.bak "s|^JWT_REFRESH_SECRET=.*|JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET|" "$ENV_FILE_1"
     sed -i.bak "s|^COOKIE_SECRET=.*|COOKIE_SECRET=$COOKIE_SECRET|" "$ENV_FILE_1"
     echo "✓ Updated $ENV_FILE_1"
 else

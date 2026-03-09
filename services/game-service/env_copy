@@ -1,5 +1,4 @@
 JWT_ACCESS_SECRET=supersecretkey
-JWT_REFRESH_SECRET=superrefreshkey
 USE_HTTPS=true
 NODE_TLS_REJECT_UNAUTHORIZED=0
 AUTH_SERVICE_URL=https://auth-service:8000/
