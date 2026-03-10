@@ -126,9 +126,6 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
 
   const peerName = conversation.other_user_username
   const userProfileLink = `/dashboard/${peerName}`
-  const filteredMessages = activeConversationId
-    ? messages.filter((message) => message.conversation_id === activeConversationId)
-    : []
 
   return (
     <div className="chat-window">
@@ -224,7 +221,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
       )}
 
       <div className="messages-container">
-        {filteredMessages.map((message) => {
+        {messages.map((message) => {
           const senderId = message.sender_id 
           const isOwnMessage = senderId === currentUser?.id
           return (

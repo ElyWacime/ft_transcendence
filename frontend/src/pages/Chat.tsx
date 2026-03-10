@@ -63,10 +63,13 @@ export default function Chat() {
     }
 
     const handleReceiveMessage = (message: any) => {
-      setMessages(prev => {
-        return [...prev, message]
-      })
-
+      if (message.conversation_id === selectedId)
+      {
+        setMessages(prev => {
+          return [...prev, message]
+        })
+      }
+    
       setConversations(prev => prev.map(conv => {
         if (conv.id === message.conversation_id) {
           return {
@@ -86,7 +89,7 @@ export default function Chat() {
       socket.off("newConversation", handleNewConversation)
       socket.off('receiveMessage', handleReceiveMessage)
     }
-  }, [socket, navigate])
+  }, [socket, navigate, selectedId])
 
   useEffect(() => {
     fetchConversations()
@@ -98,8 +101,7 @@ export default function Chat() {
         const conversationsData = await res.json()
         setConversations(conversationsData)        
         for (const conversation of conversationsData) {
-          if (!friendsList?.[conversation.other_user_id])
-            checkFriendshipStatus(conversation);
+          checkFriendshipStatus(conversation);
         }
       } catch (error) {
         console.error('Failed to fetch conversations:', error)
@@ -157,6 +159,8 @@ export default function Chat() {
         body: JSON.stringify({ user_id: conversation.other_user_id, invitationType: invitationType })
     }, accessToken, updateAccessToken)
     
+    const re = await response.json()    
+
     setPendingInvitations((prev: any) => ({
       ...prev,
       [conversation.id]: {
