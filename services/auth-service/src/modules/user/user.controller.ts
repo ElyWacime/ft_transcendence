@@ -175,30 +175,30 @@ export async function update_email(
       data: { email: new_email },
     });
   
-    try {
-      const gameServiceUrl = process.env.GAME_SERVICE_URL || 'https://game-server:3000';
-      const httpsAgent = getHttpsAgent();
-      const fetchOptions: RequestInit = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: updatedUser.id,
-          email: new_email,
-        }),
-      };
-      if (httpsAgent) {
-        (fetchOptions as any).agent = httpsAgent;
-      }
-      const gameServiceResponse = await fetch(`${gameServiceUrl}/sync-email`, fetchOptions);
+    // try {
+    //   const gameServiceUrl = process.env.GAME_SERVICE_URL || 'https://game-server:3000';
+    //   const httpsAgent = getHttpsAgent();
+    //   const fetchOptions: RequestInit = {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({
+    //       userId: updatedUser.id,
+    //       email: new_email,
+    //     }),
+    //   };
+    //   if (httpsAgent) {
+    //     (fetchOptions as any).agent = httpsAgent;
+    //   }
+    //   // const gameServiceResponse = await fetch(`${gameServiceUrl}/sync-email`, fetchOptions);
 
-      if (!gameServiceResponse.ok) {
-        console.error('Failed to sync email with game service:', await gameServiceResponse.text());
-      }
-    } catch (syncError) {
-      console.error('Error syncing email with game service:', syncError);
-    }
+    //   // if (!gameServiceResponse.ok) {
+    //   //   console.error('Failed to sync email with game service:', await gameServiceResponse.text());
+    //   // }
+    // } catch (syncError) {
+    //   console.error('Error syncing email with game service:', syncError);
+    // }
 
     const payload = {
       id: updatedUser.id,

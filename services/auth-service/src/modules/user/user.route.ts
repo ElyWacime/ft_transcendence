@@ -4,7 +4,8 @@ import prisma from "../../utils/prisma";
 
 export async function userRoutes(app: FastifyInstance) {
 
-  app.get("/get-user/:userId", async (req:any, reply:any) => {
+  app.get("/get-user/:userId",{ preHandler: [app.authenticate] }, async (req:any, reply:any) => {
+
     try {
       const { userId } = req.params as { userId: string };
 
@@ -120,6 +121,7 @@ export async function userRoutes(app: FastifyInstance) {
   });
 
   app.put("/update_email", {
+    preHandler: app.authenticate,
     schema: {
       body: {
         type: "object",
