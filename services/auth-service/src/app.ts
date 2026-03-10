@@ -18,6 +18,76 @@ const app = Fastify({
   ...httpsOptions
 }).withTypeProvider<ZodTypeProvider>();
 
+const parsedRateLimitMax = Number.parseInt(
+  process.env.AUTH_RATE_LIMIT_MAX ?? "120",
+  10,
+);
+const parsedRateLimitWindowMs = Number.parseInt(
+  process.env.AUTH_RATE_LIMIT_WINDOW_MS ?? "60000",
+  10,
+);
+
+const authRateLimitMax = Number.isFinite(parsedRateLimitMax) && parsedRateLimitMax > 0
+  ? parsedRateLimitMax
+  : 120;
+const authRateLimitWindowMs = Number.isFinite(parsedRateLimitWindowMs) && parsedRateLimitWindowMs > 0
+  ? parsedRateLimitWindowMs
+  : 60_000;
+
+type RateLimitCounter = {
+  count: number;
+  windowStart: number;
+  lastSeen: number;
+};
+
+const rateLimitByIp = new Map<string, RateLimitCounter>();
+
+app.addHook("onRequest", (req, reply, done) => {
+  const now = Date.now();
+  const forwardedFor = req.headers["x-forwarded-for"];
+
+  const clientIp = typeof forwardedFor === "string" && forwardedFor.trim().length > 0
+    ? forwardedFor.split(",")[0].trim()
+    : Array.isArray(forwardedFor) && forwardedFor.length > 0
+      ? forwardedFor[0].split(",")[0].trim()
+      : req.ip;
+
+  for (const [ip, counter] of rateLimitByIp.entries()) {
+    if (now - counter.lastSeen > authRateLimitWindowMs) {
+      rateLimitByIp.delete(ip);
+    }
+  }
+
+  const current = rateLimitByIp.get(clientIp);
+
+  if (!current || now - current.windowStart >= authRateLimitWindowMs) {
+    rateLimitByIp.set(clientIp, {
+      count: 1,
+      windowStart: now,
+      lastSeen: now,
+    });
+    done();
+    return;
+  }
+
+  current.count += 1;
+  current.lastSeen = now;
+
+  if (current.count > authRateLimitMax) {
+    const retryAfterSeconds = Math.ceil(
+      (current.windowStart + authRateLimitWindowMs - now) / 1000,
+    );
+
+    reply
+      .header("Retry-After", String(Math.max(1, retryAfterSeconds)))
+      .status(429)
+      .send({ message: "Too many requests. Please try again later." });
+    return;
+  }
+
+  done();
+});
+
 app.register(cors, {
   origin: true,  // Allow all origins for development
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -61,6 +131,10 @@ app.decorate(
 app.get("/healthcheck", async () => ({ message: "Success" }));
 
 app.register(userRoutes);
+
+app.addHook("onClose", async () => {
+  rateLimitByIp.clear();
+});
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.on(signal, async () => {

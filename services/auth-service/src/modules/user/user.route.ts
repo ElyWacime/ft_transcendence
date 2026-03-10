@@ -120,6 +120,7 @@ export async function userRoutes(app: FastifyInstance) {
   });
 
   app.put("/update_email", {
+    preHandler: app.authenticate,
     schema: {
       body: {
         type: "object",
