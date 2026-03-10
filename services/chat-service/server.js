@@ -31,6 +31,9 @@ const httpsOptions = process.env.USE_HTTPS === "true" ? {
 
 const fastify = Fastify(httpsOptions);
 
+fastify.decorateRequest('authUser', null);
+fastify.decorateRequest('userId', null);
+
 const allowAllOrigins = (origin, cb) => cb(null, true);
 
 await fastify.register(cookie);
@@ -126,19 +129,23 @@ async function requireInternalServiceKey(request, reply) {
   }
 }
 
+async function requireAuth(request, reply) {
+  const res = await desToken(request);
+
+  if (res.status !== 200) {
+    return reply.code(401).send({ error: 'Unauthorized' });
+  }
+
+  request.authUser = await res.json();
+  request.userId = request.authUser.user_id;
+}
+
 fastify.post("/users/add", { schema: usersAddSchema, preHandler: requireInternalServiceKey }, async (request) => {
   return await insertUsers(request.body.id, request.body.username);
 })
 
-fastify.post("/user/update", { schema: userUpdateSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-
-  const token = await res.json();
-  const senderId = token.user_id;
+fastify.post("/user/update", { schema: userUpdateSchema, preHandler: requireAuth }, async (request) => {
+  const senderId = request.userId;
   
   const newUsername = request.body.username;
   const updatedUser = await updateUsername(senderId, newUsername);
@@ -150,31 +157,15 @@ fastify.post("/user/update", { schema: userUpdateSchema }, async (request, reply
 });
 
 
-fastify.get("/conversations", async (request, reply) => {
-    const res = await desToken(request);
-    
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    
-    const token = await res.json();
-    const senderId = token.user_id;
-
-    const userId = senderId;   
+fastify.get("/conversations", { preHandler: requireAuth }, async (request) => {
+    const userId = request.userId;
     const conv = await getConversationsForUser(userId);
 
     return conv;
 })
 
-fastify.post("/conversations/start", { schema: conversationsStartSchema }, async (request, reply) => { 
-  const res = await desToken(request);  
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-
-  const token = await res.json();
-  const senderId = token.user_id;
+fastify.post("/conversations/start", { schema: conversationsStartSchema, preHandler: requireAuth }, async (request, reply) => { 
+  const senderId = request.userId;
   const receipentId = request.body.receipentId;
 
 
@@ -193,15 +184,8 @@ fastify.post("/conversations/start", { schema: conversationsStartSchema }, async
   return { conversationId: conv.id };
 })
 
-fastify.get("/conversations/:id/messages", { schema: conversationMessagesSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-
-  const token = await res.json();
-  const userId = token.user_id;
+fastify.get("/conversations/:id/messages", { schema: conversationMessagesSchema, preHandler: requireAuth }, async (request, reply) => {
+  const userId = request.userId;
 
   const conversationId = request.params.id;
 
@@ -218,15 +202,8 @@ fastify.get("/conversations/:id/messages", { schema: conversationMessagesSchema 
   return messages;
 })
 
-fastify.post("/friends/status", { schema: friendsSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const requesterId = token.user_id;
+fastify.post("/friends/status", { schema: friendsSchema, preHandler: requireAuth }, async (request) => {
+  const requesterId = request.userId;
   const otherUserId = request.body.user_id;
   
   const status = await getFriendStatus(requesterId, otherUserId);
@@ -241,30 +218,16 @@ fastify.post("/friends/status", { schema: friendsSchema }, async (request, reply
   };
 });
 
-fastify.get("/friends", async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const userId = token.user_id;
+fastify.get("/friends", { preHandler: requireAuth }, async (request) => {
+  const userId = request.userId;
   
   const friends = await getAllFriends(userId);
   
   return { friends };
 });
 
-fastify.post("/friends/add", { schema: friendsSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const user_a = token.user_id;
+fastify.post("/friends/add", { schema: friendsSchema, preHandler: requireAuth }, async (request, reply) => {
+  const user_a = request.userId;
   const user_b = request.body.user_id;
   
   if (user_a === user_b) {
@@ -278,15 +241,8 @@ fastify.post("/friends/add", { schema: friendsSchema }, async (request, reply) =
   };
 })
 
-fastify.post("/friends/remove", { schema: friendsSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const user_a = token.user_id;
+fastify.post("/friends/remove", { schema: friendsSchema, preHandler: requireAuth }, async (request) => {
+  const user_a = request.userId;
   const user_b = request.body.user_id;
   
   await deleteFriend(user_a, user_b);
@@ -296,15 +252,8 @@ fastify.post("/friends/remove", { schema: friendsSchema }, async (request, reply
   };
 })
 
-fastify.post("/block/status", { schema: blockSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-
-  const token = await res.json();
-  const requesterId = token.user_id;
+fastify.post("/block/status", { schema: blockSchema, preHandler: requireAuth }, async (request) => {
+  const requesterId = request.userId;
   const otherUserId = request.body.user_id;
 
   const status = await getBlockingStatus(requesterId, otherUserId);
@@ -325,15 +274,8 @@ fastify.post("/block/status", { schema: blockSchema }, async (request, reply) =>
   };
 });
 
-fastify.post("/block", { schema: blockSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const blockerId = token.user_id;
+fastify.post("/block", { schema: blockSchema, preHandler: requireAuth }, async (request) => {
+  const blockerId = request.userId;
   const blockedId = request.body.user_id;
 
   await blockUser(blockerId, blockedId);
@@ -347,15 +289,8 @@ fastify.post("/block", { schema: blockSchema }, async (request, reply) => {
   };
 });
 
-fastify.post("/unblock", { schema: blockSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const blockerId = token.user_id;
+fastify.post("/unblock", { schema: blockSchema, preHandler: requireAuth }, async (request, reply) => {
+  const blockerId = request.userId;
   const unblockedId = request.body.user_id;
 
   const statusBefore = await getBlockingStatus(blockerId, unblockedId);
@@ -373,15 +308,8 @@ fastify.post("/unblock", { schema: blockSchema }, async (request, reply) => {
   };
 });
 
-fastify.post("/invitations/status", { schema: invitationsSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-
-  const token = await res.json();
-  const requesterId = token.user_id;
+fastify.post("/invitations/status", { schema: invitationsSchema, preHandler: requireAuth }, async (request) => {
+  const requesterId = request.userId;
   const otherUserId = request.body.user_id;
   const invitationType = request.body.invitationType;
 
@@ -403,15 +331,8 @@ fastify.post("/invitations/status", { schema: invitationsSchema }, async (reques
     };
 });
 
-fastify.post("/invite", { schema: invitationsSchema }, async (request, reply) => {
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const inviterId = token.user_id;
+fastify.post("/invite", { schema: invitationsSchema, preHandler: requireAuth }, async (request) => {
+  const inviterId = request.userId;
   const inviteeId = request.body.user_id;
   const invitationType = request.body.invitationType;
   
@@ -427,15 +348,8 @@ fastify.post("/invite", { schema: invitationsSchema }, async (request, reply) =>
   };
 });
 
-fastify.post("/uninvite", { schema: invitationsSchema }, async (request, reply) => {        
-  const res = await desToken(request);
-  
-  if (res.status === 401) {
-    return reply.code(401).send({ error: 'Unauthorized' });
-  }
-  
-  const token = await res.json();
-  const inviterId = token.user_id;
+fastify.post("/uninvite", { schema: invitationsSchema, preHandler: requireAuth }, async (request) => {        
+  const inviterId = request.userId;
   const inviteeId = request.body.user_id;
   const invitationType = request.body.invitationType;
 
