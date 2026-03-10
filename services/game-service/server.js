@@ -381,8 +381,8 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
     g.count_players = 2;
     g.mode = 2;
     g.gameStatus = "PLAYING";
-    g.player1Name = await getUserName(g.P1_Id);
-    g.player2Name = await getUserName(g.P2_Id);
+    g.player1Name = (g.P1_Id);
+    g.player2Name = (g.P2_Id);
 
     matches.set(g.id, g);
 
@@ -682,6 +682,17 @@ const handelRoomQuiiting = async(id) => {
   }
 };
 
+const handelAlive = async(id) => {
+  let res = await dbcnx.getOngoingMatch(id);
+  if(!res)
+  {
+    let ngame = new GameState();
+    ngame.id = -1;
+    let data = JSON.stringify(ngame);
+    sendtoplayer(id, data);
+  }
+};
+
 async function handelRegister(request, id) {
   try {
     if (request.mode < 2 || request.mode > 4) 
@@ -842,8 +853,9 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
    try
    {
-      const request = JSON.parse(msg);
-      let token = request.token;
+     const request = JSON.parse(msg);
+     let token = request.token;
+     console.log("Received >>>>>>>>>>: ", request.type);
       if (token) {
         const mockReq = {
           headers: {
@@ -867,6 +879,8 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           await handelMove(request,id);
         else if (request.type == "DELETE") 
           await handelRoomQuiiting(id);
+        if (request.type == "ISALIVE") 
+          await handelAlive(id);
         else if (request.type == "TOURNAMENT_CREATE") 
         {
           const creator = { id, name  };

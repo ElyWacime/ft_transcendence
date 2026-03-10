@@ -136,6 +136,8 @@ const GameOnline = () => {
       isalive = true;
       if (data)
       {
+        if (data.id == -1)
+          navigate("/");
         matchref.current = data.id;
         setGameState((prev) => ({
             ...prev,
@@ -241,6 +243,14 @@ const GameOnline = () => {
       ws.removeEventListener("message", handleMessage);
     };
   }, [ws]);
+
+  useEffect(() => {
+    if (!(ws && isReady && ws.readyState == WebSocket.OPEN)) return;
+    ws.send(JSON.stringify({
+      token: accessToken,
+      type: "ISALIVE",
+    }));
+  }, [ws, isReady]);
 
   return (
     <div className="ai-game-page">
