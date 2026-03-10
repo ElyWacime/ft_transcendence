@@ -68,9 +68,9 @@ async function desToken(request)
       body: JSON.stringify({ token }),
    };
    
-   if (httpsAgent) {
-     fetchOptions.agent = httpsAgent;
-   }
+  //  if (httpsAgent) {
+  //    fetchOptions.agent = httpsAgent;
+  //  }
    
    const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
   return res;

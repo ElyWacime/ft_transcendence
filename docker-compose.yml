@@ -51,7 +51,8 @@ services:
       - ./services/chat-service/.env
     environment:
       - USE_HTTPS=true
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - NODE_TLS_REJECT_UNAUTHORIZED=1
+      - NODE_EXTRA_CA_CERTS=/app/certs/certificate.crt
     command: npm run start
     networks:
       - transcendence    
@@ -81,7 +82,8 @@ services:
       - ./services/game-service/.env
     environment:
       - USE_HTTPS=true
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - NODE_TLS_REJECT_UNAUTHORIZED=1
+      - NODE_EXTRA_CA_CERTS=/app/certs/certificate.crt
     ports:
       - "3000:3000"
     command: npm run start
