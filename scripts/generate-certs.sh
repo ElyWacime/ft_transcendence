@@ -10,7 +10,6 @@
 # echo "- private.key"
 
 
-#!/bin/bash
 
 mkdir -p ./services/gateway/certs
 
@@ -25,7 +24,7 @@ prompt = no
 CN = 10.12.6.3
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
+keyUsage = keyEncipherment, digitalSignature
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
@@ -44,7 +43,8 @@ openssl req -x509 -newkey rsa:4096 \
   -keyout ./services/gateway/certs/private.key \
   -out ./services/gateway/certs/certificate.crt \
   -days 365 -nodes \
-  -config ./services/gateway/certs/openssl.cnf
+  -config ./services/gateway/certs/openssl.cnf \
+  -extensions v3_req
 
 rm ./services/gateway/certs/openssl.cnf
 

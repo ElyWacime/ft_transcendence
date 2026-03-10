@@ -4,8 +4,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "8080:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -23,8 +21,6 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./services/.env
-    # ports:
-    #   - "8000:8000"
     volumes:
       - ./services/auth-service:/app
       - /app/node_modules
@@ -51,7 +47,8 @@ services:
       - ./services/chat-service/.env
     environment:
       - USE_HTTPS=true
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - NODE_TLS_REJECT_UNAUTHORIZED=1
+      - NODE_EXTRA_CA_CERTS=/app/certs/certificate.crt
     command: npm run start
     networks:
       - transcendence    
@@ -82,9 +79,7 @@ services:
     environment:
       - USE_HTTPS=true
       - NODE_TLS_REJECT_UNAUTHORIZED=1
-      - NODE_EXTRA_CA_CERTS=/app/certs/certificate.crt  # Add this line
-    ports:
-      - "3000:3000"
+      - NODE_EXTRA_CA_CERTS=/app/certs/certificate.crt
     command: npm run start
     volumes:
       - ./services/game-service/db:/app/db

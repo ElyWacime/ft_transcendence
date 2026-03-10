@@ -5,13 +5,17 @@ const Result = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const stat = location.state ;
-    if(!stat)
-    {
-        useEffect(()=>{
-            navigate("/");
-        },[]);
-        return <></>;
+    
+    useEffect(() => {
+      if (!stat) {
+        navigate("/");
+      }
+    }, [stat, navigate]);
+    
+    if (!stat) {
+      return <div>Redirecting...</div>; 
     }
+    
     let {message} = stat;
     const resetGame = useCallback(() => {navigate("/loading?mode=2")}, []);
     return (<>

@@ -328,18 +328,13 @@ export const PongCanvasAI = ({
   const startGame = () => {
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
-    lastTimeRef.current = null;
-    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
   const pauseGame = () => {
     setGameState((prev) => ({ ...prev, gameStatus: "paused" }));
-    setGameState((prev) => ({ ...prev, gameStatus: "paused" }));
   };
 
   const resumeGame = () => {
-    lastTimeRef.current = null;
-    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
