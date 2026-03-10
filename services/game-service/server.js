@@ -21,9 +21,16 @@ const fastify = Fastify({
   ...httpsOptions
 });
 
-const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
-  rejectUnauthorized: false
-}) : undefined;
+// const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
+//   rejectUnauthorized: true
+// }) : undefined;
+
+
+// const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
+//   rejectUnauthorized: true,  // Keep this enabled for security
+//   ca: fs.readFileSync("/app/certs/certificate.crt")  // Add your CA/cert to trusted store
+// }) : undefined;
+// const internalProtocol = "https";
 
 await fastify.register(websocket);
 
@@ -44,7 +51,19 @@ const MAX_Speed = 25;
 const MAX_Score = 5;
 
 await dbcnx.connect();
+import tls from 'tls';
 
+const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
+  rejectUnauthorized: true,
+  checkServerIdentity: (hostname, cert) => {
+    // Accept the certificate for auth-service even though hostname doesn't match
+    if (hostname === 'auth-service') {
+      return undefined;
+    }
+    return tls.checkServerIdentity(hostname, cert);
+  },
+  ca: fs.readFileSync("/app/certs/certificate.crt")
+}) : undefined;
 async function desToken(request)
 {
    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
@@ -71,8 +90,8 @@ async function desToken(request)
    if (httpsAgent) {
      fetchOptions.agent = httpsAgent;
    }
-   
-   const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
+   const res = await fetch(`${internalProtocol}://auth-service:8000/validate_token`, fetchOptions);
+  //  const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
   return res;
 }
 
