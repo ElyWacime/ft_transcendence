@@ -4,8 +4,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "8080:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -23,8 +21,6 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./services/.env
-    # ports:
-    #   - "8000:8000"
     volumes:
       - ./services/auth-service:/app
       - /app/node_modules
@@ -84,8 +80,6 @@ services:
       - USE_HTTPS=true
       - NODE_TLS_REJECT_UNAUTHORIZED=1
       - NODE_EXTRA_CA_CERTS=/app/certs/certificate.crt
-    ports:
-      - "3000:3000"
     command: npm run start
     volumes:
       - ./services/game-service/db:/app/db

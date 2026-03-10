@@ -71,6 +71,10 @@ export const PongCanvas = ({
 
   });
 
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
   const createBall = useCallback(
     (dirx: number = 1) => ({
       x: 400,
@@ -249,16 +253,7 @@ export const PongCanvas = ({
       }
       if (["KeyW", "KeyS", "ArrowUp", "ArrowDown"].includes(e.code)) {
         keysPressed.current.add(e.code);
-        if (gameState.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
-          e.preventDefault();
-      }
-      if (e.target instanceof HTMLElement) {
-        const tag = e.target.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
-      }
-      if (["KeyW", "KeyS", "ArrowUp", "ArrowDown"].includes(e.code)) {
-        keysPressed.current.add(e.code);
-        if (gameState.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
+        if (gameStateRef.current?.gameStatus === "playing" && (e.code === "ArrowUp" || e.code === "ArrowDown"))
           e.preventDefault();
       }
     };
@@ -275,7 +270,9 @@ export const PongCanvas = ({
       lastTimeRef.current = time;
 
       updateGame(delta);
-      draw(gameState);
+      if (gameStateRef.current) {
+        draw(gameStateRef.current);
+      }
 
       animationRef.current = requestAnimationFrame(loop);
     };
@@ -286,23 +283,18 @@ export const PongCanvas = ({
       window.removeEventListener("keyup", handleKeyUp);
       cancelAnimationFrame(animationRef.current);
     };
-  }, [gameState, updateGame, draw]);
+  }, [updateGame, draw]);
 
   const startGame = () => {
-    lastTimeRef.current = null;
-    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };
 
   const pauseGame = () => {
     setGameState((prev) => ({ ...prev, gameStatus: "paused" }));
-    setGameState((prev) => ({ ...prev, gameStatus: "paused" }));
   };
 
   const resumeGame = () => {
-    lastTimeRef.current = null;
-    setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
     lastTimeRef.current = null;
     setGameState((prev) => ({ ...prev, gameStatus: "playing" }));
   };

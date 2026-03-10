@@ -274,10 +274,16 @@ export async function update_password(
 
     await prisma.user.update({
       where: { email: userToken.email },
-      data: { password: hashedPassword },
+      data: {
+        password: hashedPassword,
+        refreshToken: null,
+        loggedIn: false,
+      },
     });
 
-    reply.clearCookie("access_token");
+    reply.clearCookie("refresh_token", {
+      path: "/",
+    });
 
     return reply.send({
       success: true,
