@@ -24,8 +24,7 @@ const Register = () => {
         toast.error(res.message || "Registration failed");
       }
     } catch (err) {
-      toast.error("Server error, please try again later");
-      console.error(err);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
