@@ -37,6 +37,7 @@ await fastify.register(cors, {
 let dbcnx = new SQLiteDB();
 let clients = new Map();
 let matches = new Map();
+let tokens = new Map();
 let tournaments = new Map();
 const TICK_RATE = 60;
 const PADDLE_SPEED = 8;
@@ -59,7 +60,7 @@ async function desToken(request)
    }
    
    if (!token) {
-     return { status: 401, json: async () => ({ error: 'No token provided' }) };
+     return { status: 401, error: 'No token provided' };
    }
    
    const fetchOptions = {
@@ -68,14 +69,25 @@ async function desToken(request)
       body: JSON.stringify({ token }),
    };
    
-  //  if (httpsAgent) {
-  //    fetchOptions.agent = httpsAgent;
-  //  }
-   
-   const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
-  return res;
+   try {
+     const response = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
+     
+     if (response.status === 200) {
+       const data = await response.json();
+       const userData = { 
+         status: 200, 
+         user_id: data.user_id,
+       };
+       tokens.set(token, userData); 
+       return userData;
+     }
+     
+     return { status: response.status, error: 'Authentication failed' };
+   } catch (error) {
+     console.error('Auth service error:', error);
+     return { status: 500, error: 'Auth service unavailable' };
+   }
 }
-
 const sendtoplayer = async (id, data) => 
 {
   if (id) {
@@ -863,12 +875,18 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           },
           cookies: {}
         };
-        const res = await desToken(mockReq);
-        if (res.status === 401) {
-          connection.close();
-          return;
+        let userData, res;
+        if (request.type != 'MOVE')
+        {
+          res = await desToken(mockReq);
+          if (res.status === 401) {
+            connection.close();
+            return;
+          }
         }
-        const userData = await res.json();
+        else
+          res = tokens.get(token);
+        userData = res;
         const id = userData.user_id;
         await handelDup(connection,id);
         clients.set(id, connection);
@@ -963,7 +981,7 @@ fastify.post('/check', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    const token = await res.json();
+    const token =  res;
     const id = token.user_id;
     let m = await dbcnx.getAvaiable(id);
     if (m && m.mode != request.body.mode)
@@ -983,7 +1001,7 @@ fastify.post('/allmatch', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    const token = await res.json();
+    const token = res;
     const id = token.user_id;
     let matches = await dbcnx.getPlayerMatches(id);
       return reply.code(201).send({ matches: matches});
@@ -994,14 +1012,13 @@ fastify.post('/allmatch', async (request, reply) => {
 
 });
 
-
 fastify.get('/api/dashboard/:identifier', async (request, reply) => {
   try {
     const res = await desToken(request);
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    const token = await res.json();
+    const token = res;
     const targetUserId = token.user_id;
     const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
       Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
