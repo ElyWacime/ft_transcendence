@@ -16,10 +16,10 @@ const MatchMacking = () => {
     let del = useRef(true);
     let matchref = useRef(true);
     const [features, setFeatures] = useState([]);
-    const [show, setShows] = useState(false);
 
     const { accessToken, updateAccessToken } = useAuth();
-    const getName = async (id: number) => {
+
+    const getName = useCallback(async (id: number) => {
         if(!id)  return null;
         let res =  await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
         if (res.status === 200) {
@@ -29,12 +29,9 @@ const MatchMacking = () => {
           console.error(`Failed to fetch name for id ${id}: ${res.statusText}`);
           return null;
         }
-    };
-    let cidx;
-    // setShows(false);
+    });
     const handleMessage = useCallback(async (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      setShows(false);
       matchref.current = data.id;
       let [res1, res2, res3, res4] = await Promise.all([getName(data.P1_Id),getName(data.P2_Id),getName(data.P3_Id),getName(data.P4_Id)]);
       data.player1Name = res1;
@@ -56,7 +53,6 @@ const MatchMacking = () => {
         });
       }
       else{
-        setShows(true);
         setFeatures(() => {
           if (mode == "4")
           {
@@ -117,7 +113,6 @@ const MatchMacking = () => {
         }));
         ws.addEventListener("message", handleMessage);
         return () => {
-          clearTimeout(cidx);
             if (del.current && ws && isReady && ws.readyState == WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                   token: accessToken,
@@ -131,7 +126,7 @@ const MatchMacking = () => {
 
     return (
        <>
-       {show && (<>
+       { (<>
           <div className="home-page">
             <section className="hero-section">
               <div className="hero-glow-overlay"></div>
