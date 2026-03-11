@@ -31,23 +31,15 @@ export const WebSocketProvider = ({ children }) => {
         if (data.score1 > data.score2) 
         {
           message = data.P1_Id === id || data.P3_Id === id ? "You win the match!" : "You lost the match!";
-          if (data.P1_Id === id || data.P3_Id === id)
-            vs =  " vs " + (data.player2Name || "PLAYER 2") + " " + (data.player4Name || "");
-         else
-            vs =  " vs " + (data.player1Name || "PLAYER 1") + " " + (data.player3Name || "");
         }
         else 
         {
           message = data.P2_Id === id || data.P4_Id === id ? "You win the match!" : "You lost the match!";
-          if (data.P2_Id === id || data.P4_Id === id)
-            vs =  " vs " + (data.player1Name || "PLAYER 1") + " " + (data.player3Name || "");
-          else 
-            vs =  " vs " + (data.player2Name  || "PLAYER 2")+ " " + (data.player4Name || "");
         }
         if (message.includes("win"))
-          toast.success(message + vs);
+          toast.success(message);
         else
-          toast.error(message + vs);
+          toast.error(message);
       }
     },
     [id, token]
@@ -105,16 +97,16 @@ export const WebSocketProvider = ({ children }) => {
   }, [isLoggedIn, isLoading, handleMessage]);
 
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const socket = wsRef.current;
-      if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
-      }
-    }, 25000);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const socket = wsRef.current;
+  //     if (socket && socket.readyState === WebSocket.OPEN) {
+  //         socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
+  //     }
+  //   }, 25000);
 
-    return () => clearInterval(interval);
-  }, [accessToken]);
+  //   return () => clearInterval(interval);
+  // }, [accessToken]);
 
   return <WebSocketContext.Provider value={{ ws, isReady, wsRef }}>{children}</WebSocketContext.Provider>;
 };

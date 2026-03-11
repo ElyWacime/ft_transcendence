@@ -834,7 +834,7 @@ const interval = setInterval(async () => {
 }, 1000 / TICK_RATE);
 
 const getUserName = async (id) => {
-  // return null;
+  return id;
   try {
     if(!id)
       return null;

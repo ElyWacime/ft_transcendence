@@ -30,7 +30,7 @@ export const updateEmailSchema = z.object({
 });
 
 export const updatePassSchema = z.object({
-  new_email: z.string().email(),
+  new_password: z.string().min(6),
   password: z.string().min(6),
 });
 

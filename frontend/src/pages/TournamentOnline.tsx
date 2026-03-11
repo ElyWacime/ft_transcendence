@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "../css/tournament-online.css";
 import { useWebSocket } from "@/context/WebSocketContext";
 import { useAuth } from "@/context/AuthContext";
+import { fetchWithAuth } from "@/lib/tokenRefresh";
 
 interface Participant {
   id: string;
@@ -43,7 +44,7 @@ interface CurrentUser {
 export default function TournamentOnlinePage() {
   const navigate = useNavigate();
   const { ws, isReady, wsRef } = useWebSocket();
-  const { accessToken, user } = useAuth();
+  const { accessToken, user,updateAccessToken } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,13 +83,31 @@ export default function TournamentOnlinePage() {
     }
   }, [isConnected]);
 
+  const getName = async (id: number) => {
+      if(!id)  return null;
+      let res =  await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
+      if (res.status === 200) {
+        let data = await res.json();
+        return data.name;
+      } else {
+        console.log(`Failed to fetch name for id ${id}: ${res.statusText}`);
+        return null;
+      }
+  };
   useEffect(() => {
     const socket = wsRef?.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) return;
-
-    const handleMessage = (event: MessageEvent) => {
+    
+    const handleMessage = async (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
+          console.log("Received WS message:",data);
+        for (let index = 0; index < data.tournaments.length; index++) {
+          data.tournaments[index].createdByName = await getName(data.tournaments[index].createdBy);
+          console.log("Received WS message:",data.tournaments[index]);
+        }
+
+      
         if (data.type === "TOURNAMENTS_STATE") {
           setTournaments(Array.isArray(data.tournaments) ? data.tournaments : []);
           setIsLoading(false);

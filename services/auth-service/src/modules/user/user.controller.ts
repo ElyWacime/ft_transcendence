@@ -74,7 +74,7 @@ export async function createUser(
 
     return reply.code(201).send(user);
   } catch (e) {
-    return reply.code(500).send(e);
+    return reply.code(500).send({message: "internal server error"});
   }
 }
 
@@ -174,31 +174,6 @@ export async function update_email(
       where: { email: decoded.email },
       data: { email: new_email },
     });
-  
-    try {
-      const gameServiceUrl = process.env.GAME_SERVICE_URL || 'https://game-server:3000';
-      const httpsAgent = getHttpsAgent();
-      const fetchOptions: RequestInit = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: updatedUser.id,
-          email: new_email,
-        }),
-      };
-      if (httpsAgent) {
-        (fetchOptions as any).agent = httpsAgent;
-      }
-      const gameServiceResponse = await fetch(`${gameServiceUrl}/sync-email`, fetchOptions);
-
-      if (!gameServiceResponse.ok) {
-        console.error('Failed to sync email with game service:', await gameServiceResponse.text());
-      }
-    } catch (syncError) {
-      console.error('Error syncing email with game service:', syncError);
-    }
 
     const payload = {
       id: updatedUser.id,
@@ -274,10 +249,16 @@ export async function update_password(
 
     await prisma.user.update({
       where: { email: userToken.email },
-      data: { password: hashedPassword },
+      data: {
+        password: hashedPassword,
+        refreshToken: null,
+        loggedIn: false,
+      },
     });
 
-    reply.clearCookie("access_token");
+    reply.clearCookie("refresh_token", {
+      path: "/",
+    });
 
     return reply.send({
       success: true,
