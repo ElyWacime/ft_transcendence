@@ -97,16 +97,16 @@ export const WebSocketProvider = ({ children }) => {
   }, [isLoggedIn, isLoading, handleMessage]);
 
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     const socket = wsRef.current;
-  //     if (socket && socket.readyState === WebSocket.OPEN) {
-  //         socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
-  //     }
-  //   }, 25000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const socket = wsRef.current;
+      if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
+      }
+    }, 25000);
 
-  //   return () => clearInterval(interval);
-  // }, [accessToken]);
+    return () => clearInterval(interval);
+  }, [accessToken]);
 
   return <WebSocketContext.Provider value={{ ws, isReady, wsRef }}>{children}</WebSocketContext.Provider>;
 };
