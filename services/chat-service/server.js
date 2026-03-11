@@ -1,6 +1,5 @@
 import Fastify from 'fastify';
 import cookie from "@fastify/cookie"
-import cookieParser from 'cookie';
 import cors from "@fastify/cors"
 import { Server } from 'socket.io';
 import * as fs from 'fs';
@@ -366,19 +365,12 @@ fastify.post("/uninvite", { schema: invitationsSchema, preHandler: requireAuth }
 
 io.use(async (socket, next) => {
   try {
-    const cookieHeader = socket.handshake.headers.cookie;
-    if (!cookieHeader) {
-      return next(new Error('No cookies found'));
+    const token = socket.handshake.auth?.token;
+    if (!token) {
+      return next(new Error('No access token provided'));
     }
 
-    const cookies = cookieParser.parse(cookieHeader);
-
-    const refreshToken = cookies.refresh_token;
-    if (!refreshToken) {
-      return next(new Error('No access token found'));
-    }
-
-    const userData = await validateSocketToken(refreshToken);    
+    const userData = await validateSocketToken(token);    
     if (!userData) {
       return next(new Error('Invalid or expired token'));
     }

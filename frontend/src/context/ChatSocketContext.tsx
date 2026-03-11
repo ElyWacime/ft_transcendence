@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
-import { fetchWithAuth } from "@/lib/tokenRefresh";
+import { fetchWithAuth, refreshToken } from "@/lib/tokenRefresh";
 
 type ChatSocketContextValue = {
   socket: Socket | null;
@@ -47,10 +47,25 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     }
     const chatSocket = io(SERVER_URL, {
       withCredentials: true,
-      reconnection: true
+      reconnection: true,
+      auth: {
+        token: accessToken
+      }
     });
     setSocket(chatSocket);
     chatSocket.on("connect", () => {});
+
+    chatSocket.on("connect_error", async () => {
+      try {
+        const result = await refreshToken();
+        if (result) {
+          updateAccessToken(result.accessToken);
+          chatSocket.auth = { token: result.accessToken };
+        }
+      } catch (err) {
+        console.error("[ChatSocket] Token refresh failed:", err);
+      }
+    });
 
     chatSocket.on("authenticate", (data: any) => {
       setCurrentUser({ id: data.userId });
