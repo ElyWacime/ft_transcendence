@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
       usePolling: true,
     },
       hmr: {
-        host: process.env.VITE_HMR_HOST, 
+        host: process.env.VITE_DOMAIN, 
         protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws",
       },
   };

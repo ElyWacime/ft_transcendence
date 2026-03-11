@@ -80,15 +80,18 @@ export const WebSocketProvider = ({ children }) => {
     socket.onopen = () => 
     {
       setIsReady(true);
+      console.log("WebSocket Created:");
       if (socket && socket.readyState === WebSocket.OPEN) 
           socket.send(JSON.stringify({ type: "PING" ,token:accessToken}));
     };
     socket.onclose = () => {
       setIsReady(false);
+      console.log("WebSocket Closed:");
       wsRef.current = null;
       setWs(null);
     };
     socket.onerror = (err) => {
+
       console.log("WebSocket error:", err);
     };
 
