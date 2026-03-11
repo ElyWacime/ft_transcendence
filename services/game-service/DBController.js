@@ -97,11 +97,7 @@ export class SQLiteDB {
             if (!tables.length) {
                 const schema = fs.readFileSync(SCHEMA_FILE, "utf8");
                 await this.db.exec(schema);
-            } else {
-            }
-            this.db.on("trace", sql => {
-                // console.log("[SQL]:", sql);
-            });
+            } 
         } catch (err) {
             console.error("[DB] Failed to initialize database:", err);
             throw err;

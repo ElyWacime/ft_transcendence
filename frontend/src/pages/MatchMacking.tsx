@@ -19,7 +19,7 @@ const MatchMacking = () => {
     const [features, setFeatures] = useState([]);
     const { accessToken, updateAccessToken } = useAuth();
     const getName = async (id: number) => {
-        if(!id)  return null;
+      if(!id)  return null;
         let res =  await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
         if (res.status === 200) {
           let data = await res.json();

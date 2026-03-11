@@ -89,7 +89,7 @@ app.addHook("onRequest", (req, reply, done) => {
 });
 
 app.register(cors, {
-  origin: true,  // Allow all origins for development
+  origin: true, 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
