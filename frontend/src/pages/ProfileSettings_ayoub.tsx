@@ -285,7 +285,6 @@ const ProfileSettings = () => {
               )}
             </div>
           </Card>
-
           {}
           <div className="profile-settings-grid">
             {settingsOptions.map((option) => {

@@ -12,7 +12,7 @@ const ChangeUsername = () => {
   const [newUsername, setNewUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { accessToken, updateAccessToken } = useAuth();
+  const { accessToken, updateAccessToken, user } = useAuth();
 
   const updateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +22,7 @@ const ChangeUsername = () => {
       const res = await userApi.updateUsername(password, newUsername, accessToken, updateAccessToken);
       if (res.success) {
         toast.success("Username updated successfully!");
+        user.name = newUsername;
         navigate("/profile");
       } else {
         toast.error(res.message || "Username update failed.");
