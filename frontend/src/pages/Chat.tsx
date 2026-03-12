@@ -31,7 +31,7 @@ export const handleStartConversation = async ({ userId, socket, accessToken, upd
       return data.conversationId as number
     }
   } catch (error) {
-    console.error('Failed to start conversation:', error)
+    console.error('Failed to start conversation:')
   }
   return null
 }
@@ -104,7 +104,7 @@ export default function Chat() {
           checkFriendshipStatus(conversation);
         }
       } catch (error) {
-        console.error('Failed to fetch conversations:', error)
+        console.error('Failed to fetch conversations:')
       }
     }
 
@@ -245,7 +245,7 @@ export default function Chat() {
       const historyData = await res.json()
       setMessages(historyData)
     } catch (error) {
-      console.error('Failed to fetch chat history:', error)
+      console.error('Failed to fetch chat history:')
     }
   }
 
@@ -278,7 +278,7 @@ export default function Chat() {
         })
       }
     } catch (error) {
-      console.error('Failed to remove friend:', error)
+      console.error('Failed to remove friend:')
     }
   }
 
@@ -325,7 +325,7 @@ export default function Chat() {
         }
       }
     } catch (error) {
-      console.error('Failed to check invitation status:', error)
+      console.error('Failed to check invitation status:')
     }
   }
   
@@ -345,7 +345,7 @@ export default function Chat() {
           })) 
       }
     } catch (error) {
-      console.error('Failed to check friendship status:', error)
+      console.error('Failed to check friendship status:')
     }
   }
 
@@ -373,7 +373,7 @@ export default function Chat() {
         }
       }
     } catch (error) {
-      console.error('Failed to check block status:', error)
+      console.error('Failed to check block status:')
     }
   }
 

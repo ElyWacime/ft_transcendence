@@ -91,7 +91,7 @@ export default function ChatWindow({ conversation, messages, onSendMessage,  isF
       }
       
     } catch (error) {
-      console.error('Error toggling block status:', error)
+      console.error('Error toggling block status:')
     }
   }
 

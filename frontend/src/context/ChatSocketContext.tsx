@@ -64,7 +64,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
           chatSocket.auth = { token: result.accessToken };
         }
       } catch (err) {
-        console.error("[ChatSocket] Token refresh failed:", err);
+        console.error("[ChatSocket] Token refresh failed:");
       }
     });
 

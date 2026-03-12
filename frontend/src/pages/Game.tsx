@@ -14,7 +14,6 @@ const Game = () => {
         const winner = player1Score > player2Score ? player1 : player2;
         toast.success(`${winner} wins the match!`);
     } catch (error) {
-      console.error("Failed to update match result:", error);
       toast.error("Failed to save match result");
     }
   };

@@ -100,7 +100,6 @@ export default function TournamentOnlinePage() {
       }
   };
 
-  // Collect all unique user IDs from a list of tournaments.
   const collectAllIds = (tours: Tournament[]): string[] => {
     const ids = new Set<string>();
 
@@ -109,49 +108,41 @@ export default function TournamentOnlinePage() {
     };
 
     for (const tournament of tours) {
-      // Creator
       addId(tournament.createdBy);
 
-      // Participants
       for (const participant of tournament.participants || []) {
         addId(participant?.id);
       }
 
-      // Semifinals matches
       for (const match of tournament.semifinals || []) {
         addId(match.player1?.id);
         addId(match.player2?.id);
         addId(match.winner?.id);
       }
 
-      // Final match
       if (tournament.final) {
         addId(tournament.final.player1?.id);
         addId(tournament.final.player2?.id);
         addId(tournament.final.winner?.id);
       }
 
-      // Tournament winner
       addId(tournament.winner?.id);
     }
 
     return Array.from(ids);
   };
 
-  // Resolve all unique IDs to real names in one batch. Returns a map of id -> name.
   const resolveNames = async (tours: Tournament[]): Promise<Map<string, string>> => {
     const allIds = collectAllIds(tours);
 
-    // Fetch all names in parallel
     const resolvedPairs = await Promise.all(
       allIds.map(async (id) => {
         const name = await getName(id);
-        const finalName = name || id; // fallback to id if name not found
+        const finalName = name || id; 
         return { id, name: finalName };
       })
     );
 
-    // Build the map
     const nameMap = new Map<string, string>();
     for (const pair of resolvedPairs) {
       nameMap.set(pair.id, pair.name);
@@ -160,7 +151,7 @@ export default function TournamentOnlinePage() {
     return nameMap;
   };
 
-  // Replace a participant's name using the name map.
+
   const replaceParticipantName = (
     participant: Participant | null,
     nameMap: Map<string, string>
@@ -170,7 +161,7 @@ export default function TournamentOnlinePage() {
     return { ...participant, name: resolvedName };
   };
 
-  // Replace a match slot's player/winner names using the name map.
+
   const replaceMatchNames = (
     match: MatchSlot,
     nameMap: Map<string, string>
@@ -183,40 +174,33 @@ export default function TournamentOnlinePage() {
     };
   };
 
-  // Replace all id-as-name fields inside a tournament list using a pre-built name map.
   const applyNames = (tours: Tournament[], nameMap: Map<string, string>): Tournament[] => {
     const result: Tournament[] = [];
 
     for (const tournament of tours) {
-      // Resolve createdByName
       let resolvedCreatedByName = tournament.createdByName;
       if (tournament.createdBy) {
         resolvedCreatedByName = nameMap.get(tournament.createdBy) || tournament.createdByName;
       }
 
-      // Resolve participants
       const resolvedParticipants: Participant[] = [];
       for (const participant of tournament.participants) {
         const updated = replaceParticipantName(participant, nameMap);
         if (updated) resolvedParticipants.push(updated);
       }
 
-      // Resolve semifinals
       const resolvedSemifinals: MatchSlot[] = [];
       for (const match of tournament.semifinals || []) {
         resolvedSemifinals.push(replaceMatchNames(match, nameMap));
       }
 
-      // Resolve final
       let resolvedFinal = tournament.final;
       if (tournament.final) {
         resolvedFinal = replaceMatchNames(tournament.final, nameMap);
       }
 
-      // Resolve tournament winner
       const resolvedWinner = replaceParticipantName(tournament.winner || null, nameMap);
 
-      // Build the updated tournament object
       const updatedTournament: Tournament = {
         ...tournament,
         createdByName: resolvedCreatedByName,
@@ -238,8 +222,6 @@ export default function TournamentOnlinePage() {
     const handleMessage = async (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        console.log("Received WS message:", data);
-
         if (data.type === "TOURNAMENTS_STATE") {
           const rawTournaments: Tournament[] = Array.isArray(data.tournaments) ? data.tournaments : [];
           const nameMap = await resolveNames(rawTournaments);
@@ -255,7 +237,7 @@ export default function TournamentOnlinePage() {
           }
         }
       } catch (e) {
-        console.error("Failed to parse WS message", e);
+        console.error("Failed to parse WS message");
       }
     };
 

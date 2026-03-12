@@ -151,7 +151,7 @@ async function main() {
 
     await app.listen({ port, host: "0.0.0.0" });
     
-    app.log.info(`✅ Auth service running on port 8000 (${useHttps ? 'HTTPS' : 'HTTP'})`);
+    app.log.info(`Auth service running on port 8000 (${useHttps ? 'HTTPS' : 'HTTP'})`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

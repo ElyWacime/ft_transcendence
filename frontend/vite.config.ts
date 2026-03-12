@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
         cert: fs.readFileSync("/app/certs/certificate.crt"),
       };
     } catch (err) {
-      console.warn("Could not load HTTPS certificates:", err);
+      console.warn("Could not load HTTPS certificates:");
     }
   }
 

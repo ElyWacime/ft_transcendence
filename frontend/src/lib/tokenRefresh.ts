@@ -16,18 +16,10 @@ export async function refreshToken(): Promise<{ accessToken: string } | null> {
     }
     return null;
   } catch (error) {
-    console.error("Token refresh failed:", error);
+    console.error("Token refresh failed:");
     return null;
   }
 }
-
-/**
- * Make an authenticated fetch request with automatic token refresh on 401
- * @param url - The URL to fetch
- * @param options - Fetch options
- * @param accessToken - Current access token (from context/state) - optional for backwards compatibility
- * @param onTokenRefresh - Callback to update the access token in state - optional
- */
 
 export async function fetchWithAuth(
   url: string,

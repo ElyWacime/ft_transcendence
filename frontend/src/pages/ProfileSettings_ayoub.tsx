@@ -78,7 +78,7 @@ const ProfileSettings = () => {
           });
         }
       } catch (error) {
-        console.error("Failed to fetch user data:", error);
+        console.error("Failed to fetch user data:");
         setUserInfo({
           id: "",
           email: user?.email || "",
@@ -147,8 +147,8 @@ const ProfileSettings = () => {
       toast.success("User found");
     } catch (err: any) {
       setSearchResult(null);
-      setSearchError(err?.message || "User not found");
-      toast.error(err?.message || "User not found");
+      setSearchError( "User not found");
+      toast.error("User not found");
     } finally {
       setSearchLoading(false);
     }

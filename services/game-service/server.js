@@ -771,7 +771,7 @@ async function handelRegister(request, id) {
     sendtoplayer(ngame.P3_Id, data);
     sendtoplayer(ngame.P4_Id, data);
   } catch (error) {
-    console.error("Error in handelRegister for user:", id, "-", error);
+    console.error("Error in handelRegister for user:", id);
   }
 }
 
@@ -830,34 +830,6 @@ const interval = setInterval(async () => {
     sendtoplayer(match.P4_Id, data);
   }
 }, 1000 / TICK_RATE);
-
-const getUserName = async (id) => {
-  return id;
-  try {
-    if(!id)
-      return null;
-    const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
-    const fetchOptions = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    if (httpsAgent) {
-      fetchOptions.agent = httpsAgent;
-    }
-    const response = await fetch(`${protocol}://auth-service:8000/get-user/${id}`, fetchOptions);
-    if (!response.ok) {
-      console.error(`Auth service returned status ${response.status}`);
-      return null;
-    }
-    const user = await response.json();
-    return user ? user.name : null;
-  } catch (error) {
-    console.error(`Error fetching user ${id} from auth service: `,error);
-    return null;
-  }
-};
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
@@ -927,7 +899,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    }
    catch (e)
    {
-      console.error("WebSocket message handler error:", e);
+      console.error("WebSocket message handler error");
    }
   });
   connection.on("close", async () => {
@@ -939,7 +911,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         console.log("Server OnClosed Socket for ",id);
         break;
        } catch (e) {
-          console.error("Server OnClosed Socket error:", e);
+          console.error("Server OnClosed Socket error:");
        }
       }
     }
@@ -973,7 +945,7 @@ fastify.post('/invite', async (request, reply) => {
     }
     return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
   } catch (e) {
-    return reply.code(405).send({ message: 'Error ' + e });
+    return reply.code(405).send({ message: 'Error in Invite ' });
   }
 });
 
@@ -992,7 +964,7 @@ fastify.post('/check', async (request, reply) => {
     }
     return reply.code(201).send({ message: 'Available' });
   } catch (e) {
-    return reply.code(405).send({ message: e });
+    return reply.code(405).send({ message: "Error in checking"});
   }
 });
 
@@ -1052,8 +1024,7 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
       lastMatch: lastMatch ? lastMatch :  null
     };
   } catch (error) {
-    console.error('Dashboard error:', error);
-    return reply.code(500).send({ error: 'Internal server error' });
+    return reply.code(500).send({ message: 'Error in dashboard identifier' });
   }
 });
 

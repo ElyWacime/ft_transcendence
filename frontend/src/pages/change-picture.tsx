@@ -29,7 +29,7 @@ const ChangePicture = () => {
           setUsername(user.User_name || "");
         }
       } catch (error) {
-        console.error("Failed to fetch current avatar:", error);
+        console.error("Failed to fetch current avatar:");
       } finally {
         setInitialLoading(false);
       }
@@ -112,7 +112,6 @@ const ChangePicture = () => {
       }
     } catch (err) {
       toast.error("Failed to process image. Please try again.");
-      console.error(err);
     } finally {
       setLoading(false);
       if (fileInput) {

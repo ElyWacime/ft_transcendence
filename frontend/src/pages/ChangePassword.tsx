@@ -35,7 +35,6 @@ const ChangePassword = () => {
       }
     } catch (err) {
       toast.error("Server error, please try again later");
-      console.error(err);
     } finally {
       setLoading(false);
     }

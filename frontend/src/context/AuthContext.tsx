@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
         }
       } catch (err) {
-        console.error("[AuthContext] Session restore failed:", err);
+        console.error("[AuthContext] Session restore failed:");
         setAccessToken(null);
         setUser(null);
       } finally {
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await userApi.logout(accessToken, (newToken: string) => setAccessToken(newToken));
     } catch (e) {
-      console.error("Logout failed", e);
+      console.error("Logout failed");
     }
     setAccessToken(null);
     setUser(null);

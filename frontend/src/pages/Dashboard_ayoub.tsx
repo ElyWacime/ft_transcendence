@@ -74,9 +74,9 @@ const Dashboard_ayoub = () => {
         if (err.message.includes("not found")) {
           setError(`Username "${userIdentifier}" not found. Please check the spelling.`);
         } else {
-          setError(err.message || "Failed to load dashboard data");
+          setError( "Failed to load dashboard data");
         }
-        toast.error(err.message || "Failed to load dashboard data");
+        toast.error( "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }

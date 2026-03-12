@@ -31,7 +31,6 @@ const Login = () => {
       }
     } catch (err) {
       toast.error("Server error, please try again");
-      console.error(err);
     } finally {
       setLoading(false);
     }
