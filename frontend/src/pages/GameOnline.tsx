@@ -178,7 +178,6 @@ const GameOnline = () => {
               x = `You Lost the match!`;
           }
           if (!data.T_Id){
-            console.log("Tryiiing to navigate to result with message: ");
             navigate("/result", { 
             state: {  
               message: x, 

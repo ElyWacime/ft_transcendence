@@ -54,8 +54,6 @@ const MatchMacking = () => {
                 },
             });
         }
-        else
-            console.log("Received PLAYING status but FIRST is false. Data:");   
       }
       else{
         let [res1, res2, res3, res4] = await Promise.all([getName(data.P1_Id),getName(data.P2_Id),getName(data.P3_Id),getName(data.P4_Id)]);
