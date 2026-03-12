@@ -26,6 +26,7 @@ export async function createUser(
   }
   const name_user = await prisma.user.findUnique({
     where: {
+
       name: name,
     },
   });
@@ -74,7 +75,7 @@ export async function createUser(
 
     return reply.code(201).send(user);
   } catch (e) {
-    return reply.code(500).send({message: "internal server error"});
+    return reply.code(500).send({message: "User Already Exists"});
   }
 }
 

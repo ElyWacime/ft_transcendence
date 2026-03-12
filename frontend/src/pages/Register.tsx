@@ -21,10 +21,10 @@ const Register = () => {
         toast.success("Account created successfully! You can now log in.");
         navigate("/login");
       } else {
-        toast.error(res.message || "Registration failed");
+        toast.error(res.message );
       }
     } catch (err) {
-      toast.error( "Registration failed");
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

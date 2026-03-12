@@ -7,6 +7,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Could not detect IP. Enter manually:"
         read NEW_IP
     fi
+    read NEW_IP
     echo "Using IP: $NEW_IP (macOS)"
     
     sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/frontend/.env"

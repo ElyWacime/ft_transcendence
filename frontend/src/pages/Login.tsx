@@ -27,10 +27,10 @@ const Login = () => {
         toast.success("Welcome back!");
         navigate("/");
       } else {
-        toast.error(res.message || "Login failed");
+        toast.error(res.message);
       }
     } catch (err) {
-      toast.error("Server error, please try again");
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

@@ -71,7 +71,7 @@ class UserAPI {
     if (res.ok) {
       return response;
     } else {
-      throw new Error(response.message || "Registration failed");
+      throw new Error(response.message);
     }
   }
 
