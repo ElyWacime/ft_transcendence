@@ -27,7 +27,7 @@ type MessagesPageLayoutProps = {
 }
 
 export default function MessagesPageLayout ({ conversations, selectedId, onUnfriend, friendsList, messages, onSendMessage, onGetHistory, isConnected, currentUser, blockedConversations, pendingInvitations, onBlockConversation, onUnblockConversation, onCheckBlockStatus, onCheckInvitationStatus, onCancelInvite, invitePrompt, onInvite, onRespondInvite, socket }: MessagesPageLayoutProps) {
-  const selectedConversation = conversations.find((c) => c.id === selectedId)
+  const selectedConversation = conversations?.find((c) => c.id === selectedId)
   const blockStatus = selectedConversation ? blockedConversations[selectedConversation.id] : null
   const friendstatus = selectedConversation ? friendsList[selectedConversation.other_user_id] : null
   const isFriend = friendstatus?.isFriend ?? false

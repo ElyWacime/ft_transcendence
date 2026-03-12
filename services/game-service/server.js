@@ -959,12 +959,20 @@ fastify.post('/invite', async (request, reply) => {
     let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
     if (!(m1 || m2))
     {
+      console.log("Invite Check 1 Result: ", [m1,m2]);
       let m = new Match();
       m.P1_Id = P1;
       m.P2_Id = P2;
       m.count_players = 2;
       await  dbcnx.createVIPMatch(m);
       return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
+    }
+    else
+    {
+      let res= await dbcnx.getBoth(P1,P2);
+      console.log("Invite Check  2 Result: ", res);
+      if (res)
+        return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
     }
     return reply.code(409).send(JSON.stringify({ message: 'You Cant Navigate' }));
   } catch (e) {

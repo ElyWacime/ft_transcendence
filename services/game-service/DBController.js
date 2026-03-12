@@ -108,6 +108,7 @@ export class SQLiteDB {
         const result = await this.db.run(`INSERT INTO Match (P1_Id,P2_Id,count_players,T_Id) VALUES (?, ?,?,?);`, [m.P1_Id, m.P2_Id,2,m.T_Id]);
         return result.lastID;
     }
+
     async createMatch(m) {
         const result = await this.db.run(`INSERT INTO Match (P1_Id, T_Id, mode) VALUES (?, ?, ?);`, [m.P1_Id, m.T_Id, m.mode]);
         return result.lastID;
@@ -204,6 +205,14 @@ export class SQLiteDB {
         FROM Match
         WHERE  gameStatus = 'PLAYING' and 
         (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [id,id,id,id]);
+    }
+    
+    async getBoth(p1,p2)
+    {
+        return await this.db.get(`SELECT *
+        FROM Match
+        WHERE  gameStatus = 'PLAYING' and 
+        ((P1_Id = ? and P2_Id = ?) OR (P2_Id = ? OR P1_Id = ?));`, [p1,p2,p1,p2]);
     }
 
     async UserCountWins_ayoub(id) {
