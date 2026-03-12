@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
-import { fetchWithAuth, refreshToken } from "@/lib/tokenRefresh";
+import { refreshToken } from "@/lib/tokenRefresh";
 
 type ChatSocketContextValue = {
   socket: Socket | null;

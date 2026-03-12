@@ -1,6 +1,4 @@
 import Fastify from "fastify";
-import fastifyCookie from "@fastify/cookie";
-import fjwt from "@fastify/jwt";  
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
 import * as fs from "fs";
@@ -992,8 +990,7 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    const token = res;
-    const targetUserId = token.user_id;
+    const targetUserId = request.params.identifier;
     const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
       Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
     const winsCount = await dbcnx.UserCountWins_ayoub(targetUserId);

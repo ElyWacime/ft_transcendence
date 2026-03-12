@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect,useState,useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Trophy, Users, Gamepad2, Zap } from "lucide-react";
 import { toast } from "sonner";

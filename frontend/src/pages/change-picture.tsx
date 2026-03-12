@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { userApi } from "@/lib/api";
-import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
 import { Camera, ArrowLeft, Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";

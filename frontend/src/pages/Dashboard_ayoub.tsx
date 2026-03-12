@@ -44,9 +44,7 @@ const Dashboard_ayoub = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://localhost';
 
-  const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image")
-    ? dashboardData?.user.avatar
-    : `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
+  const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image") ? dashboardData?.user.avatar : `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
 
   useEffect(() => {
     if (!identifier && !isLoggedIn) {

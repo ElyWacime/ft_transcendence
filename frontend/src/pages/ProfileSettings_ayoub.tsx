@@ -1,10 +1,9 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Trophy, Mail, Lock, Camera, User } from "lucide-react";
+import {  Mail, Lock, Camera, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { userApi } from "@/lib/api";
 import { handleStartConversation } from "./Chat";
 import "../css/profile.css";
 import { useChatSocket } from "@/context/ChatSocketContext";

@@ -1,11 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import Home from "./Home";
 import { useAuth } from "@/context/AuthContext";
 import { fetchWithAuth } from "@/lib/tokenRefresh";
-interface Match {
-}
+
 
 const MatchHistory = () => {
   const navigate = useNavigate();
@@ -29,6 +27,7 @@ const MatchHistory = () => {
         return null;
       }
   };
+  
   const getall = async () => {
     const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
     let matchess =  await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/allmatch`, {

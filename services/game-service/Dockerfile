@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-# RUN apt update && apt install -y sqlite3
+RUN apt update && apt install -y sqlite3
 
 EXPOSE 3000
 

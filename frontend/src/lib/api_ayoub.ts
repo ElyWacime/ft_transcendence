@@ -83,10 +83,6 @@ class PlayerDashboardAPI_ayoub {
       throw error;
     }
   }
-
-  async getPlayerDashboard(identifier: string, accessToken: string, updateAccessToken: (newToken: string) => void) {
-    return this.getCompleteUserData(identifier, accessToken, updateAccessToken);
-  }
 }
 
 export const playerDashboardApi_ayoub = new PlayerDashboardAPI_ayoub();
