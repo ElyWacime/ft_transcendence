@@ -20,8 +20,8 @@ export const Navigation = () => {
   const gamesModes = [
     { path: "/game", label: "Local Game", icon: Gamepad2 },
     { path: "/game-ai", label: "VS AI", icon: Bot },
-    { path: "/loading?mode=2", label: "1 vs 1", icon: Gamepad2 },    
-    { path: "/loading?mode=4", label: "2 vs 2", icon: Gamepad2 },
+    // { path: "/loading?mode=2", label: "1 vs 1", icon: Gamepad2 },    
+    // { path: "/loading?mode=4", label: "2 vs 2", icon: Gamepad2 },
     { path: "/online-tournament", label: "Tournament", icon: Trophy },
   ];
 

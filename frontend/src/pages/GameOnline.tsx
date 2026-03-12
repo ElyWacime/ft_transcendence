@@ -182,6 +182,7 @@ const GameOnline = () => {
             navigate("/result", { 
             state: {  
               message: x, 
+              mode: data.mode,
             } 
           });
           }

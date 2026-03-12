@@ -17,7 +17,7 @@ const Result = () => {
     }
     
     let {message} = stat;
-    const resetGame = useCallback(() => {navigate("/loading?mode=2")}, []);
+    const resetGame = useCallback(() => {navigate(`/loading?mode=${stat.mode}`)}, []);
     return (<>
         <div className="ai-game-page">
         <div className="ai-game-container">
