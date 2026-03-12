@@ -35,7 +35,7 @@ export default function MessagesPageLayout ({ conversations, selectedId, onUnfri
   const isBlocked = blockStatus?.blocked ?? false
   const blockedBy = blockStatus?.blockedBy ?? null
   const canUnblock = isBlocked && blockedBy === 'you'
-  const incomingInvite = selectedConversation && invitePrompt?.conversationId === selectedConversation.id ? invitePrompt : null
+  const incomingInvite = selectedConversation ? invitePrompt?.[selectedConversation.id] : null
   const conversationPendingStatus = selectedConversation ? pendingInvitations[selectedConversation.id] : null
   const pendingGameRequest = conversationPendingStatus?.game_request ?? false
   const pendingFriendRequest = conversationPendingStatus?.friend_request ?? false
