@@ -1,15 +1,12 @@
 #!/bin/bash
 
-# Detect OS type
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
     NEW_IP=$(ipconfig getifaddr en0 2>/dev/null)
     
     if [ -z "$NEW_IP" ]; then
         echo "Could not detect IP. Enter manually:"
         read NEW_IP
     fi
-    read NEW_IP
     echo "Using IP: $NEW_IP (macOS)"
     
     sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/frontend/.env"
@@ -18,7 +15,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/scripts/generate-certs.sh"
     
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux
     NEW_IP=$(ip route get 1 | awk '{print $7; exit}')
     
     if [ -z "$NEW_IP" ]; then
