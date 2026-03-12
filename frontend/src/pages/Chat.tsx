@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useChatSocket } from "../context/ChatSocketContext"
 import "../components/chat/App.css"
 import MessagesPageLayout from "../components/chat/MessagesPageLayout"
 import { useAuth } from "@/context/AuthContext"
 import { fetchWithAuth } from "@/lib/tokenRefresh"
+import { toast } from "sonner";
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
 const SERVER_URL = API_URL
@@ -180,21 +182,8 @@ export default function Chat() {
     const activeInvitePrompt = invitePrompt?.[selectedId]
     if (!activeInvitePrompt) return
     
-    await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: activeInvitePrompt.fromUserId, invitationType: invitationType })
-    }, accessToken, updateAccessToken)
+    let t = false
 
-    socket.emit('InviteResponse', {
-            conversationId: activeInvitePrompt.conversationId,
-            toUserId: activeInvitePrompt.fromUserId,
-            fromUserId: currentUser.id,
-            invitationType: invitationType,
-            accepted,
-    })
-    
     if (accepted)
     {
       if (invitationType === "game_request")
@@ -202,6 +191,11 @@ export default function Chat() {
         let res = await inviteHandle(activeInvitePrompt.fromUserId,  currentUser.id);
         if (res.ok)
           navigate(`/loading?mode=2`);
+        else
+        {
+          toast.error("Your friend is on another match!")
+          t = true
+        }
       } else if (invitationType === "friend_request")
       {
         const response = await fetchWithAuth(`${SERVER_URL}/api/chat/friends/add`, {
@@ -221,11 +215,29 @@ export default function Chat() {
       }              
     }
 
-    setInvitePrompt((prev: any) => {
-      const updated = { ...prev }
-      delete updated[activeInvitePrompt.conversationId]
-      return updated
-    })
+    if (t == false)
+    {
+        await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: activeInvitePrompt.fromUserId, invitationType: invitationType })
+        }, accessToken, updateAccessToken)    
+
+        socket.emit('InviteResponse', {
+                conversationId: activeInvitePrompt.conversationId,
+                toUserId: activeInvitePrompt.fromUserId,
+                fromUserId: currentUser.id,
+                invitationType: invitationType,
+                accepted,
+        })    
+
+        setInvitePrompt((prev: any) => {
+          const updated = { ...prev }
+          delete updated[activeInvitePrompt.conversationId]
+          return updated
+        })      
+    }
   }
 
   const getChatHistory = async (conversationId: number) => {

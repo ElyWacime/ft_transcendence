@@ -123,8 +123,8 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
         if (data.accepted) {
           setFriendsList((prev: any) => ({
             ...prev,
-            [data.fromUserId]: { isFriend: true }
-          }))
+            [data.fromUserId]: { ...prev[data.fromUserId], isFriend: true }
+          }));          
         }
       }
       setPendingInvitations((prev: any) => ({
