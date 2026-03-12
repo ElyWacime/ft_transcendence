@@ -55,11 +55,11 @@ export class AIOpponent {
   {
     this.difficulty = difficulty;
     if (difficulty === Difficulty.EASY) {
-      this.predictionNoise = 40;
+      this.predictionNoise = 70;
     } else if (difficulty === Difficulty.MEDIUM) {
-      this.predictionNoise = 15;
+      this.predictionNoise = 40;
     } else {
-      this.predictionNoise = 0;
+      this.predictionNoise = 10;
     }
   }
 

@@ -51,7 +51,7 @@ class PlayerDashboardAPI_ayoub {
 
       const authData = await authRes.json();
 
-      const gameRes = await fetchWithAuth(`${this.baseUrl}//dashboard/${userId}`, { method: "GET" }, accessToken, updateAccessToken);
+      const gameRes = await fetchWithAuth(`${this.baseUrl}/dashboard/${userId}`, { method: "GET" }, accessToken, updateAccessToken);
 
       if (!gameRes.ok) {
         throw new Error(`Failed to fetch game data (${gameRes.status})`);

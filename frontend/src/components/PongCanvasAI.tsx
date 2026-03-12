@@ -278,7 +278,7 @@ export const PongCanvasAI = ({
   );
 
   useEffect(() => {
-    aiRef.current = enableAI ? new AIOpponent() : null;
+    aiRef.current = enableAI ? new AIOpponent(aiDifficulty) : null;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLElement) {

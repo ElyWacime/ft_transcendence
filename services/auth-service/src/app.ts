@@ -15,6 +15,7 @@ const httpsOptions = process.env.USE_HTTPS === "true" ? {
 
 const app = Fastify({ 
   logger: true,
+  bodyLimit: 7 * 1024 * 1024,
   ...httpsOptions
 }).withTypeProvider<ZodTypeProvider>();
 
