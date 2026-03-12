@@ -134,7 +134,25 @@ const router = createBrowserRouter(
 
 const App = () => (
   <>
-    <Toaster />
+    <Toaster
+      theme="dark"
+      position="bottom-right"
+      closeButton
+      toastOptions={{
+        classNames: {
+          toast: "site-toast",
+          title: "site-toast-title",
+          description: "site-toast-description",
+          actionButton: "site-toast-action",
+          cancelButton: "site-toast-cancel",
+          closeButton: "site-toast-close",
+          success: "site-toast-success",
+          error: "site-toast-error",
+          info: "site-toast-info",
+          warning: "site-toast-warning",
+        },
+      }}
+    />
     <AuthProvider children={undefined}>
       <WebSocketProvider>
         <RouterProvider router={router} />

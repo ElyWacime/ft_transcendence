@@ -1,12 +1,8 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
-import { useLocation } from 'react-router-dom';
 
 const WebSocketContext = createContext(null);
-
-
-
 
 export const WebSocketProvider = ({ children }) => {
   const { isLoggedIn, isLoading, accessToken, user } = useAuth();
@@ -27,15 +23,10 @@ export const WebSocketProvider = ({ children }) => {
       }
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
-        let vs = "";
         if (data.score1 > data.score2) 
-        {
           message = data.P1_Id === id || data.P3_Id === id ? "You win the match!" : "You lost the match!";
-        }
         else 
-        {
           message = data.P2_Id === id || data.P4_Id === id ? "You win the match!" : "You lost the match!";
-        }
         if (message.includes("win"))
           toast.success(message);
         else
@@ -44,7 +35,6 @@ export const WebSocketProvider = ({ children }) => {
     },
     [id, token]
   );
-
 
   useEffect(() => {
     if (isLoading) {

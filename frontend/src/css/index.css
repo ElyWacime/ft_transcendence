@@ -569,3 +569,67 @@ body {
 .btn-neon:hover {
   box-shadow: var(--shadow-glow);
 }
+
+.site-toast {
+  background: hsl(var(--card) / 0.92) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-card), 0 0 18px hsl(var(--neon-blue) / 0.15) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.site-toast-title {
+  color: hsl(var(--foreground)) !important;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-weight: 600 !important;
+}
+
+.site-toast-description {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.site-toast-action {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: 1px solid hsl(var(--primary) / 0.7) !important;
+}
+
+.site-toast-action:hover {
+  background-color: hsl(var(--primary) / 0.9) !important;
+}
+
+.site-toast-cancel {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.site-toast-cancel:hover {
+  background-color: hsl(var(--secondary) / 0.85) !important;
+}
+
+.site-toast-close {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.site-toast-close:hover {
+  color: hsl(var(--foreground)) !important;
+}
+
+.site-toast-success {
+  border-left: 3px solid hsl(var(--neon-green)) !important;
+}
+
+.site-toast-error {
+  border-left: 3px solid hsl(var(--destructive)) !important;
+}
+
+.site-toast-info {
+  border-left: 3px solid hsl(var(--primary)) !important;
+}
+
+.site-toast-warning {
+  border-left: 3px solid hsl(var(--electric)) !important;
+}

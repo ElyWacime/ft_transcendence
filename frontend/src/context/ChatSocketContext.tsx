@@ -45,6 +45,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     if (!isLoggedIn) {
       return;
     }
+    
     const chatSocket = io(SERVER_URL, {
       withCredentials: true,
       reconnection: true,

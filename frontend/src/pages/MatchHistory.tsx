@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import Home from "./Home";
 import { useAuth } from "@/context/AuthContext";
 import { fetchWithAuth } from "@/lib/tokenRefresh";
+interface Match {
+}
 
 const MatchHistory = () => {
   const navigate = useNavigate();
@@ -15,7 +17,18 @@ const MatchHistory = () => {
   let  {id} = stat;
   if(id == "" || id == null || id == undefined)
     id = user?.id;
-
+  let [names,setnames]= useState(new Map());
+  const getName = async (id: number) => {
+    if(!id)  return null;
+      let res =  await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
+      if (res.status === 200) {
+        let data = await res.json();
+        return data.name;
+      } else {
+        console.error(`Failed to fetch name for id ${id}: ${res.statusText}`);
+        return null;
+      }
+  };
   const getall = async () => {
     const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
     let matchess =  await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/allmatch`, {
@@ -30,7 +43,32 @@ const MatchHistory = () => {
     if (matchess.ok)
     {
       let ndata = await matchess.json();
+      for(let i = 0; i < ndata.matches.length; i++)
+      {
+        if (!names.has(ndata.matches[i].P1_Id)) {
+          let name = await getName(ndata.matches[i].P1_Id);
+          names.set(ndata.matches[i].P1_Id, name);
+        }
+        if (!names.has(ndata.matches[i].P2_Id)) {
+          let name = await getName(ndata.matches[i].P2_Id);
+          names.set(ndata.matches[i].P2_Id, name);
+        }
+        if (!names.has(ndata.matches[i].P3_Id)) {
+          let name = await getName(ndata.matches[i].P3_Id);
+          names.set(ndata.matches[i].P3_Id, name);
+        }
+        if (!names.has(ndata.matches[i].P4_Id)) {
+          let name = await getName(ndata.matches[i].P4_Id);
+          names.set(ndata.matches[i].P4_Id, name);
+        }
+        ndata.matches[i].Name1 = names.get(ndata.matches[i].P1_Id) || "Unknown";
+        ndata.matches[i].Name2 = names.get(ndata.matches[i].P2_Id) || "Unknown";
+        ndata.matches[i].Name3 = names.get(ndata.matches[i].P3_Id) || "Unknown";
+        ndata.matches[i].Name4 = names.get(ndata.matches[i].P4_Id) || "Unknown";
+      }
+      // console.log(names);   
       setFeatures(ndata.matches || []);
+      console.log(">>>>>> ",ndata.matches);
     }
   };
 

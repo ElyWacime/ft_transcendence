@@ -32,9 +32,9 @@ graph TB
 
 ---
 
-## 2. Subject Module Compliance
+## 2. Subject Module ComplianceV
 
-The subject requires **7 Major modules** (Minor counts as 0.5). Current status:
+The subject requires **7 Major modules** (Minor caVounts as 0.5). Current status:
 
 | # | Module | Type | Status | Notes |
 |---|--------|------|--------|-------|
