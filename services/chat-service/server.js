@@ -126,6 +126,15 @@ async function requireInternalServiceKey(request, reply) {
 async function requireAuth(request, reply) {
   const res = await desToken(request);
 
+  if (res.status === 429) {
+    const retryAfter = res.headers.get('Retry-After');
+    if (retryAfter) {
+      reply.header('Retry-After', retryAfter);
+    }
+    const body = await res.json().catch(() => ({ error: 'Too many requests' }));
+    return reply.code(429).send(body);
+  }
+
   if (res.status !== 200) {
     return reply.code(401).send({ error: 'Unauthorized' });
   }
