@@ -33,7 +33,7 @@ const Dashboard_ayoub = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = (location.state as { id?: string }) || {};
-  const { id: stateUserId } = state;
+  const { id } = state;
   const { identifier } = useParams<{ identifier?: string }>();
   const { isLoggedIn, user: authUser } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,7 @@ const Dashboard_ayoub = () => {
     }
 
     const fetchDashboardData = async () => {
-      let userIdentifier = stateUserId || identifier;
+      let userIdentifier = id || identifier;
 
       if (!userIdentifier) {
         userIdentifier = authUser?.name || undefined;
@@ -83,11 +83,11 @@ const Dashboard_ayoub = () => {
     };
 
     fetchDashboardData();
-  }, [stateUserId, identifier, isLoggedIn, navigate, authUser?.name]);
+  }, [id, identifier, isLoggedIn, navigate, authUser?.name]);
 
   useEffect(() => {
     const handleAvatarUpdate = () => {
-      const userIdentifier = stateUserId || identifier || authUser?.name;
+      const userIdentifier = id || identifier || authUser?.name;
       if (userIdentifier && !loading) {
         playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken)
           .then((data) => {
@@ -101,7 +101,7 @@ const Dashboard_ayoub = () => {
 
     window.addEventListener("avatarUpdated", handleAvatarUpdate);
     return () => window.removeEventListener("avatarUpdated", handleAvatarUpdate);
-  }, [stateUserId, identifier, loading, authUser?.name]);
+  }, [id, identifier, loading, authUser?.name]);
 
   if (loading) {
     return (

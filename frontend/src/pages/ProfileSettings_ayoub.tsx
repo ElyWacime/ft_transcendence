@@ -222,7 +222,7 @@ const ProfileSettings = () => {
                 <p className="profile-user-email">{userInfo.email}</p>
                 <button
                   variant="outline"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate("/dashboard",{state : { id: userInfo.User_name }})}
                   className="profile-dashboard-btn dashboard-btn"
                 >
                   <User className="profile-dashboard-icon" />
