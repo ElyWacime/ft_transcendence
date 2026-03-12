@@ -993,12 +993,12 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     const targetUserId = request.params.identifier;
     const matchesCount = await dbcnx.db.get(`SELECT count(*) as Played FROM Match 
       Where (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [targetUserId, targetUserId, targetUserId, targetUserId]);
-    const winsCount = await dbcnx.UserCountWins_ayoub(targetUserId);
-    const lastMatch = await dbcnx.getLasttMatchByPlayerID_ayoub(targetUserId);
+    const winsCount = await dbcnx.UserCountWins(targetUserId);
+    const lastMatch = await dbcnx.getLasttMatchByPlayerID(targetUserId);
     const totalMatches = matchesCount?.Played || 0;
     const totalWins = winsCount?.Winned || 0;
-    const totalTournaments  = await dbcnx.UserCountTournPlayed_ayoub(targetUserId);
-    const totalTourWins = await dbcnx.UserCountTournWin_ayoub(targetUserId);
+    const totalTournaments  = await dbcnx.UserCountTournPlayed(targetUserId);
+    const totalTourWins = await dbcnx.UserCountTournWin(targetUserId);
     const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
     return {
       user: {

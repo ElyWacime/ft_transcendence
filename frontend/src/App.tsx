@@ -16,8 +16,8 @@ import { PublicRoute } from "./components/PublicRoute";
 import Register from "./pages/Register";
 import MatchHistory from "./pages/MatchHistory";
 import MatchMacking from "./pages/MatchMacking";
-import Dashboard_ayoub from "./pages/Dashboard_ayoub";
-import ProfileSettings from "./pages/ProfileSettings_ayoub";
+import Dashboard from "./pages/Dashboard";
+import ProfileSettings from "./pages/ProfileSettings";
 import ChangeEmail from "./pages/Change_email_page";
 import ChangePassword from "./pages/ChangePassword";
 import ChangePicture from "./pages/change-picture";
@@ -83,7 +83,7 @@ const router = createBrowserRouter(
           path: "dashboard/:identifier?",
           element: (
             <ProtectedRoute>
-              <Dashboard_ayoub />
+              <Dashboard />
             </ProtectedRoute>
           ),
         },

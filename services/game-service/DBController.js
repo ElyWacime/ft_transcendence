@@ -169,15 +169,6 @@ export class SQLiteDB {
         `, [id, id, id, id]);
     }
 
-    async getLasttMatchByPlayerID(id) {
-        return this.db.get(`SELECT *
-        FROM Match
-        WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) 
-        ORDER BY CreatedAt DESC
-        LIMIT 1;
-        `, [id, id, id, id]);
-    }
-
     async updateMatch(m) {
         await this.db.run(`
             UPDATE Match SET
@@ -215,16 +206,16 @@ export class SQLiteDB {
         ((P1_Id = ? and P2_Id = ?) OR (P2_Id = ? OR P1_Id = ?));`, [p1,p2,p1,p2]);
     }
 
-    async UserCountWins_ayoub(id) {
+    async UserCountWins(id) {
         return await this.db.get(`SELECT count(*) as Winned  FROM  Match 
         Where (((P1_Id = ?  OR P3_Id = ?) and score1 >= score2 ) OR ((P2_Id = ?  OR P4_Id = ?)and score2 >= score1))  and gameStatus = 'FINISHED';`,[id,id,id,id]);
     }
 
-    async UserCountTournPlayed_ayoub(id) {
+    async UserCountTournPlayed(id) {
         return await this.db.get(`SELECT count(DISTINCT T_Id) as Played  FROM  Match  Where (P1_Id = ? OR P2_Id = ?) AND T_Id is NOT NULL;`,[id, id]);
     }
 
-    async UserCountTournWin_ayoub(id) {
+    async UserCountTournWin(id) {
         return await this.db.get(`SELECT COUNT(*) AS Winned
         FROM (
             SELECT T_Id
@@ -236,12 +227,12 @@ export class SQLiteDB {
         ) t;`,[id]);
     }
 
-    async UserCountMatches_ayoub(id) {
+    async UserCountMatches(id) {
         return await this.db.get(`SELECT count(*) as Played  FROM  Match 
         Where (P1_Id = ?  OR P2_Id = ?  OR P3_Id = ?  OR P4_Id = ?);`, [id,id,id,id]);
     }
 
-    async getLasttMatchByPlayerID_ayoub(id) {
+    async getLasttMatchByPlayerID(id) {
         return this.db.get(`SELECT *
         FROM Match
         WHERE (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?) 

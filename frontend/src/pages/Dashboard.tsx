@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams,useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { playerDashboardApi_ayoub } from "@/lib/api_ayoub";
+import { playerDashboardApi } from "@/lib/api";
 import { User, TrendingUp, Gamepad2, Award, Users, ExternalLink } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -29,7 +29,7 @@ interface DashboardData {
   lastMatch: any | null;
 }
 
-const Dashboard_ayoub = () => {
+const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = (location.state as { id?: string }) || {};
@@ -41,8 +41,6 @@ const Dashboard_ayoub = () => {
   const [error, setError] = useState<string | null>(null);
   const [avatarKey, setAvatarKey] = useState(Date.now());
   const { accessToken, updateAccessToken } = useAuth();
-
-  const API_URL = import.meta.env.VITE_API_URL || 'https://localhost';
 
   const avatarSrc = dashboardData?.user.avatar?.startsWith("data:image") ? dashboardData?.user.avatar : `${dashboardData?.user.avatar || "https://scx2.b-cdn.net/gfx/news/2019/galaxy.jpg"}?t=${avatarKey}`;
 
@@ -65,7 +63,7 @@ const Dashboard_ayoub = () => {
       }
 
       try {
-        const data = await playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken);
+        const data = await playerDashboardApi.getCompleteUserData(userIdentifier, accessToken, updateAccessToken);
         setDashboardData(data);
         setAvatarKey(Date.now());
       } catch (err: any) {
@@ -87,7 +85,7 @@ const Dashboard_ayoub = () => {
     const handleAvatarUpdate = () => {
       const userIdentifier = id || identifier || authUser?.name;
       if (userIdentifier && !loading) {
-        playerDashboardApi_ayoub.getCompleteUserData(userIdentifier, accessToken, updateAccessToken)
+        playerDashboardApi.getCompleteUserData(userIdentifier, accessToken, updateAccessToken)
           .then((data) => {
             setDashboardData(data);
             setAvatarKey(Date.now());
@@ -269,4 +267,4 @@ const Dashboard_ayoub = () => {
   );
 };
 
-export default Dashboard_ayoub;
+export default Dashboard;
