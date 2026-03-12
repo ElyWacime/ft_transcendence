@@ -48,6 +48,7 @@ export default function TournamentOnlinePage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nameCache, setNameCache] = useState<Record<string, string>>({});
   const isConnected = isReady && wsRef?.current?.readyState === WebSocket.OPEN;
 
   const currentUser: CurrentUser | null = user
@@ -83,16 +84,75 @@ export default function TournamentOnlinePage() {
     }
   }, [isConnected]);
 
-  const getName = async (id: number) => {
-      if(!id)  return null;
-      let res =  await fetchWithAuth(`/api/users/get-user/${id}`, { method: "GET" }, accessToken, updateAccessToken);
+  const getName = async (id: string | number | null | undefined) => {
+      if(id === null || id === undefined || id === "")  return null;
+      const key = String(id);
+      if (nameCache[key]) return nameCache[key];
+      let res =  await fetchWithAuth(`/api/users/get-user/${key}`, { method: "GET" }, accessToken, updateAccessToken);
       if (res.status === 200) {
         let data = await res.json();
-        return data.name;
+        const resolved = data?.name ?? key;
+        setNameCache((prev) => ({ ...prev, [key]: resolved }));
+        return resolved;
       } else {
-        console.log(`Failed to fetch name for id ${id}: ${res.statusText}`);
+        console.log(`Failed to fetch name for id ${key}: ${res.statusText}`);
         return null;
       }
+  };
+
+  // Resolve all unique IDs in a tournament list to real names in one batch.
+  // Returns a map of id -> name.
+  const resolveNames = async (tours: Tournament[]): Promise<Map<string, string>> => {
+    const ids = new Set<string>();
+    for (const t of tours) {
+      for (const p of t.participants ?? []) if (p?.id) ids.add(p.id);
+      if (t.createdBy) ids.add(t.createdBy);
+      for (const m of t.semifinals ?? []) {
+        if (m.player1?.id) ids.add(m.player1.id);
+        if (m.player2?.id) ids.add(m.player2.id);
+        if (m.winner?.id) ids.add(m.winner.id);
+      }
+      if (t.final) {
+        if (t.final.player1?.id) ids.add(t.final.player1.id);
+        if (t.final.player2?.id) ids.add(t.final.player2.id);
+        if (t.final.winner?.id) ids.add(t.final.winner.id);
+      }
+      if (t.winner?.id) ids.add(t.winner.id);
+    }
+    const entries = await Promise.all(
+      Array.from(ids).map(async (id) => {
+        const name = await getName(id);
+        return [id, name ?? id] as [string, string];
+      })
+    );
+    return new Map(entries);
+  };
+
+  // Replace all id-as-name fields inside a tournament list using a pre-built name map.
+  const applyNames = (tours: Tournament[], nameMap: Map<string, string>): Tournament[] => {
+    const resolvePart = (p: { id: string; name: string } | null) =>
+      p ? { ...p, name: nameMap.get(p.id) ?? p.name } : p;
+
+    return tours.map((t) => ({
+      ...t,
+      createdByName: t.createdBy ? (nameMap.get(t.createdBy) ?? t.createdByName) : t.createdByName,
+      participants: t.participants.map((p) => resolvePart(p)!),
+      semifinals: (t.semifinals ?? []).map((m) => ({
+        ...m,
+        player1: resolvePart(m.player1),
+        player2: resolvePart(m.player2),
+        winner: resolvePart(m.winner),
+      })),
+      final: t.final
+        ? {
+            ...t.final,
+            player1: resolvePart(t.final.player1),
+            player2: resolvePart(t.final.player2),
+            winner: resolvePart(t.final.winner),
+          }
+        : t.final,
+      winner: resolvePart(t.winner),
+    }));
   };
   useEffect(() => {
     const socket = wsRef?.current;
@@ -101,15 +161,13 @@ export default function TournamentOnlinePage() {
     const handleMessage = async (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-          console.log("Received WS message:",data);
-        for (let index = 0; index < data.tournaments.length; index++) {
-          data.tournaments[index].createdByName = await getName(data.tournaments[index].createdBy);
-          console.log("Received WS message:",data.tournaments[index]);
-        }
+        console.log("Received WS message:", data);
 
-      
         if (data.type === "TOURNAMENTS_STATE") {
-          setTournaments(Array.isArray(data.tournaments) ? data.tournaments : []);
+          const rawTournaments: Tournament[] = Array.isArray(data.tournaments) ? data.tournaments : [];
+          const nameMap = await resolveNames(rawTournaments);
+          const resolved = applyNames(rawTournaments, nameMap);
+          setTournaments(resolved);
           setIsLoading(false);
         }
         if (data.type === "TOURNAMENT_MATCH_READY") {

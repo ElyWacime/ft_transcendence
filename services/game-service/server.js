@@ -428,7 +428,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
 
     if (soloPlayer && !opponent) {
       const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
-      const THREE_MINUTES_MS = 60_000;
+      const THREE_MINUTES_MS = 6_000;
       const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
       if (threeMinutesElapsed) {
         finalMatch.winner = soloPlayer;
@@ -466,8 +466,8 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
         g.score1 = dbMatch.score1;
         g.score2 = dbMatch.score2;
         g.Winner_Id = reporterId;
-        g.player1Name = await getUserName(g.P1_Id);
-        g.player2Name = g.P2_Id ? await getUserName(g.P2_Id) : null;
+        g.player1Name = g.P1_Id;
+        g.player2Name = g.P2_Id ? g.P2_Id : null;
         matches.set(g.id, g);
 
         for (const semi of semifinals) {
@@ -504,8 +504,8 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
           sg.score1 = semiDb.score1;
           sg.score2 = semiDb.score2;
           sg.Winner_Id = semiWinner.id;
-          sg.player1Name = await getUserName(sg.P1_Id);
-          sg.player2Name = sg.P2_Id ? await getUserName(sg.P2_Id) : null;
+          sg.player1Name = sg.P1_Id;
+          sg.player2Name = sg.P2_Id ? sg.P2_Id : null;
           matches.set(sg.id, sg);
           semi.winner = semiWinner;
         }
@@ -535,7 +535,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   if (opponentReady) return; 
 
   const diffMs = Date.now() - new Date(reporterReadyAt).getTime();
-  if (diffMs < 60_000) return;
+  if (diffMs < 6_000) return;
 
   matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
   eliminateParticipant(tournament, opponent.id);
@@ -567,8 +567,8 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   g.score1 = dbMatch.score1;
   g.score2 = dbMatch.score2;
   g.Winner_Id = reporterId;
-  g.player1Name = await getUserName(g.P1_Id);
-  g.player2Name = await getUserName(g.P2_Id);
+  g.player1Name = g.P1_Id;
+  g.player2Name = g.P2_Id;
   matches.set(g.id, g);
 
   if (semifinals.includes(matchSlot)) {
@@ -610,8 +610,7 @@ const updateTournamentAfterMatch = async (gameState) => {
 
   const semMatch = semifinals.find((m) => m.matchId === gameState.id);
   if (semMatch) {
-    let wname = await getUserName(Winner_Id);
-    semMatch.winner = winnerParticipant || { id: Winner_Id, name: wname || "Winner" };
+    semMatch.winner = winnerParticipant || { id: Winner_Id, name: Winner_Id };
     const p1Id = semMatch.player1?.id;
     const p2Id = semMatch.player2?.id;
     const loserId = Winner_Id === p1Id ? p2Id : p1Id;
@@ -637,8 +636,7 @@ const updateTournamentAfterMatch = async (gameState) => {
       }
     }
   } else if (finalMatch && finalMatch.matchId === gameState.id) {
-    let wwname = await getUserName(Winner_Id);
-    finalMatch.winner = winnerParticipant || { id: Winner_Id, name: wwname|| "Winner" };
+    finalMatch.winner = winnerParticipant || { id: Winner_Id, name: Winner_Id };
    const p1Id = finalMatch.player1?.id;
     const p2Id = finalMatch.player2?.id;
     const loserId = Winner_Id === p1Id ? p2Id : p1Id;
@@ -890,7 +888,6 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         const id = userData.user_id;
         await handelDup(connection,id);
         clients.set(id, connection);
-        const name = await getUserName(id);
         if (request.type == "REGISTER") 
           await handelRegister(request,id);
         else if (request.type == "MOVE") 
@@ -901,16 +898,16 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           await handelAlive(id);
         else if (request.type == "TOURNAMENT_CREATE") 
         {
-          const creator = { id, name  };
+          const creator = { id, name: id };
           createTournamentRoom(creator);
         }
         else if (request.type == "TOURNAMENT_LEAVE") 
         {
-        const participant = { id, name};
+        const participant = { id, name: id };
         leaveTournamentRoom(request.tournamentId, participant);
         }
         else if (request.type == "TOURNAMENT_JOIN") {
-          const participant = { id, name };
+          const participant = { id, name: id };
           joinTournamentRoom(request.tournamentId, participant);
         }
         else if (request.type == "TOURNAMENT_READY") {
