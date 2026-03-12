@@ -100,8 +100,6 @@ export default function TournamentOnlinePage() {
       }
   };
 
-  // Resolve all unique IDs in a tournament list to real names in one batch.
-  // Returns a map of id -> name.
   const resolveNames = async (tours: Tournament[]): Promise<Map<string, string>> => {
     const ids = new Set<string>();
     for (const t of tours) {
@@ -128,7 +126,6 @@ export default function TournamentOnlinePage() {
     return new Map(entries);
   };
 
-  // Replace all id-as-name fields inside a tournament list using a pre-built name map.
   const applyNames = (tours: Tournament[], nameMap: Map<string, string>): Tournament[] => {
     const resolvePart = (p: { id: string; name: string } | null) =>
       p ? { ...p, name: nameMap.get(p.id) ?? p.name } : p;
