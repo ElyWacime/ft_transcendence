@@ -100,56 +100,136 @@ export default function TournamentOnlinePage() {
       }
   };
 
-  const resolveNames = async (tours: Tournament[]): Promise<Map<string, string>> => {
+  // Collect all unique user IDs from a list of tournaments.
+  const collectAllIds = (tours: Tournament[]): string[] => {
     const ids = new Set<string>();
-    for (const t of tours) {
-      for (const p of t.participants ?? []) if (p?.id) ids.add(p.id);
-      if (t.createdBy) ids.add(t.createdBy);
-      for (const m of t.semifinals ?? []) {
-        if (m.player1?.id) ids.add(m.player1.id);
-        if (m.player2?.id) ids.add(m.player2.id);
-        if (m.winner?.id) ids.add(m.winner.id);
+
+    const addId = (id: string | null | undefined) => {
+      if (id) ids.add(id);
+    };
+
+    for (const tournament of tours) {
+      // Creator
+      addId(tournament.createdBy);
+
+      // Participants
+      for (const participant of tournament.participants || []) {
+        addId(participant?.id);
       }
-      if (t.final) {
-        if (t.final.player1?.id) ids.add(t.final.player1.id);
-        if (t.final.player2?.id) ids.add(t.final.player2.id);
-        if (t.final.winner?.id) ids.add(t.final.winner.id);
+
+      // Semifinals matches
+      for (const match of tournament.semifinals || []) {
+        addId(match.player1?.id);
+        addId(match.player2?.id);
+        addId(match.winner?.id);
       }
-      if (t.winner?.id) ids.add(t.winner.id);
+
+      // Final match
+      if (tournament.final) {
+        addId(tournament.final.player1?.id);
+        addId(tournament.final.player2?.id);
+        addId(tournament.final.winner?.id);
+      }
+
+      // Tournament winner
+      addId(tournament.winner?.id);
     }
-    const entries = await Promise.all(
-      Array.from(ids).map(async (id) => {
-        const name = await getName(id);
-        return [id, name ?? id] as [string, string];
-      })
-    );
-    return new Map(entries);
+
+    return Array.from(ids);
   };
 
-  const applyNames = (tours: Tournament[], nameMap: Map<string, string>): Tournament[] => {
-    const resolvePart = (p: { id: string; name: string } | null) =>
-      p ? { ...p, name: nameMap.get(p.id) ?? p.name } : p;
+  // Resolve all unique IDs to real names in one batch. Returns a map of id -> name.
+  const resolveNames = async (tours: Tournament[]): Promise<Map<string, string>> => {
+    const allIds = collectAllIds(tours);
 
-    return tours.map((t) => ({
-      ...t,
-      createdByName: t.createdBy ? (nameMap.get(t.createdBy) ?? t.createdByName) : t.createdByName,
-      participants: t.participants.map((p) => resolvePart(p)!),
-      semifinals: (t.semifinals ?? []).map((m) => ({
-        ...m,
-        player1: resolvePart(m.player1),
-        player2: resolvePart(m.player2),
-        winner: resolvePart(m.winner),
-      })),
-      final: t.final
-        ? {
-            ...t.final,
-            player1: resolvePart(t.final.player1),
-            player2: resolvePart(t.final.player2),
-            winner: resolvePart(t.final.winner),
-          }
-        : t.final,
-      winner: resolvePart(t.winner),
-    }));
+    // Fetch all names in parallel
+    const resolvedPairs = await Promise.all(
+      allIds.map(async (id) => {
+        const name = await getName(id);
+        const finalName = name || id; // fallback to id if name not found
+        return { id, name: finalName };
+      })
+    );
+
+    // Build the map
+    const nameMap = new Map<string, string>();
+    for (const pair of resolvedPairs) {
+      nameMap.set(pair.id, pair.name);
+    }
+
+    return nameMap;
+  };
+
+  // Replace a participant's name using the name map.
+  const replaceParticipantName = (
+    participant: Participant | null,
+    nameMap: Map<string, string>
+  ): Participant | null => {
+    if (!participant) return null;
+    const resolvedName = nameMap.get(participant.id) || participant.name;
+    return { ...participant, name: resolvedName };
+  };
+
+  // Replace a match slot's player/winner names using the name map.
+  const replaceMatchNames = (
+    match: MatchSlot,
+    nameMap: Map<string, string>
+  ): MatchSlot => {
+    return {
+      ...match,
+      player1: replaceParticipantName(match.player1, nameMap),
+      player2: replaceParticipantName(match.player2, nameMap),
+      winner: replaceParticipantName(match.winner, nameMap),
+    };
+  };
+
+  // Replace all id-as-name fields inside a tournament list using a pre-built name map.
+  const applyNames = (tours: Tournament[], nameMap: Map<string, string>): Tournament[] => {
+    const result: Tournament[] = [];
+
+    for (const tournament of tours) {
+      // Resolve createdByName
+      let resolvedCreatedByName = tournament.createdByName;
+      if (tournament.createdBy) {
+        resolvedCreatedByName = nameMap.get(tournament.createdBy) || tournament.createdByName;
+      }
+
+      // Resolve participants
+      const resolvedParticipants: Participant[] = [];
+      for (const participant of tournament.participants) {
+        const updated = replaceParticipantName(participant, nameMap);
+        if (updated) resolvedParticipants.push(updated);
+      }
+
+      // Resolve semifinals
+      const resolvedSemifinals: MatchSlot[] = [];
+      for (const match of tournament.semifinals || []) {
+        resolvedSemifinals.push(replaceMatchNames(match, nameMap));
+      }
+
+      // Resolve final
+      let resolvedFinal = tournament.final;
+      if (tournament.final) {
+        resolvedFinal = replaceMatchNames(tournament.final, nameMap);
+      }
+
+      // Resolve tournament winner
+      const resolvedWinner = replaceParticipantName(tournament.winner || null, nameMap);
+
+      // Build the updated tournament object
+      const updatedTournament: Tournament = {
+        ...tournament,
+        createdByName: resolvedCreatedByName,
+        participants: resolvedParticipants,
+        semifinals: resolvedSemifinals,
+        final: resolvedFinal,
+        winner: resolvedWinner,
+      };
+
+      result.push(updatedTournament);
+    }
+
+    return result;
   };
   useEffect(() => {
     const socket = wsRef?.current;
