@@ -23,7 +23,7 @@ export const WebSocketProvider = ({ children }) => {
 
       const data = JSON.parse(event.data);
       if (window.location.pathname !== "/online-tournaments" && data?.waitingMatch) {
-        toast.info("you have a match waiting in the tournament", {position:"top-right"});
+        toast.info("you have a match waiting in the tournament", {position:"bottom-right"});
       }
       if (data.score1 >= 5 || data.score2 >= 5) {
         let message = "";
