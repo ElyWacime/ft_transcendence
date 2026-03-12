@@ -392,6 +392,8 @@ io.use(async (socket, next) => {
 io.on('connection', async (socket) => {
   const myId = socket.userId;
 
+  console.log({myId})
+
   socket.emit('authenticate', { userId: myId });
     
   socket.join(`user:${myId}`);
@@ -483,8 +485,8 @@ io.on('connection', async (socket) => {
     });
   });
 
-  socket.on('cancelInvite', ({ toUserId  }) => {
-    socket.to(`user:${toUserId}`).emit('cancelInvite', {});
+  socket.on('cancelInvite', ({ toUserId, conversationId }) => {
+    socket.to(`user:${toUserId}`).emit('cancelInvite', {conversationId});
   });
 
   socket.on('InviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {

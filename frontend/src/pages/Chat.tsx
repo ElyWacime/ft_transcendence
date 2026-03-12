@@ -152,15 +152,13 @@ export default function Chat() {
     if (!socket || !isConnected || !conversation?.other_user_id) return
 
 
-    const response = await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
+    await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: conversation.other_user_id, invitationType: invitationType })
     }, accessToken, updateAccessToken)
     
-    const re = await response.json()    
-
     setPendingInvitations((prev: any) => ({
       ...prev,
       [conversation.id]: {
@@ -168,27 +166,30 @@ export default function Chat() {
         [invitationType]: false
       }
     }))
-    
-    setInvitePrompt(null)
+
     socket.emit('cancelInvite', {
+      conversationId: conversation.id,
       toUserId: conversation.other_user_id,
       invitationType: invitationType
     })
   }
 
   const respondInvite = async (accepted: boolean, invitationType: string) => {
-    if (!socket || !invitePrompt) return
+    if (!socket || !selectedId) return
+
+    const activeInvitePrompt = invitePrompt?.[selectedId]
+    if (!activeInvitePrompt) return
     
     await fetchWithAuth(`${SERVER_URL}/api/chat/uninvite`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: invitePrompt.fromUserId, invitationType: invitationType })
+            body: JSON.stringify({ user_id: activeInvitePrompt.fromUserId, invitationType: invitationType })
     }, accessToken, updateAccessToken)
 
     socket.emit('InviteResponse', {
-            conversationId: invitePrompt.conversationId,
-            toUserId: invitePrompt.fromUserId,
+            conversationId: activeInvitePrompt.conversationId,
+            toUserId: activeInvitePrompt.fromUserId,
             fromUserId: currentUser.id,
             invitationType: invitationType,
             accepted,
@@ -198,7 +199,7 @@ export default function Chat() {
     {
       if (invitationType === "game_request")
       {
-        let res = await inviteHandle(invitePrompt.fromUserId,  currentUser.id);
+        let res = await inviteHandle(activeInvitePrompt.fromUserId,  currentUser.id);
         if (res.ok)
           navigate(`/loading?mode=2`);
       } else if (invitationType === "friend_request")
@@ -207,32 +208,24 @@ export default function Chat() {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: invitePrompt.fromUserId })
+          body: JSON.stringify({ user_id: activeInvitePrompt.fromUserId })
         }, accessToken, updateAccessToken)
   
         if (response.ok) {
           setFriendsList((prev: any) => ({
             ...prev,
-            [invitePrompt.fromUserId]: { ...prev[invitePrompt.fromUserId], isFriend: true }
+            [activeInvitePrompt.fromUserId]: { ...prev[activeInvitePrompt.fromUserId], isFriend: true }
           }))
         }
-        socket.emit('AddFriendOnline', { userId: invitePrompt.fromUserId })
+        socket.emit('AddFriendOnline', { userId: activeInvitePrompt.fromUserId })
       }              
     }
 
-    setInvitePrompt(null)    
-
-    const respondingConversation = conversations.find(c => c.other_user_id === invitePrompt?.fromUserId)
-    if (respondingConversation) {
-      setPendingInvitations((prev: any) => ({
-        ...prev,
-        [respondingConversation.id]: {
-          ...prev[respondingConversation.id],
-          [invitationType]: false
-        }
-      }))
-    
-    }
+    setInvitePrompt((prev: any) => {
+      const updated = { ...prev }
+      delete updated[activeInvitePrompt.conversationId]
+      return updated
+    })
   }
 
   const getChatHistory = async (conversationId: number) => {
@@ -301,26 +294,41 @@ export default function Chat() {
       const data = await res.json()
 
       if (res.ok) {
-        setPendingInvitations((prev: any) => ({
-          ...prev,
-          [conversation.id]: {
-            ...prev[conversation.id],
-            [invitationType]: data.pending
-          }
-        }))
-        
         if (data.pending === true) {
           if (data.invitedBy === "other") {
-            setInvitePrompt({
-              conversationId: conversation.id,
-              fromUserId: conversation.other_user_id,
-              invitationType: invitationType
-            })
+            setInvitePrompt((prev: any) => ({
+              ...prev,
+              [conversation.id]: {
+                conversationId: conversation.id,
+                fromUserId: conversation.other_user_id,
+                invitationType: invitationType
+              }
+            }))
+          } else
+          {
+            setPendingInvitations((prev: any) => ({
+              ...prev,
+              [conversation.id]: {
+                ...prev[conversation.id],
+                [invitationType]: data.pending
+              }
+            }))            
           }
         } else {
-          if (invitePrompt?.conversationId === conversation.id && 
-              invitePrompt?.invitationType === invitationType) {
-            setInvitePrompt(null)
+          if (data.invitedBy === "other") {
+            setInvitePrompt((prev: any) => {
+              const updated = { ...prev }
+              delete updated[conversation.id]
+              return updated
+            })
+          } else {
+            setPendingInvitations((prev: any) => ({
+              ...prev,
+              [conversation.id]: {
+                ...prev[conversation.id],
+                [invitationType]: data.pending
+              }
+            }))
           }
         }
       }

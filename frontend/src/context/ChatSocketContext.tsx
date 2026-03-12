@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
-import { fetchWithAuth, refreshToken } from "@/lib/tokenRefresh";
+import { refreshToken } from "@/lib/tokenRefresh";
 
 type ChatSocketContextValue = {
   socket: Socket | null;
@@ -13,8 +13,10 @@ type ChatSocketContextValue = {
   currentUser: any;
   friendsList: any;
   setFriendsList: (friends: any) => void;
-  pendingAddFriend: boolean;
-  setPendingAddFriend: (pending: boolean) => void;
+  pendingInvitations: any;
+  setPendingInvitations: (pending: any) => void;
+  blockedConversations: any;
+  setBlockedConversations: (blocked: any) => void;
 };
 
 const ChatSocketContext = createContext<ChatSocketContextValue | null>(null);
@@ -26,7 +28,7 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const [invitePrompt, setInvitePrompt] = useState<any>(null);
+    const [invitePrompt, setInvitePrompt] = useState<any>({});
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [friendsList, setFriendsList] = useState<any>({})
     const [pendingInvitations, setPendingInvitations] = useState<any>({})
@@ -77,11 +79,15 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
       setFriendsList({});
       setPendingInvitations({});
       setBlockedConversations({});
+      setInvitePrompt({});
       setIsConnected(false)
     });
     
     chatSocket.on("Invite", (data: any) => {
-      setInvitePrompt(data);
+      setInvitePrompt((prev) => ({
+        ...prev,
+        [data.conversationId]: data
+      }));
     });
 
     chatSocket.on('onlineFriends', (data: any) => {
@@ -131,8 +137,14 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     }    
     chatSocket.on('InviteResponse', handleGameInviteResponse)
 
-    const handleCancelInvite = async ({invitationType}) => {
-      setInvitePrompt(null);
+    const handleCancelInvite = ({ conversationId }: any) => {
+      if (!conversationId) return;
+      
+      setInvitePrompt((prev: any) => {
+        const updated = { ...prev };
+        delete updated[conversationId];
+        return updated;
+      });
     }
     chatSocket.on("cancelInvite", handleCancelInvite);
     
