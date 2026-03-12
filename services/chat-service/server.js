@@ -483,8 +483,8 @@ io.on('connection', async (socket) => {
     });
   });
 
-  socket.on('cancelInvite', ({ toUserId  }) => {
-    socket.to(`user:${toUserId}`).emit('cancelInvite', {});
+  socket.on('cancelInvite', ({ toUserId, conversationId }) => {
+    socket.to(`user:${toUserId}`).emit('cancelInvite', {conversationId});
   });
 
   socket.on('InviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {

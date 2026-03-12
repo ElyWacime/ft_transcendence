@@ -81,8 +81,8 @@ useEffect(() => {
           <div className="features-grid1">
           {features.length > 0 ?  (features.map((feature) => {
             let cardClass = "feature-card1"; 
-            if ((feature.Winner_Id == feature.P1_Id  || feature.Winner_Id == feature.P3_Id ) && feature.Winner_Id == id) cardClass += " match-win";
-            else if ((feature.Winner_Id == feature.P2_Id  || feature.Winner_Id == feature.P4_Id ) && feature.Winner_Id == id) cardClass += " match-win";
+            if ((feature.Winner_Id == feature.P1_Id  || feature.Winner_Id == feature.P3_Id ) && (feature.P1_Id == id || feature.P3_Id == id ) ) cardClass += " match-win";
+            else if ((feature.Winner_Id == feature.P2_Id  || feature.Winner_Id == feature.P4_Id ) && (feature.P2_Id == id || feature.P4_Id == id )) cardClass += " match-win";
             else if (feature.gameStatus == 'FINISHED') cardClass += " match-loss";
             else
               cardClass += " match-pend";
