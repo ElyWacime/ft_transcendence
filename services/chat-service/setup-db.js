@@ -4,7 +4,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const SCHEMA_FILE_PATH = path.join(process.cwd(), 'schema.sql');
-const DB_PATH = './dev.db';
+const DB_PATH = './db/dev.db';
 let db;
 
 async function setupDatabase(db) {

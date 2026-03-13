@@ -5,12 +5,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - ./services/gateway/certs:/app/certs:ro
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - VITE_HTTPS=true
+      - ./services/gateway/certs:/etc/nginx/certs:ro
     networks:
       - transcendence
     restart: always
@@ -43,6 +38,7 @@ services:
       - ./services/chat-service:/app
       -  /app/node_modules
       - ./services/gateway/certs:/app/certs:ro
+      - ./services/chat-service/db:/app/db
     env_file:
       - ./services/chat-service/.env
     environment:
