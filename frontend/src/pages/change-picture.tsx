@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -14,8 +15,7 @@ const ChangePicture = () => {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState("");
-  const [currentAvatar, setCurrentAvatar] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [username, setUsername] = useState("");
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const ChangePicture = () => {
       try {
         const userId = user?.id;
         if (userId) {
-          setCurrentAvatar(user.avatar || "");
+
           setPreviewUrl(user.avatar || "");
           setUsername(user.User_name || "");
         }
@@ -40,7 +40,7 @@ const ChangePicture = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedFile(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);

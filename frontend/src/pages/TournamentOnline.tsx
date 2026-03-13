@@ -308,7 +308,7 @@ export default function TournamentOnlinePage() {
     setIsSubmitting(true);
     const ok = sendAction({ type: "TOURNAMENT_REPORT_MISSING", tournamentId, matchId });
     if (ok) {
-      toast.message("click report if you think your opponent is missing.");
+      toast.message("after you click READY, if your opponent doesn't show up within 5 minutes, you can report them as missing and automatically advance to the next round.");
       requestTournaments();
     }
     setIsSubmitting(false);
@@ -382,7 +382,7 @@ export default function TournamentOnlinePage() {
                   <button
                     title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
                     className="primary"
-                    disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 && t.status == "finals") || t.status == "completed"}
+                    disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 && t.status == "finals") || t.status == "completed"} 
                     onClick={() => reportMissing(t.id, m.id)}
                   >
                     Report
@@ -413,7 +413,7 @@ export default function TournamentOnlinePage() {
                 <button
                   className="primary"
                   title="Report if your opponent didnt show up - for more than 30 minutes since the beginning of the tournamament , or if your opponent present but remains unready for more than 5 minutes."
-                  disabled={isSubmitting ||  !iAmInside || t.status == "completed"}
+                  disabled={isSubmitting ||  !iAmInside || t.status == "completed" || t.participants.length ==1}
                   onClick={() => reportMissing(t.id, t.final?.id || "final")}
                 >
                   Report

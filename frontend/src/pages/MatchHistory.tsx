@@ -13,8 +13,14 @@ const MatchHistory = () => {
 
   const [features, setFeatures] = useState([]);
   let  {id} = stat;
+  console.log("Received id from location state:", id);
   if(id == "" || id == null || id == undefined)
+  {
     id = user?.id;
+    console.log("SET id from location:", id);
+  }
+
+  
   let [names,setnames]= useState(new Map());
   const getName = async (id: number) => {
     if(!id)  return null;
@@ -66,6 +72,7 @@ const MatchHistory = () => {
         ndata.matches[i].Name4 = names.get(ndata.matches[i].P4_Id) || "Unknown";
       }
       setFeatures(ndata.matches || []);
+      console.log("Fetched matches:", ndata.matches);
     }
   };
 
@@ -81,17 +88,22 @@ useEffect(() => {
           <div className="features-grid1">
           {features.length > 0 ?  (features.map((feature) => {
             let cardClass = "feature-card1"; 
-            if ((feature.Winner_Id == feature.P1_Id  || feature.Winner_Id == feature.P3_Id ) && (feature.P1_Id == id || feature.P3_Id == id ) ) cardClass += " match-win";
+            if (feature.gameStatus != 'FINISHED') cardClass += " match-pend";
+            else if ((feature.Winner_Id == feature.P1_Id  || feature.Winner_Id == feature.P3_Id) && (feature.P1_Id == id || feature.P3_Id == id ) ) cardClass += " match-win";
             else if ((feature.Winner_Id == feature.P2_Id  || feature.Winner_Id == feature.P4_Id ) && (feature.P2_Id == id || feature.P4_Id == id )) cardClass += " match-win";
-            else if (feature.gameStatus == 'FINISHED') cardClass += " match-loss";
-            else
-              cardClass += " match-pend";
+            else  cardClass += " match-loss";
             return (
               <Card key={feature.id} className={cardClass}>
                 <div className="feature-card-content">
                   <h3 className="feature-title">{feature.score1} - {feature.score2}</h3>
                   <h4 className="feature-title"> {feature.Name1}{feature.mode === 4 ? " & " + feature.Name3 : ""} vs {feature.Name2}{feature.mode === 4 ? " & " + feature.Name4 : ""}</h4>
-                  <p className="feature-description">{feature.CreatedAt}</p>
+                  <p className="feature-description">{feature.P1_Id}</p>
+                  <p className="feature-description">{feature.P2_Id}</p>
+                  <p className="feature-description">{feature.P3_Id}</p>
+                  <p className="feature-description">{feature.P4_Id}</p>
+                  <p className="feature-description">{cardClass}</p>
+                  <p className="feature-description">{id}</p>
+                  <p className="feature-description">{feature.Winner_Id}</p>
                 </div>
               </Card>
             );
