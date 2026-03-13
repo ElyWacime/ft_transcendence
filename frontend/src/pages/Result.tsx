@@ -4,7 +4,7 @@ import {useCallback,useEffect} from "react";
 const Result = () => { 
     const navigate = useNavigate();
     const location = useLocation();
-    const stat = location.state | "" ;
+    const stat = location.state ;
     
     useEffect(() => {
       if (!stat) {
@@ -17,7 +17,7 @@ const Result = () => {
     }
     
     let {message} = stat;
-    const resetGame = useCallback(() => {navigate(`/loading?mode=${stat.mode}`)}, []);
+    const resetGame = useCallback(() => {navigate("/loading?mode=2")}, []);
     return (<>
         <div className="ai-game-page">
         <div className="ai-game-container">
