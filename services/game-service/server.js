@@ -423,9 +423,9 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
 
     if (soloPlayer && !opponent) {
       const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
-      const THREE_MINUTES_MS = 6_000;
-      const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
-      if (threeMinutesElapsed) {
+      const MINUTES_MS = 6 * 300000;
+      const MinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= MINUTES_MS : false;
+      if (MinutesElapsed) {
         finalMatch.winner = soloPlayer;
         tournament.winner = soloPlayer;
         tournament.status = "completed";
@@ -530,7 +530,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   if (opponentReady) return; 
 
   const diffMs = Date.now() - new Date(reporterReadyAt).getTime();
-  if (diffMs < 6_000) return;
+  if (diffMs < 300000) return;
 
   matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
   eliminateParticipant(tournament, opponent.id);
