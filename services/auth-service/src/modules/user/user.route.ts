@@ -41,9 +41,9 @@ export async function userRoutes(app: FastifyInstance) {
         type: "object",
         required: ["email", "password", "name"],
         properties: {
-          email: { type: "string", format: "email" },
+          email: { type: "string", format: "email", maxLength: 50 },
           password: { type: "string", minLength: 6 },
-          name: { type: "string" },
+          name: { type: "string", maxLength: 50, minLength: 3 },
         },
       },
       response: {
