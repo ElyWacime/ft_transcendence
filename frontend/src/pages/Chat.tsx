@@ -193,7 +193,7 @@ export default function Chat() {
           navigate(`/loading?mode=2`);
         else
         {
-          toast.error("Your friend is on another match!")
+          toast.error("You or your friend is on another match!")
           t = true
         }
       } else if (invitationType === "friend_request")

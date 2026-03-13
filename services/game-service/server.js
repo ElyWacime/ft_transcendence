@@ -3,7 +3,7 @@ import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
 import * as fs from "fs";
 import https from "https";
-import { randomUUID } from "crypto"; 
+import { randomUUID } from "crypto";
 import { Match, SQLiteDB, GameState } from "./DBController.js";
 
 
@@ -14,7 +14,7 @@ const httpsOptions = process.env.USE_HTTPS === "true" ? {
   }
 } : {};
 
-const fastify = Fastify({ 
+const fastify = Fastify({
   logger: false,
   ...httpsOptions
 });
@@ -24,8 +24,8 @@ await fastify.register(websocket);
 await fastify.register(cors, {
   origin: true,
   credentials: true,
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization","Origin","X-Requested-With","Accept","Cookie"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Origin", "X-Requested-With", "Accept", "Cookie"],
 });
 
 let dbcnx = new SQLiteDB();
@@ -40,56 +40,54 @@ const MAX_Score = 5;
 
 await dbcnx.connect();
 
-async function desToken(request)
-{
-   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
-   
-   let token = null;
-   const authHeader = request.headers.authorization;
-   
-   if (authHeader && authHeader.startsWith('Bearer ')) {
-     token = authHeader.substring(7); 
-   } else if (request.cookies.access_token) {
-     token = request.cookies.access_token; 
-   }
-   
-   if (!token) {
-     return { status: 401, error: 'No token provided' };
-   }
-   
-   const fetchOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-   };
-   
-   try {
-     const response = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
-     
-     if (response.status === 200) {
-       const data = await response.json();
-       const userData = { 
-         status: 200, 
-         user_id: data.user_id,
-       };
-       tokens.set(token, userData); 
-       return userData;
-     }
-     
-     return { status: response.status, error: 'Authentication failed' };
-   } catch (error) {
-     console.error('Auth service error:', error);
-     return { status: 500, error: 'Auth service unavailable' };
-   }
+async function desToken(request) {
+  const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+
+  let token = null;
+  const authHeader = request.headers.authorization;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  } else if (request.cookies.access_token) {
+    token = request.cookies.access_token;
+  }
+
+  if (!token) {
+    return { status: 401, error: 'No token provided' };
+  }
+
+  const fetchOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  };
+
+  try {
+    const response = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
+
+    if (response.status === 200) {
+      const data = await response.json();
+      const userData = {
+        status: 200,
+        user_id: data.user_id,
+      };
+      tokens.set(token, userData);
+      return userData;
+    }
+
+    return { status: response.status, error: 'Authentication failed' };
+  } catch (error) {
+    console.error('Auth service error:', error);
+    return { status: 500, error: 'Auth service unavailable' };
+  }
 }
 
-const sendtoplayer = async (id, data) => 
-{
+const sendtoplayer = async (id, data) => {
   if (id) {
     let socket = (clients.get(id));
     if (socket && socket.readyState === 1)
       socket.send(data);
-    }
+  }
 }
 
 function broadcastAll(data) {
@@ -113,8 +111,7 @@ const eliminateParticipant = (tournament, participantId) => {
   tournament.full = true;
 };
 
-function moveplayer(m,y,up,down,id,dt)
-{
+function moveplayer(m, y, up, down, id, dt) {
   if (!id) return null;
   if (up)
     y = Math.max(0, y - (PADDLE_SPEED * dt));
@@ -123,11 +120,9 @@ function moveplayer(m,y,up,down,id,dt)
   return y;
 }
 
-function playercoli(m,x,y,id, n,dt)
-{
+function playercoli(m, x, y, id, n, dt) {
   if (!id) return;
-  if (n == 1)
-  {
+  if (n == 1) {
     if (
       m.Ball_x - m.ball_radius <= x + m.sizePaddle_width &&
       m.Ball_x - m.ball_radius >= x &&
@@ -135,52 +130,51 @@ function playercoli(m,x,y,id, n,dt)
       m.Ball_y - m.ball_radius <= y + m.sizePaddle_height &&
       m.Ball_dx < 0
     ) {
-         m.Ball_x = x + m.sizePaddle_width + m.ball_radius;
-         m.Ball_dx *= -1;
-         if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < MAX_Speed * MAX_Speed) {
-           m.Ball_dx *= 1.2;
-           m.Ball_dy *= 1.2;
-           }
+      m.Ball_x = x + m.sizePaddle_width + m.ball_radius;
+      m.Ball_dx *= -1;
+      if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < MAX_Speed * MAX_Speed) {
+        m.Ball_dx *= 1.2;
+        m.Ball_dy *= 1.2;
+      }
     }
   }
-  else if (n == 0)
-  {
+  else if (n == 0) {
     if (
       m.Ball_x + m.ball_radius >= x &&
       m.Ball_x + m.ball_radius <= x + m.sizePaddle_width &&
       m.Ball_y + m.ball_radius >= y &&
       m.Ball_y - m.ball_radius <= y + m.sizePaddle_height &&
       m.Ball_dx > 0
-    ){
-         m.Ball_x = x - m.ball_radius;
-         m.Ball_dx = -m.Ball_dx;
-         if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < MAX_Speed * MAX_Speed) {
-          m.Ball_dx *= 1.2;
-          m.Ball_dy *= 1.2;
-    }
+    ) {
+      m.Ball_x = x - m.ball_radius;
+      m.Ball_dx = -m.Ball_dx;
+      if (m.Ball_dx * m.Ball_dx + m.Ball_dy * m.Ball_dy < MAX_Speed * MAX_Speed) {
+        m.Ball_dx *= 1.2;
+        m.Ball_dy *= 1.2;
+      }
     }
   }
 }
 
-function tick(m,dt) {
+function tick(m, dt) {
   if (m.gameStatus !== "PLAYING") return;
 
-  m.Player1_y = moveplayer(m, m.Player1_y, m.p1UPkey, m.p1Downkey, m.P1_Id,dt);
-  m.Player2_y = moveplayer(m, m.Player2_y, m.p2UPkey, m.p2Downkey, m.P2_Id,dt);
-  m.Player3_y = moveplayer(m, m.Player3_y, m.p3UPkey, m.p3Downkey, m.P3_Id,dt);
-  m.Player4_y = moveplayer(m, m.Player4_y, m.p4UPkey, m.p4Downkey, m.P4_Id,dt);
-  m.Ball_x += m.Ball_dx*dt;
-  m.Ball_y += m.Ball_dy*dt;
+  m.Player1_y = moveplayer(m, m.Player1_y, m.p1UPkey, m.p1Downkey, m.P1_Id, dt);
+  m.Player2_y = moveplayer(m, m.Player2_y, m.p2UPkey, m.p2Downkey, m.P2_Id, dt);
+  m.Player3_y = moveplayer(m, m.Player3_y, m.p3UPkey, m.p3Downkey, m.P3_Id, dt);
+  m.Player4_y = moveplayer(m, m.Player4_y, m.p4UPkey, m.p4Downkey, m.P4_Id, dt);
+  m.Ball_x += m.Ball_dx * dt;
+  m.Ball_y += m.Ball_dy * dt;
 
   if (m.Ball_y - m.ball_radius <= 0 || m.Ball_y + m.ball_radius >= m.height) {
     m.Ball_dy *= -1;
     m.Ball_y = Math.max(m.ball_radius, Math.min(m.height - m.ball_radius, m.Ball_y));
   }
 
-  playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id,1,dt);
-  playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id,1,dt);
-  playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id,0,dt);
-  playercoli(m, m.Player4_x, m.Player4_y, m.P4_Id,0,dt);
+  playercoli(m, m.Player1_x, m.Player1_y, m.P1_Id, 1, dt);
+  playercoli(m, m.Player3_x, m.Player3_y, m.P3_Id, 1, dt);
+  playercoli(m, m.Player2_x, m.Player2_y, m.P2_Id, 0, dt);
+  playercoli(m, m.Player4_x, m.Player4_y, m.P4_Id, 0, dt);
 
   if (m.Ball_x < 0) {
     m.score2 += 1;
@@ -189,12 +183,11 @@ function tick(m,dt) {
     m.score1 += 1;
     resetBall(1, m);
   }
-  if (m.score2 >= MAX_Score || m.score1 >= MAX_Score)
-  {
+  if (m.score2 >= MAX_Score || m.score1 >= MAX_Score) {
     m.gameStatus = "FINISHED";
     m.Winner_Id = m.P2_Id;
     if (m.score1 >= m.score2)
-    m.Winner_Id = m.P1_Id;
+      m.Winner_Id = m.P1_Id;
     updateTournamentAfterMatch(m);
 
     dbcnx.updateMatch(m);
@@ -281,7 +274,7 @@ const joinTournamentRoom = (id, participant) => {
   const tournament = tournaments.get(id);
   if (!tournament || tournament.full) return tournament;
   const exists = tournament.participants.some((p) => p.id === participant.id);
-  if (!exists) {  
+  if (!exists) {
     tournament.participants.push(participant);
   }
   tournament.full = tournament.participants.length >= 4;
@@ -345,19 +338,19 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
 
   if (bothReady) {
 
-    let [m1, m2]= await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
-      if (m1 || m2) {
-        if (m1) {
-          matchSlot.ready[matchSlot.player1.id] = false;
-          matchSlot.readyAt[matchSlot.player1.id] = null;
-        }
-        if (m2) {
-          matchSlot.ready[matchSlot.player2.id] = false;
-          matchSlot.readyAt[matchSlot.player2.id] = null;
-        }
-        broadcastTournamentState();
-        return;
+    let [m1, m2] = await Promise.all([dbcnx.getAvaiable(matchSlot.player1.id), dbcnx.getAvaiable(matchSlot.player2.id)]);
+    if (m1 || m2) {
+      if (m1) {
+        matchSlot.ready[matchSlot.player1.id] = false;
+        matchSlot.readyAt[matchSlot.player1.id] = null;
       }
+      if (m2) {
+        matchSlot.ready[matchSlot.player2.id] = false;
+        matchSlot.readyAt[matchSlot.player2.id] = null;
+      }
+      broadcastTournamentState();
+      return;
+    }
 
 
 
@@ -403,7 +396,7 @@ const handleTournamentReady = async (tournamentId, matchId, playerId) => {
 };
 
 const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) => {
-  
+
   const tournament = tournaments.get(tournamentId);
   if (!tournament) return;
 
@@ -414,7 +407,7 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
   if (!matchSlot) return;
 
   const isFinal = finalMatch && finalMatch.id === matchId;
-  
+
   if (isFinal) {
     const reporterIsPlayer1 = matchSlot.player1?.id === reporterId;
     const reporterIsPlayer2 = matchSlot.player2?.id === reporterId;
@@ -423,9 +416,9 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
 
     if (soloPlayer && !opponent) {
       const createdAtMs = tournament.createdAt ? new Date(tournament.createdAt).getTime() : null;
-      const THREE_MINUTES_MS = 6_000;
-      const threeMinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= THREE_MINUTES_MS : false;
-      if (threeMinutesElapsed) {
+      const MINUTES_MS = 6 * 300000;
+      const MinutesElapsed = createdAtMs ? Date.now() - createdAtMs >= MINUTES_MS : false;
+      if (MinutesElapsed) {
         finalMatch.winner = soloPlayer;
         tournament.winner = soloPlayer;
         tournament.status = "completed";
@@ -522,15 +515,15 @@ const handleReportMissingOpponent = async (tournamentId, matchId, reporterId) =>
 
   const reporterReadyAt = matchSlot.readyAt[reporterId];
   const reporterReady = Boolean(matchSlot.ready[reporterId]);
-  if (!reporterReady || !reporterReadyAt) return; 
+  if (!reporterReady || !reporterReadyAt) return;
 
   const opponent = matchSlot.player1.id === reporterId ? matchSlot.player2 : matchSlot.player1;
   if (!opponent) return;
   const opponentReady = Boolean(matchSlot.ready[opponent.id]);
-  if (opponentReady) return; 
+  if (opponentReady) return;
 
   const diffMs = Date.now() - new Date(reporterReadyAt).getTime();
-  if (diffMs < 6_000) return;
+  if (diffMs < 300000) return;
 
   matchSlot.winner = matchSlot.player1.id === reporterId ? matchSlot.player1 : matchSlot.player2;
   eliminateParticipant(tournament, opponent.id);
@@ -632,7 +625,7 @@ const updateTournamentAfterMatch = async (gameState) => {
     }
   } else if (finalMatch && finalMatch.matchId === gameState.id) {
     finalMatch.winner = winnerParticipant || { id: Winner_Id, name: Winner_Id };
-   const p1Id = finalMatch.player1?.id;
+    const p1Id = finalMatch.player1?.id;
     const p2Id = finalMatch.player2?.id;
     const loserId = Winner_Id === p1Id ? p2Id : p1Id;
     if (loserId) eliminateParticipant(tournament, loserId);
@@ -649,10 +642,9 @@ fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
 });
 
-const handelRoomQuiiting = async(id) => {
+const handelRoomQuiiting = async (id) => {
   let m = await dbcnx.deletePendingMatchByPlayerID(id);
-  if (m)
-  {
+  if (m) {
     let ngame = new GameState();
     ngame.id = m.id;
     ngame.P1_Id = m.P1_Id;
@@ -672,10 +664,9 @@ const handelRoomQuiiting = async(id) => {
   }
 };
 
-const handelAlive = async(id) => {
+const handelAlive = async (id) => {
   let res = await dbcnx.getOngoingMatch(id);
-  if(!res)
-  {
+  if (!res) {
     let ngame = new GameState();
     ngame.id = -1;
     let data = JSON.stringify(ngame);
@@ -685,40 +676,36 @@ const handelAlive = async(id) => {
 
 async function handelRegister(request, id) {
   try {
-    if (request.mode < 2 || request.mode > 4) 
+    if (request.mode < 2 || request.mode > 4)
       return;
     let ngame = new GameState();
     let m = await dbcnx.getOngoingMatch(id);
-    if (!m) 
-    {
+    if (!m) {
       m = await dbcnx.getOpenRoom(request.mode);
       if (!m) {
         m = new Match();
         m.P1_Id = id;
         m.mode = request.mode;
-        if (!request.tournement) 
+        if (!request.tournement)
           m.id = await dbcnx.createMatch_not(m);
-        else 
+        else
           m.id = await dbcnx.createMatch(m);
       }
-      else 
-      {
-        if (request.mode == 2) 
-        {
-          if (!m.P1_Id) 
+      else {
+        if (request.mode == 2) {
+          if (!m.P1_Id)
             m.P1_Id = id;
-          else if (!m.P2_Id) 
+          else if (!m.P2_Id)
             m.P2_Id = id;
         }
-        else
-        {
-          if (!m.P1_Id ) 
+        else {
+          if (!m.P1_Id)
             m.P1_Id = id;
-          else if (!m.P2_Id) 
+          else if (!m.P2_Id)
             m.P2_Id = id;
-          else if (!m.P3_Id) 
+          else if (!m.P3_Id)
             m.P3_Id = id;
-          else if (!m.P4_Id) 
+          else if (!m.P4_Id)
             m.P4_Id = id;
         }
         m.count_players = m.count_players + 1;
@@ -737,11 +724,10 @@ async function handelRegister(request, id) {
     ngame.count_players = m.count_players;
     ngame.mode = request.mode;
     ngame.id = m.id;
-    if (ngame.count_players == request.mode) 
-    {
-        m.gameStatus = "PLAYING";
-        if(!matches.get(m.id))
-          matches.set(m.id, ngame);
+    if (ngame.count_players == request.mode) {
+      m.gameStatus = "PLAYING";
+      if (!matches.get(m.id))
+        matches.set(m.id, ngame);
     }
     ngame.gameStatus = m.gameStatus;
     let data = JSON.stringify(ngame);
@@ -756,10 +742,9 @@ async function handelRegister(request, id) {
 }
 
 
-const handelMove = async (request,id) =>{
+const handelMove = async (request, id) => {
   let match = matches.get(request.matchId);
-  if(match)
-  {
+  if (match) {
     if (match.P1_Id == id) {
       match.p1UPkey = request.keys.ArrowUp;
       match.p1Downkey = request.keys.ArrowDown;
@@ -779,17 +764,14 @@ const handelMove = async (request,id) =>{
   }
 };
 
-const handelDup = async (connection,id) => {
-  if (clients.has(id)) 
-  {
+const handelDup = async (connection, id) => {
+  if (clients.has(id)) {
     try {
-      if (clients.get(id) != connection) 
-      {
+      if (clients.get(id) != connection) {
         clients.get(id).close();
       }
     }
-    catch (e) 
-    {  
+    catch (e) {
       console.log("Error Server Closed Duplicate Socket ");
     }
   }
@@ -802,7 +784,7 @@ const interval = setInterval(async () => {
     match.now = Date.now();
     let delta = (((match.now - match.last)) * TICK_RATE) / 1000;
     match.last = match.now;
-    tick(match,delta);
+    tick(match, delta);
     let data = JSON.stringify(match);
     sendtoplayer(match.P1_Id, data);
     sendtoplayer(match.P2_Id, data);
@@ -813,14 +795,13 @@ const interval = setInterval(async () => {
 
 fastify.get("/ws", { websocket: true }, async (connection, req) => {
   connection.on("message", async (msg) => {
-   try
-   {
-     const request = JSON.parse(msg);
-     if (!request || !request.token || !request.type) {
-       console.log("Invalid message format, missing type:");
-       return;
-     }
-     let token = request.token;
+    try {
+      const request = JSON.parse(msg);
+      if (!request || !request.token || !request.type) {
+        console.log("Invalid message format, missing type:");
+        return;
+      }
+      let token = request.token;
       if (token) {
         const mockReq = {
           headers: {
@@ -841,25 +822,23 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           res = tokens.get(token);
         userData = res;
         const id = userData.user_id;
-        await handelDup(connection,id);
+        await handelDup(connection, id);
         clients.set(id, connection);
-        if (request.type == "REGISTER") 
-          await handelRegister(request,id);
-        else if (request.type == "MOVE") 
-          await handelMove(request,id);
-        else if (request.type == "DELETE") 
+        if (request.type == "REGISTER")
+          await handelRegister(request, id);
+        else if (request.type == "MOVE")
+          await handelMove(request, id);
+        else if (request.type == "DELETE")
           await handelRoomQuiiting(id);
-        if (request.type == "ISALIVE") 
+        if (request.type == "ISALIVE")
           await handelAlive(id);
-        else if (request.type == "TOURNAMENT_CREATE") 
-        {
+        else if (request.type == "TOURNAMENT_CREATE") {
           const creator = { id, name: id };
           createTournamentRoom(creator);
         }
-        else if (request.type == "TOURNAMENT_LEAVE") 
-        {
-        const participant = { id, name: id };
-        leaveTournamentRoom(request.tournamentId, participant);
+        else if (request.type == "TOURNAMENT_LEAVE") {
+          const participant = { id, name: id };
+          leaveTournamentRoom(request.tournamentId, participant);
         }
         else if (request.type == "TOURNAMENT_JOIN") {
           const participant = { id, name: id };
@@ -875,28 +854,26 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           sendtoplayer(id, JSON.stringify({ type: "TOURNAMENTS_STATE", tournaments: Array.from(tournaments.values()) }));
         }
       }
-      else 
-      {
+      else {
         console.log("No token provided, proceeding on Closing connection");
         connection.close();
       }
-   }
-   catch (e)
-   {
+    }
+    catch (e) {
       console.error("WebSocket message handler error");
-   }
+    }
   });
   connection.on("close", async () => {
     for (const [id, client] of clients) {
       if (client == connection) {
-       try {
-        await handelRoomQuiiting(id);
-        clients.delete(id);
-        console.log("Server OnClosed Socket for YOU");
-        break;
-       } catch (e) {
+        try {
+          await handelRoomQuiiting(id);
+          clients.delete(id);
+          console.log("Server OnClosed Socket for YOU");
+          break;
+        } catch (e) {
           console.error("Server OnClosed Socket error:");
-       }
+        }
       }
     }
   });
@@ -905,25 +882,23 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
 fastify.post('/invite', async (request, reply) => {
   try {
     const res = await desToken(request);
-    
+
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
     let P1 = request.body.P1;
     let P2 = request.body.P2;
-    let [m1, m2]= await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
-    if (!(m1 || m2))
-    {
+    let [m1, m2] = await Promise.all([dbcnx.getAvaiable(P1), dbcnx.getAvaiable(P2)]);
+    if (!(m1 || m2)) {
       let m = new Match();
       m.P1_Id = P1;
       m.P2_Id = P2;
       m.count_players = 2;
-      await  dbcnx.createVIPMatch(m);
+      await dbcnx.createVIPMatch(m);
       return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
     }
-    else
-    {
-      let res= await dbcnx.getBoth(P1,P2);
+    else {
+      let res = await dbcnx.getBoth(P1, P2);
       if (res)
         return reply.code(201).send(JSON.stringify({ message: 'You Can Navigate' }));
     }
@@ -939,34 +914,33 @@ fastify.post('/check', async (request, reply) => {
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
-    const token =  res;
+    const token = res;
     const id = token.user_id;
     let m = await dbcnx.getAvaiable(id);
-    if (m && m.mode != request.body.mode)
-    {
+    if (m && m.mode != request.body.mode) {
       return reply.code(409).send({ message: 'Not Available' });
     }
     return reply.code(201).send({ message: 'Available' });
   } catch (e) {
-    return reply.code(405).send({ message: "Error in checking"});
+    return reply.code(405).send({ message: "Error in checking" });
   }
 });
 
 fastify.post('/allmatch', async (request, reply) => {
   try {
     const res = await desToken(request);
-    
+
     if (res.status === 401) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
     const token = res;
     const id = token.user_id;
     let matches = await dbcnx.getPlayerMatches(id);
-      return reply.code(201).send({ matches: matches});
-    } 
-    catch (err) {
-      return reply.code(401).send({ message: 'Invalid token' });
-    }
+    return reply.code(201).send({ matches: matches });
+  }
+  catch (err) {
+    return reply.code(401).send({ message: 'Invalid token' });
+  }
 
 });
 
@@ -983,7 +957,7 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
     const lastMatch = await dbcnx.getLasttMatchByPlayerID(targetUserId);
     const totalMatches = matchesCount?.Played || 0;
     const totalWins = winsCount?.Winned || 0;
-    const totalTournaments  = await dbcnx.UserCountTournPlayed(targetUserId);
+    const totalTournaments = await dbcnx.UserCountTournPlayed(targetUserId);
     const totalTourWins = await dbcnx.UserCountTournWin(targetUserId);
     const winRate = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : 0;
     return {
@@ -1001,9 +975,9 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
         totalLosses: totalMatches - totalWins,
         winRate: parseFloat(winRate),
         totalTournaments: totalTournaments ? totalTournaments.Played : 0,
-        totalTourWins: totalTourWins ? totalTourWins.Winned  :  0,
+        totalTourWins: totalTourWins ? totalTourWins.Winned : 0,
       },
-      lastMatch: lastMatch ? lastMatch :  null
+      lastMatch: lastMatch ? lastMatch : null
     };
   } catch (error) {
     return reply.code(500).send({ message: 'Error in dashboard identifier' });

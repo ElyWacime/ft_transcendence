@@ -134,6 +134,7 @@ const MatchMacking = () => {
 
     return (
        <>
+       {}
        {(<>
           <div className="home-page">
             <section className="hero-section">
@@ -153,7 +154,8 @@ const MatchMacking = () => {
                 <h2 className="features-title glow-text">
                   Game's Waiting Room
                 </h2>
-                <div className="features-grid">
+                {(!isReady || !ws) && (<p className="features-title glow-text">Connecting to server...</p>)}
+                {isReady && (<div className="features-grid">
                   {features.map((feature, index) => (
                     <Card
                       key={index}
@@ -169,7 +171,8 @@ const MatchMacking = () => {
                       </div>
                     </Card>
                   ))}
-                </div>
+
+                </div>)}
               </div>
             </section>
           </div>

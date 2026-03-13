@@ -61,6 +61,8 @@ export const WebSocketProvider = ({ children }) => {
 
     socket.onopen = () => 
     {
+
+      
       setIsReady(true);
       console.log("WebSocket Created:");
       if (socket && socket.readyState === WebSocket.OPEN) 

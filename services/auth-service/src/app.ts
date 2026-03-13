@@ -17,7 +17,7 @@ const httpsOptions = process.env.USE_HTTPS === "true" ? {
   }
 } : {};
 
-const app = Fastify({ 
+const app = Fastify({
   logger: true,
   bodyLimit: 7 * 1024 * 1024,
   ...httpsOptions
@@ -41,7 +41,7 @@ const authRateLimitWindowMs = Number.isFinite(parsedRateLimitWindowMs) && parsed
 
 const isProduction = process.env.NODE_ENV === "production";
 const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
-const cookieSameSite: "lax" | "none" = secureCookie ? "none" : "lax";
+const cookieSameSite: "lax" | "none" = "lax";
 
 type RateLimitCounter = {
   count: number;
@@ -58,54 +58,54 @@ app.addHook(
     reply: FastifyReply,
     done: HookHandlerDoneFunction,
   ) => {
-  const now = Date.now();
-  const forwardedFor = req.headers["x-forwarded-for"];
+    const now = Date.now();
+    const forwardedFor = req.headers["x-forwarded-for"];
 
-  const clientIp = typeof forwardedFor === "string" && forwardedFor.trim().length > 0
-    ? forwardedFor.split(",")[0].trim()
-    : Array.isArray(forwardedFor) && forwardedFor.length > 0
-      ? forwardedFor[0].split(",")[0].trim()
-      : req.ip;
+    const clientIp = typeof forwardedFor === "string" && forwardedFor.trim().length > 0
+      ? forwardedFor.split(",")[0].trim()
+      : Array.isArray(forwardedFor) && forwardedFor.length > 0
+        ? forwardedFor[0].split(",")[0].trim()
+        : req.ip;
 
-  for (const [ip, counter] of rateLimitByIp.entries()) {
-    if (now - counter.lastSeen > authRateLimitWindowMs) {
-      rateLimitByIp.delete(ip);
+    for (const [ip, counter] of rateLimitByIp.entries()) {
+      if (now - counter.lastSeen > authRateLimitWindowMs) {
+        rateLimitByIp.delete(ip);
+      }
     }
-  }
 
-  const current = rateLimitByIp.get(clientIp);
+    const current = rateLimitByIp.get(clientIp);
 
-  if (!current || now - current.windowStart >= authRateLimitWindowMs) {
-    rateLimitByIp.set(clientIp, {
-      count: 1,
-      windowStart: now,
-      lastSeen: now,
-    });
+    if (!current || now - current.windowStart >= authRateLimitWindowMs) {
+      rateLimitByIp.set(clientIp, {
+        count: 1,
+        windowStart: now,
+        lastSeen: now,
+      });
+      done();
+      return;
+    }
+
+    current.count += 1;
+    current.lastSeen = now;
+
+    if (current.count > authRateLimitMax) {
+      const retryAfterSeconds = Math.ceil(
+        (current.windowStart + authRateLimitWindowMs - now) / 1000,
+      );
+
+      reply
+        .header("Retry-After", String(Math.max(1, retryAfterSeconds)))
+        .status(429)
+        .send({ message: "Too many requests. Please try again later." });
+      return;
+    }
+
     done();
-    return;
-  }
-
-  current.count += 1;
-  current.lastSeen = now;
-
-  if (current.count > authRateLimitMax) {
-    const retryAfterSeconds = Math.ceil(
-      (current.windowStart + authRateLimitWindowMs - now) / 1000,
-    );
-
-    reply
-      .header("Retry-After", String(Math.max(1, retryAfterSeconds)))
-      .status(429)
-      .send({ message: "Too many requests. Please try again later." });
-    return;
-  }
-
-  done();
-},
+  },
 );
 
 app.register(cors, {
-  origin: true, 
+  origin: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -119,9 +119,9 @@ app.addHook(
     _res: FastifyReply,
     next: HookHandlerDoneFunction,
   ) => {
-  req.jwt = app.jwt;
-  next();
-},
+    req.jwt = app.jwt;
+    next();
+  },
 );
 
 app.register(fCookie, {
@@ -139,11 +139,11 @@ app.decorate(
   "authenticate",
   async (req: FastifyRequest, reply: FastifyReply) => {
     let token = req.headers.authorization?.replace('Bearer ', '');
-    
+
     if (!token) {
       token = req.cookies.access_token;
     }
-    
+
     if (!token) {
       return reply.status(401).send({ message: "Authentication required" });
     }
@@ -179,7 +179,7 @@ async function main() {
     const useHttps = process.env.USE_HTTPS === "true";
 
     await app.listen({ port, host: "0.0.0.0" });
-    
+
     app.log.info(`Auth service running on port 8000 (${useHttps ? 'HTTPS' : 'HTTP'})`);
   } catch (err) {
     app.log.error(err);
