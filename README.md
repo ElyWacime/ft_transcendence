@@ -68,3 +68,62 @@ The application uses a microservices architecture:
 - Gateway: Routes requests to appropriate services
 
 Services communicate via HTTPS and WebSocket protocols.
+
+## AUTH SERVICE ROUTES (QUICK GUIDE)
+
+Base service: `auth-service` (port `8000` inside Docker).
+
+- **GET /healthcheck**  
+  Quick check to confirm the auth service is running.
+
+- **GET /** *(auth required)*  
+  Simple protected endpoint used to verify that authentication works.
+
+- **POST /register**  
+  Creates a new user account.
+
+- **POST /login**  
+  Logs a user in and returns access credentials.
+
+- **POST /logout** *(auth required)*  
+  Logs the current user out and clears their active session.
+
+- **POST /refresh**  
+  Renews expired/old login tokens so the user can stay signed in.
+
+- **PUT /update_email** *(auth required)*  
+  Changes the current user's email address.
+
+- **PUT /update_password** *(auth required)*  
+  Changes the current user's password.
+
+- **PUT /update_username** *(auth required)*  
+  Changes the current user's display name/username.
+
+- **PUT /update_image** *(auth required)*  
+  Updates the current user's profile picture.
+
+- **POST /validate_token**  
+  Checks whether a token is valid and returns basic user info.
+
+- **POST /search-this-name** *(auth required)*  
+  Finds a user by username and returns basic user info.
+
+- **GET /get-user/:userId** *(auth required)*  
+  Returns a user's name using their user ID.
+
+- **GET /user-info/:userId** *(auth required)*  
+  Returns a user's profile details using their user ID.
+
+### requirements
+OS: linux / mac os
+Docker (for arch linux `sudo pacman -S docker`)
+GNU make (for arch linux run `sudo pacman -S make`)
+
+## How to run
+  # Linux
+    Add sudo to Makfile for each command in flcean target in Makefile
+    Run make
+  # Mac os
+    Run make
+
