@@ -49,6 +49,9 @@ services:
       - USE_HTTPS=true
       - NODE_TLS_REJECT_UNAUTHORIZED=1
       - NODE_EXTRA_CA_CERTS=/app/certs/certificate.crt
+    depends_on:
+      - auth-service
+      - frontend
     command: npm run start
     networks:
       - transcendence    
@@ -60,6 +63,7 @@ services:
       - frontend
       - auth-service
       - game-server
+      - chat-service
     ports:
       - "80:80"
       - "443:443"
