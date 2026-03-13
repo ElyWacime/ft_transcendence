@@ -19,10 +19,6 @@ const fastify = Fastify({
   ...httpsOptions
 });
 
-const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
-  rejectUnauthorized: false
-}) : undefined;
-
 await fastify.register(websocket);
 
 await fastify.register(cors, {
@@ -86,6 +82,7 @@ async function desToken(request)
      return { status: 500, error: 'Auth service unavailable' };
    }
 }
+
 const sendtoplayer = async (id, data) => 
 {
   if (id) {
@@ -648,23 +645,8 @@ const updateTournamentAfterMatch = async (gameState) => {
   broadcastTournamentState();
 };
 
-
 fastify.get('/', async (request, reply) => {
   return { message: 'Server is running' };
-});
-
-fastify.get('/tournaments-online', async (_request, reply) => {
-  try {
-    const res = await desToken(_request);
-  
-    if (res.status === 401) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
-    const snapshot = Array.from(tournaments.values());
-    return snapshot;
-  } catch (e) {
-    return reply.code(500).send({ message: "Failed to load tournaments" });
-  }
 });
 
 const handelRoomQuiiting = async(id) => {

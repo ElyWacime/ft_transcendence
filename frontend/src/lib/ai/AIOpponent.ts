@@ -48,18 +48,23 @@ export class AIOpponent {
 
   private difficulty: Difficulty;
   private predictionNoise: number;
+  private hesitation: number;
   private paddleSpeed: number = 10;
   private lastCalculationTime: number = 0;
+  private hesitationCounter: number = 0;
 
   constructor(difficulty: Difficulty = Difficulty.HARD)
   {
     this.difficulty = difficulty;
     if (difficulty === Difficulty.EASY) {
-      this.predictionNoise = 70;
+      this.predictionNoise = 100;    
+      this.hesitation = 25;         
     } else if (difficulty === Difficulty.MEDIUM) {
-      this.predictionNoise = 40;
+      this.predictionNoise = 60;   
+      this.hesitation = 15;         
     } else {
-      this.predictionNoise = 10;
+      this.predictionNoise = 20; 
+      this.hesitation = 4; 
     }
   }
 
@@ -77,8 +82,14 @@ export class AIOpponent {
       this.targetY = this.applyPredictionNoise(pred.targetY, gameState.gameHeight);
       this.timeToReachAI = pred.timeToReachAI;
       this.lastCalculationTime = currentTime;
+      this.hesitationCounter = this.hesitation;
     } else {
       this.timeToReachAI = Math.max(0, this.timeToReachAI - 1);
+    }
+
+    if (this.hesitationCounter > 0) {
+      this.hesitationCounter--;
+      return action;
     }
 
     if (this.targetY !== null) {
@@ -204,8 +215,7 @@ export class AIOpponent {
     return Math.max(0, Math.min(max, adjusted));
   }
 
-  public simulateKeyboardInput(action: AIAction): void {
-  }
+
 
   public cleanup?(): void {
   }
