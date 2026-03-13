@@ -1,4 +1,8 @@
-import Fastify, { FastifyReply, FastifyRequest } from "fastify";
+import Fastify, {
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction,
+} from "fastify";
 import { userRoutes } from "./modules/user/user.route";
 import fjwt, { FastifyJWT } from "@fastify/jwt";
 import fCookie from "@fastify/cookie";
@@ -35,6 +39,10 @@ const authRateLimitWindowMs = Number.isFinite(parsedRateLimitWindowMs) && parsed
   ? parsedRateLimitWindowMs
   : 60_000;
 
+const isProduction = process.env.NODE_ENV === "production";
+const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
+const cookieSameSite: "lax" | "none" = secureCookie ? "none" : "lax";
+
 type RateLimitCounter = {
   count: number;
   windowStart: number;
@@ -43,7 +51,13 @@ type RateLimitCounter = {
 
 const rateLimitByIp = new Map<string, RateLimitCounter>();
 
-app.addHook("onRequest", (req, reply, done) => {
+app.addHook(
+  "onRequest",
+  (
+    req: FastifyRequest,
+    reply: FastifyReply,
+    done: HookHandlerDoneFunction,
+  ) => {
   const now = Date.now();
   const forwardedFor = req.headers["x-forwarded-for"];
 
@@ -87,7 +101,8 @@ app.addHook("onRequest", (req, reply, done) => {
   }
 
   done();
-});
+},
+);
 
 app.register(cors, {
   origin: true, 
@@ -97,14 +112,27 @@ app.register(cors, {
 });
 
 app.register(fjwt, { secret: process.env.JWT_ACCESS_SECRET });
-app.addHook("preHandler", (req, _res, next) => {
+app.addHook(
+  "preHandler",
+  (
+    req: FastifyRequest,
+    _res: FastifyReply,
+    next: HookHandlerDoneFunction,
+  ) => {
   req.jwt = app.jwt;
   next();
-});
+},
+);
 
 app.register(fCookie, {
   secret: process.env.COOKIE_SECRET,
   hook: "preHandler",
+  parseOptions: {
+    path: "/",
+    httpOnly: true,
+    secure: secureCookie,
+    sameSite: cookieSameSite,
+  },
 });
 
 app.decorate(

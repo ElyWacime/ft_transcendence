@@ -13,14 +13,10 @@ const MatchHistory = () => {
 
   const [features, setFeatures] = useState([]);
   let  {id} = stat;
-  console.log("Received id from location state:", id);
-  if(id == "" || id == null || id == undefined)
-  {
-    id = user?.id;
-    console.log("SET id from location:", id);
-  }
 
-  
+  if(id == "" || id == null || id == undefined)
+    id = user?.id;
+
   let [names,setnames]= useState(new Map());
   const getName = async (id: number) => {
     if(!id)  return null;

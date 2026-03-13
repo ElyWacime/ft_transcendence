@@ -15,7 +15,6 @@ interface DashboardData {
     User_name: string;
     avatar: string;
     isOnline: boolean;
-    Auto_Match: boolean;
     CreatedAt: string;
   };
   statistics: {

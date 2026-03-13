@@ -993,7 +993,6 @@ fastify.get('/api/dashboard/:identifier', async (request, reply) => {
         User_name: null,
         avatar: null,
         isOnline: null,
-        Auto_Match: null,
         CreatedAt: null,
       },
       statistics: {

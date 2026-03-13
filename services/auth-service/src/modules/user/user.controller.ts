@@ -6,6 +6,21 @@ import prisma from "../../utils/prisma";
 import { getHttpsAgent } from "../../utils/https-agent";
 
 const SALT_ROUNDS = 10;
+const REFRESH_TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+
+function getAuthCookieOptions(maxAge?: number) {
+  const isProduction = process.env.NODE_ENV === "production";
+  const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
+  const sameSite: "lax" | "none" = secureCookie ? "none" : "lax";
+
+  return {
+    path: "/",
+    httpOnly: true,
+    secure: secureCookie,
+    sameSite,
+    ...(typeof maxAge === "number" ? { maxAge } : {}),
+  };
+}
 
 export async function createUser(
   req: FastifyRequest<{
@@ -110,15 +125,8 @@ export async function login(
     data: { loggedIn: true, refreshToken },
   });
 
-  const isProduction = process.env.NODE_ENV === "production";
-  const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
-  
   reply.setCookie("refresh_token", refreshToken, {
-    path: "/",
-    httpOnly: true,
-    secure: secureCookie,
-    sameSite: secureCookie ? "none" : "lax",
-    maxAge: 7 * 24 * 60 * 60,
+    ...getAuthCookieOptions(REFRESH_TOKEN_MAX_AGE_SECONDS),
   });
   
   return { 
@@ -190,15 +198,8 @@ export async function update_email(
       data: { refreshToken },
     });
   
-    const isProduction = process.env.NODE_ENV === "production";
-    const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
-
     reply.setCookie("refresh_token", refreshToken, {
-      path: "/",
-      httpOnly: true,
-      secure: secureCookie,
-      sameSite: secureCookie ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60,
+      ...getAuthCookieOptions(REFRESH_TOKEN_MAX_AGE_SECONDS),
     });
   
     return {
@@ -258,7 +259,7 @@ export async function update_password(
     });
 
     reply.clearCookie("refresh_token", {
-      path: "/",
+      ...getAuthCookieOptions(),
     });
 
     return reply.send({
@@ -356,15 +357,8 @@ export async function update_username(
       data: { refreshToken },
     });
 
-    const isProduction = process.env.NODE_ENV === "production";
-    const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
-
     reply.setCookie("refresh_token", refreshToken, {
-      path: "/",
-      httpOnly: true,
-      secure: secureCookie,
-      sameSite: secureCookie ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60,
+      ...getAuthCookieOptions(REFRESH_TOKEN_MAX_AGE_SECONDS),
     });
 
     return reply.send({
@@ -407,7 +401,7 @@ export async function logout(
   });
 
   reply.clearCookie("refresh_token", {
-    path: "/",
+    ...getAuthCookieOptions(),
   });
 
   return reply.send({ message: "Logout successful" });
@@ -436,7 +430,9 @@ export async function refreshToken(
     });
 
     if (!user || user.refreshToken !== refreshToken) {
-      reply.clearCookie("refresh_token");
+      reply.clearCookie("refresh_token", {
+        ...getAuthCookieOptions(),
+      });
       return reply.code(401).send({ message: "Invalid refresh token" });
     }
 
@@ -456,16 +452,8 @@ export async function refreshToken(
       data: { refreshToken: newRefreshToken },
     });
 
-    const isProduction = process.env.NODE_ENV === "production";
-    const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
-
-
     reply.setCookie("refresh_token", newRefreshToken, {
-      path: "/",
-      httpOnly: true,
-      secure: secureCookie,
-      sameSite: secureCookie ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60,
+      ...getAuthCookieOptions(REFRESH_TOKEN_MAX_AGE_SECONDS),
     });
 
     const responseData = { 
@@ -480,7 +468,9 @@ export async function refreshToken(
 
     return reply.send(responseData);
   } catch (err) {
-    reply.clearCookie("refresh_token");
+    reply.clearCookie("refresh_token", {
+      ...getAuthCookieOptions(),
+    });
     return reply.code(401).send({ message: "Invalid or expired refresh token" });
   }
 }
