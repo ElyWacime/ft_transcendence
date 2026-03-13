@@ -68,7 +68,6 @@ const MatchHistory = () => {
         ndata.matches[i].Name4 = names.get(ndata.matches[i].P4_Id) || "Unknown";
       }
       setFeatures(ndata.matches || []);
-      console.log("Fetched matches:", ndata.matches);
     }
   };
 

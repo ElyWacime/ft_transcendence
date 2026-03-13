@@ -790,7 +790,7 @@ const handelDup = async (connection,id) => {
     }
     catch (e) 
     {  
-      console.log("Error Server Closed Duplicate Socket for ",id);
+      console.log("Error Server Closed Duplicate Socket ");
     }
   }
 };
@@ -892,7 +892,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
        try {
         await handelRoomQuiiting(id);
         clients.delete(id);
-        console.log("Server OnClosed Socket for ",id);
+        console.log("Server OnClosed Socket for YOU");
         break;
        } catch (e) {
           console.error("Server OnClosed Socket error:");

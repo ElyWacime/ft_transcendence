@@ -95,7 +95,7 @@ export default function TournamentOnlinePage() {
         setNameCache((prev) => ({ ...prev, [key]: resolved }));
         return resolved;
       } else {
-        console.log(`Failed to fetch name for id ${key}: ${res.statusText}`);
+        console.log(`Failed to fetch name`);
         return null;
       }
   };
