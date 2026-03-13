@@ -816,6 +816,10 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
    try
    {
      const request = JSON.parse(msg);
+     if (!request || !request.token || !request.type) {
+       console.log("Invalid message format, missing type:");
+       return;
+     }
      let token = request.token;
       if (token) {
         const mockReq = {

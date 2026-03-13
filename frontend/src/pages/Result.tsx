@@ -4,7 +4,7 @@ import {useCallback,useEffect} from "react";
 const Result = () => { 
     const navigate = useNavigate();
     const location = useLocation();
-    const stat = location.state ;
+    const stat = location.state | "" ;
     
     useEffect(() => {
       if (!stat) {

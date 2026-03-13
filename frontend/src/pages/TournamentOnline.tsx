@@ -380,7 +380,7 @@ export default function TournamentOnlinePage() {
                 )}
                 {currentUser && [m.player1?.id, m.player2?.id].includes(currentUser.id) && (
                   <button
-                    title="Report your opponent as missing if they don't show up. If they remain unready for 5 minutes, you'll automatically advance to the next round."
+                    title="Report your opponent as missing if they don't show up. If they remain unready, you'll automatically advance to the next round."
                     className="primary"
                     disabled={isSubmitting || !m.ready?.[currentUser.id] || !iAmInside || (t.participants.length < 4 && t.status == "finals") || t.status == "completed"} 
                     onClick={() => reportMissing(t.id, m.id)}

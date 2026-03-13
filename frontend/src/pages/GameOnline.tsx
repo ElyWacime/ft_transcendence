@@ -17,18 +17,7 @@ const GameOnline = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state as GameOnlineProps;
-
-  useEffect(() => {
-    if (!state) {
-      navigate("/");
-    }
-  }, [state, navigate]);
-  
-  if (!state) {
-    return <div>Redirecting...</div>; 
-  }
-  
-  const { player1Name, player2Name,player3Name, player4Name, mode } = state;
+  const { player1Name, player2Name,player3Name, player4Name, mode } = state | {};
   const { ws, isReady, wsRef } = useWebSocket();
   const { accessToken, user } = useAuth();
   const id = user?.id || null;
@@ -38,6 +27,12 @@ const GameOnline = () => {
   let matchref = useRef(null);
   const animationRef = useRef(0);
 
+  useEffect(() => {
+    if (!state) {
+      navigate("/");
+    }
+  }, [state, navigate]);
+  
   const [gameState, setGameState] = useState({
     ball: { x: 400, y: 300, dx: 1, dy: 1, radius: 8 },
     paddle1: { x: 20, y: 250 },
@@ -195,15 +190,10 @@ const GameOnline = () => {
       }
       else
         navigate("/");
-  }
+  },[]
   );
 
-  useEffect(() => {
-    if (!ws || !isReady ||  ws.readyState !== WebSocket.OPEN) return;
-    
-    ws.addEventListener("message", handleMessage);
-      return () => ws.removeEventListener("message", handleMessage);
-  }, [ws, isReady]);
+
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -235,13 +225,11 @@ const GameOnline = () => {
   }, [loop]);
 
   useEffect(() => {
-    if (!(ws && isReady && ws.readyState == WebSocket.OPEN)) return;
-
+    if (!ws || !isReady ||  ws.readyState !== WebSocket.OPEN) return;
+    
     ws.addEventListener("message", handleMessage);
-    return () => {
-      ws.removeEventListener("message", handleMessage);
-    };
-  }, [ws]);
+      return () => ws.removeEventListener("message", handleMessage);
+  }, [ws, isReady]);
 
   useEffect(() => {
     if (!(ws && isReady && ws.readyState == WebSocket.OPEN)) return;
@@ -250,7 +238,9 @@ const GameOnline = () => {
       type: "ISALIVE",
     }));
   }, [ws, isReady]);
-
+  if (!state) {
+    return <div>Redirecting...</div>; 
+  }
   return (
     <div className="ai-game-page">
       <div className="ai-game-container">

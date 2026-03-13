@@ -121,9 +121,11 @@ export class SQLiteDB {
     async getPlayerMatches(id) {
         return this.db.all(`SELECT * FROM Match  WHERE gameStatus != 'PENDING' AND (P1_Id = ? OR P2_Id = ? OR P3_Id = ? OR P4_Id = ?);`, [id, id, id, id]);
     }
+
     async getMatchById(id) {
         return this.db.get(`SELECT * FROM Match WHERE id = ?;`, [id]);
     }
+    
     async getOpenRoom(mode) {
         return this.db.get(`SELECT * FROM Match   
                             WHERE mode = ? and   
