@@ -45,6 +45,10 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (!isLoggedIn) {
+      setFriendsList({});
+      setPendingInvitations({});
+      setBlockedConversations({});
+      setInvitePrompt({});
       return;
     }
     
@@ -76,10 +80,6 @@ export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     });
 
     chatSocket.on("disconnect", () => {
-      setFriendsList({});
-      setPendingInvitations({});
-      setBlockedConversations({});
-      setInvitePrompt({});
       setIsConnected(false)
     });
     
