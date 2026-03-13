@@ -116,7 +116,6 @@ Base service: `auth-service` (port `8000` inside Docker).
   Returns a user's profile details using their user ID.
 
 ### requirements
-OS: linux / mac os
 Docker (for arch linux `sudo pacman -S docker`)
 GNU make (for arch linux run `sudo pacman -S make`)
 
