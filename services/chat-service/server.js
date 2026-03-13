@@ -46,8 +46,8 @@ await fastify.register(cors, {
 const io = new Server(fastify.server, {
   cors: {
     origin: (requestOrigin, callback) => callback(null, true),
-    methods: ["GET", "POST"], 
-    credentials: true 
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -57,29 +57,28 @@ const httpsAgent = process.env.USE_HTTPS === "true" ? new https.Agent({
   rejectUnauthorized: false
 }) : undefined;
 
-async function desToken(request)
-{
-   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
-   
-   let token = null;
-   const authHeader = request.headers.authorization;
-   
-   if (authHeader && authHeader.startsWith('Bearer ')) {
-     token = authHeader.substring(7); 
-   } else if (request.cookies.access_token) {
-     token = request.cookies.access_token; 
-   }
-   
-   if (!token) {
-     return { status: 401, json: async () => ({ error: 'No token provided' }) };
-   }
-   
-   const fetchOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-   };
-   const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
+async function desToken(request) {
+  const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
+
+  let token = null;
+  const authHeader = request.headers.authorization;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  } else if (request.cookies.access_token) {
+    token = request.cookies.access_token;
+  }
+
+  if (!token) {
+    return { status: 401, json: async () => ({ error: 'No token provided' }) };
+  }
+
+  const fetchOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  };
+  const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
   return res;
 }
 
@@ -87,21 +86,21 @@ async function validateSocketToken(token) {
   if (!token) {
     return null;
   }
-  
+
   const protocol = process.env.USE_HTTPS === "true" ? "https" : "http";
   const fetchOptions = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token }),
   };
-  
+
   if (httpsAgent) {
     fetchOptions.agent = httpsAgent;
   }
-  
+
   try {
     const res = await fetch(`${protocol}://auth-service:8000/validate_token`, fetchOptions);
-    
+
     if (res.status === 200) {
       const data = await res.json();
       return data;
@@ -149,7 +148,7 @@ fastify.post("/users/add", { schema: usersAddSchema, preHandler: requireInternal
 
 fastify.post("/user/update", { schema: userUpdateSchema, preHandler: requireAuth }, async (request) => {
   const senderId = request.userId;
-  
+
   const newUsername = request.body.username;
   const updatedUser = await updateUsername(senderId, newUsername);
 
@@ -161,13 +160,13 @@ fastify.post("/user/update", { schema: userUpdateSchema, preHandler: requireAuth
 
 
 fastify.get("/conversations", { preHandler: requireAuth }, async (request) => {
-    const userId = request.userId;
-    const conv = await getConversationsForUser(userId);
+  const userId = request.userId;
+  const conv = await getConversationsForUser(userId);
 
-    return conv;
+  return conv;
 })
 
-fastify.post("/conversations/start", { schema: conversationsStartSchema, preHandler: requireAuth }, async (request, reply) => { 
+fastify.post("/conversations/start", { schema: conversationsStartSchema, preHandler: requireAuth }, async (request, reply) => {
   const senderId = request.userId;
   const receipentId = request.body.receipentId;
 
@@ -178,8 +177,7 @@ fastify.post("/conversations/start", { schema: conversationsStartSchema, preHand
   }
 
   let conv = await checkIfConvExist(senderId, receipentId);
-  if (conv)
-  {
+  if (conv) {
     return { conversationId: conv.id };
   }
 
@@ -208,7 +206,7 @@ fastify.get("/conversations/:id/messages", { schema: conversationMessagesSchema,
 fastify.post("/friends/status", { schema: friendsSchema, preHandler: requireAuth }, async (request) => {
   const requesterId = request.userId;
   const otherUserId = request.body.user_id;
-  
+
   const status = await getFriendStatus(requesterId, otherUserId);
 
   if (!status.friends) {
@@ -223,22 +221,22 @@ fastify.post("/friends/status", { schema: friendsSchema, preHandler: requireAuth
 
 fastify.get("/friends", { preHandler: requireAuth }, async (request) => {
   const userId = request.userId;
-  
+
   const friends = await getAllFriends(userId);
-  
+
   return { friends };
 });
 
 fastify.post("/friends/add", { schema: friendsSchema, preHandler: requireAuth }, async (request, reply) => {
   const user_a = request.userId;
   const user_b = request.body.user_id;
-  
+
   if (user_a === user_b) {
     return reply.code(400).send({ error: 'Cannot add yourself as a friend' });
   }
 
   await addFriend(user_a, user_b);
-  
+
   return {
     message: 'Friend added successfully'
   };
@@ -247,9 +245,9 @@ fastify.post("/friends/add", { schema: friendsSchema, preHandler: requireAuth },
 fastify.post("/friends/remove", { schema: friendsSchema, preHandler: requireAuth }, async (request) => {
   const user_a = request.userId;
   const user_b = request.body.user_id;
-  
+
   await deleteFriend(user_a, user_b);
-  
+
   return {
     message: 'Friend removed successfully'
   };
@@ -297,7 +295,7 @@ fastify.post("/unblock", { schema: blockSchema, preHandler: requireAuth }, async
   const unblockedId = request.body.user_id;
 
   const statusBefore = await getBlockingStatus(blockerId, unblockedId);
-  
+
   if (!statusBefore.blocked || statusBefore.blockerId !== blockerId) {
     return reply.code(400).send({ error: 'You can only unblock users you blocked' });
   }
@@ -326,22 +324,22 @@ fastify.post("/invitations/status", { schema: invitationsSchema, preHandler: req
   const invitedBy = status.inviterId === requesterId ? 'you' : 'other';
 
   return {
-      pending: true,
-      invitedBy,
-      inviterId: status.inviterId,
-      inviteeId: status.inviteeId,
-      invitationType: status.invitationType,
-    };
+    pending: true,
+    invitedBy,
+    inviterId: status.inviterId,
+    inviteeId: status.inviteeId,
+    invitationType: status.invitationType,
+  };
 });
 
 fastify.post("/invite", { schema: invitationsSchema, preHandler: requireAuth }, async (request) => {
   const inviterId = request.userId;
   const inviteeId = request.body.user_id;
   const invitationType = request.body.invitationType;
-  
 
-  await createInvitation(inviterId, inviteeId, invitationType); 
-  
+
+  await createInvitation(inviterId, inviteeId, invitationType);
+
   return {
     pending: true,
     inviterId,
@@ -351,7 +349,7 @@ fastify.post("/invite", { schema: invitationsSchema, preHandler: requireAuth }, 
   };
 });
 
-fastify.post("/uninvite", { schema: invitationsSchema, preHandler: requireAuth }, async (request) => {        
+fastify.post("/uninvite", { schema: invitationsSchema, preHandler: requireAuth }, async (request) => {
   const inviterId = request.userId;
   const inviteeId = request.body.user_id;
   const invitationType = request.body.invitationType;
@@ -374,7 +372,7 @@ io.use(async (socket, next) => {
       return next(new Error('No access token provided'));
     }
 
-    const userData = await validateSocketToken(token);    
+    const userData = await validateSocketToken(token);
     if (!userData) {
       return next(new Error('Invalid or expired token'));
     }
@@ -393,9 +391,9 @@ io.on('connection', async (socket) => {
   const myId = socket.userId;
 
   socket.emit('authenticate', { userId: myId });
-    
+
   socket.join(`user:${myId}`);
-  
+
   connectedUsers.set(myId, true);
 
   const friendIds = await getAllFriends(myId);
@@ -409,19 +407,19 @@ io.on('connection', async (socket) => {
 
   socket.on('disconnect', async () => {
     const friendIds = await getAllFriends(myId);
-    
+
     friendIds.forEach(friendId => {
       if (connectedUsers.has(friendId)) {
         socket.to(`user:${friendId}`).emit('friendOffline', { userId: myId });
       }
     });
-    
-    connectedUsers.delete(myId);    
-  });  
+
+    connectedUsers.delete(myId);
+  });
 
   socket.on('AddFriendOnline', ({ userId }) => {
     if (connectedUsers.has(userId)) {
-        socket.emit('friendOnline', { userId });
+      socket.emit('friendOnline', { userId });
     }
 
     socket.to(`user:${userId}`).emit('friendOnline', { userId: myId });
@@ -484,7 +482,7 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('cancelInvite', ({ toUserId, conversationId }) => {
-    socket.to(`user:${toUserId}`).emit('cancelInvite', {conversationId});
+    socket.to(`user:${toUserId}`).emit('cancelInvite', { conversationId });
   });
 
   socket.on('InviteResponse', ({ conversationId, toUserId, invitationType, fromUserId, accepted }) => {
@@ -507,7 +505,7 @@ io.on('connection', async (socket) => {
 const start = async () => {
   try {
     await initializeDb();
-    
+
     const useHttps = process.env.USE_HTTPS === "true";
     const port = 3700;
 
