@@ -810,7 +810,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           cookies: {}
         };
         let userData, res;
-        if (request.type != 'MOVE')
+        if (request.type != 'MOVE' || !tokens.has(token))
         {
           res = await desToken(mockReq);
           if (res.status === 401) {
@@ -826,7 +826,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         clients.set(id, connection);
         if (request.type == "REGISTER")
           await handelRegister(request, id);
-        else if (request.type == "MOVE")
+        else if (request.type == "MOVE" )
           await handelMove(request, id);
         else if (request.type == "DELETE")
           await handelRoomQuiiting(id);

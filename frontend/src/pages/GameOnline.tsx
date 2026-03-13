@@ -157,6 +157,7 @@ const GameOnline = () => {
             Mode:data.mode
         }));
         if (data.score1  >= 5 ||  data.score2  >= 5) {
+          console.log("Match ended",data);
           let x = "";
           isalive = false;
           if (data.score1  > data.score2 )
