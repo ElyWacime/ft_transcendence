@@ -219,7 +219,6 @@ class UserAPI {
       User_name: data.name,
       avatar: data.avatar,
       isOnline: data.loggedIn,
-      Auto_Match: data.Auto_Match,
       CreatedAt: data.CreatedAt
     };
   }

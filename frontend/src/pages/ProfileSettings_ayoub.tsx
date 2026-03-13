@@ -18,7 +18,6 @@ const ProfileSettings = () => {
     email: "",
     User_name: "",
     avatar: "",
-    Auto_Match: null as boolean | null,
     CreatedAt: null as string | null,
     isOnline: false
   });
@@ -60,7 +59,6 @@ const ProfileSettings = () => {
             email: authData.email || "",
             User_name: authData.name || "Player",
             avatar: authData.avatar || "",
-            Auto_Match: authData.Auto_Match ?? null,
             CreatedAt: authData.CreatedAt ?? null,
             isOnline: authData.loggedIn || false
           });
@@ -71,7 +69,6 @@ const ProfileSettings = () => {
             email: user?.email || "",
             User_name: user?.name || "Player",
             avatar: "",
-            Auto_Match: null,
             CreatedAt: null,
             isOnline: false
           });
@@ -83,7 +80,6 @@ const ProfileSettings = () => {
           email: user?.email || "",
           User_name: user?.name || "Player",
           avatar: "",
-          Auto_Match: null,
           CreatedAt: null,
           isOnline: false
         });

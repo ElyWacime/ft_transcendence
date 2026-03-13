@@ -359,7 +359,6 @@ export async function userRoutes(app: FastifyInstance) {
           name: true,
           avatar: true,
           loggedIn: true,
-          Auto_Match: true,
           CreatedAt: true
         }
       });

@@ -6,7 +6,6 @@ interface UserData {
   User_name: string;
   avatar: string;
   isOnline: boolean;
-  Auto_Match: boolean;
   CreatedAt: string;
 }
 
@@ -66,7 +65,6 @@ class PlayerDashboardAPI_ayoub {
           User_name: authData.name || "Player",
           avatar: authData.avatar || "",
           isOnline: authData.loggedIn || false,
-          Auto_Match: authData.Auto_Match || false,
           CreatedAt: authData.CreatedAt || new Date().toISOString(),
         },
         statistics: gameData.statistics || {
