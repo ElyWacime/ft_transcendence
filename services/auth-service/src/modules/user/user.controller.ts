@@ -11,7 +11,7 @@ const REFRESH_TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 function getAuthCookieOptions(maxAge?: number) {
   const isProduction = process.env.NODE_ENV === "production";
   const secureCookie = process.env.USE_HTTPS === "true" || isProduction;
-  const sameSite: "lax" | "none" = secureCookie ? "none" : "lax";
+  const sameSite: "lax" | "none" = "lax";
 
   return {
     path: "/",
