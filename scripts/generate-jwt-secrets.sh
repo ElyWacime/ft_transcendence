@@ -5,7 +5,7 @@ set -e
 echo "Generating JWT and Cookie secrets..."
 
 if ! command -v docker >/dev/null 2>&1; then
-    echo "❌ Docker is required but not installed or not in PATH"
+    echo "Docker is required but not installed or not in PATH"
     exit 1
 fi
 
@@ -22,7 +22,7 @@ else
 fi
 
 echo ""
-echo "✅ JWT and Cookie secrets updated successfully!"
+echo "JWT and Cookie secrets updated successfully!"
 echo ""
 echo "⚠️  IMPORTANT: Restart all services for changes to take effect:"
 echo "   docker-compose down && docker-compose up -d"

@@ -3,7 +3,7 @@
 set -e
 
 if ! command -v docker >/dev/null 2>&1; then
-  echo "❌ Docker is required but not installed or not in PATH"
+  echo "Docker is required but not installed or not in PATH"
   exit 1
 fi
 
