@@ -1,6 +1,6 @@
 .env
 node_modules
 auth-service/prisma/db/
-chat-service/dev.db
+chat-service/db/dev.db
 game-service/db/
 gateway/certs/*
