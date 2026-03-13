@@ -92,13 +92,6 @@ useEffect(() => {
                 <div className="feature-card-content">
                   <h3 className="feature-title">{feature.score1} - {feature.score2}</h3>
                   <h4 className="feature-title"> {feature.Name1}{feature.mode === 4 ? " & " + feature.Name3 : ""} vs {feature.Name2}{feature.mode === 4 ? " & " + feature.Name4 : ""}</h4>
-                  <p className="feature-description">{feature.P1_Id}</p>
-                  <p className="feature-description">{feature.P2_Id}</p>
-                  <p className="feature-description">{feature.P3_Id}</p>
-                  <p className="feature-description">{feature.P4_Id}</p>
-                  <p className="feature-description">{cardClass}</p>
-                  <p className="feature-description">{id}</p>
-                  <p className="feature-description">{feature.Winner_Id}</p>
                 </div>
               </Card>
             );

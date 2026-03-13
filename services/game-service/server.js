@@ -829,7 +829,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
           cookies: {}
         };
         let userData, res;
-        if (request.type != 'MOVE')
+        if (request.type != 'MOVE' || !tokens.has(token))
         {
           res = await desToken(mockReq);
           if (res.status === 401) {

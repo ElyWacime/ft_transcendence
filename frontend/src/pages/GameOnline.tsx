@@ -16,8 +16,10 @@ const GameOnline = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as GameOnlineProps;
-  const { player1Name, player2Name,player3Name, player4Name, mode } = state | {};
+  let state = location.state;
+  if(!state)
+    state = {};
+  const { player1Name, player2Name,player3Name, player4Name, mode } = state;
   const { ws, isReady, wsRef } = useWebSocket();
   const { accessToken, user } = useAuth();
   const id = user?.id || null;
