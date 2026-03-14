@@ -4,7 +4,7 @@ import {useCallback,useEffect} from "react";
 const Result = () => { 
     const navigate = useNavigate();
     const location = useLocation();
-    const stat = location.state | "" ;
+    const stat = location.state ;
     
     useEffect(() => {
       if (!stat) {
@@ -16,15 +16,15 @@ const Result = () => {
       return <div>Redirecting...</div>; 
     }
     
-    let {message} = stat;
-    const resetGame = useCallback(() => {navigate(`/loading?mode=${stat.mode}`)}, []);
+    let {message,mode} = stat;
+    const resetGame = useCallback(() => {navigate(`/loading?mode=${mode}`)}, []);
     return (<>
         <div className="ai-game-page">
         <div className="ai-game-container">
         <div className="ai-game-header">
           <div className="ai-game-title-container">
             <h1 className="ai-game-title glow-text">
-              <span>PLAYER VS Player</span>
+              <span>Match Result</span>
             </h1>
             <p className="ai-game-subtitle">
             Challenge Other Players.

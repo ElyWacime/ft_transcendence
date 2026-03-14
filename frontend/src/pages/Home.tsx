@@ -9,9 +9,10 @@ const Home = () => {
   const navigate = useNavigate();
   const { user, accessToken, updateAccessToken } = useAuth();
   const id = user?.id;
+  const GAME_SERVICE_URL = window.location.origin;
   
   const checkhandel = async (mode: number) => {
-    return await fetchWithAuth(`https://${import.meta.env.VITE_DOMAIN}/api/game/check`, {
+    return await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/check`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

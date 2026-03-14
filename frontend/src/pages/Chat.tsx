@@ -8,9 +8,8 @@ import { fetchWithAuth } from "@/lib/tokenRefresh"
 import { toast } from "sonner";
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
-const SERVER_URL = API_URL
-const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`
+const SERVER_URL = window.location.origin
+const GAME_SERVICE_URL = window.location.origin
 
 type StartConversationParams = {
   userId: number

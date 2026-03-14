@@ -7,10 +7,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Could not detect IP. Enter manually:"
         read NEW_IP
     fi
-    # read NEW_IP
     echo "Using IP: $NEW_IP (macOS)"
     
-    sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/frontend/.env"
     sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/services/.env"
     sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/services/chat-service/.env"
     sed -i '' "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/scripts/generate-certs.sh"
@@ -25,7 +23,6 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     
     echo "Using IP: $NEW_IP (Linux)"
     
-    sed -i "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/frontend/.env"
     sed -i "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/services/.env"
     sed -i "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/services/chat-service/.env"
     sed -i "s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/$NEW_IP/g" "$PWD/scripts/generate-certs.sh"

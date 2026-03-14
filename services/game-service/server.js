@@ -2,7 +2,6 @@ import Fastify from "fastify";
 import websocket from "@fastify/websocket";
 import cors from "@fastify/cors";
 import * as fs from "fs";
-import https from "https";
 import { randomUUID } from "crypto";
 import { Match, SQLiteDB, GameState } from "./DBController.js";
 
@@ -16,10 +15,18 @@ const httpsOptions = process.env.USE_HTTPS === "true" ? {
 
 const fastify = Fastify({
   logger: false,
-  ...httpsOptions
+  ...httpsOptions,
+  maxParamLength: 1000,
+  bodyLimit: 1048576,
 });
 
-await fastify.register(websocket);
+await fastify.register(websocket, {
+  options: {
+    maxPayload: 1048576,
+    clientTracking: true,
+  }
+});
+
 
 await fastify.register(cors, {
   origin: true,
@@ -826,7 +833,7 @@ fastify.get("/ws", { websocket: true }, async (connection, req) => {
         clients.set(id, connection);
         if (request.type == "REGISTER")
           await handelRegister(request, id);
-        else if (request.type == "MOVE" )
+        else if (request.type == "MOVE")
           await handelMove(request, id);
         else if (request.type == "DELETE")
           await handelRoomQuiiting(id);

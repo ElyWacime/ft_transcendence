@@ -38,7 +38,7 @@ export interface ChatMessage {
   type: "message" | "system";
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost';
+const API_URL = window.location.origin;
 class UserAPI {
     
   private baseUrl = `${API_URL}/api/users`;

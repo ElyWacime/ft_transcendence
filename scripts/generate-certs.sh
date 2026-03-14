@@ -16,7 +16,7 @@ x509_extensions = v3_req
 prompt = no
 
 [req_distinguished_name]
-CN = 10.12.6.3
+CN = 10.12.5.4
 
 [v3_req]
 keyUsage = keyEncipherment, digitalSignature
@@ -24,7 +24,7 @@ extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
 [alt_names]
-IP.1 = 10.12.6.3
+IP.1 = 10.12.5.4
 DNS.1 = localhost
 DNS.2 = auth-service
 DNS.3 = gateway

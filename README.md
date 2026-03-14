@@ -79,4 +79,3 @@ GNU make (for arch linux run `sudo pacman -S make`)
     Run make
   # Mac os
     Run make
-

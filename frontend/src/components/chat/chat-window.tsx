@@ -5,8 +5,7 @@ import type { KeyboardEvent } from 'react'
 import { Socket } from 'socket.io-client'
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost'
-const SERVER_URL = API_URL
+const SERVER_URL = window.location.origin
 const MAX_MESSAGE_LENGTH = 1000
 
 type ChatWindowProps = {

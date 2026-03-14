@@ -10,6 +10,7 @@ const MatchHistory = () => {
   const location = useLocation();
   const { user, accessToken, updateAccessToken } = useAuth();
   const stat = location.state || "";
+  const GAME_SERVICE_URL = window.location.origin;
 
   const [features, setFeatures] = useState([]);
   let  {id} = stat;
@@ -31,7 +32,6 @@ const MatchHistory = () => {
   };
   
   const getall = async () => {
-    const GAME_SERVICE_URL = import.meta.env.VITE_GAME_SERVICE_URL || `https://${import.meta.env.VITE_DOMAIN}`;
     let matchess =  await fetchWithAuth(`${GAME_SERVICE_URL}/api/game/allmatch`, {
       method: "POST",
       headers: {

@@ -1,32 +1,32 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import fs from "fs";
 
 export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const wantsHttps = env.VITE_HTTPS === "true";
+
   const serverConfig: any = {
-    host: true, 
+    host: true,
     port: 5173,
-    allowedHosts: [
-      "frontend", 
-      "localhost",
-      process.env.DOMAIN || "localhost",
-    ],
+    allowedHosts: true,
     watch: {
       usePolling: true,
     },
-      hmr: {
-        host: process.env.VITE_DOMAIN, 
-        protocol: process.env.VITE_HTTPS === "true" ? "wss" : "ws",
-      },
+    hmr: {
+      protocol: "ws",
+    },
   };
-  if (process.env.VITE_HTTPS === "true") {
+
+  if (wantsHttps) {
     try {
       serverConfig.https = {
         key: fs.readFileSync("/app/certs/private.key"),
         cert: fs.readFileSync("/app/certs/certificate.crt"),
       };
+      serverConfig.hmr.protocol = "wss";
     } catch (err) {
       console.warn("Could not load HTTPS certificates:");
     }

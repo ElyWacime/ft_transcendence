@@ -54,7 +54,7 @@ export const WebSocketProvider = ({ children }) => {
     if (wsRef.current) return; 
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = import.meta.env.VITE_DOMAIN || window.location.host;
+    const host = window.location.host;
     const socket = new WebSocket(`${protocol}//${host}/ws`);
     wsRef.current = socket;
     setWs(socket);

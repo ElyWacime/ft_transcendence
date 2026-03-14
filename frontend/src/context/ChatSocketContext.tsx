@@ -21,8 +21,7 @@ type ChatSocketContextValue = {
 
 const ChatSocketContext = createContext<ChatSocketContextValue | null>(null);
 
-const API_URL = import.meta.env.VITE_API_URL || "https://localhost";
-const SERVER_URL = API_URL;
+const SERVER_URL = window.location.origin;
 
 export const ChatSocketProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
