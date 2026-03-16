@@ -43,7 +43,7 @@ if [ -f "$CHAT_ENV" ]; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
         sed -i '' "s|^INTERNAL_SERVICE_KEY=.*|INTERNAL_SERVICE_KEY=$INTERNAL_SERVICE_KEY|" "$CHAT_ENV"
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        sed -i '' "s|^INTERNAL_SERVICE_KEY=.*|INTERNAL_SERVICE_KEY=$INTERNAL_SERVICE_KEY|" "$CHAT_ENV"
+        sed -i "s|^INTERNAL_SERVICE_KEY=.*|INTERNAL_SERVICE_KEY=$INTERNAL_SERVICE_KEY|" "$CHAT_ENV"
     fi
     echo "Updated $CHAT_ENV"
 else

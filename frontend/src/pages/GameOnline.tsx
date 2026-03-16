@@ -234,14 +234,6 @@ const GameOnline = () => {
       return () => cancelAnimationFrame(animationRef.current);
   }, [loop]);
 
-  useEffect(() => {
-    if (!(ws && isReady && ws.readyState == WebSocket.OPEN)) return;
-
-    ws.addEventListener("message", handleMessage);
-    return () => {
-      ws.removeEventListener("message", handleMessage);
-    };
-  }, [ws]);
 
   useEffect(() => {
     if (!(ws && isReady && ws.readyState == WebSocket.OPEN)) return;
